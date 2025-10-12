@@ -1,0 +1,830 @@
+{% extends "base.html" %} {% block title %}Connected Accounts - HomeHub{%
+endblock %} {% block content %}
+
+<style>
+  :root {
+    --primary: #4361ee;
+    --primary-dark: #3a0ca3;
+    --secondary: #7209b7;
+    --accent: #f72585;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --success: #06ffa5;
+    --info: #00b4d8;
+    --warning: #ffbe0b;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+    --border-radius: 15px;
+  }
+
+  body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      sans-serif;
+    background-color: #f8f9fa;
+    color: var(--dark);
+    line-height: 1.6;
+  }
+
+  .accounts-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* Header Section */
+  .accounts-header {
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .accounts-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')
+      no-repeat bottom;
+    background-size: cover;
+  }
+
+  .header-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header-title {
+    font-size: 2rem;
+    font-weight: 800;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 30px;
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: var(--transition);
+  }
+
+  .back-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  /* Connected Accounts Section */
+  .connected-accounts {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title i {
+    color: var(--primary);
+  }
+
+  .accounts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .account-card {
+    background: #f8f9fa;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .account-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  .account-card.connected::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: var(--success);
+  }
+
+  .account-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .account-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+  }
+
+  .google-icon {
+    background: linear-gradient(135deg, #ea4335, #fbbc05);
+  }
+
+  .facebook-icon {
+    background: linear-gradient(135deg, #1877f2, #42a5f5);
+  }
+
+  .twitter-icon {
+    background: linear-gradient(135deg, #1da1f2, #0d8bd9);
+  }
+
+  .github-icon {
+    background: linear-gradient(135deg, #333, #555);
+  }
+
+  .microsoft-icon {
+    background: linear-gradient(135deg, #00a4ef, #0078d4);
+  }
+
+  .apple-icon {
+    background: linear-gradient(135deg, #555, #333);
+  }
+
+  .account-info h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    color: var(--dark);
+  }
+
+  .account-status {
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    display: inline-block;
+  }
+
+  .status-connected {
+    background: rgba(6, 255, 165, 0.1);
+    color: var(--success);
+  }
+
+  .status-disconnected {
+    background: rgba(247, 37, 133, 0.1);
+    color: var(--accent);
+  }
+
+  .account-details {
+    margin-bottom: 1rem;
+  }
+
+  .account-email {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .account-date {
+    color: #6c757d;
+    font-size: 0.85rem;
+  }
+
+  .account-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  /* Add New Account Section */
+  .add-account {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+  }
+
+  .providers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .provider-card {
+    background: #f8f9fa;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    text-align: center;
+    transition: var(--transition);
+    cursor: pointer;
+    border: 2px solid transparent;
+  }
+
+  .provider-card:hover {
+    background: #e9ecef;
+    border-color: var(--primary);
+  }
+
+  .provider-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.5rem;
+    color: white;
+  }
+
+  .provider-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+  }
+
+  .provider-desc {
+    color: #6c757d;
+    font-size: 0.85rem;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(67, 97, 238, 0.3);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+
+  .btn-outline:hover {
+    background: var(--primary);
+    color: white;
+  }
+
+  .btn-danger {
+    background: linear-gradient(135deg, var(--accent), #e63946);
+    color: white;
+  }
+
+  .btn-danger:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(247, 37, 133, 0.3);
+  }
+
+  .btn-block {
+    display: block;
+    width: 100%;
+  }
+
+  /* Confirmation Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
+  .modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 0;
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 500px;
+    box-shadow: var(--shadow);
+    animation: modalFadeIn 0.3s ease;
+  }
+
+  @keyframes modalFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  .close {
+    color: #aaa;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .close:hover {
+    color: var(--dark);
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .modal-footer {
+    padding: 1.5rem;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+  }
+
+  /* Notification Toast */
+  .notification-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    min-width: 300px;
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s;
+    animation-fill-mode: forwards;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  .notification-success {
+    background: linear-gradient(
+      135deg,
+      rgba(6, 255, 165, 0.9),
+      rgba(0, 180, 216, 0.9)
+    );
+    color: white;
+  }
+
+  .notification-danger {
+    background: linear-gradient(
+      135deg,
+      rgba(247, 37, 133, 0.9),
+      rgba(230, 57, 70, 0.9)
+    );
+    color: white;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .accounts-container {
+      padding: 1rem;
+    }
+
+    .header-title {
+      font-size: 1.5rem;
+    }
+
+    .accounts-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .providers-grid {
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+  }
+</style>
+
+<div class="accounts-container">
+  <!-- Accounts Header -->
+  <div class="accounts-header">
+    <div class="header-content">
+      <h1 class="header-title">Connected Accounts</h1>
+      <div class="header-actions">
+        <a href="{{ url_for('service_provider.settings') }}" class="back-btn">
+          <i class="fas fa-arrow-left"></i> Back to Settings
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connected Accounts Section -->
+  <div class="connected-accounts">
+    <h2 class="section-title">
+      <i class="fas fa-link"></i>
+      Your Connected Accounts
+    </h2>
+
+    <div class="accounts-grid">
+      <!-- Google Account -->
+      <div class="account-card connected" id="google-account">
+        <div class="account-header">
+          <div class="account-icon google-icon">
+            <i class="fab fa-google"></i>
+          </div>
+          <div class="account-info">
+            <h3>Google</h3>
+            <span class="account-status status-connected">Connected</span>
+          </div>
+        </div>
+        <div class="account-details">
+          <div class="account-email">user@gmail.com</div>
+          <div class="account-date">Connected on Jan 15, 2023</div>
+        </div>
+        <div class="account-actions">
+          <button class="btn btn-outline btn-sm">Manage</button>
+          <button
+            class="btn btn-danger btn-sm"
+            onclick="confirmDisconnect('Google')"
+          >
+            Disconnect
+          </button>
+        </div>
+      </div>
+
+      <!-- Facebook Account -->
+      <div class="account-card connected" id="facebook-account">
+        <div class="account-header">
+          <div class="account-icon facebook-icon">
+            <i class="fab fa-facebook-f"></i>
+          </div>
+          <div class="account-info">
+            <h3>Facebook</h3>
+            <span class="account-status status-connected">Connected</span>
+          </div>
+        </div>
+        <div class="account-details">
+          <div class="account-email">user@facebook.com</div>
+          <div class="account-date">Connected on Mar 22, 2023</div>
+        </div>
+        <div class="account-actions">
+          <button class="btn btn-outline btn-sm">Manage</button>
+          <button
+            class="btn btn-danger btn-sm"
+            onclick="confirmDisconnect('Facebook')"
+          >
+            Disconnect
+          </button>
+        </div>
+      </div>
+
+      <!-- Twitter Account (Not Connected) -->
+      <div class="account-card" id="twitter-account">
+        <div class="account-header">
+          <div class="account-icon twitter-icon">
+            <i class="fab fa-twitter"></i>
+          </div>
+          <div class="account-info">
+            <h3>Twitter</h3>
+            <span class="account-status status-disconnected"
+              >Not Connected</span
+            >
+          </div>
+        </div>
+        <div class="account-details">
+          <div class="account-email">Connect your Twitter account</div>
+        </div>
+        <div class="account-actions">
+          <button
+            class="btn btn-primary btn-sm"
+            onclick="connectAccount('Twitter')"
+          >
+            Connect
+          </button>
+        </div>
+      </div>
+
+      <!-- GitHub Account -->
+      <div class="account-card connected" id="github-account">
+        <div class="account-header">
+          <div class="account-icon github-icon">
+            <i class="fab fa-github"></i>
+          </div>
+          <div class="account-info">
+            <h3>GitHub</h3>
+            <span class="account-status status-connected">Connected</span>
+          </div>
+        </div>
+        <div class="account-details">
+          <div class="account-email">user@github.com</div>
+          <div class="account-date">Connected on Jun 10, 2023</div>
+        </div>
+        <div class="account-actions">
+          <button class="btn btn-outline btn-sm">Manage</button>
+          <button
+            class="btn btn-danger btn-sm"
+            onclick="confirmDisconnect('GitHub')"
+          >
+            Disconnect
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add New Account Section -->
+  <div class="add-account">
+    <h2 class="section-title">
+      <i class="fas fa-plus-circle"></i>
+      Add New Account
+    </h2>
+    <p>Connect additional accounts to enhance your HomeHub experience</p>
+
+    <div class="providers-grid">
+      <!-- Microsoft -->
+      <div class="provider-card" onclick="connectAccount('Microsoft')">
+        <div class="provider-icon microsoft-icon">
+          <i class="fab fa-microsoft"></i>
+        </div>
+        <div class="provider-name">Microsoft</div>
+        <div class="provider-desc">Connect your Microsoft account</div>
+      </div>
+
+      <!-- Apple -->
+      <div class="provider-card" onclick="connectAccount('Apple')">
+        <div class="provider-icon apple-icon">
+          <i class="fab fa-apple"></i>
+        </div>
+        <div class="provider-name">Apple</div>
+        <div class="provider-desc">Connect your Apple ID</div>
+      </div>
+
+      <!-- LinkedIn -->
+      <div class="provider-card" onclick="connectAccount('LinkedIn')">
+        <div
+          class="provider-icon"
+          style="background: linear-gradient(135deg, #0077b5, #00a0dc)"
+        >
+          <i class="fab fa-linkedin-in"></i>
+        </div>
+        <div class="provider-name">LinkedIn</div>
+        <div class="provider-desc">Connect your LinkedIn profile</div>
+      </div>
+
+      <!-- Instagram -->
+      <div class="provider-card" onclick="connectAccount('Instagram')">
+        <div
+          class="provider-icon"
+          style="background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045)"
+        >
+          <i class="fab fa-instagram"></i>
+        </div>
+        <div class="provider-name">Instagram</div>
+        <div class="provider-desc">Connect your Instagram account</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Disconnect Confirmation Modal -->
+<div id="disconnectModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Disconnect Account</h3>
+      <span class="close" onclick="closeModal()">&times;</span>
+    </div>
+    <div class="modal-body">
+      <p>
+        Are you sure you want to disconnect your
+        <strong id="accountName">Account</strong>?
+      </p>
+      <p>
+        This will remove all permissions and you'll need to reconnect if you
+        want to use this account again.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" onclick="disconnectAccount()">
+        Disconnect
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let accountToDisconnect = "";
+
+  function confirmDisconnect(accountName) {
+    accountToDisconnect = accountName;
+    document.getElementById("accountName").textContent = accountName;
+    document.getElementById("disconnectModal").style.display = "block";
+  }
+
+  function closeModal() {
+    document.getElementById("disconnectModal").style.display = "none";
+  }
+
+  function disconnectAccount() {
+    // In a real application, this would make an API call to disconnect the account
+    console.log(`Disconnecting ${accountToDisconnect} account`);
+
+    // Update UI to show account as disconnected
+    const accountElement = document.getElementById(
+      `${accountToDisconnect.toLowerCase()}-account`
+    );
+    if (accountElement) {
+      accountElement.classList.remove("connected");
+
+      // Update status
+      const statusElement = accountElement.querySelector(".account-status");
+      statusElement.textContent = "Not Connected";
+      statusElement.className = "account-status status-disconnected";
+
+      // Update details
+      const detailsElement = accountElement.querySelector(".account-details");
+      detailsElement.innerHTML = `<div class="account-email">Connect your ${accountToDisconnect} account</div>`;
+
+      // Update actions
+      const actionsElement = accountElement.querySelector(".account-actions");
+      actionsElement.innerHTML = `<button class="btn btn-primary btn-sm" onclick="connectAccount('${accountToDisconnect}')">Connect</button>`;
+    }
+
+    // Show success notification
+    showNotification(
+      `${accountToDisconnect} account disconnected successfully`,
+      "success"
+    );
+
+    // Close modal
+    closeModal();
+  }
+
+  function connectAccount(accountName) {
+    // In a real application, this would redirect to the OAuth provider
+    console.log(`Connecting to ${accountName} account`);
+
+    // Simulate connection process
+    showNotification(`Connecting to ${accountName}...`, "success");
+
+    // In a real app, this would be handled by the OAuth flow
+    // For demo purposes, we'll simulate a successful connection after a delay
+    setTimeout(() => {
+      // Update UI to show account as connected
+      const accountElement = document.getElementById(
+        `${accountName.toLowerCase()}-account`
+      );
+      if (accountElement) {
+        accountElement.classList.add("connected");
+
+        // Update status
+        const statusElement = accountElement.querySelector(".account-status");
+        statusElement.textContent = "Connected";
+        statusElement.className = "account-status status-connected";
+
+        // Update details
+        const currentDate = new Date().toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+        detailsElement.innerHTML = `
+          <div class="account-email">user@${accountName.toLowerCase()}.com</div>
+          <div class="account-date">Connected on ${currentDate}</div>
+        `;
+
+        // Update actions
+        const actionsElement = accountElement.querySelector(".account-actions");
+        actionsElement.innerHTML = `
+          <button class="btn btn-outline btn-sm">Manage</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmDisconnect('${accountName}')">Disconnect</button>
+        `;
+      }
+
+      // Show success notification
+      showNotification(
+        `${accountName} account connected successfully`,
+        "success"
+      );
+    }, 1500);
+  }
+
+  function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement("div");
+    notification.className = `notification-toast notification-${type}`;
+
+    // Add icon based on type
+    let icon = "";
+    if (type === "success") {
+      icon = '<i class="fas fa-check-circle"></i>';
+    } else if (type === "danger") {
+      icon = '<i class="fas fa-exclamation-circle"></i>';
+    } else if (type === "warning") {
+      icon = '<i class="fas fa-exclamation-triangle"></i>';
+    }
+
+    notification.innerHTML = `${icon} ${message}`;
+
+    // Add to DOM
+    document.body.appendChild(notification);
+
+    // Remove after animation completes
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
+  }
+
+  // Close modal when clicking outside of it
+  window.onclick = function (event) {
+    const modal = document.getElementById("disconnectModal");
+    if (event.target === modal) {
+      closeModal();
+    }
+  };
+</script>
+
+{% endblock %}

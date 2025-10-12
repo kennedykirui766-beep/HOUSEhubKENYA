@@ -1,0 +1,1304 @@
+{% extends "base.html" %} {% block title %}Service Provider Reviews - HomeHub{%
+endblock %} {% block content %}
+
+<style>
+  :root {
+    --primary: #4361ee;
+    --primary-dark: #3a0ca3;
+    --secondary: #7209b7;
+    --accent: #f72585;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --success: #06ffa5;
+    --info: #00b4d8;
+    --warning: #ffbe0b;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+  }
+
+  body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      sans-serif;
+    background-color: #f8f9fa;
+    color: var(--dark);
+    line-height: 1.6;
+  }
+
+  .reviews-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* Header Section */
+  .reviews-header {
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+    padding: 3rem 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .reviews-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')
+      no-repeat bottom;
+    background-size: cover;
+  }
+
+  .header-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .header-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+  }
+
+  .header-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    max-width: 700px;
+  }
+
+  /* Rating Summary */
+  .rating-summary {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .rating-overall {
+    flex: 1;
+    min-width: 200px;
+    text-align: center;
+    padding: 1rem;
+    border-right: 1px solid #e9ecef;
+  }
+
+  .rating-number {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+  }
+
+  .rating-stars {
+    color: var(--warning);
+    font-size: 1.5rem;
+    margin: 10px 0;
+  }
+
+  .rating-count {
+    color: #6c757d;
+    font-size: 1rem;
+  }
+
+  .rating-breakdown {
+    flex: 2;
+    min-width: 300px;
+  }
+
+  .rating-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .rating-bar-label {
+    width: 60px;
+    font-size: 0.9rem;
+    color: #495057;
+  }
+
+  .rating-bar-progress {
+    flex: 1;
+    height: 10px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    margin: 0 15px;
+    overflow: hidden;
+  }
+
+  .rating-bar-fill {
+    height: 100%;
+    background-color: var(--primary);
+    border-radius: 5px;
+  }
+
+  .rating-bar-percent {
+    width: 40px;
+    text-align: right;
+    font-size: 0.9rem;
+    color: #495057;
+  }
+
+  /* Filters Section */
+  .filters-section {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+  }
+
+  .filters-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .filters-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  .filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .filter-btn {
+    padding: 0.5rem 1.25rem;
+    border: 2px solid #e9ecef;
+    background: white;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 600;
+    color: var(--dark);
+  }
+
+  .filter-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .filter-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+
+  /* Reviews Section */
+  .reviews-section {
+    margin-bottom: 2rem;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  .view-toggle {
+    display: flex;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .view-btn {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .view-btn.active {
+    background: var(--primary);
+    color: white;
+  }
+
+  /* Review Cards */
+  .reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .review-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .review-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  .review-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+  }
+
+  .reviewer-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin-right: 1rem;
+    object-fit: cover;
+  }
+
+  .reviewer-info {
+    flex: 1;
+  }
+
+  .reviewer-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.25rem;
+  }
+
+  .review-date {
+    color: #6c757d;
+    font-size: 0.85rem;
+  }
+
+  .review-body {
+    padding: 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .review-rating {
+    color: var(--warning);
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+  }
+
+  .review-text {
+    color: #495057;
+    margin-bottom: 1.5rem;
+    flex-grow: 1;
+    line-height: 1.6;
+  }
+
+  .review-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+  }
+
+  .service-tag {
+    display: inline-block;
+    background: rgba(67, 97, 238, 0.1);
+    color: var(--primary);
+    padding: 0.4rem 1rem;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .helpful-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    color: #6c757d;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: var(--transition);
+  }
+
+  .helpful-btn:hover {
+    color: var(--primary);
+  }
+
+  .helpful-btn i {
+    font-size: 1rem;
+  }
+
+  /* List View */
+  .reviews-list {
+    display: none;
+  }
+
+  .reviews-list.active {
+    display: block;
+  }
+
+  .list-item {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+  }
+
+  .list-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  .list-content {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .list-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .list-info h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+  }
+
+  .list-rating {
+    color: var(--warning);
+    margin-bottom: 0.5rem;
+  }
+
+  .list-text {
+    color: #495057;
+    margin-bottom: 0.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .list-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+  }
+
+  .list-date {
+    color: #6c757d;
+    font-size: 0.85rem;
+  }
+
+  .list-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  /* Pagination */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+    gap: 0.5rem;
+  }
+
+  .page-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid #e9ecef;
+    color: #495057;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .page-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .page-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+
+  .next-btn {
+    width: auto;
+    padding: 0 1rem;
+    border-radius: 20px;
+  }
+
+  /* Responsive */
+  @media (max-width: 992px) {
+    .reviews-grid {
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+
+    .list-content {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .list-meta {
+      align-items: flex-start;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .reviews-container {
+      padding: 1rem;
+    }
+
+    .header-title {
+      font-size: 2rem;
+    }
+
+    .rating-summary {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .rating-overall {
+      border-right: none;
+      border-bottom: 1px solid #e9ecef;
+      padding-bottom: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .reviews-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .section-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+  }
+</style>
+
+<div class="reviews-container">
+  <!-- Header Section -->
+  <div class="reviews-header">
+    <div class="header-content">
+      <h1 class="header-title">Service Provider Reviews</h1>
+      <p class="header-subtitle">
+        Read genuine reviews from our customers to help you make informed
+        decisions
+      </p>
+    </div>
+  </div>
+
+  <!-- Rating Summary -->
+  <div class="rating-summary">
+    <div class="rating-overall">
+      <div class="rating-number">4.7</div>
+      <div class="rating-stars">
+        <i class="fas fa-star"></i>
+        <i class="fas fa-star"></i>
+        <i class="fas fa-star"></i>
+        <i class="fas fa-star"></i>
+        <i class="fas fa-star-half-alt"></i>
+      </div>
+      <div class="rating-count">Based on 1,248 reviews</div>
+    </div>
+    <div class="rating-breakdown">
+      <div class="rating-bar">
+        <div class="rating-bar-label">5★</div>
+        <div class="rating-bar-progress">
+          <div class="rating-bar-fill" style="width: 75%"></div>
+        </div>
+        <div class="rating-bar-percent">75%</div>
+      </div>
+      <div class="rating-bar">
+        <div class="rating-bar-label">4★</div>
+        <div class="rating-bar-progress">
+          <div class="rating-bar-fill" style="width: 15%"></div>
+        </div>
+        <div class="rating-bar-percent">15%</div>
+      </div>
+      <div class="rating-bar">
+        <div class="rating-bar-label">3★</div>
+        <div class="rating-bar-progress">
+          <div class="rating-bar-fill" style="width: 6%"></div>
+        </div>
+        <div class="rating-bar-percent">6%</div>
+      </div>
+      <div class="rating-bar">
+        <div class="rating-bar-label">2★</div>
+        <div class="rating-bar-progress">
+          <div class="rating-bar-fill" style="width: 3%"></div>
+        </div>
+        <div class="rating-bar-percent">3%</div>
+      </div>
+      <div class="rating-bar">
+        <div class="rating-bar-label">1★</div>
+        <div class="rating-bar-progress">
+          <div class="rating-bar-fill" style="width: 1%"></div>
+        </div>
+        <div class="rating-bar-percent">1%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <div class="filters-header">
+      <h2 class="filters-title">Filter Reviews</h2>
+    </div>
+    <div class="filter-options">
+      <button class="filter-btn active" data-filter="all">All Reviews</button>
+      <button class="filter-btn" data-filter="recent">Most Recent</button>
+      <button class="filter-btn" data-filter="highest">Highest Rated</button>
+      <button class="filter-btn" data-filter="lowest">Lowest Rated</button>
+      <button class="filter-btn" data-filter="photos">With Photos</button>
+      <button class="filter-btn" data-filter="verified">
+        Verified Purchases
+      </button>
+    </div>
+  </div>
+
+  <!-- Reviews Section -->
+  <div class="reviews-section">
+    <div class="section-header">
+      <h2 class="section-title">Customer Reviews</h2>
+      <div class="view-toggle">
+        <button class="view-btn active" id="grid-view">
+          <i class="fas fa-th"></i>
+        </button>
+        <button class="view-btn" id="list-view">
+          <i class="fas fa-list"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Grid View -->
+    <div class="reviews-grid" id="grid-view-container">
+      <!-- Review 1 -->
+      <div
+        class="review-card"
+        data-rating="5"
+        data-date="2023-06-15"
+        data-verified="true"
+      >
+        <div class="review-header">
+          <img
+            src="https://randomuser.me/api/portraits/men/32.jpg"
+            alt="Reviewer"
+            class="reviewer-avatar"
+          />
+          <div class="reviewer-info">
+            <div class="reviewer-name">Michael Johnson</div>
+            <div class="review-date">June 15, 2023</div>
+          </div>
+        </div>
+        <div class="review-body">
+          <div class="review-rating">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+          </div>
+          <p class="review-text">
+            Outstanding service! The team was professional, punctual, and went
+            above and beyond to meet our needs. I couldn't be happier with the
+            results and would highly recommend them to anyone looking for
+            quality service.
+          </p>
+          <div class="review-footer">
+            <span class="service-tag">Plumbing</span>
+            <button class="helpful-btn" data-review="1">
+              <i class="far fa-thumbs-up"></i>
+              <span>Helpful (24)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review 2 -->
+      <div
+        class="review-card"
+        data-rating="4"
+        data-date="2023-06-10"
+        data-verified="true"
+      >
+        <div class="review-header">
+          <img
+            src="https://randomuser.me/api/portraits/women/44.jpg"
+            alt="Reviewer"
+            class="reviewer-avatar"
+          />
+          <div class="reviewer-info">
+            <div class="reviewer-name">Sarah Williams</div>
+            <div class="review-date">June 10, 2023</div>
+          </div>
+        </div>
+        <div class="review-body">
+          <div class="review-rating">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="far fa-star"></i>
+          </div>
+          <p class="review-text">
+            Very satisfied with the service provided. The technician was
+            knowledgeable and fixed the issue quickly. The only reason I'm not
+            giving 5 stars is because the appointment was delayed by 30 minutes.
+          </p>
+          <div class="review-footer">
+            <span class="service-tag">Electrical</span>
+            <button class="helpful-btn" data-review="2">
+              <i class="far fa-thumbs-up"></i>
+              <span>Helpful (18)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review 3 -->
+      <div
+        class="review-card"
+        data-rating="5"
+        data-date="2023-06-05"
+        data-verified="true"
+      >
+        <div class="review-header">
+          <img
+            src="https://randomuser.me/api/portraits/men/68.jpg"
+            alt="Reviewer"
+            class="reviewer-avatar"
+          />
+          <div class="reviewer-info">
+            <div class="reviewer-name">David Thompson</div>
+            <div class="review-date">June 5, 2023</div>
+          </div>
+        </div>
+        <div class="review-body">
+          <div class="review-rating">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+          </div>
+          <p class="review-text">
+            Exceptional experience from start to finish. The customer service
+            team was responsive and helpful, and the service provider was
+            courteous and efficient. The pricing was transparent and fair.
+          </p>
+          <div class="review-footer">
+            <span class="service-tag">HVAC</span>
+            <button class="helpful-btn" data-review="3">
+              <i class="far fa-thumbs-up"></i>
+              <span>Helpful (32)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review 4 -->
+      <div
+        class="review-card"
+        data-rating="3"
+        data-date="2023-05-28"
+        data-verified="false"
+      >
+        <div class="review-header">
+          <img
+            src="https://randomuser.me/api/portraits/women/29.jpg"
+            alt="Reviewer"
+            class="reviewer-avatar"
+          />
+          <div class="reviewer-info">
+            <div class="reviewer-name">Emily Rodriguez</div>
+            <div class="review-date">May 28, 2023</div>
+          </div>
+        </div>
+        <div class="review-body">
+          <div class="review-rating">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="far fa-star"></i>
+            <i class="far fa-star"></i>
+          </div>
+          <p class="review-text">
+            The service was okay, but I expected more for the price. The
+            technician was friendly but seemed rushed and didn't explain the
+            process well. The work was completed satisfactorily, but the overall
+            experience was just average.
+          </p>
+          <div class="review-footer">
+            <span class="service-tag">Cleaning</span>
+            <button class="helpful-btn" data-review="4">
+              <i class="far fa-thumbs-up"></i>
+              <span>Helpful (12)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review 5 -->
+      <div
+        class="review-card"
+        data-rating="5"
+        data-date="2023-05-22"
+        data-verified="true"
+      >
+        <div class="review-header">
+          <img
+            src="https://randomuser.me/api/portraits/men/75.jpg"
+            alt="Reviewer"
+            class="reviewer-avatar"
+          />
+          <div class="reviewer-info">
+            <div class="reviewer-name">James Wilson</div>
+            <div class="review-date">May 22, 2023</div>
+          </div>
+        </div>
+        <div class="review-body">
+          <div class="review-rating">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+          </div>
+          <p class="review-text">
+            I've used this service multiple times and they never disappoint. The
+            technicians are always professional, knowledgeable, and thorough.
+            They take the time to explain what they're doing and why. Highly
+            recommended!
+          </p>
+          <div class="review-footer">
+            <span class="service-tag">Landscaping</span>
+            <button class="helpful-btn" data-review="5">
+              <i class="far fa-thumbs-up"></i>
+              <span>Helpful (27)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review 6 -->
+      <div
+        class="review-card"
+        data-rating="4"
+        data-date="2023-05-15"
+        data-verified="false"
+      >
+        <div class="review-header">
+          <img
+            src="https://randomuser.me/api/portraits/women/63.jpg"
+            alt="Reviewer"
+            class="reviewer-avatar"
+          />
+          <div class="reviewer-info">
+            <div class="reviewer-name">Olivia Martinez</div>
+            <div class="review-date">May 15, 2023</div>
+          </div>
+        </div>
+        <div class="review-body">
+          <div class="review-rating">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="far fa-star"></i>
+          </div>
+          <p class="review-text">
+            Good service overall. The technician arrived on time and completed
+            the work as expected. The only minor issue was that they left a
+            small mess behind, but it was easily cleaned up. I would use this
+            service again.
+          </p>
+          <div class="review-footer">
+            <span class="service-tag">Pest Control</span>
+            <button class="helpful-btn" data-review="6">
+              <i class="far fa-thumbs-up"></i>
+              <span>Helpful (15)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- List View -->
+    <div class="reviews-list" id="list-view-container">
+      <!-- Review 1 -->
+      <div
+        class="list-item"
+        data-rating="5"
+        data-date="2023-06-15"
+        data-verified="true"
+      >
+        <div class="list-content">
+          <img
+            src="https://randomuser.me/api/portraits/men/32.jpg"
+            alt="Reviewer"
+            class="list-avatar"
+          />
+          <div class="list-info">
+            <h3>Michael Johnson</h3>
+            <div class="list-rating">
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+            </div>
+            <p class="list-text">
+              Outstanding service! The team was professional, punctual, and went
+              above and beyond to meet our needs. I couldn't be happier with the
+              results and would highly recommend them to anyone looking for
+              quality service.
+            </p>
+          </div>
+          <div class="list-meta">
+            <span class="service-tag">Plumbing</span>
+            <div class="list-date">June 15, 2023</div>
+            <button class="helpful-btn" data-review="1">
+              <i class="far fa-thumbs-up"></i>
+              <span>Helpful (24)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review 2 -->
+      <div
+        class="list-item"
+        data-rating="4"
+        data-date="2023-06-10"
+        data-verified="true"
+      >
+        <div class="list-content">
+          <img
+            src="https://randomuser.me/api/portraits/women/44.jpg"
+            alt="Reviewer"
+            class="list-avatar"
+          />
+          <div class="list-info">
+            <h3>Sarah Williams</h3>
+            <div class="list-rating">
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="far fa-star"></i>
+            </div>
+            <p class="list-text">
+              Very satisfied with the service provided. The technician was
+              knowledgeable and fixed the issue quickly. The only reason I'm not
+              giving 5 stars is because the appointment was delayed by 30
+              minutes.
+            </p>
+          </div>
+          <div class="list-meta">
+            <span class="service-tag">Electrical</span>
+            <div class="list-date">June 10, 2023</div>
+            <button class="helpful-btn" data-review="2">
+              <i class="far fa-thumbs-up"></i>
+              <span>Helpful (18)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review 3 -->
+      <div
+        class="list-item"
+        data-rating="5"
+        data-date="2023-06-05"
+        data-verified="true"
+      >
+        <div class="list-content">
+          <img
+            src="https://randomuser.me/api/portraits/men/68.jpg"
+            alt="Reviewer"
+            class="list-avatar"
+          />
+          <div class="list-info">
+            <h3>David Thompson</h3>
+            <div class="list-rating">
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+            </div>
+            <p class="list-text">
+              Exceptional experience from start to finish. The customer service
+              team was responsive and helpful, and the service provider was
+              courteous and efficient. The pricing was transparent and fair.
+            </p>
+          </div>
+          <div class="list-meta">
+            <span class="service-tag">HVAC</span>
+            <div class="list-date">June 5, 2023</div>
+            <button class="helpful-btn" data-review="3">
+              <i class="far fa-thumbs-up"></i>
+              <span>Helpful (32)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review 4 -->
+      <div
+        class="list-item"
+        data-rating="3"
+        data-date="2023-05-28"
+        data-verified="false"
+      >
+        <div class="list-content">
+          <img
+            src="https://randomuser.me/api/portraits/women/29.jpg"
+            alt="Reviewer"
+            class="list-avatar"
+          />
+          <div class="list-info">
+            <h3>Emily Rodriguez</h3>
+            <div class="list-rating">
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="far fa-star"></i>
+              <i class="far fa-star"></i>
+            </div>
+            <p class="list-text">
+              The service was okay, but I expected more for the price. The
+              technician was friendly but seemed rushed and didn't explain the
+              process well. The work was completed satisfactorily, but the
+              overall experience was just average.
+            </p>
+          </div>
+          <div class="list-meta">
+            <span class="service-tag">Cleaning</span>
+            <div class="list-date">May 28, 2023</div>
+            <button class="helpful-btn" data-review="4">
+              <i class="far fa-thumbs-up"></i>
+              <span>Helpful (12)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review 5 -->
+      <div
+        class="list-item"
+        data-rating="5"
+        data-date="2023-05-22"
+        data-verified="true"
+      >
+        <div class="list-content">
+          <img
+            src="https://randomuser.me/api/portraits/men/75.jpg"
+            alt="Reviewer"
+            class="list-avatar"
+          />
+          <div class="list-info">
+            <h3>James Wilson</h3>
+            <div class="list-rating">
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+            </div>
+            <p class="list-text">
+              I've used this service multiple times and they never disappoint.
+              The technicians are always professional, knowledgeable, and
+              thorough. They take the time to explain what they're doing and
+              why. Highly recommended!
+            </p>
+          </div>
+          <div class="list-meta">
+            <span class="service-tag">Landscaping</span>
+            <div class="list-date">May 22, 2023</div>
+            <button class="helpful-btn" data-review="5">
+              <i class="far fa-thumbs-up"></i>
+              <span>Helpful (27)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review 6 -->
+      <div
+        class="list-item"
+        data-rating="4"
+        data-date="2023-05-15"
+        data-verified="false"
+      >
+        <div class="list-content">
+          <img
+            src="https://randomuser.me/api/portraits/women/63.jpg"
+            alt="Reviewer"
+            class="list-avatar"
+          />
+          <div class="list-info">
+            <h3>Olivia Martinez</h3>
+            <div class="list-rating">
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="far fa-star"></i>
+            </div>
+            <p class="list-text">
+              Good service overall. The technician arrived on time and completed
+              the work as expected. The only minor issue was that they left a
+              small mess behind, but it was easily cleaned up. I would use this
+              service again.
+            </p>
+          </div>
+          <div class="list-meta">
+            <span class="service-tag">Pest Control</span>
+            <div class="list-date">May 15, 2023</div>
+            <button class="helpful-btn" data-review="6">
+              <i class="far fa-thumbs-up"></i>
+              <span>Helpful (15)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" id="pagination">
+      <button class="page-btn active" data-page="1">1</button>
+      <button class="page-btn" data-page="2">2</button>
+      <button class="page-btn" data-page="3">3</button>
+      <button class="page-btn" data-page="4">4</button>
+      <button class="page-btn" data-page="5">5</button>
+      <button class="page-btn next-btn" data-page="next">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+{% endblock %} {% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // View Toggle
+    const gridViewBtn = document.getElementById("grid-view");
+    const listViewBtn = document.getElementById("list-view");
+    const gridViewContainer = document.getElementById("grid-view-container");
+    const listViewContainer = document.getElementById("list-view-container");
+
+    gridViewBtn.addEventListener("click", function () {
+      gridViewBtn.classList.add("active");
+      listViewBtn.classList.remove("active");
+      gridViewContainer.style.display = "grid";
+      listViewContainer.classList.remove("active");
+    });
+
+    listViewBtn.addEventListener("click", function () {
+      listViewBtn.classList.add("active");
+      gridViewBtn.classList.remove("active");
+      listViewContainer.classList.add("active");
+      gridViewContainer.style.display = "none";
+    });
+
+    // Filter functionality
+    const filterButtons = document.querySelectorAll(".filter-btn");
+    const reviewCards = document.querySelectorAll(".review-card");
+    const listItems = document.querySelectorAll(".list-item");
+
+    filterButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        // Remove active class from all buttons
+        filterButtons.forEach((btn) => btn.classList.remove("active"));
+
+        // Add active class to clicked button
+        this.classList.add("active");
+
+        const filter = this.getAttribute("data-filter");
+
+        // Show/hide reviews based on filter
+        reviewCards.forEach((card) => {
+          const rating = parseInt(card.getAttribute("data-rating"));
+          const date = card.getAttribute("data-date");
+          const verified = card.getAttribute("data-verified") === "true";
+
+          let show = true;
+
+          switch (filter) {
+            case "recent":
+              // For demo, we'll just show all
+              show = true;
+              break;
+            case "highest":
+              show = rating >= 4;
+              break;
+            case "lowest":
+              show = rating <= 3;
+              break;
+            case "verified":
+              show = verified;
+              break;
+            case "photos":
+              // For demo, we'll just show all
+              show = true;
+              break;
+            default:
+              show = true;
+          }
+
+          if (show) {
+            card.style.display = "flex";
+          } else {
+            card.style.display = "none";
+          }
+        });
+
+        // Apply same filtering to list view
+        listItems.forEach((item) => {
+          const rating = parseInt(item.getAttribute("data-rating"));
+          const date = item.getAttribute("data-date");
+          const verified = item.getAttribute("data-verified") === "true";
+
+          let show = true;
+
+          switch (filter) {
+            case "recent":
+              show = true;
+              break;
+            case "highest":
+              show = rating >= 4;
+              break;
+            case "lowest":
+              show = rating <= 3;
+              break;
+            case "verified":
+              show = verified;
+              break;
+            case "photos":
+              show = true;
+              break;
+            default:
+              show = true;
+          }
+
+          if (show) {
+            item.style.display = "block";
+          } else {
+            item.style.display = "none";
+          }
+        });
+      });
+    });
+
+    // Pagination functionality
+    const pageButtons = document.querySelectorAll(".page-btn:not(.next-btn)");
+    const nextButton = document.querySelector(".next-btn");
+
+    pageButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        // Remove active class from all buttons
+        pageButtons.forEach((btn) => btn.classList.remove("active"));
+
+        // Add active class to clicked button
+        this.classList.add("active");
+
+        // In a real application, this would load the appropriate page of reviews
+        // For demo, we'll just log the page number
+        console.log("Loading page:", this.getAttribute("data-page"));
+      });
+    });
+
+    nextButton.addEventListener("click", function () {
+      const activeButton = document.querySelector(".page-btn.active");
+      const currentPage = parseInt(activeButton.getAttribute("data-page"));
+      const nextPage = currentPage + 1;
+
+      if (nextPage <= pageButtons.length) {
+        // Remove active class from current button
+        activeButton.classList.remove("active");
+
+        // Find and activate the next button
+        const nextButtonToActivate = document.querySelector(
+          `.page-btn[data-page="${nextPage}"]`
+        );
+        if (nextButtonToActivate) {
+          nextButtonToActivate.classList.add("active");
+          console.log("Loading page:", nextPage);
+        }
+      }
+    });
+
+    // Helpful button functionality
+    const helpfulButtons = document.querySelectorAll(".helpful-btn");
+
+    helpfulButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const reviewId = this.getAttribute("data-review");
+        const helpfulText = this.querySelector("span");
+
+        // Get current count
+        const currentText = helpfulText.textContent;
+        const currentCount = parseInt(currentText.match(/\d+/)[0]);
+
+        // Increment count
+        const newCount = currentCount + 1;
+        helpfulText.textContent = `Helpful (${newCount})`;
+
+        // Change icon to filled
+        const icon = this.querySelector("i");
+        icon.classList.remove("far");
+        icon.classList.add("fas");
+
+        // Disable button to prevent multiple clicks
+        this.disabled = true;
+
+        // In a real application, this would send a request to the server
+        console.log(`Marked review ${reviewId} as helpful`);
+      });
+    });
+  });
+</script>
+{% endblock %}

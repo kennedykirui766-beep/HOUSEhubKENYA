@@ -1,0 +1,1064 @@
+The `jinja2.exceptions.UndefinedError: 'csrf_token' is undefined` error occurs because the `edit_property.html` template references `{{ csrf_token() }}` in its JavaScript code for handling image deletion, but the Flask-WTF CSRF protection is either not properly configured or not included in the template context. This issue typically arises when Flask-WTF's CSRF token is not made available to the template, either due to missing configuration in the Flask app or because the `form.hidden_tag()` (which includes the CSRF token) is not included in the form.
+
+Below, I’ll explain the cause of this error, provide steps to fix it, and update the `edit_property.html` template to resolve the issue while ensuring it aligns with your Flask application and the HomeHub specifications. I’ll also provide the `landlord_payments.html` template again, ensuring it’s free of similar issues and consistent with the provided data and color scheme.
+
+---
+
+### Diagnosing the `UndefinedError: 'csrf_token' is undefined`
+
+#### Cause
+The `edit_property.html` template includes a JavaScript function for deleting images that makes a `POST` request to `/landlord/delete_image/<image_name>` and references `{{ csrf_token() }}` for the CSRF token:
+
+```javascript
+fetch(`/landlord/delete_image/${imageName}`, {
+  method: 'POST',
+  headers: { 'X-CSRF-Token': '{{ csrf_token() }}' }
+})
+```
+
+The error occurs because:
+1. **Flask-WTF CSRF is not configured**: The Flask app may not have Flask-WTF’s CSRF protection enabled, so `csrf_token()` is not defined.
+2. **Missing `form.hidden_tag()`**: The template’s form does not include `{{ form.hidden_tag() }}`, which automatically renders the CSRF token field.
+3. **CSRF token not passed to template**: If you’re not using Flask-WTF’s form handling, the CSRF token might not be available in the template context.
+
+#### Steps to Fix
+To resolve the error, we need to ensure the CSRF token is properly included in the template and that the Flask app is configured to support CSRF protection. Here are the steps:
+
+1. **Configure Flask-WTF CSRF Protection**:
+   Ensure your Flask application is set up to use Flask-WTF with CSRF protection. In your main Flask app file (e.g., `app.py` or `main.py`), initialize Flask-WTF:
+
+   ```python
+   from flask import Flask
+   from flask_wtf.csrf import CSRFProtect
+
+   app = Flask(__name__)
+   app.config['SECRET_KEY'] = 'your-secret-key'  # Replace with a secure key
+   csrf = CSRFProtect(app)
+   ```
+
+   - **Explanation**: The `CSRFProtect` extension ensures that CSRF tokens are generated and validated for forms. The `SECRET_KEY` is required for CSRF token generation.
+   - **Action**: Verify that `SECRET_KEY` is set in your app configuration and that `CSRFProtect` is initialized.
+
+2. **Add CSRF Token to the Form**:
+   Update the form in `edit_property.html` to include `{{ form.hidden_tag() }}` if you’re using a Flask-WTF form, or manually include the CSRF token field. Since your route doesn’t use a Flask-WTF form (it processes `request.form` directly), we’ll add the CSRF token manually.
+
+3. **Update the Route to Validate CSRF**:
+   Ensure the `/landlord/delete_image/<image_name>` route (referenced in the JavaScript) checks the CSRF token. Example implementation:
+
+   ```python
+   from flask_wtf.csrf import validate_csrf
+   from flask import jsonify
+
+   @landlord_bp.route("/delete_image/<image_name>", methods=["POST"])
+   @login_required
+   def delete_image(image_name):
+       try:
+           validate_csrf(request.form.get('csrf_token'))
+           house = House.query.filter_by(owner_id=current_user.id).filter(House.image_urls.contains(image_name)).first()
+           if not house:
+               return jsonify(success=False, error="Image not found or unauthorized"), 403
+           image_urls = house.image_urls.split(',')
+           if image_name in image_urls:
+               image_urls.remove(image_name)
+               house.image_urls = ','.join(image_urls)
+               image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], image_name)
+               if os.path.exists(image_path):
+                   os.remove(image_path)
+               db.session.commit()
+               return jsonify(success=True, message="Image deleted successfully")
+           return jsonify(success=False, error="Image not found"), 404
+       except Exception as e:
+           db.session.rollback()
+           return jsonify(success=False, error=str(e)), 400
+   ```
+
+   - **Explanation**: This route validates the CSRF token using `validate_csrf`, removes the specified image from the `House` model’s `image_urls`, deletes the file from the server, and returns a JSON response.
+
+4. **Update the Template**:
+   Modify `edit_property.html` to include the CSRF token field and ensure the JavaScript uses it correctly. We’ll add `<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">` to the form and update the JavaScript to retrieve the token from the form field.
+
+5. **Test the Setup**:
+   - Ensure the Flask app has `CSRFProtect` initialized.
+   - Test the `/landlord/edit_property/<property_id>` route to confirm the form renders without errors.
+   - Test image deletion to verify the CSRF token is sent and validated correctly.
+
+---
+
+### Updated `edit_property.html`
+
+Below is the corrected `edit_property.html` template, updated to include the CSRF token and aligned with the `House` model attributes. The template retains the HomeHub color scheme and user-friendly design.
+
+<xaiArtifact artifact_id="b5caa51a-05a3-4b44-b270-f5a7617e635b" artifact_version_id="99bf7808-8a69-4e7f-a8c0-00153b24492c" title="edit_property.html" contentType="text/html">
+{% extends 'base.html' %}
+{% block title %}HomeHub | Edit Property{% endblock %}
+{% block content %}
+<div class="container dashboard-container" style="background-color: #F5E8C7; padding: 2rem;">
+  <!-- Flashed Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  {% for category, message in messages %}
+  <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert" style="background-color: {{ '#B22222' if category == 'error' else '#4A90E2' }}; color: #1A1A1A;">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+
+  <!-- Page Header -->
+  <header class="mb-4" aria-label="Page header">
+    <h1 class="fw-bold" style="color: #3D8B40; font-size: 2rem">Edit Your Property Listing</h1>
+    <p class="text-muted" style="color: #1A1A1A;">Update details for {{ house.title|default('your property', true) }} to attract tenants.</p>
+  </header>
+
+  <div class="row">
+    <!-- Main Form Section -->
+    <div class="col-lg-8">
+      <section class="mb-5" aria-label="Edit property">
+        <h2 class="fw-bold mb-4" style="color: #3D8B40; font-size: 1.8rem">Edit Property Details</h2>
+        <!-- Progress Indicator -->
+        <div class="progress mb-4" role="progressbar" aria-label="Form progress" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress-bar" style="width: 33%; background-color: #3D8B40;" id="progressBar">Step 1: Details</div>
+        </div>
+        <div class="card p-4" style="background-color: #1A1A1A; color: #F5E8C7; border-radius: 10px;">
+          <form id="editPropertyForm" enctype="multipart/form-data" method="POST" action="{{ url_for('landlord.edit_property', property_id=house.id) }}" aria-label="Edit property">
+            <!-- CSRF Token -->
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <!-- Autosave Indicator -->
+            <span id="autosaveIndicator" class="autosave" style="color: #4A90E2; display: none;">Saving...</span>
+            <!-- Property Details -->
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Property Title</h5>
+              <input type="text" class="form-control" id="title" name="title" value="{{ house.title|default('', true) }}" placeholder="e.g., Sunset Villas" style="background-color: #F5E8C7; color: #1A1A1A;" />
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Address Line 1</h5>
+              <input type="text" class="form-control" id="addressLine1" name="address_line1" value="{{ house.address_line1|default('', true) }}" required placeholder="e.g., Ngong Road" aria-required="true" style="background-color: #F5E8C7; color: #1A1A1A;" />
+              <div class="invalid-feedback">Please enter a valid address.</div>
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Address Line 2</h5>
+              <input type="text" class="form-control" id="addressLine2" name="address_line2" value="{{ house.address_line2|default('', true) }}" placeholder="e.g., Flat B2" style="background-color: #F5E8C7; color: #1A1A1A;" />
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">City</h5>
+              <select class="form-control" id="city" name="city" required aria-required="true" style="background-color: #F5E8C7; color: #1A1A1A;">
+                <option value="" disabled {% if not house.city %}selected{% endif %}>Select city</option>
+                <option value="Nairobi" {% if house.city == 'Nairobi' %}selected{% endif %}>Nairobi</option>
+                <option value="Mombasa" {% if house.city == 'Mombasa' %}selected{% endif %}>Mombasa</option>
+                <option value="Kisumu" {% if house.city == 'Kisumu' %}selected{% endif %}>Kisumu</option>
+              </select>
+              <div class="invalid-feedback">Please select a city.</div>
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">County</h5>
+              <select class="form-control" id="stateProvince" name="state_province" required aria-required="true" style="background-color: #F5E8C7; color: #1A1A1A;">
+                <option value="" disabled {% if not house.state_province %}selected{% endif %}>Select county</option>
+                <option value="Nairobi County" {% if house.state_province == 'Nairobi County' %}selected{% endif %}>Nairobi County</option>
+                <option value="Mombasa County" {% if house.state_province == 'Mombasa County' %}selected{% endif %}>Mombasa County</option>
+                <option value="Kisumu County" {% if house.state_province == 'Kisumu County' %}selected{% endif %}>Kisumu County</option>
+              </select>
+              <div class="invalid-feedback">Please select a county.</div>
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Postal Code</h5>
+              <input type="text" class="form-control" id="postalCode" name="postal_code" value="{{ house.postal_code|default('', true) }}" placeholder="e.g., 00100" style="background-color: #F5E8C7; color: #1A1A1A;" />
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Country</h5>
+              <input type="text" class="form-control" id="country" name="country" value="{{ house.country|default('Kenya', true) }}" required placeholder="e.g., Kenya" aria-required="true" style="background-color: #F5E8C7; color: #1A1A1A;" />
+              <div class="invalid-feedback">Please enter a country.</div>
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Rent Amount (KES/month)</h5>
+              <input type="number" class="form-control" id="rentAmount" name="rent_amount" value="{{ house.rent_amount|default('', true) }}" required min="0" step="0.01" placeholder="e.g., 50000" aria-required="true" style="background-color: #F5E8C7; color: #1A1A1A;" />
+              <div class="invalid-feedback">Please enter a valid rent amount.</div>
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Security Deposit (KES)</h5>
+              <input type="number" class="form-control" id="securityDeposit" name="security_deposit" value="{{ house.security_deposit|default('', true) }}" min="0" step="0.01" placeholder="e.g., 50000" style="background-color: #F5E8C7; color: #1A1A1A;" />
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Lease Term</h5>
+              <select class="form-control" id="leaseTerm" name="lease_term" required aria-required="true" style="background-color: #F5E8C7; color: #1A1A1A;">
+                <option value="" disabled {% if not house.lease_term %}selected{% endif %}>Select lease term</option>
+                <option value="6 months" {% if house.lease_term == '6 months' %}selected{% endif %}>6 months</option>
+                <option value="12 months" {% if house.lease_term == '12 months' %}selected{% endif %}>12 months</option>
+                <option value="24 months" {% if house.lease_term == '24 months' %}selected{% endif %}>24 months</option>
+              </select>
+              <div class="invalid-feedback">Please select a lease term.</div>
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Availability Date</h5>
+              <input type="date" class="form-control" id="availabilityDate" name="availability_date" value="{{ house.availability_date|default('', true)|string|slice(0,10) }}" required aria-required="true" style="background-color: #F5E8C7; color: #1A1A1A;" />
+              <div class="invalid-feedback">Please select an availability date.</div>
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Property Type</h5>
+              <select class="form-control" id="propertyType" name="property_type" required aria-required="true" style="background-color: #F5E8C7; color: #1A1A1A;">
+                <option value="" disabled {% if not house.property_type %}selected{% endif %}>Select property type</option>
+                <option value="Apartment" {% if house.property_type == 'Apartment' %}selected{% endif %}>Apartment</option>
+                <option value="House" {% if house.property_type == 'House' %}selected{% endif %}>House</option>
+                <option value="Condo" {% if house.property_type == 'Condo' %}selected{% endif %}>Condo</option>
+                <option value="Townhouse" {% if house.property_type == 'Townhouse' %}selected{% endif %}>Townhouse</option>
+              </select>
+              <div class="invalid-feedback">Please select a property type.</div>
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Description</h5>
+              <textarea class="form-control" id="description" name="description" rows="4" required placeholder="e.g., Spacious apartment in Westlands" maxlength="500" aria-required="true" style="background-color: #F5E8C7; color: #1A1A1A;">{{ house.description|default('', true) }}</textarea>
+              <small class="text-muted" id="charCount" style="color: #1A1A1A;">{{ (house.description|default('', true)|length) }}/500 characters</small>
+              <div class="invalid-feedback">Please provide a description.</div>
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Bedrooms</h5>
+              <input type="number" class="form-control" id="bedrooms" name="bedrooms" value="{{ house.bedrooms|default('', true) }}" required min="0" placeholder="e.g., 2" aria-required="true" style="background-color: #F5E8C7; color: #1A1A1A;" />
+              <div class="invalid-feedback">Please enter the number of bedrooms.</div>
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Bathrooms</h5>
+              <input type="number" class="form-control" id="bathrooms" name="bathrooms" value="{{ house.bathrooms|default('', true) }}" required min="0" step="0.5" placeholder="e.g., 1.5" aria-required="true" style="background-color: #F5E8C7; color: #1A1A1A;" />
+              <div class="invalid-feedback">Please enter the number of bathrooms.</div>
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Size (Square Meters)</h5>
+              <input type="number" class="form-control" id="size" name="size" value="{{ house.size|default('', true) }}" min="0" step="0.01" placeholder="e.g., 100" style="background-color: #F5E8C7; color: #1A1A1A;" />
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Pets Allowed</h5>
+              <div class="form-check">
+                <input type="radio" class="form-check-input" id="petsYes" name="pets_allowed" value="Yes" {% if house.pets_allowed == 'Yes' %}checked{% endif %} style="background-color: #F5E8C7;" />
+                <label class="form-check-label" for="petsYes" style="color: #1A1A1A;">Yes</label>
+              </div>
+              <div class="form-check">
+                <input type="radio" class="form-check-input" id="petsNo" name="pets_allowed" value="No" {% if house.pets_allowed == 'No' %}checked{% endif %} style="background-color: #F5E8C7;" />
+                <label class="form-check-label" for="petsNo" style="color: #1A1A1A;">No</label>
+              </div>
+              <input type="text" class="form-control mt-2" id="petRestrictions" name="pet_restrictions" value="{{ house.pet_restrictions|default('', true) }}" placeholder="e.g., Small dogs only" style="background-color: #F5E8C7; color: #1A1A1A;" />
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Parking Availability</h5>
+              <select class="form-control" id="parkingAvailability" name="parking_availability" style="background-color: #F5E8C7; color: #1A1A1A;">
+                <option value="None" {% if house.parking_availability == 'None' %}selected{% endif %}>None</option>
+                <option value="On-Site Parking" {% if house.parking_availability == 'On-Site Parking' %}selected{% endif %}>On-Site Parking</option>
+                <option value="Street Parking" {% if house.parking_availability == 'Street Parking' %}selected{% endif %}>Street Parking</option>
+                <option value="Garage" {% if house.parking_availability == 'Garage' %}selected{% endif %}>Garage</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Furnished Status</h5>
+              <div class="form-check">
+                <input type="radio" class="form-check-input" id="furnishedFully" name="furnished_status" value="Fully Furnished" {% if house.furnished_status == 'Fully Furnished' %}checked{% endif %} style="background-color: #F5E8C7;" />
+                <label class="form-check-label" for="furnishedFully" style="color: #1A1A1A;">Fully Furnished</label>
+              </div>
+              <div class="form-check">
+                <input type="radio" class="form-check-input" id="furnishedPartially" name="furnished_status" value="Partially Furnished" {% if house.furnished_status == 'Partially Furnished' %}checked{% endif %} style="background-color: #F5E8C7;" />
+                <label class="form-check-label" for="furnishedPartially" style="color: #1A1A1A;">Partially Furnished</label>
+              </div>
+              <div class="form-check">
+                <input type="radio" class="form-check-input" id="furnishedUnfurnished" name="furnished_status" value="Unfurnished" {% if house.furnished_status == 'Unfurnished' %}checked{% endif %} style="background-color: #F5E8C7;" />
+                <label class="form-check-label" for="furnishedUnfurnished" style="color: #1A1A1A;">Unfurnished</label>
+              </div>
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Amenities</h5>
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="amenityBorehole" name="amenities" value="Borehole" {% if house.amenities and 'Borehole' in house.amenities.split(',') %}checked{% endif %} style="background-color: #F5E8C7;" />
+                <label class="form-check-label" for="amenityBorehole" style="color: #1A1A1A;">Borehole</label>
+              </div>
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="amenityBalcony" name="amenities" value="Balcony" {% if house.amenities and 'Balcony' in house.amenities.split(',') %}checked{% endif %} style="background-color: #F5E8C7;" />
+                <label class="form-check-label" for="amenityBalcony" style="color: #1A1A1A;">Balcony</label>
+              </div>
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="amenityGated" name="amenities" value="Gated Compound" {% if house.amenities and 'Gated Compound' in house.amenities.split(',') %}checked{% endif %} style="background-color: #F5E8C7;" />
+                <label class="form-check-label" for="amenityGated" style="color: #1A1A1A;">Gated Compound</label>
+              </div>
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Utilities</h5>
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="utilityWater" name="utilities" value="Water" {% if house.utilities and 'Water' in house.utilities.split(',') %}checked{% endif %} style="background-color: #F5E8C7;" />
+                <label class="form-check-label" for="utilityWater" style="color: #1A1A1A;">Water</label>
+              </div>
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="utilityElectricity" name="utilities" value="Electricity" {% if house.utilities and 'Electricity' in house.utilities.split(',') %}checked{% endif %} style="background-color: #F5E8C7;" />
+                <label class="form-check-label" for="utilityElectricity" style="color: #1A1A1A;">Electricity</label>
+              </div>
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="utilityInternet" name="utilities" value="Internet" {% if house.utilities and 'Internet' in house.utilities.split(',') %}checked{% endif %} style="background-color: #F5E8C7;" />
+                <label class="form-check-label" for="utilityInternet" style="color: #1A1A1A;">Internet</label>
+              </div>
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Smoking Policy</h5>
+              <div class="form-check">
+                <input type="radio" class="form-check-input" id="smokingAllowed" name="smoking_policy" value="Allowed" {% if house.smoking_policy == 'Allowed' %}checked{% endif %} style="background-color: #F5E8C7;" />
+                <label class="form-check-label" for="smokingAllowed" style="color: #1A1A1A;">Allowed</label>
+              </div>
+              <div class="form-check">
+                <input type="radio" class="form-check-input" id="smokingNotAllowed" name="smoking_policy" value="Not Allowed" {% if house.smoking_policy == 'Not Allowed' %}checked{% endif %} style="background-color: #F5E8C7;" />
+                <label class="form-check-label" for="smokingNotAllowed" style="color: #1A1A1A;">Not Allowed</label>
+              </div>
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Accessibility Features</h5>
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="accessWheelchair" name="accessibility_features" value="Wheelchair Access" {% if house.accessibility_features and 'Wheelchair Access' in house.accessibility_features.split(',') %}checked{% endif %} style="background-color: #F5E8C7;" />
+                <label class="form-check-label" for="accessWheelchair" style="color: #1A1A1A;">Wheelchair Access</label>
+              </div>
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="accessGround" name="accessibility_features" value="Ground Floor" {% if house.accessibility_features and 'Ground Floor' in house.accessibility_features.split(',') %}checked{% endif %} style="background-color: #F5E8C7;" />
+                <label class="form-check-label" for="accessGround" style="color: #1A1A1A;">Ground Floor</label>
+              </div>
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Property Images (max 5, JPG/PNG)</h5>
+              <input type="file" class="form-control" id="images" name="images" accept="image/jpeg,image/png" multiple aria-describedby="imageHelp" style="background-color: #F5E8C7; color: #1A1A1A;" />
+              <small id="imageHelp" class="text-muted" style="color: #1A1A1A;">Upload up to 5 images (JPG or PNG, max 5MB each).</small>
+              <div class="invalid-feedback">Please upload valid images (JPG/PNG, max 5).</div>
+              <div id="imagePreview" class="mt-2 d-flex flex-wrap gap-2">
+                {% if house.image_urls %}
+                {% for image in house.image_urls.split(',') %}
+                <div class="position-relative">
+                  <img src="{{ url_for('static', filename='uploads/properties/' + image) }}" style="max-width: 100px; border-radius: 5px;" alt="Property image" />
+                  <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0" onclick="deleteImage('{{ image }}')" aria-label="Delete image">X</button>
+                </div>
+                {% endfor %}
+                {% endif %}
+              </div>
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Location (Coordinates)</h5>
+              <div class="input-group">
+                <input type="number" class="form-control" id="lat" name="lat" value="{{ house.lat|default('', true) }}" step="any" placeholder="Latitude" style="background-color: #F5E8C7; color: #1A1A1A;" />
+                <input type="number" class="form-control" id="lng" name="lng" value="{{ house.lng|default('', true) }}" step="any" placeholder="Longitude" style="background-color: #F5E8C7; color: #1A1A1A;" />
+              </div>
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Verify Location</h5>
+              <div id="mapWidget" style="height: 300px; background-color: #F5E8C7;"></div>
+            </div>
+            <!-- Form Buttons -->
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn flex-grow-1" style="background-color: #3D8B40; color: #F5E8C7;" id="submitProperty" aria-label="Update property">Update Property</button>
+              <button type="button" class="btn" style="background-color: #4A90E2; color: #F5E8C7;" id="saveDraft" aria-label="Save as draft">Save as Draft</button>
+              <a href="{{ url_for('landlord.dashboard') }}" class="btn" style="background-color: #F5E8C7; color: #1A1A1A; border: 1px solid #1A1A1A;" aria-label="Cancel and return to dashboard">Cancel</a>
+              <button type="button" class="btn" style="background-color: #B22222; color: #F5E8C7;" id="deleteProperty" data-bs-toggle="modal" data-bs-target="#deleteModal" aria-label="Delete property">Delete Property</button>
+            </div>
+          </form>
+          <!-- Delete Confirmation Modal -->
+          <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content" style="background-color: #1A1A1A; color: #F5E8C7;">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="deleteModalLabel" style="color: #4A90E2;">Confirm Deletion</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  Are you sure you want to delete this property? This action cannot be undone.
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn" style="background-color: #F5E8C7; color: #1A1A1A;" data-bs-dismiss="modal">Cancel</button>
+                  <form action="{{ url_for('landlord.delete_property', property_id=house.id) }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn" style="background-color: #B22222; color: #F5E8C7;">Delete</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="editPropertyFeedback" class="alert mt-3" style="display: none;"></div>
+        </div>
+      </section>
+      <!-- Notifications Section -->
+      <section class="mb-5" aria-label="Recent activity">
+        <h5 class="mb-3" style="color: #4A90E2;">Recent Activity</h5>
+        <div id="recentActivity" style="color: #1A1A1A;">
+          <p>No recent activity.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- Sidebar with Tips and Preview -->
+    <div class="col-lg-4">
+      <!-- Tips Sidebar -->
+      <aside class="mb-5" aria-label="Editing tips">
+        <h5 class="fw-bold mb-3" style="color: #3D8B40;">Tips for Editing Your Listing</h5>
+        <div class="card p-3" style="background-color: #F5E8C7; color: #1A1A1A;">
+          <ul class="list-unstyled">
+            <li class="mb-2">📸 Update images to reflect recent changes.</li>
+            <li class="mb-2">✍️ Revise descriptions to highlight new amenities.</li>
+            <li class="mb-2">🏠 Verify address details for accuracy.</li>
+          </ul>
+          <button class="btn btn-link" style="color: #F28C38; padding: 0;" id="toggleTips" aria-expanded="true">Hide Tips</button>
+        </div>
+      </aside>
+      <!-- Listing Preview -->
+      <section aria-label="Property preview">
+        <h5 class="fw-bold mb-3" style="color: #3D8B40;">Listing Preview</h5>
+        <div class="card p-3" style="background-color: #F5E8C7; color: #1A1A1A;" id="listingPreview">
+          <h6 id="previewTitle">{{ house.title|default('Property Title', true) }}</h6>
+          <p id="previewAddressLine1">{{ house.address_line1|default('Address Line 1', true) }}</p>
+          <p id="previewAddressLine2">{{ house.address_line2|default('Address Line 2', true) }}</p>
+          <p id="previewCity">{{ house.city|default('City', true) }}</p>
+          <p id="previewCounty">{{ house.state_province|default('County', true) }}</p>
+          <p id="previewPostalCode">{{ house.postal_code|default('Postal Code', true) }}</p>
+          <p id="previewCountry">{{ house.country|default('Country', true) }}</p>
+          <p id="previewRent">{{ house.rent_amount|default('Rent Amount', true) }}</p>
+          <p id="previewSecurityDeposit">{{ house.security_deposit|default('Security Deposit', true) }}</p>
+          <p id="previewLeaseTerm">{{ house.lease_term|default('Lease Term', true) }}</p>
+          <p id="previewAvailabilityDate">{{ house.availability_date|default('Availability Date', true)|string|slice(0,10) }}</p>
+          <p id="previewType">{{ house.property_type|default('Property Type', true) }}</p>
+          <p id="previewDescription">{{ house.description|default('Description', true) }}</p>
+          <p id="previewBedrooms">{{ house.bedrooms|default('Bedrooms', true) }}</p>
+          <p id="previewBathrooms">{{ house.bathrooms|default('Bathrooms', true) }}</p>
+          <p id="previewSize">{{ house.size|default('Size', true) }}</p>
+          <p id="previewPets">{{ house.pets_allowed|default('Pets Allowed', true) }} {{ house.pet_restrictions|default('', true) }}</p>
+          <p id="previewParking">{{ house.parking_availability|default('Parking Availability', true) }}</p>
+          <p id="previewFurnished">{{ house.furnished_status|default('Furnished Status', true) }}</p>
+          <p id="previewAmenities">{{ house.amenities|default('Amenities', true) }}</p>
+          <p id="previewUtilities">{{ house.utilities|default('Utilities', true) }}</p>
+          <p id="previewSmoking">{{ house.smoking_policy|default('Smoking Policy', true) }}</p>
+          <p id="previewAccessibility">{{ house.accessibility_features|default('Accessibility Features', true) }}</p>
+          <p id="previewLocation">{{ house.location|default('Location', true) }}</p>
+          <div id="previewImages" class="d-flex flex-wrap gap-2">
+            {% if house.image_urls %}
+            {% for image in house.image_urls.split(',') %}
+            <img src="{{ url_for('static', filename='uploads/properties/' + image) }}" style="max-width: 100px; border-radius: 5px;" alt="Property image" />
+            {% endfor %}
+            {% endif %}
+          </div>
+        </div>
+      </section>
+      <!-- Help Link -->
+      <div class="mt-3">
+        <a href="{{ url_for('static.support') }}" class="btn btn-link" style="color: #F28C38;" aria-label="Get support">Need Help?</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Language Toggle -->
+  <div class="position-fixed top-0 end-0 m-3">
+    <button class="btn" style="background-color: #3D8B40; color: #F5E8C7;" id="languageToggle" aria-label="Toggle language">Switch to Swahili</button>
+  </div>
+
+  <!-- Landlord Access Badge -->
+  <div class="position-fixed bottom-0 end-0 m-3" aria-label="Landlord access indicator">
+    <span class="badge" style="background-color: #3D8B40; color: #F5E8C7;">Landlord Access Only</span>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdlZxGxvJ3/4sk7Lg" crossorigin="anonymous"></script>
+<!-- Custom JavaScript -->
+<script src="{{ url_for('static', filename='scripts.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('editPropertyForm');
+    const feedback = document.getElementById('editPropertyFeedback');
+    const submitButton = document.getElementById('submitProperty');
+    const saveDraftButton = document.getElementById('saveDraft');
+    const deleteButton = document.getElementById('deleteProperty');
+    const toggleTipsButton = document.getElementById('toggleTips');
+    const languageToggle = document.getElementById('languageToggle');
+    const autosaveIndicator = document.getElementById('autosaveIndicator');
+    const tipsCard = toggleTipsButton.parentElement;
+    const progressBar = document.getElementById('progressBar');
+    const mapWidget = document.getElementById('mapWidget');
+    const preview = {
+      title: document.getElementById('previewTitle'),
+      addressLine1: document.getElementById('previewAddressLine1'),
+      addressLine2: document.getElementById('previewAddressLine2'),
+      city: document.getElementById('previewCity'),
+      county: document.getElementById('previewCounty'),
+      postalCode: document.getElementById('previewPostalCode'),
+      country: document.getElementById('previewCountry'),
+      rent: document.getElementById('previewRent'),
+      securityDeposit: document.getElementById('previewSecurityDeposit'),
+      leaseTerm: document.getElementById('previewLeaseTerm'),
+      availabilityDate: document.getElementById('previewAvailabilityDate'),
+      type: document.getElementById('previewType'),
+      description: document.getElementById('previewDescription'),
+      bedrooms: document.getElementById('previewBedrooms'),
+      bathrooms: document.getElementById('previewBathrooms'),
+      size: document.getElementById('previewSize'),
+      pets: document.getElementById('previewPets'),
+      parking: document.getElementById('previewParking'),
+      furnished: document.getElementById('previewFurnished'),
+      amenities: document.getElementById('previewAmenities'),
+      utilities: document.getElementById('previewUtilities'),
+      smoking: document.getElementById('previewSmoking'),
+      accessibility: document.getElementById('previewAccessibility'),
+      location: document.getElementById('previewLocation'),
+      images: document.getElementById('previewImages')
+    };
+    const inputs = {
+      title: document.getElementById('title'),
+      addressLine1: document.getElementById('addressLine1'),
+      addressLine2: document.getElementById('addressLine2'),
+      city: document.getElementById('city'),
+      county: document.getElementById('stateProvince'),
+      postalCode: document.getElementById('postalCode'),
+      country: document.getElementById('country'),
+      rent: document.getElementById('rentAmount'),
+      securityDeposit: document.getElementById('securityDeposit'),
+      leaseTerm: document.getElementById('leaseTerm'),
+      availabilityDate: document.getElementById('availabilityDate'),
+      type: document.getElementById('propertyType'),
+      description: document.getElementById('description'),
+      bedrooms: document.getElementById('bedrooms'),
+      bathrooms: document.getElementById('bathrooms'),
+      size: document.getElementById('size'),
+      pets: document.querySelectorAll('input[name="pets_allowed"]'),
+      petRestrictions: document.getElementById('petRestrictions'),
+      parking: document.getElementById('parkingAvailability'),
+      furnished: document.querySelectorAll('input[name="furnished_status"]'),
+      amenities: document.querySelectorAll('input[name="amenities"]'),
+      utilities: document.querySelectorAll('input[name="utilities"]'),
+      smoking: document.querySelectorAll('input[name="smoking_policy"]'),
+      accessibility: document.querySelectorAll('input[name="accessibility_features"]'),
+      images: document.getElementById('images'),
+      lat: document.getElementById('lat'),
+      lng: document.getElementById('lng')
+    };
+    const charCount = document.getElementById('charCount');
+    const imagePreview = document.getElementById('imagePreview');
+
+    // Real-time preview updates
+    function updatePreview() {
+      preview.title.textContent = inputs.title.value || 'Property Title';
+      preview.addressLine1.textContent = inputs.addressLine1.value || 'Address Line 1';
+      preview.addressLine2.textContent = inputs.addressLine2.value || 'Address Line 2';
+      preview.city.textContent = inputs.city.value || 'City';
+      preview.county.textContent = inputs.county.value || 'County';
+      preview.postalCode.textContent = inputs.postalCode.value || 'Postal Code';
+      preview.country.textContent = inputs.country.value || 'Country';
+      preview.rent.textContent = inputs.rent.value ? `KES ${inputs.rent.value}/month` : 'Rent Amount';
+      preview.securityDeposit.textContent = inputs.securityDeposit.value ? `KES ${inputs.securityDeposit.value}` : 'Security Deposit';
+      preview.leaseTerm.textContent = inputs.leaseTerm.value || 'Lease Term';
+      preview.availabilityDate.textContent = inputs.availabilityDate.value || 'Availability Date';
+      preview.type.textContent = inputs.type.value || 'Property Type';
+      preview.description.textContent = inputs.description.value || 'Description';
+      preview.bedrooms.textContent = inputs.bedrooms.value ? `${inputs.bedrooms.value} Bedrooms` : 'Bedrooms';
+      preview.bathrooms.textContent = inputs.bathrooms.value ? `${inputs.bathrooms.value} Bathrooms` : 'Bathrooms';
+      preview.size.textContent = inputs.size.value ? `${inputs.size.value} Square Meters` : 'Size';
+      preview.pets.textContent = Array.from(inputs.pets).find(p => p.checked)?.value + (inputs.petRestrictions.value ? `: ${inputs.petRestrictions.value}` : '') || 'Pets Allowed';
+      preview.parking.textContent = inputs.parking.value || 'Parking Availability';
+      preview.furnished.textContent = Array.from(inputs.furnished).find(f => f.checked)?.value || 'Furnished Status';
+      preview.amenities.textContent = Array.from(inputs.amenities).filter(a => a.checked).map(a => a.value).join(', ') || 'Amenities';
+      preview.utilities.textContent = Array.from(inputs.utilities).filter(u => u.checked).map(u => u.value).join(', ') || 'Utilities';
+      preview.smoking.textContent = Array.from(inputs.smoking).find(s => s.checked)?.value || 'Smoking Policy';
+      preview.accessibility.textContent = Array.from(inputs.accessibility).filter(a => a.checked).map(a => a.value).join(', ') || 'Accessibility Features';
+      preview.location.textContent = inputs.lat.value && inputs.lng.value ? `Lat: ${inputs.lat.value}, Lng: ${inputs.lng.value}` : 'Location';
+    }
+
+    // Image preview and deletion
+    function deleteImage(imageName) {
+      if (confirm('Are you sure you want to delete this image?')) {
+        const formData = new FormData();
+        formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
+        fetch(`/landlord/delete_image/${imageName}`, {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            document.querySelector(`img[src*="${imageName}"]`).parentElement.remove();
+            updatePreview();
+          } else {
+            feedback.className = 'alert mt-3';
+            feedback.style.backgroundColor = '#B22222';
+            feedback.style.color = '#F5E8C7';
+            feedback.textContent = data.error || 'Failed to delete image.';
+            feedback.style.display = 'block';
+          }
+        })
+        .catch(error => {
+          feedback.className = 'alert mt-3';
+          feedback.style.backgroundColor = '#B22222';
+          feedback.style.color = '#F5E8C7';
+          feedback.textContent = `Error: ${error.message}`;
+          feedback.style.display = 'block';
+        });
+      }
+    }
+
+    inputs.images.addEventListener('change', () => {
+      imagePreview.innerHTML = '';
+      preview.images.innerHTML = '';
+      const files = inputs.images.files;
+      const existingImages = document.querySelectorAll('#imagePreview img').length;
+      if (files.length + existingImages > 5) {
+        inputs.images.classList.add('is-invalid');
+        imagePreview.innerHTML = '<div style="color: #B22222;">Maximum 5 images allowed.</div>';
+        return;
+      }
+      for (const file of files) {
+        if (!['image/jpeg', 'image/png'].includes(file.type) || file.size > 5 * 1024 * 1024) {
+          inputs.images.classList.add('is-invalid');
+          imagePreview.innerHTML = '<div style="color: #B22222;">Only JPG/PNG files under 5MB allowed.</div>';
+          return;
+        }
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.style.maxWidth = '100px';
+        img.style.borderRadius = '5px';
+        img.alt = 'Property image preview';
+        imagePreview.appendChild(img);
+        preview.images.appendChild(img.cloneNode());
+      }
+      inputs.images.classList.remove('is-invalid');
+    });
+
+    // Character count for description
+    inputs.description.addEventListener('input', () => {
+      const count = inputs.description.value.length;
+      charCount.textContent = `${count}/500 characters`;
+      if (count > 500) {
+        inputs.description.classList.add('is-invalid');
+      } else {
+        inputs.description.classList.remove('is-invalid');
+      }
+      updatePreview();
+    });
+
+    // Real-time validation and preview
+    Object.values(inputs).forEach(input => {
+      if (input instanceof NodeList) {
+        input.forEach(i => {
+          i.addEventListener('change', updatePreview);
+        });
+      } else if (input !== inputs.images) {
+        input.addEventListener('input', () => {
+          input.classList.toggle('is-invalid', !input.checkValidity());
+          updatePreview();
+        });
+      }
+    });
+
+    // Toggle tips sidebar
+    toggleTipsButton.addEventListener('click', () => {
+      const isHidden = tipsCard.classList.toggle('d-none');
+      toggleTipsButton.textContent = isHidden ? 'Show Tips' : 'Hide Tips';
+      toggleTipsButton.setAttribute('aria-expanded', !isHidden);
+    });
+
+    // Language toggle
+    languageToggle.addEventListener('click', () => {
+      languageToggle.textContent = languageToggle.textContent === 'Switch to Swahili' ? 'Switch to English' : 'Switch to Swahili';
+      updatePreview();
+    });
+
+    // Progress indicator
+    form.addEventListener('input', () => {
+      const filled = Object.values(inputs).filter(input => {
+        if (input instanceof NodeList) {
+          return Array.from(input).some(i => i.checked || i.value);
+        }
+        return input.value && input.checkValidity();
+      }).length;
+      const progress = (filled / 15) * 100; // Adjust based on required fields
+      progressBar.style.width = `${progress}%`;
+      progressBar.setAttribute('aria-valuenow', progress);
+      progressBar.textContent = progress < 50 ? 'Step 1: Details' : progress < 100 ? 'Step 2: Images' : 'Step 3: Submit';
+    });
+
+    // Autosave functionality
+    let autosaveTimeout;
+    form.addEventListener('input', () => {
+      clearTimeout(autosaveTimeout);
+      autosaveIndicator.style.display = 'block';
+      autosaveIndicator.textContent = 'Saving...';
+      autosaveTimeout = setTimeout(async () => {
+        const formData = new FormData(form);
+        formData.append('user_id', {{ current_user.id }});
+        try {
+          const response = await fetch('/landlord/save_draft', {
+            method: 'POST',
+            body: formData,
+          });
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const result = await response.json();
+          autosaveIndicator.style.color = '#4A90E2';
+          autosaveIndicator.textContent = 'Draft saved!';
+          setTimeout(() => { autosaveIndicator.style.display = 'none'; }, 2000);
+        } catch (error) {
+          autosaveIndicator.style.color = '#B22222';
+          autosaveIndicator.textContent = 'Error saving draft';
+          setTimeout(() => { autosaveIndicator.style.display = 'none'; }, 2000);
+        }
+      }, 2000);
+    });
+
+    // Form submission
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        return;
+      }
+      submitButton.disabled = true;
+      feedback.style.display = 'none';
+      feedback.style.backgroundColor = '#4A90E2';
+      feedback.style.color = '#F5E8C7';
+      feedback.textContent = 'Updating property...';
+      feedback.style.display = 'block';
+
+      const formData = new FormData(form);
+      formData.append('user_id', {{ current_user.id }});
+
+      try {
+        const response = await fetch('{{ url_for("landlord.edit_property", property_id=house.id) }}', {
+          method: 'POST',
+          body: formData,
+        });
+        const result = await response.json();
+        if (result.redirect) {
+          feedback.style.backgroundColor = '#4A90E2';
+          feedback.textContent = result.message || 'Property updated successfully!';
+          setTimeout(() => {
+            window.location.href = "{{ url_for('landlord.dashboard') }}";
+          }, 1500);
+        } else {
+          feedback.style.backgroundColor = '#B22222';
+          feedback.textContent = result.error || 'Failed to update property.';
+        }
+      } catch (error) {
+        feedback.style.backgroundColor = '#B22222';
+        feedback.textContent = `Error: ${error.message}`;
+      } finally {
+        submitButton.disabled = false;
+      }
+    });
+
+    // Save draft
+    saveDraftButton.addEventListener('click', async () => {
+      const formData = new FormData(form);
+      formData.append('user_id', {{ current_user.id }});
+      try {
+        const response = await fetch('/landlord/save_draft', {
+          method: 'POST',
+          body: formData,
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const result = await response.json();
+        feedback.style.backgroundColor = '#4A90E2';
+        feedback.textContent = result.message || 'Draft saved successfully!';
+        feedback.style.display = 'block';
+      } catch (error) {
+        feedback.style.backgroundColor = '#B22222';
+        feedback.textContent = `Error: ${error.message}`;
+        feedback.style.display = 'block';
+      }
+    });
+
+    // Initialize Google Maps (placeholder, requires API key)
+    function initMap() {
+      // Implement Google Maps API integration here
+      // Example: const map = new google.maps.Map(mapWidget, { center: { lat: parseFloat(inputs.lat.value || -1.286389), lng: parseFloat(inputs.lng.value || 36.817223) }, zoom: 15 });
+    }
+
+    // Fetch recent activity
+    fetch('/landlord/recent_activity')
+      .then(response => response.json())
+      .then(data => {
+        const activityDiv = document.getElementById('recentActivity');
+        if (data.activity) {
+          activityDiv.innerHTML = `<p>${data.activity}</p>`;
+        }
+      })
+      .catch(() => {
+        document.getElementById('recentActivity').innerHTML = '<p>Error loading recent activity.</p>';
+      });
+
+    // Initial preview update
+    updatePreview();
+  });
+</script>
+{% endblock %}
+</xaiArtifact>
+
+**Changes Made**:
+- Added `<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">` to the form to include the CSRF token.
+- Updated the `deleteImage` JavaScript function to retrieve the CSRF token from the form field (`document.querySelector('input[name="csrf_token"]').value`) instead of directly using `{{ csrf_token() }}` in the fetch headers.
+- Added CSRF token to the delete confirmation modal’s form.
+- Ensured the `availability_date` field formats the date correctly using `|string|slice(0,10)` to match the `YYYY-MM-DD` format.
+- Updated the form submission JavaScript to expect a JSON response with a `redirect` field, aligning with modern Flask practices.
+
+**Additional Recommendations**:
+- **Add `/landlord/save_draft` Route**: The template references a `/landlord/save_draft` endpoint for autosaving. Implement this route to handle draft saves:
+
+  ```python
+  @landlord_bp.route("/save_draft", methods=["POST"])
+  @login_required
+  def save_draft():
+      try:
+          validate_csrf(request.form.get('csrf_token'))
+          # Save form data to a draft table or temporary storage
+          # For simplicity, you can reuse the edit_property logic but mark as draft
+          return jsonify(success=True, message="Draft saved successfully")
+      except Exception as e:
+          return jsonify(success=False, error=str(e)), 400
+  ```
+
+- **Add `/landlord/delete_property/<property_id>` Route**: The delete modal references this endpoint. Implement it:
+
+  ```python
+  @landlord_bp.route("/delete_property/<int:property_id>", methods=["POST"])
+  @login_required
+  def delete_property(property_id):
+      try:
+          validate_csrf(request.form.get('csrf_token'))
+          house = House.query.get_or_404(property_id)
+          if house.owner_id != current_user.id:
+              return jsonify(success=False, error="Unauthorized"), 403
+          db.session.delete(house)
+          db.session.commit()
+          return jsonify(success=True, redirect=url_for('landlord.dashboard'))
+      except Exception as e:
+          db.session.rollback()
+          return jsonify(success=False, error=str(e)), 400
+  ```
+
+- **Add `/landlord/recent_activity` Route**: The template fetches recent activity. Implement a placeholder:
+
+  ```python
+  @landlord_bp.route("/recent_activity", methods=["GET"])
+  @login_required
+  def recent_activity():
+      return jsonify(activity="Property edited recently")
+  ```
+
+---
+
+### Updated `landlord_payments.html`
+
+Below is the `landlord_payments.html` template, updated to include CSRF protection for the payment settings form and aligned with the `/landlord/payments` route data. It maintains the HomeHub color scheme and user-friendly design.
+
+<xaiArtifact artifact_id="698310b8-d39a-4dda-9418-f32cc019abe7" artifact_version_id="751db18c-0e4c-4329-8f04-b18219bd42b6" title="landlord_payments.html" contentType="text/html">
+{% extends 'base.html' %}
+{% block title %}HomeHub | Payments{% endblock %}
+{% block content %}
+<div class="container dashboard-container" style="background-color: #F5E8C7; padding: 2rem;">
+  <!-- Flashed Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  {% for category, message in messages %}
+  <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert" style="background-color: {{ '#B22222' if category == 'error' else '#4A90E2' }}; color: #1A1A1A;">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+
+  <!-- Page Header -->
+  <header class="mb-4" aria-label="Page header">
+    <h1 class="fw-bold" style="color: #3D8B40; font-size: 2rem">Manage Your Payments</h1>
+    <p class="text-muted" style="color: #1A1A1A;">Track and manage tenant payments for your properties.</p>
+  </header>
+
+  <div class="row">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+      <!-- Overview Section -->
+      <section class="mb-5" aria-label="Payment overview">
+        <h2 class="fw-bold mb-4" style="color: #3D8B40; font-size: 1.8rem">Payment Overview</h2>
+        <div class="row">
+          <div class="col-md-3 mb-3">
+            <div class="card text-center" style="background-color: #4A90E2; color: #F5E8C7;">
+              <div class="card-body">
+                <h5 class="card-title">Total Received</h5>
+                <p class="card-text">KES {{ overview.total_received|default(0, true)|int }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="card text-center" style="background-color: #F28C38; color: #1A1A1A;">
+              <div class="card-body">
+                <h5 class="card-title">Pending</h5>
+                <p class="card-text">KES {{ overview.pending|default(0, true)|int }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="card text-center" style="background-color: #B22222; color: #F5E8C7;">
+              <div class="card-body">
+                <h5 class="card-title">Overdue</h5>
+                <p class="card-text">KES {{ overview.overdue|default(0, true)|int }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="card text-center" style="background-color: #3D8B40; color: #F5E8C7;">
+              <div class="card-body">
+                <h5 class="card-title">Overdue Count</h5>
+                <p class="card-text">{{ overview.overdue_count|default(0, true) }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Payments Table -->
+      <section class="mb-5" aria-label="Payment records">
+        <h2 class="fw-bold mb-4" style="color: #3D8B40; font-size: 1.8rem">Payment Records</h2>
+        <div class="card p-4" style="background-color: #1A1A1A; color: #F5E8C7; border-radius: 10px;">
+          <div class="mb-3">
+            <input type="text" class="form-control" id="paymentFilter" placeholder="Filter by tenant or property" style="background-color: #F5E8C7; color: #1A1A1A;" />
+          </div>
+          <div class="table-responsive">
+            <table class="table table-dark table-striped" style="color: #F5E8C7;">
+              <thead>
+                <tr>
+                  <th scope="col" style="cursor: pointer;" onclick="sortTable(0)">Tenant</th>
+                  <th scope="col" style="cursor: pointer;" onclick="sortTable(1)">Property</th>
+                  <th scope="col" style="cursor: pointer;" onclick="sortTable(2)">Amount</th>
+                  <th scope="col" style="cursor: pointer;" onclick="sortTable(3)">Date Paid</th>
+                  <th scope="col" style="cursor: pointer;" onclick="sortTable(4)">Status</th>
+                  <th scope="col">Method</th>
+                  <th scope="col">Notes</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="paymentTable">
+                {% for payment in payments %}
+                <tr>
+                  <td>{{ payment.tenant_name }}<br><small>{{ payment.tenant_email }}</small></td>
+                  <td>{{ payment.property_address }}<br><small>{{ payment.property_type }}</small></td>
+                  <td>KES {{ payment.amount|int }}</td>
+                  <td>{{ payment.date_paid|default('N/A', true) }}</td>
+                  <td>
+                    <span class="badge" style="background-color: {{ '#3D8B40' if payment.status == 'Paid' else '#F28C38' if payment.status == 'Pending' else '#B22222' }};">
+                      {{ payment.status }}
+                    </span>
+                  </td>
+                  <td>{{ payment.payment_method }}<br><small>{{ payment.payment_method_details|default('N/A', true) }}</small></td>
+                  <td>{{ payment.notes|default('N/A', true) }}</td>
+                  <td>
+                    <button class="btn btn-sm" style="background-color: #4A90E2; color: #F5E8C7;" onclick="sendReminder({{ payment.id }})" aria-label="Send reminder for payment {{ payment.id }}">Remind</button>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Payment Settings Form -->
+      <section class="mb-5" aria-label="Payment settings">
+        <h2 class="fw-bold mb-4" style="color: #3D8B40; font-size: 1.8rem">Payment Settings</h2>
+        <div class="card p-4" style="background-color: #1A1A1A; color: #F5E8C7; border-radius: 10px;">
+          <form id="paymentSettingsForm" method="POST" action="{{ url_for('landlord.update_payment_settings') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Preferred Payment Method</h5>
+              <select class="form-control" id="preferredMethod" name="preferred_method" style="background-color: #F5E8C7; color: #1A1A1A;">
+                <option value="M-Pesa" {% if settings.preferred_method == 'M-Pesa' %}selected{% endif %}>M-Pesa</option>
+                <option value="Bank Transfer" {% if settings.preferred_method == 'Bank Transfer' %}selected{% endif %}>Bank Transfer</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">M-Pesa Number</h5>
+              <input type="tel" class="form-control" id="mpesaNumber" name="mpesa_number" value="{{ settings.mpesa_number|default('', true) }}" placeholder="e.g., +254712345678" style="background-color: #F5E8C7; color: #1A1A1A;" />
+            </div>
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #4A90E2;">Bank Details</h5>
+              <input type="text" class="form-control mb-2" id="bankName" name="bank_name" value="{{ settings.bank_name|default('', true) }}" placeholder="e.g., Equity Bank" style="background-color: #F5E8C7; color: #1A1A1A;" />
+              <input type="text" class="form-control mb-2" id="accountNumber" name="account_number" value="{{ settings.account_number|default('', true) }}" placeholder="e.g., 1234567890" style="background-color: #F5E8C7; color: #1A1A1A;" />
+              <input type="text" class="form-control" id="branchCode" name="branch_code" value="{{ settings.branch_code|default('', true) }}" placeholder="e.g., 001" style="background-color: #F5E8C7; color: #1A1A1A;" />
+            </div>
+            <div class="mb-3">
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="autoReminder" name="auto_reminder" {% if settings.auto_reminder %}checked{% endif %} style="background-color: #F5E8C7;" />
+                <label class="form-check-label" for="autoReminder" style="color: #1A1A1A;">Enable Auto-Reminders for Overdue Payments</label>
+              </div>
+            </div>
+            <button type="submit" class="btn" style="background-color: #3D8B40; color: #F5E8C7;" aria-label="Update payment settings">Update Settings</button>
+          </form>
+        </div>
+      </section>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <!-- Recent Notifications -->
+      <aside class="mb-5" aria-label="Recent notifications">
+        <h5 class="fw-bold mb-3" style="color: #3D8B40;">Recent Notifications</h5>
+        <div class="card p-3" style="background-color: #F5E8C7; color: #1A1A1A;">
+          <ul class="list-unstyled">
+            {% for notification in recent_notifications %}
+            <li class="mb-2">{{ notification.message }}<br><small>{{ notification.timestamp }}</small></li>
+            {% endfor %}
+          </ul>
+          <button class="btn btn-link" style="color: #F28C38; padding: 0;" id="toggleNotifications" aria-expanded="true">Hide Notifications</button>
+        </div>
+      </aside>
+
+      <!-- Export Options -->
+      <section class="mb-5" aria-label="Export payments">
+        <h5 class="fw-bold mb-3" style="color: #3D8B40;">Export Payments</h5>
+        <div class="card p-3" style="background-color: #F5E8C7; color: #1A1A1A;">
+          <div class="d-flex gap-2">
+            <a href="{{ url_for('landlord.export_payments', format='csv') }}" class="btn btn-sm" style="background-color: #4A90E2; color: #F5E8C7;" aria-label="Export as CSV">CSV</a>
+            <a href="{{ url_for('landlord.export_payments', format='pdf') }}" class="btn btn-sm" style="background-color: #4A90E2; color: #F5E8C7;" aria-label="Export as PDF">PDF</a>
+            <a href="{{ url_for('landlord.export_payments', format='xlsx') }}" class="btn btn-sm" style="background-color: #4A90E2; color: #F5E8C7;" aria-label="Export as Excel">Excel</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Help Link -->
+      <div class="mt-3">
+        <a href="{{ url_for('static.support') }}" class="btn btn-link" style="color: #F28C38;" aria-label="Get support">Need Help?</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Language Toggle -->
+  <div class="position-fixed top-0 end-0 m-3">
+    <button class="btn" style="background-color: #3D8B40; color: #F5E8C7;" id="languageToggle" aria-label="Toggle language">Switch to Swahili</button>
+  </div>
+
+  <!-- Landlord Access Badge -->
+  <div class="position-fixed bottom-0 end-0 m-3" aria-label="Landlord access indicator">
+    <span class="badge" style="background-color: #3D8B40; color: #F5E8C7;">Landlord Access Only</span>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdlZxGxvJ3/4sk7Lg" crossorigin="anonymous"></script>
+<!-- Custom JavaScript -->
+<script src="{{ url_for('static', filename='scripts.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterInput = document.getElementById('paymentFilter');
+    const paymentTable = document.getElementById('paymentTable');
+    const toggleNotificationsButton = document.getElementById('toggleNotifications');
+    const notificationsCard = toggleNotificationsButton.parentElement;
+    const languageToggle = document.getElementById('languageToggle');
+    const paymentSettingsForm = document.getElementById('paymentSettingsForm');
+
+    // Filter payments
+    filterInput.addEventListener('input', () => {
+      const filter = filterInput.value.toLowerCase();
+      const rows = paymentTable.getElementsByTagName('tr');
+      for (const row of rows) {
+        const tenant = row.cells[0].textContent.toLowerCase();
+        const property = row.cells[1].textContent.toLowerCase();
+        row.style.display = tenant.includes(filter) || property.includes(filter) ? '' : 'none';
+      }
+    });
+
+    // Sort table
+    function sortTable(column) {
+      const rows = Array.from(paymentTable.getElementsByTagName('tr'));
+      const isNumeric = [2].includes(column); // Amount is numeric
+      const isDate = [3].includes(column); // Date Paid is date
+      rows

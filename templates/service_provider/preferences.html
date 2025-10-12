@@ -1,0 +1,1112 @@
+{% extends "base.html" %} {% block title %}Preferences - HomeHub{% endblock %}
+{% block content %}
+
+<style>
+  :root {
+    --primary: #4361ee;
+    --primary-dark: #3a0ca3;
+    --secondary: #7209b7;
+    --accent: #f72585;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --success: #06ffa5;
+    --info: #00b4d8;
+    --warning: #ffbe0b;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+    --border-radius: 15px;
+  }
+
+  body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      sans-serif;
+    background-color: #f8f9fa;
+    color: var(--dark);
+    line-height: 1.6;
+  }
+
+  .preferences-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* Header Section */
+  .preferences-header {
+    background: linear-gradient(
+      135deg,
+      var(--secondary) 0%,
+      var(--primary) 100%
+    );
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .preferences-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')
+      no-repeat bottom;
+    background-size: cover;
+  }
+
+  .header-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header-title {
+    font-size: 2rem;
+    font-weight: 800;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 30px;
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: var(--transition);
+  }
+
+  .back-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  /* Preference Sections */
+  .preference-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title i {
+    color: var(--secondary);
+  }
+
+  .section-description {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Preference Items */
+  .preference-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid #f8f9fa;
+  }
+
+  .preference-item:last-child {
+    border-bottom: none;
+  }
+
+  .preference-info {
+    flex: 1;
+  }
+
+  .preference-info h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--dark);
+  }
+
+  .preference-info p {
+    color: #6c757d;
+    font-size: 0.9rem;
+  }
+
+  /* Toggle Switch */
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: var(--transition);
+    border-radius: 30px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: var(--transition);
+    border-radius: 50%;
+  }
+
+  input:checked + .slider {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(30px);
+  }
+
+  /* Radio Buttons */
+  .radio-group {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .radio-option input[type="radio"] {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ddd;
+    border-radius: 50%;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .radio-option input[type="radio"]:checked {
+    border-color: var(--primary);
+  }
+
+  .radio-option input[type="radio"]:checked::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary);
+  }
+
+  /* Select Dropdown */
+  .select-wrapper {
+    position: relative;
+    width: 200px;
+  }
+
+  .select-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 1rem;
+    background-color: white;
+    appearance: none;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .select-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+    outline: none;
+  }
+
+  .select-wrapper::after {
+    content: "\f107";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #6c757d;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(67, 97, 238, 0.3);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+
+  .btn-outline:hover {
+    background: var(--primary);
+    color: white;
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, var(--success), #00b4d8);
+    color: white;
+  }
+
+  .btn-success:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(6, 255, 165, 0.3);
+  }
+
+  .btn-block {
+    display: block;
+    width: 100%;
+  }
+
+  /* Section Actions */
+  .section-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #f8f9fa;
+  }
+
+  /* Notification Toast */
+  .notification-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    min-width: 300px;
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s;
+    animation-fill-mode: forwards;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  .notification-success {
+    background: linear-gradient(
+      135deg,
+      rgba(6, 255, 165, 0.9),
+      rgba(0, 180, 216, 0.9)
+    );
+    color: white;
+  }
+
+  .notification-danger {
+    background: linear-gradient(
+      135deg,
+      rgba(247, 37, 133, 0.9),
+      rgba(230, 57, 70, 0.9)
+    );
+    color: white;
+  }
+
+  .notification-warning {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 190, 11, 0.9),
+      rgba(255, 159, 28, 0.9)
+    );
+    color: white;
+  }
+
+  /* Theme Preview */
+  .theme-preview {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .theme-option {
+    flex: 1;
+    padding: 1rem;
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+  }
+
+  .theme-option:hover {
+    border-color: var(--primary);
+  }
+
+  .theme-option.active {
+    border-color: var(--primary);
+    background: rgba(67, 97, 238, 0.05);
+  }
+
+  .theme-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin: 0 auto 0.5rem;
+  }
+
+  .theme-light {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  }
+
+  .theme-dark {
+    background: linear-gradient(135deg, #343a40, #212529);
+  }
+
+  .theme-auto {
+    background: linear-gradient(135deg, #f8f9fa 50%, #343a40 50%);
+  }
+
+  .theme-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  /* Font Size Preview */
+  .font-size-preview {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .font-option {
+    flex: 1;
+    padding: 1rem;
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+  }
+
+  .font-option:hover {
+    border-color: var(--primary);
+  }
+
+  .font-option.active {
+    border-color: var(--primary);
+    background: rgba(67, 97, 238, 0.05);
+  }
+
+  .font-sample {
+    margin-bottom: 0.5rem;
+  }
+
+  .font-small {
+    font-size: 0.875rem;
+  }
+
+  .font-medium {
+    font-size: 1rem;
+  }
+
+  .font-large {
+    font-size: 1.125rem;
+  }
+
+  .font-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .preferences-container {
+      padding: 1rem;
+    }
+
+    .header-title {
+      font-size: 1.5rem;
+    }
+
+    .preference-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .radio-group {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .section-actions {
+      flex-direction: column;
+    }
+
+    .btn {
+      width: 100%;
+    }
+  }
+</style>
+
+<div class="preferences-container">
+  <!-- Preferences Header -->
+  <div class="preferences-header">
+    <div class="header-content">
+      <h1 class="header-title">Preferences</h1>
+      <div class="header-actions">
+        <a href="{{ url_for('service_provider.settings') }}" class="back-btn">
+          <i class="fas fa-arrow-left"></i> Back to Settings
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Preferences -->
+  <div class="preference-section">
+    <h2 class="section-title">
+      <i class="fas fa-bell"></i>
+      Notification Preferences
+    </h2>
+    <p class="section-description">
+      Choose how you want to receive notifications from HomeHub
+    </p>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <h4>Email Notifications</h4>
+        <p>Receive important updates via email</p>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="email-notifications" checked />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <h4>Push Notifications</h4>
+        <p>Get real-time notifications on your devices</p>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="push-notifications" checked />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <h4>SMS Notifications</h4>
+        <p>Receive text messages for critical alerts</p>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="sms-notifications" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <h4>Marketing Communications</h4>
+        <p>Receive updates about new features and promotions</p>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="marketing-notifications" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="section-actions">
+      <button class="btn btn-outline">Reset</button>
+      <button class="btn btn-primary" onclick="saveNotificationPreferences()">
+        Save Changes
+      </button>
+    </div>
+  </div>
+
+  <!-- Privacy Preferences -->
+  <div class="preference-section">
+    <h2 class="section-title">
+      <i class="fas fa-lock"></i>
+      Privacy Preferences
+    </h2>
+    <p class="section-description">
+      Control your privacy settings and data sharing options
+    </p>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <h4>Profile Visibility</h4>
+        <p>Choose who can see your profile information</p>
+      </div>
+      <div class="radio-group">
+        <div class="radio-option">
+          <input
+            type="radio"
+            id="visibility-everyone"
+            name="profile-visibility"
+            value="everyone"
+          />
+          <label for="visibility-everyone">Everyone</label>
+        </div>
+        <div class="radio-option">
+          <input
+            type="radio"
+            id="visibility-contacts"
+            name="profile-visibility"
+            value="contacts"
+            checked
+          />
+          <label for="visibility-contacts">Contacts Only</label>
+        </div>
+        <div class="radio-option">
+          <input
+            type="radio"
+            id="visibility-private"
+            name="profile-visibility"
+            value="private"
+          />
+          <label for="visibility-private">Private</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <h4>Activity Status</h4>
+        <p>Show when you're active on HomeHub</p>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="activity-status" checked />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <h4>Data Collection</h4>
+        <p>Help improve HomeHub by sharing usage data</p>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="data-collection" checked />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <h4>Personalized Ads</h4>
+        <p>See ads that are relevant to your interests</p>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="personalized-ads" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="section-actions">
+      <button class="btn btn-outline">Reset</button>
+      <button class="btn btn-primary" onclick="savePrivacyPreferences()">
+        Save Changes
+      </button>
+    </div>
+  </div>
+
+  <!-- Display Preferences -->
+  <div class="preference-section">
+    <h2 class="section-title">
+      <i class="fas fa-desktop"></i>
+      Display Preferences
+    </h2>
+    <p class="section-description">Customize how HomeHub looks and feels</p>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <h4>Theme</h4>
+        <p>Choose your preferred color scheme</p>
+      </div>
+      <div class="theme-preview">
+        <div class="theme-option active" onclick="selectTheme('light')">
+          <div class="theme-icon theme-light"></div>
+          <div class="theme-name">Light</div>
+        </div>
+        <div class="theme-option" onclick="selectTheme('dark')">
+          <div class="theme-icon theme-dark"></div>
+          <div class="theme-name">Dark</div>
+        </div>
+        <div class="theme-option" onclick="selectTheme('auto')">
+          <div class="theme-icon theme-auto"></div>
+          <div class="theme-name">Auto</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <h4>Font Size</h4>
+        <p>Adjust the text size for better readability</p>
+      </div>
+      <div class="font-size-preview">
+        <div class="font-option" onclick="selectFontSize('small')">
+          <div class="font-sample font-small">Aa</div>
+          <div class="font-name">Small</div>
+        </div>
+        <div class="font-option active" onclick="selectFontSize('medium')">
+          <div class="font-sample font-medium">Aa</div>
+          <div class="font-name">Medium</div>
+        </div>
+        <div class="font-option" onclick="selectFontSize('large')">
+          <div class="font-sample font-large">Aa</div>
+          <div class="font-name">Large</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <h4>Compact View</h4>
+        <p>Show more content in less space</p>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="compact-view" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="section-actions">
+      <button class="btn btn-outline">Reset</button>
+      <button class="btn btn-primary" onclick="saveDisplayPreferences()">
+        Save Changes
+      </button>
+    </div>
+  </div>
+
+  <!-- Language Preferences -->
+  <div class="preference-section">
+    <h2 class="section-title">
+      <i class="fas fa-language"></i>
+      Language Preferences
+    </h2>
+    <p class="section-description">
+      Set your language and regional preferences
+    </p>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <h4>Language</h4>
+        <p>Choose your preferred language</p>
+      </div>
+      <div class="select-wrapper">
+        <select class="select-control" id="language-select">
+          <option value="en" selected>English</option>
+          <option value="es">Spanish</option>
+          <option value="fr">French</option>
+          <option value="de">German</option>
+          <option value="it">Italian</option>
+          <option value="pt">Portuguese</option>
+          <option value="ru">Russian</option>
+          <option value="zh">Chinese</option>
+          <option value="ja">Japanese</option>
+          <option value="ko">Korean</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <h4>Date Format</h4>
+        <p>Choose how dates are displayed</p>
+      </div>
+      <div class="select-wrapper">
+        <select class="select-control" id="date-format-select">
+          <option value="mm/dd/yyyy" selected>MM/DD/YYYY</option>
+          <option value="dd/mm/yyyy">DD/MM/YYYY</option>
+          <option value="yyyy-mm-dd">YYYY-MM-DD</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <h4>Time Format</h4>
+        <p>Choose between 12-hour or 24-hour time format</p>
+      </div>
+      <div class="radio-group">
+        <div class="radio-option">
+          <input
+            type="radio"
+            id="time-12"
+            name="time-format"
+            value="12h"
+            checked
+          />
+          <label for="time-12">12-hour</label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" id="time-24" name="time-format" value="24h" />
+          <label for="time-24">24-hour</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-actions">
+      <button class="btn btn-outline">Reset</button>
+      <button class="btn btn-primary" onclick="saveLanguagePreferences()">
+        Save Changes
+      </button>
+    </div>
+  </div>
+
+  <!-- Accessibility Preferences -->
+  <div class="preference-section">
+    <h2 class="section-title">
+      <i class="fas fa-universal-access"></i>
+      Accessibility Preferences
+    </h2>
+    <p class="section-description">
+      Customize HomeHub for your accessibility needs
+    </p>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <h4>High Contrast Mode</h4>
+        <p>Increase contrast for better visibility</p>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="high-contrast" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <h4>Reduce Motion</h4>
+        <p>Minimize animations and transitions</p>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="reduce-motion" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <h4>Screen Reader Support</h4>
+        <p>Optimize for screen reader usage</p>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="screen-reader" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <h4>Keyboard Navigation</h4>
+        <p>Enhance keyboard navigation features</p>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="keyboard-nav" checked />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="section-actions">
+      <button class="btn btn-outline">Reset</button>
+      <button class="btn btn-primary" onclick="saveAccessibilityPreferences()">
+        Save Changes
+      </button>
+    </div>
+  </div>
+
+  <!-- Global Save Button -->
+  <div class="preference-section">
+    <div class="section-actions" style="border-top: none; padding-top: 0">
+      <button class="btn btn-success btn-block" onclick="saveAllPreferences()">
+        <i class="fas fa-save"></i> Save All Preferences
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Theme selection
+  function selectTheme(theme) {
+    // Remove active class from all theme options
+    document.querySelectorAll(".theme-option").forEach((option) => {
+      option.classList.remove("active");
+    });
+
+    // Add active class to selected theme
+    event.currentTarget.classList.add("active");
+
+    // Store selected theme
+    localStorage.setItem("selectedTheme", theme);
+
+    // In a real app, you would apply the theme immediately
+    console.log(`Selected theme: ${theme}`);
+  }
+
+  // Font size selection
+  function selectFontSize(size) {
+    // Remove active class from all font options
+    document.querySelectorAll(".font-option").forEach((option) => {
+      option.classList.remove("active");
+    });
+
+    // Add active class to selected font size
+    event.currentTarget.classList.add("active");
+
+    // Store selected font size
+    localStorage.setItem("selectedFontSize", size);
+
+    // In a real app, you would apply the font size immediately
+    console.log(`Selected font size: ${size}`);
+  }
+
+  // Save notification preferences
+  function saveNotificationPreferences() {
+    const emailNotifications = document.getElementById(
+      "email-notifications"
+    ).checked;
+    const pushNotifications =
+      document.getElementById("push-notifications").checked;
+    const smsNotifications =
+      document.getElementById("sms-notifications").checked;
+    const marketingNotifications = document.getElementById(
+      "marketing-notifications"
+    ).checked;
+
+    // In a real app, you would send this data to your backend
+    console.log("Saving notification preferences:", {
+      emailNotifications,
+      pushNotifications,
+      smsNotifications,
+      marketingNotifications,
+    });
+
+    // Show success notification
+    showNotification("Notification preferences saved successfully", "success");
+  }
+
+  // Save privacy preferences
+  function savePrivacyPreferences() {
+    const profileVisibility = document.querySelector(
+      'input[name="profile-visibility"]:checked'
+    ).value;
+    const activityStatus = document.getElementById("activity-status").checked;
+    const dataCollection = document.getElementById("data-collection").checked;
+    const personalizedAds = document.getElementById("personalized-ads").checked;
+
+    // In a real app, you would send this data to your backend
+    console.log("Saving privacy preferences:", {
+      profileVisibility,
+      activityStatus,
+      dataCollection,
+      personalizedAds,
+    });
+
+    // Show success notification
+    showNotification("Privacy preferences saved successfully", "success");
+  }
+
+  // Save display preferences
+  function saveDisplayPreferences() {
+    const theme = localStorage.getItem("selectedTheme") || "light";
+    const fontSize = localStorage.getItem("selectedFontSize") || "medium";
+    const compactView = document.getElementById("compact-view").checked;
+
+    // In a real app, you would send this data to your backend
+    console.log("Saving display preferences:", {
+      theme,
+      fontSize,
+      compactView,
+    });
+
+    // Show success notification
+    showNotification("Display preferences saved successfully", "success");
+  }
+
+  // Save language preferences
+  function saveLanguagePreferences() {
+    const language = document.getElementById("language-select").value;
+    const dateFormat = document.getElementById("date-format-select").value;
+    const timeFormat = document.querySelector(
+      'input[name="time-format"]:checked'
+    ).value;
+
+    // In a real app, you would send this data to your backend
+    console.log("Saving language preferences:", {
+      language,
+      dateFormat,
+      timeFormat,
+    });
+
+    // Show success notification
+    showNotification("Language preferences saved successfully", "success");
+  }
+
+  // Save accessibility preferences
+  function saveAccessibilityPreferences() {
+    const highContrast = document.getElementById("high-contrast").checked;
+    const reduceMotion = document.getElementById("reduce-motion").checked;
+    const screenReader = document.getElementById("screen-reader").checked;
+    const keyboardNav = document.getElementById("keyboard-nav").checked;
+
+    // In a real app, you would send this data to your backend
+    console.log("Saving accessibility preferences:", {
+      highContrast,
+      reduceMotion,
+      screenReader,
+      keyboardNav,
+    });
+
+    // Show success notification
+    showNotification("Accessibility preferences saved successfully", "success");
+  }
+
+  // Save all preferences
+  function saveAllPreferences() {
+    // Call all individual save functions
+    saveNotificationPreferences();
+    savePrivacyPreferences();
+    saveDisplayPreferences();
+    saveLanguagePreferences();
+    saveAccessibilityPreferences();
+
+    // Show success notification
+    showNotification("All preferences saved successfully", "success");
+  }
+
+  // Show notification
+  function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement("div");
+    notification.className = `notification-toast notification-${type}`;
+
+    // Add icon based on type
+    let icon = "";
+    if (type === "success") {
+      icon = '<i class="fas fa-check-circle"></i>';
+    } else if (type === "danger") {
+      icon = '<i class="fas fa-exclamation-circle"></i>';
+    } else if (type === "warning") {
+      icon = '<i class="fas fa-exclamation-triangle"></i>';
+    }
+
+    notification.innerHTML = `${icon} ${message}`;
+
+    // Add to DOM
+    document.body.appendChild(notification);
+
+    // Remove after animation completes
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
+  }
+
+  // Initialize preferences from localStorage
+  document.addEventListener("DOMContentLoaded", function () {
+    // Set theme
+    const savedTheme = localStorage.getItem("selectedTheme") || "light";
+    document.querySelectorAll(".theme-option").forEach((option) => {
+      option.classList.remove("active");
+      if (
+        option.querySelector(".theme-name").textContent.toLowerCase() ===
+        savedTheme
+      ) {
+        option.classList.add("active");
+      }
+    });
+
+    // Set font size
+    const savedFontSize = localStorage.getItem("selectedFontSize") || "medium";
+    document.querySelectorAll(".font-option").forEach((option) => {
+      option.classList.remove("active");
+      if (
+        option.querySelector(".font-name").textContent.toLowerCase() ===
+        savedFontSize
+      ) {
+        option.classList.add("active");
+      }
+    });
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,1501 @@
+{% extends "base.html" %} {% block title %}Earnings - HomeHub{% endblock %} {%
+block content %}
+
+<style>
+  :root {
+    --primary: #4361ee;
+    --primary-dark: #3a0ca3;
+    --secondary: #7209b7;
+    --accent: #f72585;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --success: #06ffa5;
+    --info: #00b4d8;
+    --warning: #ffbe0b;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+  }
+
+  body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      sans-serif;
+    background-color: #f8f9fa;
+    color: var(--dark);
+    line-height: 1.6;
+  }
+
+  .earnings-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* Header Section */
+  .earnings-header {
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+    padding: 3rem 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .earnings-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')
+      no-repeat bottom;
+    background-size: cover;
+  }
+
+  .header-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .header-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+  }
+
+  .header-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    max-width: 700px;
+  }
+
+  /* Earnings Summary */
+  .earnings-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .summary-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    transition: var(--transition);
+  }
+
+  .summary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  }
+
+  .summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .summary-title {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .summary-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    color: white;
+  }
+
+  .total-icon {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  }
+  .month-icon {
+    background: linear-gradient(135deg, var(--success), #00b4d8);
+  }
+  .pending-icon {
+    background: linear-gradient(135deg, var(--warning), #ff9f1c);
+  }
+  .completed-icon {
+    background: linear-gradient(135deg, var(--info), #0077b6);
+  }
+
+  .summary-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+  }
+
+  .summary-change {
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+  }
+
+  .change-positive {
+    color: var(--success);
+  }
+
+  .change-negative {
+    color: var(--accent);
+  }
+
+  .change-neutral {
+    color: #6c757d;
+  }
+
+  /* Filters Section */
+  .filters-section {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+  }
+
+  .filters-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .filters-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  .filters-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+  }
+
+  .form-control,
+  .form-select {
+    padding: 0.75rem 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+  }
+
+  .btn-filter {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    align-self: flex-end;
+  }
+
+  .btn-filter:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(67, 97, 238, 0.3);
+  }
+
+  /* Earnings Section */
+  .earnings-section {
+    margin-bottom: 2rem;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  .view-toggle {
+    display: flex;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .view-btn {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .view-btn.active {
+    background: var(--primary);
+    color: white;
+  }
+
+  /* Earnings Grid */
+  .earnings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .earning-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .earning-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  .earning-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .earning-id {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+  }
+
+  .earning-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+  }
+
+  .earning-property {
+    display: flex;
+    align-items: center;
+    color: #6c757d;
+    font-size: 0.95rem;
+  }
+
+  .earning-property i {
+    color: var(--primary);
+    margin-right: 0.5rem;
+  }
+
+  .earning-body {
+    padding: 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .earning-amount {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 1rem;
+  }
+
+  .earning-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .meta-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+  }
+
+  .meta-value {
+    font-weight: 600;
+    color: var(--dark);
+  }
+
+  .earning-status {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+
+  .status-completed {
+    background: rgba(6, 255, 165, 0.15);
+    color: var(--success);
+  }
+
+  .status-pending {
+    background: rgba(255, 190, 11, 0.15);
+    color: var(--warning);
+  }
+
+  .status-cancelled {
+    background: rgba(247, 37, 133, 0.15);
+    color: var(--accent);
+  }
+
+  .earning-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .btn-action {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    font-size: 0.9rem;
+    flex: 1;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+
+  .btn-outline:hover {
+    background: var(--primary);
+    color: white;
+  }
+
+  /* List View */
+  .earnings-list {
+    display: none;
+  }
+
+  .earnings-list.active {
+    display: block;
+  }
+
+  .list-item {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+  }
+
+  .list-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  .list-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .list-info h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+  }
+
+  .list-property {
+    display: flex;
+    align-items: center;
+    color: #6c757d;
+    font-size: 0.95rem;
+  }
+
+  .list-property i {
+    color: var(--primary);
+    margin-right: 0.5rem;
+  }
+
+  .list-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .list-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .list-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  /* Chart Section */
+  .chart-section {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  .chart-container {
+    height: 300px;
+    position: relative;
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    color: #dee2e6;
+    margin-bottom: 1rem;
+  }
+
+  .empty-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 1rem;
+  }
+
+  .empty-description {
+    color: #6c757d;
+    max-width: 500px;
+    margin: 0 auto 2rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 992px) {
+    .earnings-grid {
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+
+    .list-content {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .list-actions {
+      justify-content: flex-start;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .earnings-container {
+      padding: 1rem;
+    }
+
+    .header-title {
+      font-size: 2rem;
+    }
+
+    .filters-form {
+      grid-template-columns: 1fr;
+    }
+
+    .earnings-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .section-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+  }
+</style>
+
+<div class="earnings-container">
+  <!-- Header Section -->
+  <div class="earnings-header">
+    <div class="header-content">
+      <h1 class="header-title">Your Earnings</h1>
+      <p class="header-subtitle">
+        Track and manage your income from completed service requests and jobs
+      </p>
+    </div>
+  </div>
+
+  <!-- Earnings Summary -->
+  <div class="earnings-summary">
+    <div class="summary-card">
+      <div class="summary-header">
+        <div class="summary-title">Total Earnings</div>
+        <div class="summary-icon total-icon">
+          <i class="fas fa-wallet"></i>
+        </div>
+      </div>
+      <div class="summary-value">KES 245,680</div>
+      <div class="summary-change change-positive">
+        <i class="fas fa-arrow-up"></i>
+        <span>12.5% from last month</span>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-header">
+        <div class="summary-title">This Month</div>
+        <div class="summary-icon month-icon">
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+      </div>
+      <div class="summary-value">KES 42,350</div>
+      <div class="summary-change change-positive">
+        <i class="fas fa-arrow-up"></i>
+        <span>8.3% from last month</span>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-header">
+        <div class="summary-title">Pending</div>
+        <div class="summary-icon pending-icon">
+          <i class="fas fa-hourglass-half"></i>
+        </div>
+      </div>
+      <div class="summary-value">KES 18,750</div>
+      <div class="summary-change change-neutral">
+        <i class="fas fa-minus"></i>
+        <span>No change</span>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-header">
+        <div class="summary-title">Completed Jobs</div>
+        <div class="summary-icon completed-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+      </div>
+      <div class="summary-value">48</div>
+      <div class="summary-change change-positive">
+        <i class="fas fa-arrow-up"></i>
+        <span>5 jobs from last month</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart Section -->
+  <div class="chart-section">
+    <div class="chart-header">
+      <h2 class="chart-title">Earnings Overview</h2>
+      <div class="chart-controls">
+        <select class="form-select" id="chart-period">
+          <option value="6months">Last 6 Months</option>
+          <option value="year">This Year</option>
+          <option value="all">All Time</option>
+        </select>
+      </div>
+    </div>
+    <div class="chart-container">
+      <canvas id="earningsChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <div class="filters-header">
+      <h2 class="filters-title">Filter Earnings</h2>
+    </div>
+
+    <form class="filters-form">
+      <div class="form-group">
+        <label for="status-filter">Status</label>
+        <select id="status-filter" class="form-select">
+          <option value="">All Statuses</option>
+          <option value="completed">Completed</option>
+          <option value="pending">Pending</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="date-filter">Date Range</label>
+        <select id="date-filter" class="form-select">
+          <option value="">All Time</option>
+          <option value="today">Today</option>
+          <option value="week">This Week</option>
+          <option value="month">This Month</option>
+          <option value="year">This Year</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="property-filter">Property</label>
+        <select id="property-filter" class="form-select">
+          <option value="">All Properties</option>
+          <option value="1">Sunset Apartments</option>
+          <option value="2">Greenview Condos</option>
+          <option value="3">Riverside Estates</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="service-filter">Service Type</label>
+        <select id="service-filter" class="form-select">
+          <option value="">All Services</option>
+          <option value="plumbing">Plumbing</option>
+          <option value="electrical">Electrical</option>
+          <option value="hvac">HVAC</option>
+          <option value="cleaning">Cleaning</option>
+        </select>
+      </div>
+
+      <button type="button" class="btn-filter">Apply Filters</button>
+    </form>
+  </div>
+
+  <!-- Earnings Section -->
+  <div class="earnings-section">
+    <div class="section-header">
+      <h2 class="section-title">Your Earnings History</h2>
+
+      <div class="view-toggle">
+        <button class="view-btn active" id="grid-view">
+          <i class="fas fa-th"></i>
+        </button>
+        <button class="view-btn" id="list-view">
+          <i class="fas fa-list"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Grid View -->
+    <div class="earnings-grid" id="grid-view-container">
+      <!-- Earning 1 -->
+      <div class="earning-card" data-status="completed">
+        <div class="earning-header">
+          <div class="earning-id">Job #SR-2023-0456</div>
+          <h3 class="earning-title">Kitchen Plumbing Repair</h3>
+          <div class="earning-property">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Sunset Apartments, Westlands</span>
+          </div>
+        </div>
+        <div class="earning-body">
+          <div class="earning-amount">KES 8,500</div>
+          <div class="earning-meta">
+            <div class="meta-item">
+              <div class="meta-label">Service Date</div>
+              <div class="meta-value">Jun 15, 2023</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Payment Date</div>
+              <div class="meta-value">Jun 18, 2023</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Service Type</div>
+              <div class="meta-value">Plumbing</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Duration</div>
+              <div class="meta-value">3 hours</div>
+            </div>
+          </div>
+          <div class="earning-status status-completed">Completed</div>
+          <div class="earning-actions">
+            <a href="#" class="btn-action btn-primary">
+              <i class="fas fa-receipt"></i> View Receipt
+            </a>
+            <a href="#" class="btn-action btn-outline">
+              <i class="fas fa-download"></i> Download
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Earning 2 -->
+      <div class="earning-card" data-status="completed">
+        <div class="earning-header">
+          <div class="earning-id">Job #SR-2023-0432</div>
+          <h3 class="earning-title">AC Installation</h3>
+          <div class="earning-property">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Greenview Condos, Kileleshwa</span>
+          </div>
+        </div>
+        <div class="earning-body">
+          <div class="earning-amount">KES 12,000</div>
+          <div class="earning-meta">
+            <div class="meta-item">
+              <div class="meta-label">Service Date</div>
+              <div class="meta-value">Jun 10, 2023</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Payment Date</div>
+              <div class="meta-value">Jun 12, 2023</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Service Type</div>
+              <div class="meta-value">HVAC</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Duration</div>
+              <div class="meta-value">5 hours</div>
+            </div>
+          </div>
+          <div class="earning-status status-completed">Completed</div>
+          <div class="earning-actions">
+            <a href="#" class="btn-action btn-primary">
+              <i class="fas fa-receipt"></i> View Receipt
+            </a>
+            <a href="#" class="btn-action btn-outline">
+              <i class="fas fa-download"></i> Download
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Earning 3 -->
+      <div class="earning-card" data-status="pending">
+        <div class="earning-header">
+          <div class="earning-id">Job #SR-2023-0421</div>
+          <h3 class="earning-title">Electrical Wiring</h3>
+          <div class="earning-property">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Riverside Estates, Riverside</span>
+          </div>
+        </div>
+        <div class="earning-body">
+          <div class="earning-amount">KES 6,750</div>
+          <div class="earning-meta">
+            <div class="meta-item">
+              <div class="meta-label">Service Date</div>
+              <div class="meta-value">Jun 8, 2023</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Payment Date</div>
+              <div class="meta-value">Pending</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Service Type</div>
+              <div class="meta-value">Electrical</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Duration</div>
+              <div class="meta-value">4 hours</div>
+            </div>
+          </div>
+          <div class="earning-status status-pending">Pending</div>
+          <div class="earning-actions">
+            <a href="#" class="btn-action btn-primary">
+              <i class="fas fa-eye"></i> View Details
+            </a>
+            <a href="#" class="btn-action btn-outline">
+              <i class="fas fa-bell"></i> Notify
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Earning 4 -->
+      <div class="earning-card" data-status="completed">
+        <div class="earning-header">
+          <div class="earning-id">Job #SR-2023-0405</div>
+          <h3 class="earning-title">Deep Cleaning Service</h3>
+          <div class="earning-property">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Sunset Apartments, Westlands</span>
+          </div>
+        </div>
+        <div class="earning-body">
+          <div class="earning-amount">KES 5,200</div>
+          <div class="earning-meta">
+            <div class="meta-item">
+              <div class="meta-label">Service Date</div>
+              <div class="meta-value">Jun 5, 2023</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Payment Date</div>
+              <div class="meta-value">Jun 7, 2023</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Service Type</div>
+              <div class="meta-value">Cleaning</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Duration</div>
+              <div class="meta-value">6 hours</div>
+            </div>
+          </div>
+          <div class="earning-status status-completed">Completed</div>
+          <div class="earning-actions">
+            <a href="#" class="btn-action btn-primary">
+              <i class="fas fa-receipt"></i> View Receipt
+            </a>
+            <a href="#" class="btn-action btn-outline">
+              <i class="fas fa-download"></i> Download
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Earning 5 -->
+      <div class="earning-card" data-status="cancelled">
+        <div class="earning-header">
+          <div class="earning-id">Job #SR-2023-0398</div>
+          <h3 class="earning-title">Garden Maintenance</h3>
+          <div class="earning-property">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Greenview Condos, Kileleshwa</span>
+          </div>
+        </div>
+        <div class="earning-body">
+          <div class="earning-amount">KES 4,500</div>
+          <div class="earning-meta">
+            <div class="meta-item">
+              <div class="meta-label">Service Date</div>
+              <div class="meta-value">Jun 1, 2023</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Payment Date</div>
+              <div class="meta-value">N/A</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Service Type</div>
+              <div class="meta-value">Landscaping</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Duration</div>
+              <div class="meta-value">3 hours</div>
+            </div>
+          </div>
+          <div class="earning-status status-cancelled">Cancelled</div>
+          <div class="earning-actions">
+            <a href="#" class="btn-action btn-primary">
+              <i class="fas fa-info-circle"></i> Details
+            </a>
+            <a href="#" class="btn-action btn-outline">
+              <i class="fas fa-redo"></i> Rebook
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Earning 6 -->
+      <div class="earning-card" data-status="completed">
+        <div class="earning-header">
+          <div class="earning-id">Job #SR-2023-0387</div>
+          <h3 class="earning-title">Pest Control Treatment</h3>
+          <div class="earning-property">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Riverside Estates, Riverside</span>
+          </div>
+        </div>
+        <div class="earning-body">
+          <div class="earning-amount">KES 7,800</div>
+          <div class="earning-meta">
+            <div class="meta-item">
+              <div class="meta-label">Service Date</div>
+              <div class="meta-value">May 28, 2023</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Payment Date</div>
+              <div class="meta-value">May 30, 2023</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Service Type</div>
+              <div class="meta-value">Pest Control</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Duration</div>
+              <div class="meta-value">2 hours</div>
+            </div>
+          </div>
+          <div class="earning-status status-completed">Completed</div>
+          <div class="earning-actions">
+            <a href="#" class="btn-action btn-primary">
+              <i class="fas fa-receipt"></i> View Receipt
+            </a>
+            <a href="#" class="btn-action btn-outline">
+              <i class="fas fa-download"></i> Download
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- List View -->
+    <div class="earnings-list" id="list-view-container">
+      <!-- Earning 1 -->
+      <div class="list-item" data-status="completed">
+        <div class="list-content">
+          <div class="list-info">
+            <h3>Kitchen Plumbing Repair</h3>
+            <div class="list-property">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Sunset Apartments, Westlands</span>
+            </div>
+            <div class="earning-id">Job #SR-2023-0456</div>
+          </div>
+          <div class="list-amount">KES 8,500</div>
+          <div class="list-meta">
+            <div>
+              <div class="meta-label">Service Date</div>
+              <div class="meta-value">Jun 15, 2023</div>
+            </div>
+            <div>
+              <div class="meta-label">Payment Date</div>
+              <div class="meta-value">Jun 18, 2023</div>
+            </div>
+            <div class="earning-status status-completed">Completed</div>
+          </div>
+          <div class="list-actions">
+            <a href="#" class="btn-action btn-primary">
+              <i class="fas fa-receipt"></i> Receipt
+            </a>
+            <a href="#" class="btn-action btn-outline">
+              <i class="fas fa-download"></i> Download
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Earning 2 -->
+      <div class="list-item" data-status="completed">
+        <div class="list-content">
+          <div class="list-info">
+            <h3>AC Installation</h3>
+            <div class="list-property">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Greenview Condos, Kileleshwa</span>
+            </div>
+            <div class="earning-id">Job #SR-2023-0432</div>
+          </div>
+          <div class="list-amount">KES 12,000</div>
+          <div class="list-meta">
+            <div>
+              <div class="meta-label">Service Date</div>
+              <div class="meta-value">Jun 10, 2023</div>
+            </div>
+            <div>
+              <div class="meta-label">Payment Date</div>
+              <div class="meta-value">Jun 12, 2023</div>
+            </div>
+            <div class="earning-status status-completed">Completed</div>
+          </div>
+          <div class="list-actions">
+            <a href="#" class="btn-action btn-primary">
+              <i class="fas fa-receipt"></i> Receipt
+            </a>
+            <a href="#" class="btn-action btn-outline">
+              <i class="fas fa-download"></i> Download
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Earning 3 -->
+      <div class="list-item" data-status="pending">
+        <div class="list-content">
+          <div class="list-info">
+            <h3>Electrical Wiring</h3>
+            <div class="list-property">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Riverside Estates, Riverside</span>
+            </div>
+            <div class="earning-id">Job #SR-2023-0421</div>
+          </div>
+          <div class="list-amount">KES 6,750</div>
+          <div class="list-meta">
+            <div>
+              <div class="meta-label">Service Date</div>
+              <div class="meta-value">Jun 8, 2023</div>
+            </div>
+            <div>
+              <div class="meta-label">Payment Date</div>
+              <div class="meta-value">Pending</div>
+            </div>
+            <div class="earning-status status-pending">Pending</div>
+          </div>
+          <div class="list-actions">
+            <a href="#" class="btn-action btn-primary">
+              <i class="fas fa-eye"></i> Details
+            </a>
+            <a href="#" class="btn-action btn-outline">
+              <i class="fas fa-bell"></i> Notify
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Earning 4 -->
+      <div class="list-item" data-status="completed">
+        <div class="list-content">
+          <div class="list-info">
+            <h3>Deep Cleaning Service</h3>
+            <div class="list-property">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Sunset Apartments, Westlands</span>
+            </div>
+            <div class="earning-id">Job #SR-2023-0405</div>
+          </div>
+          <div class="list-amount">KES 5,200</div>
+          <div class="list-meta">
+            <div>
+              <div class="meta-label">Service Date</div>
+              <div class="meta-value">Jun 5, 2023</div>
+            </div>
+            <div>
+              <div class="meta-label">Payment Date</div>
+              <div class="meta-value">Jun 7, 2023</div>
+            </div>
+            <div class="earning-status status-completed">Completed</div>
+          </div>
+          <div class="list-actions">
+            <a href="#" class="btn-action btn-primary">
+              <i class="fas fa-receipt"></i> Receipt
+            </a>
+            <a href="#" class="btn-action btn-outline">
+              <i class="fas fa-download"></i> Download
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Earning 5 -->
+      <div class="list-item" data-status="cancelled">
+        <div class="list-content">
+          <div class="list-info">
+            <h3>Garden Maintenance</h3>
+            <div class="list-property">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Greenview Condos, Kileleshwa</span>
+            </div>
+            <div class="earning-id">Job #SR-2023-0398</div>
+          </div>
+          <div class="list-amount">KES 4,500</div>
+          <div class="list-meta">
+            <div>
+              <div class="meta-label">Service Date</div>
+              <div class="meta-value">Jun 1, 2023</div>
+            </div>
+            <div>
+              <div class="meta-label">Payment Date</div>
+              <div class="meta-value">N/A</div>
+            </div>
+            <div class="earning-status status-cancelled">Cancelled</div>
+          </div>
+          <div class="list-actions">
+            <a href="#" class="btn-action btn-primary">
+              <i class="fas fa-info-circle"></i> Details
+            </a>
+            <a href="#" class="btn-action btn-outline">
+              <i class="fas fa-redo"></i> Rebook
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Earning 6 -->
+      <div class="list-item" data-status="completed">
+        <div class="list-content">
+          <div class="list-info">
+            <h3>Pest Control Treatment</h3>
+            <div class="list-property">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Riverside Estates, Riverside</span>
+            </div>
+            <div class="earning-id">Job #SR-2023-0387</div>
+          </div>
+          <div class="list-amount">KES 7,800</div>
+          <div class="list-meta">
+            <div>
+              <div class="meta-label">Service Date</div>
+              <div class="meta-value">May 28, 2023</div>
+            </div>
+            <div>
+              <div class="meta-label">Payment Date</div>
+              <div class="meta-value">May 30, 2023</div>
+            </div>
+            <div class="earning-status status-completed">Completed</div>
+          </div>
+          <div class="list-actions">
+            <a href="#" class="btn-action btn-primary">
+              <i class="fas fa-receipt"></i> Receipt
+            </a>
+            <a href="#" class="btn-action btn-outline">
+              <i class="fas fa-download"></i> Download
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" id="pagination">
+      <button class="page-btn active" data-page="1">1</button>
+      <button class="page-btn" data-page="2">2</button>
+      <button class="page-btn" data-page="3">3</button>
+      <button class="page-btn" data-page="4">4</button>
+      <button class="page-btn" data-page="5">5</button>
+      <button class="page-btn next-btn" data-page="next">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+{% endblock %} {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // View Toggle
+    const gridViewBtn = document.getElementById("grid-view");
+    const listViewBtn = document.getElementById("list-view");
+    const gridViewContainer = document.getElementById("grid-view-container");
+    const listViewContainer = document.getElementById("list-view-container");
+
+    gridViewBtn.addEventListener("click", function () {
+      gridViewBtn.classList.add("active");
+      listViewBtn.classList.remove("active");
+      gridViewContainer.style.display = "grid";
+      listViewContainer.classList.remove("active");
+    });
+
+    listViewBtn.addEventListener("click", function () {
+      listViewBtn.classList.add("active");
+      gridViewBtn.classList.remove("active");
+      listViewContainer.classList.add("active");
+      gridViewContainer.style.display = "none";
+    });
+
+    // Filter functionality
+    const statusFilter = document.getElementById("status-filter");
+    const dateFilter = document.getElementById("date-filter");
+    const propertyFilter = document.getElementById("property-filter");
+    const serviceFilter = document.getElementById("service-filter");
+    const filterBtn = document.querySelector(".btn-filter");
+
+    filterBtn.addEventListener("click", function () {
+      const status = statusFilter.value;
+      const date = dateFilter.value;
+      const property = propertyFilter.value;
+      const service = serviceFilter.value;
+
+      // Get all earning cards
+      const earningCards = document.querySelectorAll(".earning-card");
+      const listItems = document.querySelectorAll(".list-item");
+
+      // Filter grid view
+      earningCards.forEach((card) => {
+        const cardStatus = card.getAttribute("data-status");
+        const cardTitle = card
+          .querySelector(".earning-title")
+          .textContent.toLowerCase();
+        const cardProperty = card
+          .querySelector(".earning-property span")
+          .textContent.toLowerCase();
+        const cardService = card
+          .querySelector(".meta-value")
+          .textContent.toLowerCase();
+
+        let showCard = true;
+
+        if (status && cardStatus !== status) showCard = false;
+        if (property && !cardProperty.includes(property.toLowerCase()))
+          showCard = false;
+        if (service && !cardService.includes(service.toLowerCase()))
+          showCard = false;
+
+        card.style.display = showCard ? "flex" : "none";
+      });
+
+      // Filter list view
+      listItems.forEach((item) => {
+        const itemStatus = item.getAttribute("data-status");
+        const itemTitle = item
+          .querySelector(".list-info h3")
+          .textContent.toLowerCase();
+        const itemProperty = item
+          .querySelector(".list-property span")
+          .textContent.toLowerCase();
+        const itemService = item
+          .querySelector(".meta-value")
+          .textContent.toLowerCase();
+
+        let showItem = true;
+
+        if (status && itemStatus !== status) showItem = false;
+        if (property && !itemProperty.includes(property.toLowerCase()))
+          showItem = false;
+        if (service && !itemService.includes(service.toLowerCase()))
+          showItem = false;
+
+        item.style.display = showItem ? "block" : "none";
+      });
+    });
+
+    // Pagination functionality
+    const pageButtons = document.querySelectorAll(".page-btn:not(.next-btn)");
+    const nextButton = document.querySelector(".next-btn");
+
+    pageButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        // Remove active class from all buttons
+        pageButtons.forEach((btn) => btn.classList.remove("active"));
+
+        // Add active class to clicked button
+        this.classList.add("active");
+
+        // In a real application, this would load the appropriate page of earnings
+        // For demo, we'll just log the page number
+        console.log("Loading page:", this.getAttribute("data-page"));
+      });
+    });
+
+    nextButton.addEventListener("click", function () {
+      const activeButton = document.querySelector(".page-btn.active");
+      const currentPage = parseInt(activeButton.getAttribute("data-page"));
+      const nextPage = currentPage + 1;
+
+      if (nextPage <= pageButtons.length) {
+        // Remove active class from current button
+        activeButton.classList.remove("active");
+
+        // Find and activate the next button
+        const nextButtonToActivate = document.querySelector(
+          `.page-btn[data-page="${nextPage}"]`
+        );
+        if (nextButtonToActivate) {
+          nextButtonToActivate.classList.add("active");
+          console.log("Loading page:", nextPage);
+        }
+      }
+    });
+
+    // Chart functionality
+    const ctx = document.getElementById("earningsChart").getContext("2d");
+    const chartPeriod = document.getElementById("chart-period");
+
+    // Initial chart data
+    let earningsChart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: ["January", "February", "March", "April", "May", "June"],
+        datasets: [
+          {
+            label: "Earnings (KES)",
+            data: [32000, 35000, 28000, 41000, 39000, 42350],
+            backgroundColor: "rgba(67, 97, 238, 0.1)",
+            borderColor: "#4361ee",
+            borderWidth: 3,
+            pointBackgroundColor: "#4361ee",
+            pointBorderColor: "#fff",
+            pointHoverBackgroundColor: "#fff",
+            pointHoverBorderColor: "#4361ee",
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            tension: 0.3,
+            fill: true,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false,
+          },
+          tooltip: {
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            titleColor: "#212529",
+            bodyColor: "#212529",
+            borderColor: "#e9ecef",
+            borderWidth: 1,
+            padding: 12,
+            displayColors: false,
+            callbacks: {
+              label: function (context) {
+                return "KES " + context.parsed.y.toLocaleString();
+              },
+            },
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: "rgba(0, 0, 0, 0.05)",
+            },
+            ticks: {
+              callback: function (value) {
+                return "KES " + value.toLocaleString();
+              },
+            },
+          },
+          x: {
+            grid: {
+              display: false,
+            },
+          },
+        },
+      },
+    });
+
+    // Update chart when period changes
+    chartPeriod.addEventListener("change", function () {
+      const period = this.value;
+      let labels, data;
+
+      switch (period) {
+        case "6months":
+          labels = ["January", "February", "March", "April", "May", "June"];
+          data = [32000, 35000, 28000, 41000, 39000, 42350];
+          break;
+        case "year":
+          labels = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ];
+          data = [
+            28000, 32000, 35000, 28000, 41000, 39000, 42000, 38000, 36000,
+            40000, 43000, 45000,
+          ];
+          break;
+        case "all":
+          labels = ["2021", "2022", "2023"];
+          data = [245000, 380000, 245680];
+          break;
+        default:
+          labels = ["January", "February", "March", "April", "May", "June"];
+          data = [32000, 35000, 28000, 41000, 39000, 42350];
+      }
+
+      earningsChart.data.labels = labels;
+      earningsChart.data.datasets[0].data = data;
+      earningsChart.update();
+    });
+
+    // Summary card hover effects
+    const summaryCards = document.querySelectorAll(".summary-card");
+
+    summaryCards.forEach((card) => {
+      card.addEventListener("mouseenter", function () {
+        this.style.transform = "translateY(-5px)";
+      });
+
+      card.addEventListener("mouseleave", function () {
+        this.style.transform = "translateY(0)";
+      });
+    });
+
+    // Earning card hover effects
+    const earningCards = document.querySelectorAll(".earning-card");
+
+    earningCards.forEach((card) => {
+      card.addEventListener("mouseenter", function () {
+        this.style.transform = "translateY(-5px)";
+      });
+
+      card.addEventListener("mouseleave", function () {
+        this.style.transform = "translateY(0)";
+      });
+    });
+
+    // List item hover effects
+    const listItems = document.querySelectorAll(".list-item");
+
+    listItems.forEach((item) => {
+      item.addEventListener("mouseenter", function () {
+        this.style.transform = "translateY(-3px)";
+      });
+
+      item.addEventListener("mouseleave", function () {
+        this.style.transform = "translateY(0)";
+      });
+    });
+  });
+</script>
+{% endblock %}

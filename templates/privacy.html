@@ -1,0 +1,1454 @@
+{% extends "base.html" %} {% block title %}Privacy Policy - HomeHub{% endblock
+%} {% block content %}
+<style>
+  :root {
+    --primary: #4361ee;
+    --primary-dark: #3a0ca3;
+    --secondary: #7209b7;
+    --accent: #f72585;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --success: #06ffa5;
+    --info: #00b4d8;
+    --warning: #ffbe0b;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+  }
+  .privacy-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* Header Section */
+  .privacy-header {
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+    padding: 5rem 2rem;
+    border-radius: 20px;
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  }
+
+  .privacy-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')
+      no-repeat bottom;
+    background-size: cover;
+  }
+
+  .header-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .privacy-title {
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin-bottom: 1.2rem;
+    letter-spacing: -0.5px;
+  }
+
+  .privacy-subtitle {
+    font-size: 1.3rem;
+    opacity: 0.9;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .last-updated {
+    margin-top: 1.8rem;
+    font-size: 0.95rem;
+    opacity: 0.8;
+    display: inline-block;
+    padding: 0.5rem 1.2rem;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 30px;
+    backdrop-filter: blur(4px);
+  }
+
+  /* Navigation */
+  .privacy-nav {
+    background: white;
+    border-radius: 16px;
+    padding: 1.8rem;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    position: sticky;
+    top: 100px;
+    z-index: 100;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .nav-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-title i {
+    color: var(--primary);
+  }
+
+  .nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+  }
+
+  .nav-link {
+    padding: 0.7rem 1.2rem;
+    background: var(--light);
+    border-radius: 50px;
+    color: var(--dark);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: var(--transition);
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .nav-link i {
+    font-size: 0.8rem;
+    color: var(--primary);
+  }
+
+  .nav-link:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+  }
+
+  .nav-link.active {
+    background: var(--primary);
+    color: white;
+  }
+
+  /* Privacy Content */
+  .privacy-content {
+    background: white;
+    border-radius: 16px;
+    padding: 3.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    margin-bottom: 3rem;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .section {
+    margin-bottom: 4rem;
+    scroll-margin-top: 120px;
+  }
+
+  .section:last-child {
+    margin-bottom: 0;
+  }
+
+  .section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 0.8rem;
+    border-bottom: 2px solid rgba(67, 97, 238, 0.1);
+  }
+
+  .section-title i {
+    font-size: 1.6rem;
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--primary-dark) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subsection {
+    margin-bottom: 2rem;
+  }
+
+  .subsection-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .subsection-title i {
+    color: var(--secondary);
+    font-size: 1rem;
+  }
+
+  .subsection-content {
+    color: #495057;
+    line-height: 1.8;
+    font-size: 1.05rem;
+  }
+
+  .subsection-content p {
+    margin-bottom: 1.2rem;
+  }
+
+  .subsection-content p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Lists */
+  .privacy-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0;
+  }
+
+  .privacy-list li {
+    padding: 0.7rem 0;
+    padding-left: 1.8rem;
+    position: relative;
+    transition: var(--transition);
+  }
+
+  .privacy-list li:hover {
+    padding-left: 2rem;
+  }
+
+  .privacy-list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 1.2rem;
+    width: 10px;
+    height: 10px;
+    background-color: var(--primary);
+    border-radius: 50%;
+    transition: var(--transition);
+  }
+
+  .privacy-list li:hover::before {
+    width: 12px;
+    height: 12px;
+  }
+
+  .numbered-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0;
+    counter-reset: item;
+  }
+
+  .numbered-list li {
+    counter-increment: item;
+    padding: 0.7rem 0;
+    padding-left: 2.5rem;
+    position: relative;
+    transition: var(--transition);
+  }
+
+  .numbered-list li:hover {
+    padding-left: 2.8rem;
+  }
+
+  .numbered-list li::before {
+    content: counter(item);
+    position: absolute;
+    left: 0;
+    top: 0.6rem;
+    width: 1.8rem;
+    height: 1.8rem;
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    box-shadow: 0 3px 8px rgba(67, 97, 238, 0.3);
+    transition: var(--transition);
+  }
+
+  .numbered-list li:hover::before {
+    transform: scale(1.1);
+  }
+
+  /* Highlight Box */
+  .highlight-box {
+    background: linear-gradient(
+      135deg,
+      rgba(67, 97, 238, 0.08) 0%,
+      rgba(58, 12, 163, 0.08) 100%
+    );
+    border-left: 5px solid var(--primary);
+    padding: 1.8rem;
+    border-radius: 12px;
+    margin: 2rem 0;
+    transition: var(--transition);
+  }
+
+  .highlight-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(67, 97, 238, 0.15);
+  }
+
+  .highlight-box-title {
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 0.8rem;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .highlight-box-title i {
+    color: var(--primary);
+  }
+
+  /* Warning Box */
+  .warning-box {
+    background: linear-gradient(
+      135deg,
+      rgba(247, 37, 133, 0.08) 0%,
+      rgba(181, 23, 158, 0.08) 100%
+    );
+    border-left: 5px solid var(--accent);
+    padding: 1.8rem;
+    border-radius: 12px;
+    margin: 2rem 0;
+    transition: var(--transition);
+  }
+
+  .warning-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(247, 37, 133, 0.15);
+  }
+
+  .warning-box-title {
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 0.8rem;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .warning-box-title i {
+    color: var(--accent);
+  }
+
+  /* Info Box */
+  .info-box {
+    background: linear-gradient(
+      135deg,
+      rgba(0, 180, 216, 0.08) 0%,
+      rgba(0, 119, 182, 0.08) 100%
+    );
+    border-left: 5px solid var(--info);
+    padding: 1.8rem;
+    border-radius: 12px;
+    margin: 2rem 0;
+    transition: var(--transition);
+  }
+
+  .info-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 180, 216, 0.15);
+  }
+
+  .info-box-title {
+    font-weight: 700;
+    color: var(--info);
+    margin-bottom: 0.8rem;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .info-box-title i {
+    color: var(--info);
+  }
+
+  /* Table */
+  .privacy-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2rem 0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  }
+
+  .privacy-table th {
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+    padding: 1.2rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  .privacy-table td {
+    padding: 1.2rem;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 0.95rem;
+  }
+
+  .privacy-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .privacy-table tr:nth-child(even) {
+    background-color: #f8f9fa;
+  }
+
+  .privacy-table tr:hover {
+    background-color: rgba(67, 97, 238, 0.05);
+  }
+
+  /* Footer */
+  .privacy-footer {
+    background: white;
+    border-radius: 16px;
+    padding: 2.5rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .privacy-footer::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(
+      90deg,
+      var(--primary),
+      var(--secondary),
+      var(--accent)
+    );
+  }
+
+  .footer-title {
+    font-size: 1.7rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    color: var(--dark);
+  }
+
+  .footer-description {
+    color: #495057;
+    margin-bottom: 1.8rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+
+  .footer-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+  }
+
+  /* Data Categories */
+  .data-categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.8rem;
+    margin: 2rem 0;
+  }
+
+  .data-category {
+    background: white;
+    border-radius: 14px;
+    padding: 2rem;
+    text-align: center;
+    transition: var(--transition);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .data-category::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+  }
+
+  .data-category:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  }
+
+  .data-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--primary-dark) 100%
+    );
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.2rem;
+    color: white;
+    font-size: 1.8rem;
+    box-shadow: 0 8px 20px rgba(67, 97, 238, 0.3);
+    transition: var(--transition);
+  }
+
+  .data-category:hover .data-icon {
+    transform: scale(1.05);
+  }
+
+  .data-title {
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.8rem;
+    font-size: 1.1rem;
+  }
+
+  .data-description {
+    font-size: 0.95rem;
+    color: #6c757d;
+    line-height: 1.5;
+  }
+
+  /* Rights Grid */
+  .rights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.2rem;
+    margin: 2rem 0;
+  }
+
+  .right-item {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: var(--transition);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .right-item::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--primary);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+
+  .right-item:hover {
+    border-color: var(--primary);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  }
+
+  .right-item:hover::before {
+    transform: scaleX(1);
+  }
+
+  .right-icon {
+    color: var(--primary);
+    font-size: 2rem;
+    margin-bottom: 0.8rem;
+    transition: var(--transition);
+  }
+
+  .right-item:hover .right-icon {
+    transform: scale(1.1);
+  }
+
+  .right-title {
+    font-weight: 700;
+    color: var(--dark);
+    font-size: 1rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .privacy-container {
+      padding: 1rem;
+    }
+
+    .privacy-header {
+      padding: 2rem 1rem;
+    }
+
+    .privacy-title {
+      font-size: 2.2rem;
+    }
+
+    .privacy-subtitle {
+      font-size: 1.1rem;
+    }
+
+    .privacy-content {
+      padding: 2rem 1.5rem;
+    }
+
+    .section-title {
+      font-size: 1.7rem;
+    }
+
+    .subsection-title {
+      font-size: 1.2rem;
+    }
+
+    .data-categories {
+      grid-template-columns: 1fr;
+    }
+
+    .rights-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .footer-buttons {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .footer-buttons .btn {
+      width: 100%;
+      max-width: 300px;
+    }
+  }
+</style>
+<div class="privacy-container">
+  <!-- Header Section -->
+  <header class="privacy-header">
+    <div class="header-content">
+      <h1 class="privacy-title">Privacy Policy</h1>
+      <p class="privacy-subtitle">
+        Your privacy is important to us. This policy explains how we collect,
+        use, and protect your personal information.
+      </p>
+      <p class="last-updated">Last updated: October 15, 2023</p>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <nav class="privacy-nav">
+    <h3 class="nav-title">
+      <i class="fas fa-compass"></i>
+      Quick Navigation
+    </h3>
+    <div class="nav-links">
+      <a href="#information-collect" class="nav-link">
+        <i class="fas fa-info-circle"></i>
+        Information We Collect
+      </a>
+      <a href="#information-use" class="nav-link">
+        <i class="fas fa-cogs"></i>
+        How We Use Information
+      </a>
+      <a href="#information-sharing" class="nav-link">
+        <i class="fas fa-share-alt"></i>
+        Information Sharing
+      </a>
+      <a href="#data-security" class="nav-link">
+        <i class="fas fa-shield-alt"></i>
+        Data Security
+      </a>
+      <a href="#your-rights" class="nav-link">
+        <i class="fas fa-user-shield"></i>
+        Your Rights
+      </a>
+      <a href="#cookies" class="nav-link">
+        <i class="fas fa-cookie-bite"></i>
+        Cookies & Tracking
+      </a>
+      <a href="#children-privacy" class="nav-link">
+        <i class="fas fa-child"></i>
+        Children's Privacy
+      </a>
+      <a href="#international" class="nav-link">
+        <i class="fas fa-globe"></i>
+        International Transfers
+      </a>
+      <a href="#changes" class="nav-link">
+        <i class="fas fa-sync-alt"></i>
+        Policy Changes
+      </a>
+      <a href="#contact" class="nav-link">
+        <i class="fas fa-envelope"></i>
+        Contact Us
+      </a>
+    </div>
+  </nav>
+
+  <!-- Privacy Content -->
+  <main class="privacy-content">
+    <!-- Section 1: Information We Collect -->
+    <section id="information-collect" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-info-circle"></i>
+        1. Information We Collect
+      </h2>
+
+      <div class="subsection">
+        <h3 class="subsection-title">
+          <i class="fas fa-database"></i>
+          Types of Information We Collect
+        </h3>
+        <div class="subsection-content">
+          <p>
+            We collect several types of information from and about users of our
+            Service, including:
+          </p>
+
+          <div class="data-categories">
+            <div class="data-category">
+              <div class="data-icon">
+                <i class="fas fa-user"></i>
+              </div>
+              <h4 class="data-title">Personal Information</h4>
+              <p class="data-description">Name, email, phone number, address</p>
+            </div>
+            <div class="data-category">
+              <div class="data-icon">
+                <i class="fas fa-credit-card"></i>
+              </div>
+              <h4 class="data-title">Payment Information</h4>
+              <p class="data-description">
+                Credit card details, billing address
+              </p>
+            </div>
+            <div class="data-category">
+              <div class="data-icon">
+                <i class="fas fa-home"></i>
+              </div>
+              <h4 class="data-title">Property Information</h4>
+              <p class="data-description">Address, photos, descriptions</p>
+            </div>
+            <div class="data-category">
+              <div class="data-icon">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <h4 class="data-title">Usage Data</h4>
+              <p class="data-description">Pages visited, time spent, actions</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3 class="subsection-title">
+          <i class="fas fa-search"></i>
+          Information Collection Methods
+        </h3>
+        <div class="subsection-content">
+          <p>We collect information through various methods:</p>
+          <ul class="privacy-list">
+            <li>
+              Directly from you when you create an account or use our services
+            </li>
+            <li>
+              Automatically when you use our website or mobile applications
+            </li>
+            <li>From third-party services with your consent</li>
+            <li>Through cookies and similar tracking technologies</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: How We Use Your Information -->
+    <section id="information-use" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-cogs"></i>
+        2. How We Use Your Information
+      </h2>
+
+      <div class="subsection">
+        <h3 class="subsection-title">
+          <i class="fas fa-bullseye"></i>
+          Primary Purposes
+        </h3>
+        <div class="subsection-content">
+          <p>We use your information for the following primary purposes:</p>
+
+          <table class="privacy-table">
+            <thead>
+              <tr>
+                <th>Purpose</th>
+                <th>Description</th>
+                <th>Legal Basis</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Service Provision</td>
+                <td>To provide and maintain our services</td>
+                <td>Contract Necessity</td>
+              </tr>
+              <tr>
+                <td>Communication</td>
+                <td>To send you updates and notifications</td>
+                <td>Consent</td>
+              </tr>
+              <tr>
+                <td>Improvement</td>
+                <td>To analyze and improve our services</td>
+                <td>Legitimate Interest</td>
+              </tr>
+              <tr>
+                <td>Security</td>
+                <td>To protect against fraud and ensure security</td>
+                <td>Legal Obligation</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3 class="subsection-title">
+          <i class="fas fa-bullhorn"></i>
+          Marketing and Analytics
+        </h3>
+        <div class="subsection-content">
+          <p>
+            We may use your information for marketing purposes with your
+            explicit consent. This includes:
+          </p>
+          <ul class="numbered-list">
+            <li>Sending promotional emails about new features or services</li>
+            <li>
+              Displaying personalized advertisements based on your interests
+            </li>
+            <li>Analyzing user behavior to improve our marketing strategies</li>
+          </ul>
+
+          <div class="info-box">
+            <div class="info-box-title">
+              <i class="fas fa-sliders-h"></i>
+              Marketing Preferences
+            </div>
+            <p>
+              You can opt out of marketing communications at any time through
+              your account settings or by clicking the unsubscribe link in our
+              emails.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Information Sharing -->
+    <section id="information-sharing" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-share-alt"></i>
+        3. Information Sharing
+      </h2>
+
+      <div class="subsection">
+        <h3 class="subsection-title">
+          <i class="fas fa-handshake"></i>
+          When We Share Information
+        </h3>
+        <div class="subsection-content">
+          <p>
+            We do not sell your personal information. We may share information
+            only in specific circumstances:
+          </p>
+
+          <div class="highlight-box">
+            <div class="highlight-box-title">
+              <i class="fas fa-lock"></i>
+              Our Commitment
+            </div>
+            <p>
+              We are committed to protecting your privacy. We only share
+              information when necessary for the purposes described in this
+              policy or as required by law.
+            </p>
+          </div>
+
+          <ul class="privacy-list">
+            <li>With service providers who perform services on our behalf</li>
+            <li>
+              With property managers, landlords, or tenants as necessary for
+              service provision
+            </li>
+            <li>When required by law or to protect our rights</li>
+            <li>In connection with a business transfer or merger</li>
+            <li>With your explicit consent</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3 class="subsection-title">
+          <i class="fas fa-building"></i>
+          Third-Party Service Providers
+        </h3>
+        <div class="subsection-content">
+          <p>
+            We work with third-party service providers who help us operate our
+            business. These providers have access to your information only to
+            perform specific tasks on our behalf and are obligated to protect
+            it.
+          </p>
+
+          <p>Categories of third-party service providers include:</p>
+          <ul class="privacy-list">
+            <li>Payment processors (e.g., Stripe, PayPal)</li>
+            <li>Cloud hosting providers (e.g., AWS, Google Cloud)</li>
+            <li>Email service providers (e.g., SendGrid)</li>
+            <li>Analytics providers (e.g., Google Analytics)</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Data Security -->
+    <section id="data-security" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-shield-alt"></i>
+        4. Data Security
+      </h2>
+
+      <div class="subsection">
+        <h3 class="subsection-title">
+          <i class="fas fa-fingerprint"></i>
+          Security Measures
+        </h3>
+        <div class="subsection-content">
+          <p>
+            We implement appropriate technical and organizational measures to
+            protect your personal information against unauthorized access,
+            alteration, disclosure, or destruction.
+          </p>
+
+          <p>Our security measures include:</p>
+          <ul class="numbered-list">
+            <li>
+              Encryption of data in transit and at rest using industry-standard
+              protocols
+            </li>
+            <li>Regular security assessments and penetration testing</li>
+            <li>Secure authentication and access controls</li>
+            <li>Employee training on data protection practices</li>
+            <li>Incident response and breach notification procedures</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3 class="subsection-title">
+          <i class="fas fa-clock"></i>
+          Data Retention
+        </h3>
+        <div class="subsection-content">
+          <p>
+            We retain your personal information only as long as necessary to
+            fulfill the purposes for which it was collected, including for
+            legal, accounting, or reporting requirements.
+          </p>
+
+          <div class="warning-box">
+            <div class="warning-box-title">
+              <i class="fas fa-exclamation-triangle"></i>
+              Important Security Notice
+            </div>
+            <p>
+              While we take reasonable measures to protect your information, no
+              security system is impenetrable. We cannot guarantee the security
+              of your information transmitted to our Service.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Your Rights -->
+    <section id="your-rights" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-user-shield"></i>
+        5. Your Privacy Rights
+      </h2>
+
+      <div class="subsection">
+        <h3 class="subsection-title">
+          <i class="fas fa-list-ul"></i>
+          Rights You Have
+        </h3>
+        <div class="subsection-content">
+          <p>
+            Depending on your location, you may have the following rights
+            regarding your personal information:
+          </p>
+
+          <div class="rights-grid">
+            <div class="right-item">
+              <div class="right-icon">
+                <i class="fas fa-eye"></i>
+              </div>
+              <div class="right-title">Access</div>
+            </div>
+            <div class="right-item">
+              <div class="right-icon">
+                <i class="fas fa-edit"></i>
+              </div>
+              <div class="right-title">Rectification</div>
+            </div>
+            <div class="right-item">
+              <div class="right-icon">
+                <i class="fas fa-trash"></i>
+              </div>
+              <div class="right-title">Deletion</div>
+            </div>
+            <div class="right-item">
+              <div class="right-icon">
+                <i class="fas fa-download"></i>
+              </div>
+              <div class="right-title">Portability</div>
+            </div>
+            <div class="right-item">
+              <div class="right-icon">
+                <i class="fas fa-ban"></i>
+              </div>
+              <div class="right-title">Object</div>
+            </div>
+            <div class="right-item">
+              <div class="right-icon">
+                <i class="fas fa-pause"></i>
+              </div>
+              <div class="right-title">Restrict</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3 class="subsection-title">
+          <i class="fas fa-tools"></i>
+          How to Exercise Your Rights
+        </h3>
+        <div class="subsection-content">
+          <p>
+            To exercise any of these rights, please contact us using the
+            information provided in the "Contact Us" section. We will respond to
+            your request within 30 days in accordance with applicable law.
+          </p>
+
+          <div class="info-box">
+            <div class="info-box-title">
+              <i class="fas fa-user-check"></i>
+              Verification Process
+            </div>
+            <p>
+              We may need to verify your identity before processing your request
+              to ensure that we are disclosing information to the right person.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: Cookies and Tracking -->
+    <section id="cookies" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-cookie-bite"></i>
+        6. Cookies and Tracking Technologies
+      </h2>
+
+      <div class="subsection">
+        <h3 class="subsection-title">
+          <i class="fas fa-cookie"></i>
+          Types of Cookies We Use
+        </h3>
+        <div class="subsection-content">
+          <p>
+            We use various types of cookies and similar tracking technologies on
+            our website:
+          </p>
+
+          <table class="privacy-table">
+            <thead>
+              <tr>
+                <th>Cookie Type</th>
+                <th>Purpose</th>
+                <th>Duration</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Essential</td>
+                <td>Required for basic website functionality</td>
+                <td>Session</td>
+              </tr>
+              <tr>
+                <td>Performance</td>
+                <td>Help us understand how visitors use our site</td>
+                <td>1 year</td>
+              </tr>
+              <tr>
+                <td>Functionality</td>
+                <td>Remember your preferences and settings</td>
+                <td>1 year</td>
+              </tr>
+              <tr>
+                <td>Targeting</td>
+                <td>Deliver relevant advertisements</td>
+                <td>90 days</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3 class="subsection-title">
+          <i class="fas fa-cog"></i>
+          Cookie Management
+        </h3>
+        <div class="subsection-content">
+          <p>
+            You can manage your cookie preferences through your browser
+            settings. Most browsers allow you to:
+          </p>
+          <ul class="privacy-list">
+            <li>View the cookies that have been set</li>
+            <li>Block third-party cookies</li>
+            <li>Delete existing cookies</li>
+            <li>Block all cookies from being set</li>
+          </ul>
+
+          <div class="highlight-box">
+            <div class="highlight-box-title">
+              <i class="fas fa-info-circle"></i>
+              Impact of Blocking Cookies
+            </div>
+            <p>
+              Please note that blocking certain types of cookies may impact your
+              experience on our website and limit the services we can offer.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 7: Children's Privacy -->
+    <section id="children-privacy" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-child"></i>
+        7. Children's Privacy
+      </h2>
+
+      <div class="subsection">
+        <h3 class="subsection-title">
+          <i class="fas fa-shield-alt"></i>
+          Our Commitment to Children
+        </h3>
+        <div class="subsection-content">
+          <p>
+            Our Service is not intended for children under the age of 13. We do
+            not knowingly collect personal information from children under 13.
+          </p>
+
+          <div class="warning-box">
+            <div class="warning-box-title">
+              <i class="fas fa-exclamation-circle"></i>
+              Parental Notice
+            </div>
+            <p>
+              If you are a parent or guardian and believe your child has
+              provided us with personal information, please contact us so we can
+              delete such information.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3 class="subsection-title">
+          <i class="fas fa-gavel"></i>
+          COPPA Compliance
+        </h3>
+        <div class="subsection-content">
+          <p>
+            We comply with the Children's Online Privacy Protection Act (COPPA)
+            and similar international regulations. We:
+          </p>
+          <ul class="numbered-list">
+            <li>
+              Never knowingly collect personal information from children under
+              13
+            </li>
+            <li>Implement age verification measures where appropriate</li>
+            <li>
+              Provide parents with access to and deletion of their child's
+              information
+            </li>
+            <li>Train our staff on children's privacy requirements</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 8: International Transfers -->
+    <section id="international" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-globe"></i>
+        8. International Data Transfers
+      </h2>
+
+      <div class="subsection">
+        <h3 class="subsection-title">
+          <i class="fas fa-globe-americas"></i>
+          Global Operations
+        </h3>
+        <div class="subsection-content">
+          <p>
+            HomeHub operates globally, and your information may be transferred
+            to and processed in countries other than where you live. These
+            countries may have different data protection laws than your country
+            of residence.
+          </p>
+
+          <div class="highlight-box">
+            <div class="highlight-box-title">
+              <i class="fas fa-shield-alt"></i>
+              Data Protection Safeguards
+            </div>
+            <p>
+              When we transfer your information internationally, we ensure
+              appropriate safeguards are in place, including:
+            </p>
+            <ul class="privacy-list">
+              <li>
+                Standard Contractual Clauses approved by European authorities
+              </li>
+              <li>Privacy Shield certifications where applicable</li>
+              <li>Binding corporate rules for internal transfers</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 9: Changes to This Policy -->
+    <section id="changes" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-sync-alt"></i>
+        9. Changes to This Privacy Policy
+      </h2>
+
+      <div class="subsection">
+        <h3 class="subsection-title">
+          <i class="fas fa-edit"></i>
+          Policy Updates
+        </h3>
+        <div class="subsection-content">
+          <p>
+            We may update this Privacy Policy from time to time to reflect
+            changes in our practices or for operational, legal, or regulatory
+            reasons.
+          </p>
+
+          <p>When we make changes:</p>
+          <ul class="privacy-list">
+            <li>
+              We will update the "Last updated" date at the top of this policy
+            </li>
+            <li>
+              We will notify users of material changes via email or website
+              notification
+            </li>
+            <li>We will obtain your consent when required by law</li>
+          </ul>
+
+          <div class="info-box">
+            <div class="info-box-title">
+              <i class="fas fa-bell"></i>
+              Review Recommendations
+            </div>
+            <p>
+              We encourage you to review this Privacy Policy periodically to
+              stay informed about how we are protecting your information.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 10: Contact Us -->
+    <section id="contact" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-envelope"></i>
+        10. Contact Us
+      </h2>
+
+      <div class="subsection">
+        <h3 class="subsection-title">
+          <i class="fas fa-phone-alt"></i>
+          How to Reach Us
+        </h3>
+        <div class="subsection-content">
+          <p>
+            If you have any questions about this Privacy Policy or our data
+            practices, please contact us:
+          </p>
+
+          <div class="highlight-box">
+            <div class="highlight-box-title">
+              <i class="fas fa-address-card"></i>
+              Contact Information
+            </div>
+            <p><strong>Email:</strong> privacy@homehub.com</p>
+            <p><strong>Phone:</strong> +1 (555) 123-4567</p>
+            <p>
+              <strong>Mail:</strong> HomeHub Privacy Team, 123 Privacy Street,
+              Suite 100, San Francisco, CA 94105
+            </p>
+          </div>
+
+          <p>
+            For data protection inquiries, please contact our Data Protection
+            Officer at dpo@homehub.com.
+          </p>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3 class="subsection-title">
+          <i class="fas fa-balance-scale"></i>
+          Regulatory Authorities
+        </h3>
+        <div class="subsection-content">
+          <p>
+            If you are not satisfied with our response to your privacy concerns,
+            you have the right to contact a data protection authority in your
+            jurisdiction.
+          </p>
+
+          <div class="info-box">
+            <div class="info-box-title">
+              <i class="fas fa-european-union"></i>
+              EU Residents
+            </div>
+            <p>
+              If you are a resident of the European Union, you have the right to
+              lodge a complaint with the data protection authority in your
+              country of residence.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="privacy-footer">
+    <h3 class="footer-title">Questions About Your Privacy?</h3>
+    <p class="footer-description">
+      We're here to help you understand how we protect your personal information
+      and exercise your privacy rights.
+    </p>
+    <div class="footer-buttons">
+      <a href="/contact" class="btn btn-primary">Contact Privacy Team</a>
+      <a href="/terms" class="btn btn-outline">View Terms of Service</a>
+    </div>
+  </footer>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  // Smooth scrolling for navigation links
+  document.querySelectorAll(".nav-link").forEach((link) => {
+    link.addEventListener("click", function (e) {
+      e.preventDefault();
+      const targetId = this.getAttribute("href");
+      const targetSection = document.querySelector(targetId);
+
+      if (targetSection) {
+        window.scrollTo({
+          top: targetSection.offsetTop - 100,
+          behavior: "smooth",
+        });
+      }
+    });
+  });
+
+  // Add active state to navigation links based on scroll position
+  window.addEventListener("scroll", () => {
+    const sections = document.querySelectorAll(".section");
+    const navLinks = document.querySelectorAll(".nav-link");
+
+    let current = "";
+
+    sections.forEach((section) => {
+      const sectionTop = section.offsetTop;
+      const sectionHeight = section.clientHeight;
+      if (scrollY >= sectionTop - 200) {
+        current = section.getAttribute("id");
+      }
+    });
+
+    navLinks.forEach((link) => {
+      link.classList.remove("active");
+      if (link.getAttribute("href").slice(1) === current) {
+        link.classList.add("active");
+      }
+    });
+  });
+</script>
+{% endblock %}

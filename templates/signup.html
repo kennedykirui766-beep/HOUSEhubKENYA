@@ -1,0 +1,1141 @@
+{% extends 'base.html' %} 
+{% block title %}Signup{% endblock %} 
+{% block content %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Signup - HomeHub</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary-color: #3d8b40; /* Acacia Green */
+        --secondary-color: #f28c38; /* Sunset Orange */
+        --accent-color: #4a90e2; /* Sky Blue */
+        --error-color: #b22222; /* Red Clay */
+        --light-bg: #f5e8c7; /* Savanna Beige */
+        --dark-text: #1a1a1a; /* Charcoal Black */
+        --light-text: #ffffff;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4efe9 100%);
+        min-height: 100vh;
+        color: var(--dark-text);
+      }
+
+      .signup-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 30px;
+      }
+
+      .signup-form-container {
+        flex: 1;
+        min-width: 350px;
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .signup-form-container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(
+          90deg,
+          var(--primary-color),
+          var(--secondary-color),
+          var(--accent-color)
+        );
+      }
+
+      .info-sidebar {
+        flex: 0 0 350px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .info-card {
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        padding: 25px;
+      }
+
+      .info-card h4 {
+        color: var(--primary-color);
+        margin-bottom: 15px;
+        font-weight: 600;
+      }
+
+      .info-card ul {
+        padding-left: 20px;
+      }
+
+      .info-card li {
+        margin-bottom: 10px;
+      }
+
+      .social-proof {
+        background: linear-gradient(135deg, var(--accent-color), #6ba3e5);
+        color: var(--light-text);
+        text-align: center;
+      }
+
+      .social-proof h4 {
+        color: var(--light-text);
+        margin-bottom: 15px;
+      }
+
+      .social-proof .stats {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 20px;
+      }
+
+      .social-proof .stat-item {
+        text-align: center;
+      }
+
+      .social-proof .stat-number {
+        font-size: 24px;
+        font-weight: 700;
+      }
+
+      .social-proof .stat-label {
+        font-size: 14px;
+        opacity: 0.9;
+      }
+
+      h1 {
+        color: var(--primary-color);
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        color: #666;
+        margin-bottom: 25px;
+      }
+
+      .form-label {
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: var(--dark-text);
+      }
+
+      .form-control {
+        border-radius: 8px;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        transition: all 0.3s ease;
+      }
+
+      .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(61, 139, 64, 0.25);
+      }
+
+      .password-container {
+        position: relative;
+        width: 100%;
+      }
+
+      .password-container input {
+        width: 100%;
+        padding-right: 40px;
+      }
+
+      .password-toggle {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #666;
+      }
+
+      .phone-input-group {
+        display: flex;
+      }
+
+      .phone-prefix {
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        border-right: none;
+        border-radius: 8px 0 0 8px;
+        padding: 12px 15px;
+        display: flex;
+        align-items: center;
+        color: #666;
+        font-weight: 500;
+      }
+
+      .phone-input {
+        border-radius: 0 8px 8px 0;
+      }
+
+      .error-message {
+        color: var(--error-color);
+        font-size: 0.85em;
+        margin-top: 5px;
+        display: none;
+      }
+
+      .notifications .alert {
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+
+      .notifications .alert-success {
+        background-color: rgba(74, 144, 226, 0.1);
+        color: var(--accent-color);
+        border: 1px solid rgba(74, 144, 226, 0.2);
+      }
+
+      .notifications .alert-danger {
+        background-color: rgba(178, 34, 34, 0.1);
+        color: var(--error-color);
+        border: 1px solid rgba(178, 34, 34, 0.2);
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        padding: 12px 25px;
+        font-weight: 500;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary:hover {
+        background-color: #367a39;
+        border-color: #367a39;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(61, 139, 64, 0.3);
+      }
+
+      .btn-link {
+        color: var(--secondary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .btn-link:hover {
+        color: #e07a28;
+        text-decoration: underline;
+      }
+
+      .btn-help {
+        color: var(--secondary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .btn-help:hover {
+        color: #e07a28;
+        text-decoration: underline;
+      }
+
+      .language-toggle {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .language-toggle:hover {
+        background-color: #367a39;
+        transform: translateY(-2px);
+      }
+
+      .password-strength {
+        font-size: 0.85em;
+        margin-top: 5px;
+        font-weight: 500;
+      }
+
+      .password-strength.weak {
+        color: var(--error-color);
+      }
+
+      .password-strength.medium {
+        color: #f28c38;
+      }
+
+      .password-strength.strong {
+        color: var(--accent-color);
+      }
+
+      .password-strength-indicator {
+        height: 5px;
+        width: 100%;
+        background-color: #e9ecef;
+        border-radius: 3px;
+        margin-top: 5px;
+        overflow: hidden;
+      }
+
+      .password-strength-bar {
+        height: 100%;
+        width: 0;
+        transition: width 0.3s ease, background-color 0.3s ease;
+      }
+
+      .password-strength-bar.weak {
+        width: 33%;
+        background-color: var(--error-color);
+      }
+
+      .password-strength-bar.medium {
+        width: 66%;
+        background-color: var(--secondary-color);
+      }
+
+      .password-strength-bar.strong {
+        width: 100%;
+        background-color: var(--accent-color);
+      }
+
+      .form-check {
+        margin-bottom: 20px;
+      }
+
+      .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+      }
+
+      .form-check-label a {
+        color: var(--accent-color);
+        text-decoration: none;
+      }
+
+      .form-check-label a:hover {
+        text-decoration: underline;
+      }
+
+      .divider {
+        display: flex;
+        align-items: center;
+        margin: 25px 0;
+      }
+
+      .divider::before,
+      .divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background-color: #e9ecef;
+      }
+
+      .divider span {
+        padding: 0 15px;
+        color: #6c757d;
+        font-size: 14px;
+      }
+
+      .social-login {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .social-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: white;
+        color: #333;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .social-btn:hover {
+        background-color: #f8f9fa;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .social-btn i {
+        font-size: 18px;
+      }
+
+      .google-btn {
+        color: #4285f4;
+      }
+
+      .facebook-btn {
+        color: #3b5998;
+      }
+
+      .progress-steps {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 30px;
+        position: relative;
+      }
+
+      .progress-steps::before {
+        content: "";
+        position: absolute;
+        top: 15px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background-color: #e9ecef;
+        z-index: 1;
+      }
+
+      .progress-step {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .step-circle {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 14px;
+        color: #6c757d;
+      }
+
+      .step-circle.active {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      .step-label {
+        font-size: 12px;
+        color: #6c757d;
+        text-align: center;
+      }
+
+      .step-label.active {
+        color: var(--primary-color);
+        font-weight: 500;
+      }
+
+      .role-cards {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .role-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .role-card:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .role-card.selected {
+        border-color: var(--primary-color);
+        background-color: rgba(61, 139, 64, 0.1);
+      }
+
+      .role-card i {
+        font-size: 24px;
+        color: var(--primary-color);
+        margin-bottom: 10px;
+      }
+
+      .role-card h5 {
+        font-size: 16px;
+        margin-bottom: 5px;
+      }
+
+      .role-card p {
+        font-size: 12px;
+        color: #6c757d;
+        margin: 0;
+      }
+
+      .file-upload {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+        width: 100%;
+      }
+
+      .file-upload input[type="file"] {
+        position: absolute;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+      }
+
+      .file-upload-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 12px 15px;
+        border: 1px dashed #ddd;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        color: #6c757d;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .file-upload:hover .file-upload-label {
+        border-color: var(--primary-color);
+        background-color: rgba(61, 139, 64, 0.05);
+        color: var(--primary-color);
+      }
+
+      .file-name {
+        margin-top: 5px;
+        font-size: 14px;
+        color: #6c757d;
+      }
+
+      .terms-container {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+
+      .terms-container p {
+        font-size: 14px;
+        color: #6c757d;
+        margin: 0;
+      }
+
+      .terms-container a {
+        color: var(--accent-color);
+        text-decoration: none;
+      }
+
+      .terms-container a:hover {
+        text-decoration: underline;
+      }
+
+      @media (max-width: 992px) {
+        .signup-container {
+          flex-direction: column;
+        }
+
+        .info-sidebar {
+          flex: 1;
+          width: 100%;
+        }
+
+        .role-cards {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .signup-form-container {
+          padding: 25px 15px;
+        }
+
+        .social-login {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="signup-container">
+      <div class="signup-form-container">
+        <h1>Create Your Account</h1>
+        <p class="subtitle">Join HomeHub to manage properties, leases, or services.</p>
+        
+        <section class="notifications">
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %} {% for category, message in messages %}
+          <div
+            class="alert alert-{{ 'danger' if category == 'error' else 'success' }}"
+          >
+            {{ message }}
+          </div>
+          {% endfor %} {% endif %} {% endwith %}
+        </section>
+
+        <div class="progress-steps">
+          <div class="progress-step">
+            <div class="step-circle active">1</div>
+            <div class="step-label active">Account Info</div>
+          </div>
+          <div class="progress-step">
+            <div class="step-circle">2</div>
+            <div class="step-label">Role Selection</div>
+          </div>
+          <div class="progress-step">
+            <div class="step-circle">3</div>
+            <div class="step-label">Complete</div>
+          </div>
+        </div>
+
+        <form
+          method="POST"
+          action="{{ url_for('auth.signup') }}"
+          id="signupForm"
+          enctype="multipart/form-data"
+        >
+          <!-- CSRF Token -->
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          
+          <div class="mb-3">
+            <label
+              for="full_name"
+              class="form-label"
+              data-en="Full Name"
+              data-sw="Jina Kamili"
+              >Full Name</label
+            >
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-person"></i></span>
+              <input
+                type="text"
+                class="form-control"
+                name="full_name"
+                id="full_name"
+                placeholder="John Doe"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label
+              for="email"
+              class="form-label"
+              data-en="Email Address"
+              data-sw="Barua Pepe"
+              >Email Address</label
+            >
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+              <input
+                type="email"
+                class="form-control"
+                name="email"
+                id="email"
+                placeholder="example@email.com"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label
+              for="phone_number"
+              class="form-label"
+              data-en="Phone Number"
+              data-sw="Nambari ya Simu"
+              >Phone Number</label
+            >
+            <div class="phone-input-group">
+              <div class="phone-prefix">+254</div>
+              <input
+                type="tel"
+                class="form-control phone-input"
+                name="phone_number"
+                id="phone_number"
+                placeholder="712345678"
+                maxlength="9"
+                required
+              />
+            </div>
+            <p id="phoneError" class="error-message">
+              Phone number must be 9 digits after +254.
+            </p>
+          </div>
+
+          <div class="mb-3 password-container">
+            <label
+              for="password"
+              class="form-label"
+              data-en="Password"
+              data-sw="Nenosiri"
+              >Password</label
+            >
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-lock"></i></span>
+              <input
+                type="password"
+                class="form-control"
+                name="password"
+                id="password"
+                placeholder="Enter strong password"
+                required
+              />
+              <span
+                class="password-toggle"
+                onclick="togglePassword('password', 'togglePasswordIcon')"
+              >
+                <i id="togglePasswordIcon" class="bi bi-eye"></i>
+              </span>
+            </div>
+            <div class="password-strength-indicator">
+              <div class="password-strength-bar" id="passwordStrengthBar"></div>
+            </div>
+            <span class="password-strength" id="passwordStrength">Weak</span>
+          </div>
+
+          <div class="mb-3 password-container">
+            <label
+              for="confirm_password"
+              class="form-label"
+              data-en="Confirm Password"
+              data-sw="Hakikisha Nenosiri"
+              >Confirm Password</label
+            >
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+              <input
+                type="password"
+                class="form-control"
+                name="confirm_password"
+                id="confirm_password"
+                placeholder="Confirm password"
+                required
+              />
+              <span
+                class="password-toggle"
+                onclick="togglePassword('confirm_password', 'toggleConfirmPasswordIcon')"
+              >
+                <i id="toggleConfirmPasswordIcon" class="bi bi-eye"></i>
+              </span>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <p id="passwordError" class="error-message">
+              Password must be at least 8 characters long and contain letters,
+              digits, and at least one special character (e.g., !@#$%^&*).
+            </p>
+            <p id="confirmPasswordError" class="error-message">
+              Passwords do not match.
+            </p>
+          </div>
+
+          <div class="mb-3">
+            <label
+              for="role"
+              class="form-label"
+              data-en="User Role"
+              data-sw="Jukumu la Mtumiaji"
+              >User Role</label
+            >
+            <div class="role-cards">
+              <div class="role-card" data-role="tenant">
+                <i class="bi bi-house-door"></i>
+                <h5>Tenant</h5>
+                <p>Browse and book properties</p>
+              </div>
+              <div class="role-card" data-role="landlord">
+                <i class="bi bi-building"></i>
+                <h5>Landlord</h5>
+                <p>Manage properties and tenants</p>
+              </div>
+              <div class="role-card" data-role="service">
+                <i class="bi bi-tools"></i>
+                <h5>Service Provider</h5>
+                <p>Offer maintenance services</p>
+              </div>
+              <div class="role-card" data-role="admin">
+                <i class="bi bi-shield-check"></i>
+                <h5>Admin</h5>
+                <p>Manage platform operations</p>
+              </div>
+            </div>
+            <select name="role" id="role" class="form-control" required style="display: none;">
+              <option value="tenant">Tenant</option>
+              <option value="landlord">Landlord</option>
+              <option value="service">Service Provider</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+
+          <div class="mb-3" id="mpesa_details_container" style="display: none">
+            <label
+              for="mpesa_details"
+              class="form-label"
+              data-en="M-Pesa Paybill/Till Number"
+              data-sw="Nambari ya M-Pesa Paybill/Till"
+              >M-Pesa Paybill/Till Number</label
+            >
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-phone"></i></span>
+              <input
+                type="text"
+                class="form-control"
+                name="mpesa_details"
+                id="mpesa_details"
+                placeholder="Paybill 123456"
+              />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label
+              for="profile_picture"
+              class="form-label"
+              data-en="Profile Picture (JPG/PNG, max 2MB)"
+              data-sw="Picha ya Wasifu (JPG/PNG, max 2MB)"
+              >Profile Picture</label
+            >
+            <div class="file-upload">
+              <input
+                type="file"
+                name="profile_picture"
+                id="profile_picture"
+                accept="image/jpeg,image/png"
+              />
+              <label for="profile_picture" class="file-upload-label">
+                <i class="bi bi-cloud-upload"></i>
+                <span>Choose file or drag here</span>
+              </label>
+            </div>
+            <p class="file-name" id="fileName">No file selected</p>
+          </div>
+
+          <div class="mb-3">
+            <label
+              for="language"
+              class="form-label"
+              data-en="Language Preference"
+              data-sw="Mapendeleo ya Lugha"
+              >Language Preference</label
+            >
+            <select name="language" id="language" class="form-control">
+              <option value="en">English</option>
+              <option value="sw">Swahili</option>
+            </select>
+          </div>
+
+          <div class="terms-container">
+            <div class="form-check">
+              <input type="checkbox" name="terms" id="terms" required />
+              <label for="terms">
+                I agree to the <a href="{{ url_for('auth.terms') }}">Terms and Conditions</a> and <a href="{{ url_for('main.privacy') }}">Privacy Policy</a>
+              </label>
+            </div>
+            <p id="termsError" class="error-message">
+              You must agree to the terms and conditions.
+            </p>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">Create Account</button>
+        </form>
+
+        <div class="divider">
+          <span>OR</span>
+        </div>
+
+        <div class="social-login">
+          <div class="social-btn google-btn">
+            <i class="bi bi-google"></i>
+            <span>Google</span>
+          </div>
+          <div class="social-btn facebook-btn">
+            <i class="bi bi-facebook"></i>
+            <span>Facebook</span>
+          </div>
+        </div>
+
+        <p class="mt-4 text-center">
+          Already have an account? <a href="{{ url_for('auth.login') }}" class="btn-link">Log In</a>
+        </p>
+        <p class="text-center">
+          <a href="{{ url_for('auth.support') }}" class="btn-help">Need Help?</a>
+        </p>
+
+        <div class="text-center mt-3">
+          <button class="language-toggle" onclick="toggleLanguage()">
+            Switch to Swahili
+          </button>
+        </div>
+      </div>
+
+      <div class="info-sidebar">
+        <div class="info-card">
+          <h4>Registration Tips</h4>
+          <ul>
+            <li>Use a strong password with letters, numbers, and special characters.</li>
+            <li>Provide a valid M-Pesa number for payments (Landlord/Service Provider).</li>
+            <li>Ensure your email and phone number are unique.</li>
+            <li>Upload a clear profile picture to help others recognize you.</li>
+          </ul>
+        </div>
+
+        <div class="info-card">
+          <h4>User Roles</h4>
+          <p><strong>Landlord:</strong> Manage properties and tenants.</p>
+          <p><strong>Tenant:</strong> Browse and book properties.</p>
+          <p><strong>Service Provider:</strong> Offer maintenance or other services.</p>
+          <p><strong>Admin:</strong> Manage platform operations.</p>
+        </div>
+
+        <div class="info-card social-proof">
+          <h4>Join Our Community</h4>
+          <p>Thousands of Kenyans are already using HomeHub to manage their properties.</p>
+          <div class="stats">
+            <div class="stat-item">
+              <div class="stat-number">10,000+</div>
+              <div class="stat-label">Active Users</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">5,000+</div>
+              <div class="stat-label">Properties</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">500+</div>
+              <div class="stat-label">Service Providers</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Phone number validation
+      document.getElementById('phone_number').addEventListener('input', function() {
+        const value = this.value.replace(/\D/g, ''); // Remove non-digits
+        this.value = value;
+        
+        if (value.length !== 9) {
+          document.getElementById('phoneError').style.display = 'block';
+        } else {
+          document.getElementById('phoneError').style.display = 'none';
+        }
+      });
+
+      // Password toggle
+      function togglePassword(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        if (input.type === "password") {
+          input.type = "text";
+          icon.classList.remove("bi-eye");
+          icon.classList.add("bi-eye-slash");
+        } else {
+          input.type = "password";
+          icon.classList.remove("bi-eye-slash");
+          icon.classList.add("bi-eye");
+        }
+      }
+
+      // Password strength checker
+      document.getElementById("password").addEventListener("input", function () {
+        const password = this.value;
+        const strengthSpan = document.getElementById("passwordStrength");
+        const strengthBar = document.getElementById("passwordStrengthBar");
+        
+        // Check password strength
+        let strength = 0;
+        
+        // Length check
+        if (password.length >= 8) strength += 1;
+        
+        // Contains lowercase
+        if (/[a-z]/.test(password)) strength += 1;
+        
+        // Contains uppercase
+        if (/[A-Z]/.test(password)) strength += 1;
+        
+        // Contains number
+        if (/[0-9]/.test(password)) strength += 1;
+        
+        // Contains special character
+        if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+        
+        // Update UI based on strength
+        if (password.length === 0) {
+          strengthSpan.textContent = "";
+          strengthBar.className = "password-strength-bar";
+        } else if (strength <= 2) {
+          strengthSpan.textContent = "Weak";
+          strengthSpan.className = "password-strength weak";
+          strengthBar.className = "password-strength-bar weak";
+        } else if (strength <= 3) {
+          strengthSpan.textContent = "Medium";
+          strengthSpan.className = "password-strength medium";
+          strengthBar.className = "password-strength-bar medium";
+        } else {
+          strengthSpan.textContent = "Strong";
+          strengthSpan.className = "password-strength strong";
+          strengthBar.className = "password-strength-bar strong";
+        }
+      });
+
+      // Confirm password validation
+      document.getElementById("confirm_password").addEventListener("input", function () {
+        const password = document.getElementById("password").value;
+        const confirmPassword = this.value;
+        
+        if (password !== confirmPassword) {
+          document.getElementById("confirmPasswordError").style.display = "block";
+        } else {
+          document.getElementById("confirmPasswordError").style.display = "none";
+        }
+      });
+
+      // Role selection
+      document.querySelectorAll('.role-card').forEach(card => {
+        card.addEventListener('click', function() {
+          // Remove selected class from all cards
+          document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+          
+          // Add selected class to clicked card
+          this.classList.add('selected');
+          
+          // Update the hidden select value
+          document.getElementById('role').value = this.dataset.role;
+          
+          // Show/hide M-Pesa details based on role
+          const mpesaContainer = document.getElementById('mpesa_details_container');
+          if (this.dataset.role === 'landlord' || this.dataset.role === 'service') {
+            mpesaContainer.style.display = 'block';
+          } else {
+            mpesaContainer.style.display = 'none';
+          }
+        });
+      });
+
+      // File upload display
+      document.getElementById('profile_picture').addEventListener('change', function() {
+        const fileName = this.files[0] ? this.files[0].name : 'No file selected';
+        document.getElementById('fileName').textContent = fileName;
+      });
+
+      // Language toggle
+      function toggleLanguage() {
+        const select = document.getElementById("language");
+        const labels = document.querySelectorAll("label");
+        const button = document.querySelector(".language-toggle");
+        
+        if (select.value === "en") {
+          select.value = "sw";
+          button.textContent = "Switch to English";
+          labels.forEach((label) => {
+            if (label.getAttribute("data-sw")) {
+              label.textContent = label.getAttribute("data-sw");
+            }
+          });
+        } else {
+          select.value = "en";
+          button.textContent = "Switch to Swahili";
+          labels.forEach((label) => {
+            if (label.getAttribute("data-en")) {
+              label.textContent = label.getAttribute("data-en");
+            }
+          });
+        }
+      }
+
+      // Form validation
+      document.getElementById("signupForm").addEventListener("submit", function (event) {
+        let isValid = true;
+        
+        // Validate phone number
+        const phone = document.getElementById('phone_number').value;
+        if (phone.length !== 9) {
+          document.getElementById('phoneError').style.display = 'block';
+          isValid = false;
+        }
+        
+        // Validate password
+        const password = document.getElementById('password').value;
+        const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+        if (!passwordRegex.test(password)) {
+          document.getElementById('passwordError').style.display = 'block';
+          isValid = false;
+        }
+        
+        // Validate confirm password
+        const confirmPassword = document.getElementById('confirm_password').value;
+        if (password !== confirmPassword) {
+          document.getElementById('confirmPasswordError').style.display = 'block';
+          isValid = false;
+        }
+        
+        // Validate terms
+        const terms = document.getElementById('terms').checked;
+        if (!terms) {
+          document.getElementById('termsError').style.display = 'block';
+          isValid = false;
+        }
+        
+        if (!isValid) {
+          event.preventDefault();
+        }
+      });
+
+      // Initialize with first role card selected
+      document.querySelector('.role-card[data-role="tenant"]').click();
+    </script>
+  </body>
+</html>
+{% endblock %}

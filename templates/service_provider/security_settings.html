@@ -1,0 +1,713 @@
+{% extends "base.html" %} {% block title %}Security Settings - HomeHub{%
+endblock %} {% block content %}
+
+<style>
+  :root {
+    --primary: #4361ee;
+    --primary-dark: #3a0ca3;
+    --secondary: #7209b7;
+    --accent: #f72585;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --success: #06ffa5;
+    --info: #00b4d8;
+    --warning: #ffbe0b;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+    --border-radius: 15px;
+  }
+
+  body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      sans-serif;
+    background-color: #f8f9fa;
+    color: var(--dark);
+    line-height: 1.6;
+  }
+
+  .settings-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* Header Section */
+  .settings-header {
+    background: linear-gradient(135deg, var(--accent) 0%, #e63946 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .settings-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')
+      no-repeat bottom;
+    background-size: cover;
+  }
+
+  .header-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header-title {
+    font-size: 2rem;
+    font-weight: 800;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 30px;
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: var(--transition);
+  }
+
+  .back-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  /* Security Status Card */
+  .security-status {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title i {
+    color: var(--accent);
+  }
+
+  .status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .status-card {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    text-align: center;
+    transition: var(--transition);
+  }
+
+  .status-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  .status-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.5rem;
+    color: white;
+  }
+
+  .password-icon {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  }
+
+  .two-factor-icon {
+    background: linear-gradient(135deg, var(--success), #00b4d8);
+  }
+
+  .login-alerts-icon {
+    background: linear-gradient(135deg, var(--warning), #ff9f1c);
+  }
+
+  .sessions-icon {
+    background: linear-gradient(135deg, var(--info), #0077b6);
+  }
+
+  .status-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+  }
+
+  .status-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .status-action {
+    margin-top: 1rem;
+  }
+
+  /* Security Settings */
+  .security-settings {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+  }
+
+  .security-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid #f8f9fa;
+  }
+
+  .security-item:last-child {
+    border-bottom: none;
+  }
+
+  .security-info h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--dark);
+  }
+
+  .security-info p {
+    color: #6c757d;
+    font-size: 0.9rem;
+  }
+
+  .security-action {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  /* Password Section */
+  .password-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+  }
+
+  .password-form {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+
+  .form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+  }
+
+  .password-strength {
+    margin-top: 0.5rem;
+    height: 5px;
+    border-radius: 3px;
+    background: #e9ecef;
+  }
+
+  .strength-weak {
+    background: var(--accent);
+  }
+
+  .strength-medium {
+    background: var(--warning);
+  }
+
+  .strength-strong {
+    background: var(--success);
+  }
+
+  /* Two Factor Section */
+  .two-factor-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+  }
+
+  .two-factor-options {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .two-factor-option {
+    flex: 1;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: var(--border-radius);
+    text-align: center;
+    transition: var(--transition);
+    cursor: pointer;
+  }
+
+  .two-factor-option:hover {
+    background: #e9ecef;
+  }
+
+  .two-factor-option.active {
+    background: linear-gradient(
+      135deg,
+      rgba(67, 97, 238, 0.1),
+      rgba(58, 12, 163, 0.1)
+    );
+    border: 2px solid var(--primary);
+  }
+
+  .option-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.5rem;
+    color: white;
+  }
+
+  .sms-icon {
+    background: linear-gradient(135deg, var(--info), #0077b6);
+  }
+
+  .authenticator-icon {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  }
+
+  .email-icon {
+    background: linear-gradient(135deg, var(--warning), #ff9f1c);
+  }
+
+  .option-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+  }
+
+  .option-desc {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Sessions Section */
+  .sessions-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+  }
+
+  .session-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    transition: var(--transition);
+  }
+
+  .session-item:hover {
+    background: #e9ecef;
+  }
+
+  .session-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .session-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .device-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f3f4;
+    color: var(--dark);
+    font-size: 1.2rem;
+  }
+
+  .session-details h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--dark);
+  }
+
+  .session-details p {
+    color: #6c757d;
+    font-size: 0.9rem;
+  }
+
+  .session-status {
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+  }
+
+  .status-current {
+    background: rgba(6, 255, 165, 0.1);
+    color: var(--success);
+  }
+
+  .status-active {
+    background: rgba(0, 180, 216, 0.1);
+    color: var(--info);
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(67, 97, 238, 0.3);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+
+  .btn-outline:hover {
+    background: var(--primary);
+    color: white;
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, var(--success), #00b4d8);
+    color: white;
+  }
+
+  .btn-success:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(6, 255, 165, 0.3);
+  }
+
+  .btn-danger {
+    background: linear-gradient(135deg, var(--accent), #e63946);
+    color: white;
+  }
+
+  .btn-danger:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(247, 37, 133, 0.3);
+  }
+
+  .btn-warning {
+    background: linear-gradient(135deg, var(--warning), #ff9f1c);
+    color: white;
+  }
+
+  .btn-warning:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(255, 190, 11, 0.3);
+  }
+
+  .btn-block {
+    display: block;
+    width: 100%;
+  }
+
+  /* Notification Toast */
+  .notification-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    min-width: 300px;
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s;
+    animation-fill-mode: forwards;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  .notification-success {
+    background: linear-gradient(
+      135deg,
+      rgba(6, 255, 165, 0.9),
+      rgba(0, 180, 216, 0.9)
+    );
+    color: white;
+  }
+
+  .notification-danger {
+    background: linear-gradient(
+      135deg,
+      rgba(247, 37, 133, 0.9),
+      rgba(230, 57, 70, 0.9)
+    );
+    color: white;
+  }
+
+  .notification-warning {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 190, 11, 0.9),
+      rgba(255, 159, 28, 0.9)
+    );
+    color: white;
+  }
+
+  /* Modal Styles */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
+  .modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 0;
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 500px;
+    box-shadow: var(--shadow);
+    animation: modalFadeIn 0.3s ease;
+  }
+
+  @keyframes modalFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .modal-footer {
+    padding: 1.5rem;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+  }
+
+  .qr-code {
+    width: 200px;
+    height: 200px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 1rem auto;
+    font-size: 3rem;
+    color: var(--dark);
+  }
+
+  .backup-codes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .backup-code {
+    flex: 1;
+    min-width: 120px;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    text-align: center;
+    font-family: monospace;
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .settings-container {
+      padding: 1rem;
+    }
+
+    .header-title {
+      font-size: 1.5rem;
+    }
+
+    .two-factor-options {
+      flex-direction: column;
+    }
+
+    .form-actions {
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }
+</style>
+
+<div class="settings-container">
+  <!-- Settings Header -->
+  <div class="settings-header">
+    <div class="header-content">
+      <h1 class="header-title">Security Settings</h1>
+      <div class="header-actions">
+        <a href="{{ url_for('service_provider.settings') }}" class="back-btn">
+          <i class="fas fa-arrow-left"></i> Back to Settings
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Security Status -->
+  <div class="security-status">
+    <h2 class="section-title">
+      <i class="fas fa-shield-alt"></i>
+      Security Status
+    </h2>
+
+    <div class="status-grid">
+      <div class="status-card">
+        <div class="status-icon password-icon">
+          <i class="fas fa-key"></i>
+        </div>
+        <div class="status-value">Strong</div>
+        <div class="status-label">Password</div>
+      </div>
+
+      <!-- Add more status cards as needed -->
+    </div>
+  </div>
+
+  <!-- Add more sections as needed -->
+</div>
+
+{% endblock %}

@@ -1,0 +1,1685 @@
+{% extends "base.html" %} {% block title %}Service Provider Profile - HomeHub{%
+endblock %} {% block content %}
+
+<style>
+  :root {
+    --primary: #4361ee;
+    --primary-dark: #3a0ca3;
+    --secondary: #7209b7;
+    --accent: #f72585;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --success: #06ffa5;
+    --info: #00b4d8;
+    --warning: #ffbe0b;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+    --border-radius: 15px;
+  }
+
+  body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      sans-serif;
+    background-color: #f8f9fa;
+    color: var(--dark);
+    line-height: 1.6;
+  }
+
+  .profile-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* Header Section */
+  .profile-header {
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+    padding: 3rem 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .profile-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')
+      no-repeat bottom;
+    background-size: cover;
+  }
+
+  .header-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .header-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+  }
+
+  .header-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    max-width: 600px;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .notification-icon {
+    position: relative;
+    font-size: 1.3rem;
+    color: white;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.2);
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+  }
+
+  .notification-icon:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-3px);
+  }
+
+  .notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: var(--accent);
+    color: white;
+    font-size: 0.7rem;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+
+  .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 8px 15px;
+    border-radius: 30px;
+    transition: var(--transition);
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .user-profile:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+  }
+
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+  }
+
+  .user-info h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+  }
+
+  .user-info p {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  /* Profile Card */
+  .profile-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+  }
+
+  .profile-avatar-container {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid var(--primary);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+  }
+
+  .profile-avatar:hover {
+    transform: scale(1.03);
+  }
+
+  .avatar-upload {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    border: 3px solid white;
+  }
+
+  .avatar-upload:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(67, 97, 238, 0.3);
+  }
+
+  .avatar-upload i {
+    font-size: 1.2rem;
+  }
+
+  .profile-info {
+    flex: 1;
+  }
+
+  .profile-name {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--dark);
+  }
+
+  .profile-service {
+    display: inline-block;
+    padding: 0.5rem 1.2rem;
+    background: linear-gradient(
+      135deg,
+      rgba(67, 97, 238, 0.1),
+      rgba(58, 12, 163, 0.1)
+    );
+    color: var(--primary);
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  .profile-rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .profile-rating i {
+    color: var(--warning);
+    font-size: 1.2rem;
+  }
+
+  .profile-rating span {
+    color: #6c757d;
+    font-weight: 500;
+  }
+
+  .profile-stats {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 25px;
+    flex-wrap: wrap;
+  }
+
+  .profile-stat {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: var(--border-radius);
+    padding: 1.2rem;
+    min-width: 120px;
+    text-align: center;
+    transition: var(--transition);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .profile-stat:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .stat-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Dashboard Stats */
+  .dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    transition: var(--transition);
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  }
+
+  .stat-icon {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    margin-right: 1.5rem;
+    font-size: 1.5rem;
+    color: white;
+  }
+
+  .profile-icon {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  }
+  .earnings-icon {
+    background: linear-gradient(135deg, var(--success), #00b4d8);
+  }
+  .jobs-icon {
+    background: linear-gradient(135deg, var(--info), #0077b6);
+  }
+  .rating-icon {
+    background: linear-gradient(135deg, var(--warning), #ff9f1c);
+  }
+
+  .stat-content h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-content p {
+    color: #6c757d;
+    margin: 0;
+  }
+
+  /* Form Section */
+  .form-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title i {
+    color: var(--primary);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+  }
+
+  .form-control {
+    padding: 0.75rem 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+
+  .form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+  }
+
+  textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  /* Availability Toggle */
+  .availability-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    background: linear-gradient(
+      135deg,
+      rgba(67, 97, 238, 0.05),
+      rgba(58, 12, 163, 0.05)
+    );
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+  }
+
+  .availability-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .availability-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--success), #00b4d8);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  }
+
+  .availability-text h4 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .availability-text p {
+    color: #6c757d;
+    font-size: 0.9rem;
+  }
+
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 70px;
+    height: 34px;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: var(--transition);
+    border-radius: 34px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: var(--transition);
+    border-radius: 50%;
+  }
+
+  input:checked + .slider {
+    background: linear-gradient(135deg, var(--success), #00b4d8);
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(36px);
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(67, 97, 238, 0.3);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+
+  .btn-outline:hover {
+    background: var(--primary);
+    color: white;
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, var(--success), #00b4d8);
+    color: white;
+  }
+
+  .btn-success:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(6, 255, 165, 0.3);
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+  }
+
+  /* Alert Styles */
+  .alert {
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+  }
+
+  .alert-success {
+    background: linear-gradient(
+      135deg,
+      rgba(6, 255, 165, 0.1),
+      rgba(0, 180, 216, 0.1)
+    );
+    color: var(--success);
+    border-left: 5px solid var(--success);
+  }
+
+  .alert-danger {
+    background: linear-gradient(
+      135deg,
+      rgba(247, 37, 133, 0.1),
+      rgba(230, 57, 70, 0.1)
+    );
+    color: var(--accent);
+    border-left: 5px solid var(--accent);
+  }
+
+  .alert-info {
+    background: linear-gradient(
+      135deg,
+      rgba(0, 180, 216, 0.1),
+      rgba(0, 119, 182, 0.1)
+    );
+    color: var(--info);
+    border-left: 5px solid var(--info);
+  }
+
+  .alert-warning {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 190, 11, 0.1),
+      rgba(255, 159, 28, 0.1)
+    );
+    color: var(--warning);
+    border-left: 5px solid var(--warning);
+  }
+
+  .alert-close {
+    margin-left: auto;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    opacity: 0.7;
+  }
+
+  .alert-close:hover {
+    opacity: 1;
+  }
+
+  /* Password Section */
+  .password-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+  }
+
+  /* Skills Section */
+  .skills-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+  }
+
+  .skills-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .skill-tag {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(
+      135deg,
+      rgba(67, 97, 238, 0.1),
+      rgba(58, 12, 163, 0.1)
+    );
+    color: var(--primary);
+    padding: 0.5rem 1rem;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: var(--transition);
+  }
+
+  .skill-tag:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(67, 97, 238, 0.2);
+  }
+
+  .skill-tag i {
+    margin-right: 0.5rem;
+  }
+
+  .add-skill {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+
+  .add-skill:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+  }
+
+  /* Portfolio Section */
+  .portfolio-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+  }
+
+  .portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .portfolio-item {
+    position: relative;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    height: 200px;
+  }
+
+  .portfolio-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  }
+
+  .portfolio-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .portfolio-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    display: flex;
+    align-items: flex-end;
+    padding: 1rem;
+    opacity: 0;
+    transition: var(--transition);
+  }
+
+  .portfolio-item:hover .portfolio-overlay {
+    opacity: 1;
+  }
+
+  .portfolio-title {
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  .add-portfolio {
+    background: linear-gradient(
+      135deg,
+      rgba(67, 97, 238, 0.1),
+      rgba(58, 12, 163, 0.1)
+    );
+    border: 2px dashed var(--primary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .add-portfolio:hover {
+    background: linear-gradient(
+      135deg,
+      rgba(67, 97, 238, 0.2),
+      rgba(58, 12, 163, 0.2)
+    );
+  }
+
+  .add-portfolio i {
+    font-size: 2rem;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .add-portfolio span {
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  /* Modal Styles */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
+  .modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 0;
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 500px;
+    box-shadow: var(--shadow);
+    animation: modalFadeIn 0.3s ease;
+  }
+
+  @keyframes modalFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .modal-footer {
+    padding: 1.5rem;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+  }
+
+  .btn-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #6c757d;
+    transition: var(--transition);
+  }
+
+  .btn-close:hover {
+    color: var(--dark);
+  }
+
+  /* Notification Toast */
+  .notification-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    min-width: 300px;
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s;
+    animation-fill-mode: forwards;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  .notification-success {
+    background: linear-gradient(
+      135deg,
+      rgba(6, 255, 165, 0.9),
+      rgba(0, 180, 216, 0.9)
+    );
+    color: white;
+  }
+
+  .notification-danger {
+    background: linear-gradient(
+      135deg,
+      rgba(247, 37, 133, 0.9),
+      rgba(230, 57, 70, 0.9)
+    );
+    color: white;
+  }
+
+  .notification-warning {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 190, 11, 0.9),
+      rgba(255, 159, 28, 0.9)
+    );
+    color: white;
+  }
+
+  /* Responsive */
+  @media (max-width: 992px) {
+    .header-content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.5rem;
+    }
+
+    .profile-card {
+      flex-direction: column;
+      text-align: center;
+      gap: 2rem;
+    }
+
+    .profile-stats {
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .profile-container {
+      padding: 1rem;
+    }
+
+    .header-title {
+      font-size: 2rem;
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    .profile-stats {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .profile-stat {
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .form-actions {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .portfolio-grid {
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+  }
+</style>
+
+<div class="profile-container">
+  <!-- Profile Header -->
+  <div class="profile-header">
+    <div class="header-content">
+      <div>
+        <h1 class="header-title">Service Provider Profile</h1>
+        <p class="header-subtitle">
+          Manage your profile information, skills, and portfolio
+        </p>
+      </div>
+      <div class="header-actions">
+        <div class="notification-icon">
+          <i class="fas fa-bell"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="user-profile">
+          <img
+            src="https://randomuser.me/api/portraits/men/32.jpg"
+            alt="User Avatar"
+            class="user-avatar"
+          />
+          <div class="user-info">
+            <h4>John Doe</h4>
+            <p>Service Provider</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Stats -->
+  <div class="dashboard-stats">
+    <div class="stat-card">
+      <div class="stat-icon profile-icon">
+        <i class="fas fa-user"></i>
+      </div>
+      <div class="stat-content">
+        <h3>85%</h3>
+        <p>Profile Completion</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon earnings-icon">
+        <i class="fas fa-money-bill-wave"></i>
+      </div>
+      <div class="stat-content">
+        <h3>KES 42,350</h3>
+        <p>This Month's Earnings</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon jobs-icon">
+        <i class="fas fa-tasks"></i>
+      </div>
+      <div class="stat-content">
+        <h3>24</h3>
+        <p>Completed Jobs</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon rating-icon">
+        <i class="fas fa-star"></i>
+      </div>
+      <div class="stat-content">
+        <h3>4.7/5</h3>
+        <p>Average Rating</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Card -->
+  <div class="profile-card">
+    <div class="profile-avatar-container">
+      <img
+        src="https://randomuser.me/api/portraits/men/32.jpg"
+        alt="Profile Picture"
+        class="profile-avatar"
+        id="profileAvatar"
+      />
+      <label for="avatarUpload" class="avatar-upload">
+        <i class="fas fa-camera"></i>
+      </label>
+      <input
+        type="file"
+        id="avatarUpload"
+        accept="image/*"
+        style="display: none"
+      />
+    </div>
+
+    <div class="profile-info">
+      <h2 class="profile-name">John Doe</h2>
+      <span class="profile-service">Plumbing & Electrical</span>
+
+      <div class="profile-rating">
+        <i class="fas fa-star"></i>
+        <i class="fas fa-star"></i>
+        <i class="fas fa-star"></i>
+        <i class="fas fa-star"></i>
+        <i class="fas fa-star-half-alt"></i>
+        <span>(124 reviews)</span>
+      </div>
+
+      <div class="profile-stats">
+        <div class="profile-stat">
+          <div class="stat-value">24</div>
+          <div class="stat-label">Jobs Completed</div>
+        </div>
+        <div class="profile-stat">
+          <div class="stat-value">95%</div>
+          <div class="stat-label">Response Rate</div>
+        </div>
+        <div class="profile-stat">
+          <div class="stat-value">2021</div>
+          <div class="stat-label">Member Since</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Form -->
+  <div class="form-section">
+    <div class="section-header">
+      <h3 class="section-title">
+        <i class="fas fa-user-edit"></i>
+        Edit Profile Information
+      </h3>
+    </div>
+
+    <form id="profileForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            class="form-control"
+            value="John Doe"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="service_type">Service Type</label>
+          <input
+            type="text"
+            id="service_type"
+            name="service_type"
+            class="form-control"
+            value="Plumbing & Electrical"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-control"
+            value="john.doe@example.com"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            class="form-control"
+            value="+254 712 345 678"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="location">Location</label>
+        <input
+          type="text"
+          id="location"
+          name="location"
+          class="form-control"
+          value="Nairobi, Kenya"
+          required
+        />
+      </div>
+
+      <!-- Availability Section -->
+      <div class="availability-section">
+        <div class="availability-info">
+          <div class="availability-icon">
+            <i class="fas fa-calendar-check"></i>
+          </div>
+          <div class="availability-text">
+            <h4>Availability Status</h4>
+            <p>Set your availability to receive new job requests</p>
+          </div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="available" name="available" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label for="working_hours">Working Hours</label>
+        <input
+          type="text"
+          id="working_hours"
+          name="working_hours"
+          class="form-control"
+          value="9:00 AM - 5:00 PM"
+          placeholder="e.g., 9:00 AM - 5:00 PM"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="description">Professional Description</label>
+        <textarea
+          id="description"
+          name="description"
+          class="form-control"
+          rows="4"
+        >
+Experienced plumber and electrician with over 10 years in the industry. Specializing in residential and commercial plumbing and electrical systems.</textarea
+        >
+      </div>
+
+      <div class="form-actions">
+        <a href="#" class="btn btn-outline">
+          <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save"></i> Save Changes
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Skills Section -->
+  <div class="skills-section">
+    <div class="section-header">
+      <h3 class="section-title">
+        <i class="fas fa-tools"></i>
+        Skills & Expertise
+      </h3>
+    </div>
+
+    <div class="skills-container" id="skillsContainer">
+      <div class="skill-tag"><i class="fas fa-check"></i> Plumbing</div>
+      <div class="skill-tag"><i class="fas fa-check"></i> Electrical</div>
+      <div class="skill-tag"><i class="fas fa-check"></i> HVAC</div>
+      <div class="skill-tag"><i class="fas fa-check"></i> Maintenance</div>
+      <button class="skill-tag add-skill" id="addSkillBtn">
+        <i class="fas fa-plus"></i> Add Skill
+      </button>
+    </div>
+  </div>
+
+  <!-- Portfolio Section -->
+  <div class="portfolio-section">
+    <div class="section-header">
+      <h3 class="section-title">
+        <i class="fas fa-images"></i>
+        Portfolio
+      </h3>
+    </div>
+
+    <div class="portfolio-grid" id="portfolioGrid">
+      <div class="portfolio-item">
+        <img
+          src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+          alt="Portfolio Item"
+        />
+        <div class="portfolio-overlay">
+          <div class="portfolio-title">Kitchen Renovation</div>
+        </div>
+      </div>
+      <div class="portfolio-item">
+        <img
+          src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+          alt="Portfolio Item"
+        />
+        <div class="portfolio-overlay">
+          <div class="portfolio-title">Bathroom Remodel</div>
+        </div>
+      </div>
+      <div class="portfolio-item">
+        <img
+          src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+          alt="Portfolio Item"
+        />
+        <div class="portfolio-overlay">
+          <div class="portfolio-title">Electrical Work</div>
+        </div>
+      </div>
+      <div class="add-portfolio" id="addPortfolioBtn">
+        <i class="fas fa-plus"></i>
+        <span>Add Project</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Password Change Section -->
+  <div class="password-section">
+    <div class="section-header">
+      <h3 class="section-title">
+        <i class="fas fa-key"></i>
+        Change Password
+      </h3>
+    </div>
+    <form id="passwordForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="current_password">Current Password</label>
+          <input
+            type="password"
+            id="current_password"
+            name="current_password"
+            class="form-control"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="new_password">New Password</label>
+          <input
+            type="password"
+            id="new_password"
+            name="new_password"
+            class="form-control"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="confirm_password">Confirm New Password</label>
+        <input
+          type="password"
+          id="confirm_password"
+          name="confirm_password"
+          class="form-control"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn btn-success">
+        <i class="fas fa-key"></i> Update Password
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Add Skill Modal -->
+<div class="modal" id="skillModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title" id="skillModalLabel">Add New Skill</h5>
+      <button class="btn-close" id="closeSkillModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="skillForm">
+        <div class="mb-3">
+          <label for="skillName" class="form-label">Skill Name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="skillName"
+            placeholder="e.g., Plumbing, Electrical, etc."
+          />
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" id="cancelSkillBtn">
+        Cancel
+      </button>
+      <button type="button" class="btn btn-primary" id="saveSkillBtn">
+        Add Skill
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Portfolio Modal -->
+<div class="modal" id="portfolioModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title" id="portfolioModalLabel">Add Portfolio Item</h5>
+      <button class="btn-close" id="closePortfolioModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="portfolioForm">
+        <div class="mb-3">
+          <label for="portfolioTitle" class="form-label">Project Title</label>
+          <input
+            type="text"
+            class="form-control"
+            id="portfolioTitle"
+            placeholder="e.g., Kitchen Renovation"
+          />
+        </div>
+        <div class="mb-3">
+          <label for="portfolioImage" class="form-label">Project Image</label>
+          <input
+            type="file"
+            class="form-control"
+            id="portfolioImage"
+            accept="image/*"
+          />
+        </div>
+        <div class="mb-3">
+          <label for="portfolioDescription" class="form-label"
+            >Description</label
+          >
+          <textarea
+            class="form-control"
+            id="portfolioDescription"
+            rows="3"
+            placeholder="Brief description of the project"
+          ></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" id="cancelPortfolioBtn">
+        Cancel
+      </button>
+      <button type="button" class="btn btn-primary" id="savePortfolioBtn">
+        Add Project
+      </button>
+    </div>
+  </div>
+</div>
+
+{% endblock %} {% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Notification Toast Function
+    function showToast(message, type = "success") {
+      // Remove any existing toasts
+      const existingToast = document.querySelector(".notification-toast");
+      if (existingToast) {
+        existingToast.remove();
+      }
+
+      // Create new toast
+      const toast = document.createElement("div");
+      toast.className = `notification-toast notification-${type}`;
+
+      // Set icon based on type
+      let icon = "fa-check-circle";
+      if (type === "danger") icon = "fa-exclamation-circle";
+      if (type === "warning") icon = "fa-exclamation-triangle";
+
+      toast.innerHTML = `
+        <i class="fas ${icon}"></i>
+        <span>${message}</span>
+      `;
+
+      // Add to DOM
+      document.body.appendChild(toast);
+
+      // Auto remove after animation completes
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    // Availability Toggle
+    const availableCheckbox = document.getElementById("available");
+    const availabilitySection = document.querySelector(".availability-section");
+
+    availableCheckbox.addEventListener("change", function () {
+      if (this.checked) {
+        availabilitySection.style.background =
+          "linear-gradient(135deg, rgba(6, 255, 165, 0.1), rgba(0, 180, 216, 0.1))";
+        showToast("You are now available for new job requests", "success");
+      } else {
+        availabilitySection.style.background =
+          "linear-gradient(135deg, rgba(247, 37, 133, 0.1), rgba(230, 57, 70, 0.1))";
+        showToast("You are now unavailable for new job requests", "warning");
+      }
+    });
+
+    // Avatar Upload Preview
+    const avatarUpload = document.getElementById("avatarUpload");
+    const profileAvatar = document.getElementById("profileAvatar");
+
+    avatarUpload.addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+          profileAvatar.src = event.target.result;
+          showToast("Profile picture updated successfully", "success");
+        };
+
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Form Submission
+    const profileForm = document.getElementById("profileForm");
+    const passwordForm = document.getElementById("passwordForm");
+
+    profileForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      // Show loading state
+      const submitButton = this.querySelector('button[type="submit"]');
+      const originalText = submitButton.innerHTML;
+      submitButton.innerHTML =
+        '<i class="fas fa-spinner fa-spin"></i> Saving...';
+      submitButton.disabled = true;
+
+      // Simulate API call
+      setTimeout(() => {
+        submitButton.innerHTML = originalText;
+        submitButton.disabled = false;
+        showToast("Profile updated successfully!", "success");
+      }, 1500);
+    });
+
+    passwordForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      // Validate passwords match
+      const newPassword = document.getElementById("new_password").value;
+      const confirmPassword = document.getElementById("confirm_password").value;
+
+      if (newPassword !== confirmPassword) {
+        showToast("Passwords do not match", "danger");
+        return;
+      }
+
+      // Show loading state
+      const submitButton = this.querySelector('button[type="submit"]');
+      const originalText = submitButton.innerHTML;
+      submitButton.innerHTML =
+        '<i class="fas fa-spinner fa-spin"></i> Updating...';
+      submitButton.disabled = true;
+
+      // Simulate API call
+      setTimeout(() => {
+        submitButton.innerHTML = originalText;
+        submitButton.disabled = false;
+        showToast("Password updated successfully!", "success");
+        document.getElementById("passwordForm").reset();
+      }, 1500);
+    });
+
+    // Skills Management
+    const addSkillBtn = document.getElementById("addSkillBtn");
+    const skillModal = document.getElementById("skillModal");
+    const skillForm = document.getElementById("skillForm");
+    const saveSkillBtn = document.getElementById("saveSkillBtn");
+    const cancelSkillBtn = document.getElementById("cancelSkillBtn");
+    const closeSkillModal = document.getElementById("closeSkillModal");
+    const skillsContainer = document.getElementById("skillsContainer");
+
+    // Open skill modal
+    addSkillBtn.addEventListener("click", function () {
+      skillModal.style.display = "block";
+    });
+
+    // Close skill modal
+    function closeSkillModalFunc() {
+      skillModal.style.display = "none";
+      skillForm.reset();
+    }
+
+    closeSkillModal.addEventListener("click", closeSkillModalFunc);
+    cancelSkillBtn.addEventListener("click", closeSkillModalFunc);
+
+    // Save skill
+    saveSkillBtn.addEventListener("click", function () {
+      const skillName = document.getElementById("skillName").value.trim();
+
+      if (skillName) {
+        // Create new skill element
+        const newSkill = document.createElement("div");
+        newSkill.className = "skill-tag";
+        newSkill.innerHTML = `<i class="fas fa-check"></i> ${skillName}`;
+
+        // Insert before the add button
+        skillsContainer.insertBefore(newSkill, addSkillBtn);
+
+        // Reset form and close modal
+        closeSkillModalFunc();
+
+        showToast(`Skill "${skillName}" added successfully`, "success");
+      } else {
+        showToast("Please enter a skill name", "warning");
+      }
+    });
+
+    // Portfolio Management
+    const addPortfolioBtn = document.getElementById("addPortfolioBtn");
+    const portfolioModal = document.getElementById("portfolioModal");
+    const portfolioForm = document.getElementById("portfolioForm");
+    const savePortfolioBtn = document.getElementById("savePortfolioBtn");
+    const cancelPortfolioBtn = document.getElementById("cancelPortfolioBtn");
+    const closePortfolioModal = document.getElementById("closePortfolioModal");
+    const portfolioGrid = document.getElementById("portfolioGrid");
+
+    // Open portfolio modal
+    addPortfolioBtn.addEventListener("click", function () {
+      portfolioModal.style.display = "block";
+    });
+
+    // Close portfolio modal
+    function closePortfolioModalFunc() {
+      portfolioModal.style.display = "none";
+      portfolioForm.reset();
+    }
+
+    closePortfolioModal.addEventListener("click", closePortfolioModalFunc);
+    cancelPortfolioBtn.addEventListener("click", closePortfolioModalFunc);
+
+    // Save portfolio item
+    savePortfolioBtn.addEventListener("click", function () {
+      const title = document.getElementById("portfolioTitle").value.trim();
+      const imageFile = document.getElementById("portfolioImage").files[0];
+
+      if (title && imageFile) {
+        // Create new portfolio item
+        const newPortfolioItem = document.createElement("div");
+        newPortfolioItem.className = "portfolio-item";
+
+        // Create image element
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(imageFile);
+        img.alt = title;
+
+        // Create overlay
+        const overlay = document.createElement("div");
+        overlay.className = "portfolio-overlay";
+
+        const titleDiv = document.createElement("div");
+        titleDiv.className = "portfolio-title";
+        titleDiv.textContent = title;
+
+        overlay.appendChild(titleDiv);
+        newPortfolioItem.appendChild(img);
+        newPortfolioItem.appendChild(overlay);
+
+        // Insert before the add button
+        portfolioGrid.insertBefore(newPortfolioItem, addPortfolioBtn);
+
+        // Reset form and close modal
+        closePortfolioModalFunc();
+
+        showToast(`Portfolio item "${title}" added successfully`, "success");
+      } else {
+        showToast("Please enter a title and select an image", "warning");
+      }
+    });
+
+    // Close modals when clicking outside
+    window.addEventListener("click", function (event) {
+      if (event.target === skillModal) {
+        closeSkillModalFunc();
+      }
+      if (event.target === portfolioModal) {
+        closePortfolioModalFunc();
+      }
+    });
+
+    // Add animation to stat cards
+    const statCards = document.querySelectorAll(".stat-card");
+    statCards.forEach((card, index) => {
+      card.style.animationDelay = `${index * 0.1}s`;
+      card.classList.add("fade-in");
+    });
+
+    // Add animation to profile stats
+    const profileStats = document.querySelectorAll(".profile-stat");
+    profileStats.forEach((stat, index) => {
+      stat.style.animationDelay = `${index * 0.1}s`;
+      stat.classList.add("fade-in");
+    });
+
+    // Add fade-in animation
+    const style = document.createElement("style");
+    style.textContent = `
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .fade-in {
+        animation: fadeIn 0.5s ease forwards;
+        opacity: 0;
+      }
+    `;
+    document.head.appendChild(style);
+  });
+</script>
+{% endblock %}

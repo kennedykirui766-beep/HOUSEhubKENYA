@@ -1,0 +1,879 @@
+{% extends "base.html" %} {% block title %}Terms of Service - HomeHub{% endblock
+%} {% block content %}
+<style>
+  :root {
+    --primary: #4361ee;
+    --primary-dark: #3a0ca3;
+    --secondary: #7209b7;
+    --accent: #f72585;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --success: #06ffa5;
+    --info: #00b4d8;
+    --warning: #ffbe0b;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      sans-serif;
+    background-color: #f8f9fa;
+    color: var(--dark);
+    line-height: 1.6;
+  }
+
+  .terms-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* Header Section */
+  .terms-header {
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+    padding: 4rem 2rem;
+    border-radius: 20px;
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .terms-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')
+      no-repeat bottom;
+    background-size: cover;
+  }
+
+  .header-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .terms-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+  }
+
+  .terms-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .last-updated {
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+
+  /* Navigation */
+  .terms-nav {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 20px;
+    z-index: 100;
+  }
+
+  .nav-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--dark);
+  }
+
+  .nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .nav-link {
+    padding: 0.5rem 1rem;
+    background: var(--light);
+    border-radius: 50px;
+    color: var(--dark);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: var(--transition);
+    border: 1px solid transparent;
+  }
+
+  .nav-link:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  /* Terms Content */
+  .terms-content {
+    background: white;
+    border-radius: 15px;
+    padding: 3rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 3rem;
+  }
+
+  .section {
+    margin-bottom: 3rem;
+    scroll-margin-top: 100px;
+  }
+
+  .section:last-child {
+    margin-bottom: 0;
+  }
+
+  .section-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title i {
+    font-size: 1.5rem;
+  }
+
+  .subsection {
+    margin-bottom: 1.5rem;
+  }
+
+  .subsection-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+  }
+
+  .subsection-content {
+    color: #495057;
+    line-height: 1.8;
+  }
+
+  .subsection-content p {
+    margin-bottom: 1rem;
+  }
+
+  .subsection-content p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Lists */
+  .terms-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+  }
+
+  .terms-list li {
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+  }
+
+  .terms-list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 1rem;
+    width: 8px;
+    height: 8px;
+    background-color: var(--primary);
+    border-radius: 50%;
+  }
+
+  .numbered-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+    counter-reset: item;
+  }
+
+  .numbered-list li {
+    counter-increment: item;
+    padding: 0.5rem 0;
+    padding-left: 2rem;
+    position: relative;
+  }
+
+  .numbered-list li::before {
+    content: counter(item);
+    position: absolute;
+    left: 0;
+    top: 0.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    background-color: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  /* Highlight Box */
+  .highlight-box {
+    background: linear-gradient(
+      135deg,
+      rgba(67, 97, 238, 0.1) 0%,
+      rgba(58, 12, 163, 0.1) 100%
+    );
+    border-left: 4px solid var(--primary);
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin: 1.5rem 0;
+  }
+
+  .highlight-box-title {
+    font-weight: 600;
+    color: var(--primary-dark);
+    margin-bottom: 0.5rem;
+  }
+
+  /* Warning Box */
+  .warning-box {
+    background: linear-gradient(
+      135deg,
+      rgba(247, 37, 133, 0.1) 0%,
+      rgba(181, 23, 158, 0.1) 100%
+    );
+    border-left: 4px solid var(--accent);
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin: 1.5rem 0;
+  }
+
+  .warning-box-title {
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  /* Info Box */
+  .info-box {
+    background: linear-gradient(
+      135deg,
+      rgba(0, 180, 216, 0.1) 0%,
+      rgba(0, 119, 182, 0.1) 100%
+    );
+    border-left: 4px solid var(--info);
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin: 1.5rem 0;
+  }
+
+  .info-box-title {
+    font-weight: 600;
+    color: var(--info);
+    margin-bottom: 0.5rem;
+  }
+
+  /* Table */
+  .terms-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .terms-table th {
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+  }
+
+  .terms-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .terms-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .terms-table tr:nth-child(even) {
+    background-color: #f8f9fa;
+  }
+
+  /* Footer */
+  .terms-footer {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+
+  .footer-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--dark);
+  }
+
+  .footer-description {
+    color: #495057;
+    margin-bottom: 1.5rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .footer-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+    border: none;
+    cursor: pointer;
+    display: inline-block;
+  }
+
+  .btn-primary {
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(
+      135deg,
+      var(--primary-dark) 0%,
+      var(--primary) 100%
+    );
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+
+  .btn-outline:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(67, 97, 238, 0.2);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .terms-container {
+      padding: 1rem;
+    }
+
+    .terms-header {
+      padding: 2rem 1rem;
+    }
+
+    .terms-title {
+      font-size: 2rem;
+    }
+
+    .terms-subtitle {
+      font-size: 1rem;
+    }
+
+    .terms-content {
+      padding: 2rem 1.5rem;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+    }
+
+    .subsection-title {
+      font-size: 1.1rem;
+    }
+
+    .footer-buttons {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .footer-buttons .btn {
+      width: 100%;
+      max-width: 300px;
+    }
+  }
+</style>
+<div class="terms-container">
+  <!-- Header Section -->
+  <header class="terms-header">
+    <div class="header-content">
+      <h1 class="terms-title">Terms of Service</h1>
+      <p class="terms-subtitle">
+        Please read these terms and conditions carefully before using our
+        services
+      </p>
+      <p class="last-updated">Last updated: October 15, 2023</p>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <nav class="terms-nav">
+    <h3 class="nav-title">Quick Navigation</h3>
+    <div class="nav-links">
+      <a href="#acceptance" class="nav-link">Acceptance</a>
+      <a href="#services" class="nav-link">Our Services</a>
+      <a href="#user-responsibilities" class="nav-link"
+        >User Responsibilities</a
+      >
+      <a href="#payments" class="nav-link">Payments</a>
+      <a href="#cancellations" class="nav-link">Cancellations</a>
+      <a href="#privacy" class="nav-link">Privacy</a>
+      <a href="#intellectual-property" class="nav-link"
+        >Intellectual Property</a
+      >
+      <a href="#limitation" class="nav-link">Limitation of Liability</a>
+      <a href="#changes" class="nav-link">Changes to Terms</a>
+    </div>
+  </nav>
+
+  <!-- Terms Content -->
+  <main class="terms-content">
+    <!-- Section 1: Acceptance -->
+    <section id="acceptance" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-handshake"></i>
+        1. Acceptance of Terms
+      </h2>
+      <div class="subsection">
+        <p>
+          By accessing and using HomeHub's services, you accept and agree to be
+          bound by the terms and provision of this agreement. If you do not
+          agree to these terms, please do not use our services.
+        </p>
+
+        <div class="highlight-box">
+          <div class="highlight-box-title">Important Notice</div>
+          <p>
+            These Terms of Service constitute a legally binding agreement made
+            between you, whether personally or on behalf of an entity ("you"),
+            and HomeHub, concerning your access to and use of the
+            [website/application/service] as well as any other media form, media
+            channel, mobile website or mobile application related, linked, or
+            otherwise connected thereto (collectively, the "Service").
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Our Services -->
+    <section id="services" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-home"></i>
+        2. Our Services
+      </h2>
+      <div class="subsection">
+        <h3 class="subsection-title">2.1 Service Description</h3>
+        <div class="subsection-content">
+          <p>
+            HomeHub is a platform that connects property owners, tenants, and
+            service providers. Our services include:
+          </p>
+          <ul class="terms-list">
+            <li>Property listing and management</li>
+            <li>Tenant-landlord matching</li>
+            <li>Service provider connections</li>
+            <li>Payment processing</li>
+            <li>Communication tools</li>
+            <li>Review and rating system</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3 class="subsection-title">2.2 Eligibility</h3>
+        <div class="subsection-content">
+          <p>To use our services, you must:</p>
+          <ul class="numbered-list">
+            <li>Be at least 18 years of age</li>
+            <li>Have the legal capacity to enter into a binding agreement</li>
+            <li>Provide accurate and complete information</li>
+            <li>Maintain the security of your account credentials</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: User Responsibilities -->
+    <section id="user-responsibilities" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-user-shield"></i>
+        3. User Responsibilities
+      </h2>
+      <div class="subsection">
+        <h3 class="subsection-title">3.1 Account Security</h3>
+        <div class="subsection-content">
+          <p>
+            You are responsible for maintaining the confidentiality of your
+            account information and for all activities that occur under your
+            account.
+          </p>
+
+          <div class="warning-box">
+            <div class="warning-box-title">Security Warning</div>
+            <p>
+              You agree to immediately notify HomeHub of any unauthorized use of
+              your account or any other breach of security. HomeHub cannot and
+              will not be liable for any loss or damage arising from your
+              failure to comply with this security obligation.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3 class="subsection-title">3.2 Prohibited Activities</h3>
+        <div class="subsection-content">
+          <p>
+            Users may not engage in any of the following activities while using
+            the Service:
+          </p>
+          <ul class="terms-list">
+            <li>Posting false or misleading information</li>
+            <li>Impersonating another person or entity</li>
+            <li>Engaging in fraudulent activities</li>
+            <li>Violating any applicable laws or regulations</li>
+            <li>Transmitting spam or unsolicited communications</li>
+            <li>Interfering with the proper working of the Service</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Payments -->
+    <section id="payments" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-credit-card"></i>
+        4. Payments and Fees
+      </h2>
+      <div class="subsection">
+        <h3 class="subsection-title">4.1 Service Fees</h3>
+        <div class="subsection-content">
+          <p>HomeHub charges the following fees for services rendered:</p>
+
+          <table class="terms-table">
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>Fee Type</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Property Listing</td>
+                <td>Monthly Subscription</td>
+                <td>$9.99 - $29.99</td>
+              </tr>
+              <tr>
+                <td>Tenant Placement</td>
+                <td>One-time Fee</td>
+                <td>First Month's Rent</td>
+              </tr>
+              <tr>
+                <td>Service Provider Connection</td>
+                <td>Commission</td>
+                <td>10% - 20%</td>
+              </tr>
+              <tr>
+                <td>Premium Features</td>
+                <td>Monthly Subscription</td>
+                <td>$4.99 - $19.99</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3 class="subsection-title">4.2 Payment Processing</h3>
+        <div class="subsection-content">
+          <p>
+            All payments are processed securely through our third-party payment
+            processors. By providing your payment information, you authorize
+            HomeHub to charge the specified amounts for the services selected.
+          </p>
+
+          <div class="info-box">
+            <div class="info-box-title">Refund Policy</div>
+            <p>
+              Refunds are available within 30 days of purchase for services not
+              rendered. All refund requests must be submitted through your
+              account dashboard and are subject to review.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Cancellations -->
+    <section id="cancellations" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-times-circle"></i>
+        5. Cancellations and Terminations
+      </h2>
+      <div class="subsection">
+        <h3 class="subsection-title">5.1 Service Cancellations</h3>
+        <div class="subsection-content">
+          <p>
+            You may cancel your subscription at any time through your account
+            settings. Cancellations will take effect at the end of the current
+            billing period.
+          </p>
+
+          <p>
+            HomeHub reserves the right to suspend or terminate your account and
+            access to the Service if:
+          </p>
+          <ul class="terms-list">
+            <li>You breach these Terms of Service</li>
+            <li>You engage in fraudulent or illegal activities</li>
+            <li>Your payment method is declined</li>
+            <li>We are required to do so by law</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3 class="subsection-title">5.2 Effect of Termination</h3>
+        <div class="subsection-content">
+          <p>
+            Upon termination, your right to use the Service will cease
+            immediately. All provisions of these Terms which by their nature
+            should survive termination shall survive, including, without
+            limitation, ownership provisions, warranty disclaimers,
+            indemnification, and limitations of liability.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: Privacy -->
+    <section id="privacy" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-lock"></i>
+        6. Privacy Policy
+      </h2>
+      <div class="subsection">
+        <p>
+          Our Privacy Policy, which is incorporated into these Terms by
+          reference, describes how we collect, use, and protect your personal
+          information. By using the Service, you agree to the collection and use
+          of information in accordance with our Privacy Policy.
+        </p>
+
+        <div class="highlight-box">
+          <div class="highlight-box-title">Key Privacy Points</div>
+          <ul class="terms-list">
+            <li>We collect information you provide directly to us</li>
+            <li>We use cookies and similar tracking technologies</li>
+            <li>We do not sell your personal information to third parties</li>
+            <li>
+              You have the right to access, update, and delete your information
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 7: Intellectual Property -->
+    <section id="intellectual-property" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-copyright"></i>
+        7. Intellectual Property Rights
+      </h2>
+      <div class="subsection">
+        <h3 class="subsection-title">7.1 Our Content</h3>
+        <div class="subsection-content">
+          <p>
+            All content included on the Service, such as text, graphics, logos,
+            images, and software, is the property of HomeHub or its content
+            suppliers and protected by intellectual property laws.
+          </p>
+
+          <p>You may not:</p>
+          <ul class="terms-list">
+            <li>
+              Modify, copy, distribute, or sell any content from the Service
+            </li>
+            <li>Use any content for commercial purposes</li>
+            <li>Reverse engineer any aspect of the Service</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3 class="subsection-title">7.2 User Content</h3>
+        <div class="subsection-content">
+          <p>
+            By posting content on the Service, you grant HomeHub a worldwide,
+            non-exclusive, royalty-free license to use, reproduce, modify, and
+            distribute such content.
+          </p>
+
+          <div class="warning-box">
+            <div class="warning-box-title">Content Responsibility</div>
+            <p>
+              You are solely responsible for the content you post and agree that
+              it does not violate the rights of any third party or any
+              applicable law.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 8: Limitation of Liability -->
+    <section id="limitation" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-exclamation-triangle"></i>
+        8. Limitation of Liability
+      </h2>
+      <div class="subsection">
+        <p>
+          HomeHub shall not be liable for any indirect, incidental, special,
+          consequential, or punitive damages resulting from your use of the
+          Service or any other matter relating to these Terms.
+        </p>
+
+        <div class="highlight-box">
+          <div class="highlight-box-title">Liability Cap</div>
+          <p>
+            In no event shall HomeHub's total liability to you for all damages
+            exceed the amount paid by you to HomeHub in the past twelve months
+            preceding the incident giving rise to liability.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 9: Changes to Terms -->
+    <section id="changes" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-sync-alt"></i>
+        9. Changes to These Terms
+      </h2>
+      <div class="subsection">
+        <p>
+          HomeHub reserves the right to modify these Terms at any time. We will
+          notify users of any changes by posting the new Terms on this page and
+          updating the "Last updated" date at the top.
+        </p>
+
+        <p>
+          Continued use of the Service after any such changes shall constitute
+          your consent to such changes. It is your responsibility to review
+          these Terms periodically for changes.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="terms-footer">
+    <h3 class="footer-title">Questions About Our Terms?</h3>
+    <p class="footer-description">
+      If you have any questions about these Terms of Service, please contact our
+      support team.
+    </p>
+    <div class="footer-buttons">
+      <a href="/contact" class="btn btn-primary">Contact Support</a>
+      <a href="/privacy" class="btn btn-outline">Privacy Policy</a>
+    </div>
+  </footer>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  // Smooth scrolling for navigation links
+  document.querySelectorAll(".nav-link").forEach((link) => {
+    link.addEventListener("click", function (e) {
+      e.preventDefault();
+      const targetId = this.getAttribute("href");
+      const targetSection = document.querySelector(targetId);
+
+      if (targetSection) {
+        window.scrollTo({
+          top: targetSection.offsetTop - 100,
+          behavior: "smooth",
+        });
+      }
+    });
+  });
+
+  // Add active state to navigation links based on scroll position
+  window.addEventListener("scroll", () => {
+    const sections = document.querySelectorAll(".section");
+    const navLinks = document.querySelectorAll(".nav-link");
+
+    let current = "";
+
+    sections.forEach((section) => {
+      const sectionTop = section.offsetTop;
+      const sectionHeight = section.clientHeight;
+      if (scrollY >= sectionTop - 200) {
+        current = section.getAttribute("id");
+      }
+    });
+
+    navLinks.forEach((link) => {
+      link.classList.remove("active");
+      if (link.getAttribute("href").slice(1) === current) {
+        link.classList.add("active");
+      }
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,789 @@
+{% extends "base.html" %} {% block title %}Delete Account - HomeHub{% endblock
+%} {% block content %}
+
+<style>
+  :root {
+    --primary: #4361ee;
+    --primary-dark: #3a0ca3;
+    --secondary: #7209b7;
+    --accent: #f72585;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --success: #06ffa5;
+    --info: #00b4d8;
+    --warning: #ffbe0b;
+    --danger: #e63946;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+    --border-radius: 15px;
+  }
+
+  body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      sans-serif;
+    background-color: #f8f9fa;
+    color: var(--dark);
+    line-height: 1.6;
+  }
+
+  .delete-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* Header Section */
+  .delete-header {
+    background: linear-gradient(135deg, var(--danger) 0%, var(--accent) 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .delete-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')
+      no-repeat bottom;
+    background-size: cover;
+  }
+
+  .header-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header-title {
+    font-size: 2rem;
+    font-weight: 800;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 30px;
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: var(--transition);
+  }
+
+  .back-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  /* Warning Section */
+  .warning-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+    border-left: 5px solid var(--danger);
+  }
+
+  .warning-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--danger);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .warning-content {
+    color: var(--dark);
+    margin-bottom: 1.5rem;
+  }
+
+  .warning-list {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  .warning-list li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f8f9fa;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .warning-list li:last-child {
+    border-bottom: none;
+  }
+
+  .warning-list li i {
+    color: var(--danger);
+    margin-top: 0.25rem;
+  }
+
+  /* Form Section */
+  .form-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title i {
+    color: var(--danger);
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+
+  .form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+    outline: none;
+  }
+
+  .checkbox-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+  }
+
+  .checkbox-group input[type="checkbox"] {
+    margin-top: 0.25rem;
+    width: 20px;
+    height: 20px;
+    accent-color: var(--danger);
+  }
+
+  .checkbox-group label {
+    margin-bottom: 0;
+    cursor: pointer;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(67, 97, 238, 0.3);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+
+  .btn-outline:hover {
+    background: var(--primary);
+    color: white;
+  }
+
+  .btn-danger {
+    background: linear-gradient(135deg, var(--danger), var(--accent));
+    color: white;
+  }
+
+  .btn-danger:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(230, 57, 70, 0.3);
+  }
+
+  .btn-danger:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .btn-block {
+    display: block;
+    width: 100%;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  /* Confirmation Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
+  .modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 0;
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 500px;
+    box-shadow: var(--shadow);
+    animation: modalFadeIn 0.3s ease;
+  }
+
+  @keyframes modalFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--danger);
+  }
+
+  .close {
+    color: #aaa;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .close:hover {
+    color: var(--dark);
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .modal-footer {
+    padding: 1.5rem;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+  }
+
+  /* Notification Toast */
+  .notification-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    min-width: 300px;
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s;
+    animation-fill-mode: forwards;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  .notification-success {
+    background: linear-gradient(
+      135deg,
+      rgba(6, 255, 165, 0.9),
+      rgba(0, 180, 216, 0.9)
+    );
+    color: white;
+  }
+
+  .notification-danger {
+    background: linear-gradient(
+      135deg,
+      rgba(230, 57, 70, 0.9),
+      rgba(247, 37, 133, 0.9)
+    );
+    color: white;
+  }
+
+  .notification-warning {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 190, 11, 0.9),
+      rgba(255, 159, 28, 0.9)
+    );
+    color: white;
+  }
+
+  /* Progress Steps */
+  .progress-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+  }
+
+  .step:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: #e9ecef;
+    z-index: -1;
+  }
+
+  .step.active:not(:last-child)::after {
+    background: var(--danger);
+  }
+
+  .step-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e9ecef;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    transition: var(--transition);
+  }
+
+  .step.active .step-icon {
+    background: var(--danger);
+    color: white;
+  }
+
+  .step-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-align: center;
+  }
+
+  .step.active .step-label {
+    color: var(--danger);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .delete-container {
+      padding: 1rem;
+    }
+
+    .header-title {
+      font-size: 1.5rem;
+    }
+
+    .form-actions {
+      flex-direction: column;
+    }
+
+    .btn {
+      width: 100%;
+    }
+  }
+</style>
+
+<div class="delete-container">
+  <!-- Delete Header -->
+  <div class="delete-header">
+    <div class="header-content">
+      <h1 class="header-title">Delete Account</h1>
+      <div class="header-actions">
+        <a href="{{ url_for('service_provider.settings') }}" class="back-btn">
+          <i class="fas fa-arrow-left"></i> Back to Settings
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress Steps -->
+  <div class="progress-steps">
+    <div class="step active">
+      <div class="step-icon">1</div>
+      <div class="step-label">Warning</div>
+    </div>
+    <div class="step">
+      <div class="step-icon">2</div>
+      <div class="step-label">Confirmation</div>
+    </div>
+    <div class="step">
+      <div class="step-icon">3</div>
+      <div class="step-label">Final Check</div>
+    </div>
+  </div>
+
+  <!-- Warning Section -->
+  <div class="warning-section">
+    <h2 class="warning-title">
+      <i class="fas fa-exclamation-triangle"></i>
+      This Action Cannot Be Undone
+    </h2>
+    <div class="warning-content">
+      <p>
+        Deleting your account will permanently remove all your data and
+        settings. This action is irreversible.
+      </p>
+    </div>
+    <ul class="warning-list">
+      <li>
+        <i class="fas fa-times-circle"></i>
+        <div>
+          <strong>All your personal information</strong> will be permanently
+          deleted from our servers.
+        </div>
+      </li>
+      <li>
+        <i class="fas fa-times-circle"></i>
+        <div>
+          <strong>All your connected services</strong> will be disconnected and
+          you'll lose access to them.
+        </div>
+      </li>
+      <li>
+        <i class="fas fa-times-circle"></i>
+        <div>
+          <strong>All your saved preferences</strong> and settings will be
+          removed.
+        </div>
+      </li>
+      <li>
+        <i class="fas fa-times-circle"></i>
+        <div>
+          <strong>All your activity history</strong> and logs will be
+          permanently deleted.
+        </div>
+      </li>
+      <li>
+        <i class="fas fa-times-circle"></i>
+        <div>
+          <strong>You will lose access</strong> to any premium features or
+          subscriptions.
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Form Section -->
+  <div class="form-section">
+    <h2 class="section-title">
+      <i class="fas fa-user-shield"></i>
+      Confirm Your Identity
+    </h2>
+    <p>
+      To delete your account, please confirm your identity and acknowledge the
+      consequences.
+    </p>
+
+    <form id="deleteAccountForm">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input
+          type="email"
+          id="email"
+          class="form-control"
+          value="{{ current_user.email }}"
+          readonly
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          class="form-control"
+          placeholder="Enter your password"
+          required
+        />
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="understand" required />
+        <label for="understand">
+          I understand that deleting my account is permanent and cannot be
+          undone. All my data will be permanently removed.
+        </label>
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="data-loss" required />
+        <label for="data-loss">
+          I understand that I will lose all my data, settings, and access to
+          connected services.
+        </label>
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="no-refund" required />
+        <label for="no-refund">
+          I understand that I will not receive a refund for any remaining
+          subscription period.
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label for="confirm-text">Type "DELETE" to confirm</label>
+        <input
+          type="text"
+          id="confirm-text"
+          class="form-control"
+          placeholder="Type DELETE to confirm"
+          required
+        />
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" onclick="goBack()">
+          <i class="fas fa-arrow-left"></i> Cancel
+        </button>
+        <button type="submit" id="delete-btn" class="btn btn-danger" disabled>
+          <i class="fas fa-trash-alt"></i> Delete My Account
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Final Confirmation Modal -->
+<div id="finalConfirmModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Final Confirmation</h3>
+      <span class="close" onclick="closeModal()">&times;</span>
+    </div>
+    <div class="modal-body">
+      <p>Are you absolutely sure you want to delete your account?</p>
+      <p>
+        This is your last chance to cancel. Once you confirm, your account will
+        be permanently deleted.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" onclick="finalDelete()">
+        <i class="fas fa-trash-alt"></i> Yes, Delete My Account
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Form validation
+  const passwordInput = document.getElementById("password");
+  const understandCheckbox = document.getElementById("understand");
+  const dataLossCheckbox = document.getElementById("data-loss");
+  const noRefundCheckbox = document.getElementById("no-refund");
+  const confirmTextInput = document.getElementById("confirm-text");
+  const deleteBtn = document.getElementById("delete-btn");
+  const deleteForm = document.getElementById("deleteAccountForm");
+
+  // Enable/disable delete button based on form validation
+  function validateForm() {
+    const isPasswordValid = passwordInput.value.trim() !== "";
+    const isUnderstandChecked = understandCheckbox.checked;
+    const isDataLossChecked = dataLossCheckbox.checked;
+    const isNoRefundChecked = noRefundCheckbox.checked;
+    const isConfirmTextValid = confirmTextInput.value.trim() === "DELETE";
+
+    const isValid =
+      isPasswordValid &&
+      isUnderstandChecked &&
+      isDataLossChecked &&
+      isNoRefundChecked &&
+      isConfirmTextValid;
+
+    deleteBtn.disabled = !isValid;
+  }
+
+  // Add event listeners for form validation
+  passwordInput.addEventListener("input", validateForm);
+  understandCheckbox.addEventListener("change", validateForm);
+  dataLossCheckbox.addEventListener("change", validateForm);
+  noRefundCheckbox.addEventListener("change", validateForm);
+  confirmTextInput.addEventListener("input", validateForm);
+
+  // Handle form submission
+  deleteForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    // Show final confirmation modal
+    document.getElementById("finalConfirmModal").style.display = "block";
+  });
+
+  // Close modal
+  function closeModal() {
+    document.getElementById("finalConfirmModal").style.display = "none";
+  }
+
+  // Go back to settings
+  function goBack() {
+    window.location.href = "{{ url_for('service_provider.settings') }}";
+  }
+
+  // Final delete function
+  function finalDelete() {
+    // In a real application, this would make an API call to delete the account
+    console.log("Deleting account...");
+
+    // Show loading state
+    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+    deleteBtn.disabled = true;
+
+    // Simulate API call
+    setTimeout(() => {
+      // Show success notification
+      showNotification("Your account has been successfully deleted", "success");
+
+      // Redirect to home page after a delay
+      setTimeout(() => {
+        window.location.href = "{{ url_for('index') }}";
+      }, 2000);
+    }, 2000);
+  }
+
+  // Show notification
+  function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement("div");
+    notification.className = `notification-toast notification-${type}`;
+
+    // Add icon based on type
+    let icon = "";
+    if (type === "success") {
+      icon = '<i class="fas fa-check-circle"></i>';
+    } else if (type === "danger") {
+      icon = '<i class="fas fa-exclamation-circle"></i>';
+    } else if (type === "warning") {
+      icon = '<i class="fas fa-exclamation-triangle"></i>';
+    }
+
+    notification.innerHTML = `${icon} ${message}`;
+
+    // Add to DOM
+    document.body.appendChild(notification);
+
+    // Remove after animation completes
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
+  }
+
+  // Close modal when clicking outside of it
+  window.onclick = function (event) {
+    const modal = document.getElementById("finalConfirmModal");
+    if (event.target === modal) {
+      closeModal();
+    }
+  };
+</script>
+
+{% endblock %}

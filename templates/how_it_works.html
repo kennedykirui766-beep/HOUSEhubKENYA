@@ -1,0 +1,667 @@
+{% extends "base.html" %} {% block title %}How It Works - HomeHub{% endblock %}
+{% block extra_css %}
+<style>
+  :root {
+    --primary: #4361ee;
+    --primary-dark: #3a0ca3;
+    --secondary: #7209b7;
+    --accent: #f72585;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --success: #06ffa5;
+    --info: #00b4d8;
+    --warning: #ffbe0b;
+  }
+
+  .hero-section {
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+    padding: 5rem 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')
+      no-repeat bottom;
+    background-size: cover;
+  }
+
+  .section-title {
+    position: relative;
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+
+  .section-title::after {
+    content: "";
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: var(--primary);
+    border-radius: 2px;
+  }
+
+  .user-card {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    height: 100%;
+    background: white;
+    margin-bottom: 2rem;
+  }
+
+  .user-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+  }
+
+  .user-header {
+    padding: 2rem;
+    color: white;
+    text-align: center;
+  }
+
+  .landlord-header {
+    background: linear-gradient(135deg, #4361ee, #3a0ca3);
+  }
+  .tenant-header {
+    background: linear-gradient(135deg, #06ffa5, #00b4d8);
+  }
+  .provider-header {
+    background: linear-gradient(135deg, #ffbe0b, #fb8500);
+  }
+  .admin-header {
+    background: linear-gradient(135deg, #f72585, #b5179e);
+  }
+
+  .user-icon {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    font-size: 2rem;
+    color: white;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .user-body {
+    padding: 2rem;
+  }
+
+  .feature-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .feature-list li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+  }
+
+  .feature-list li:last-child {
+    border-bottom: none;
+  }
+
+  .feature-list li i {
+    margin-right: 1rem;
+    font-size: 1.2rem;
+  }
+
+  .landlord-icon {
+    color: #4361ee;
+  }
+  .tenant-icon {
+    color: #06ffa5;
+  }
+  .provider-icon {
+    color: #ffbe0b;
+  }
+  .admin-icon {
+    color: #f72585;
+  }
+
+  .overview-card {
+    border-radius: 15px;
+    padding: 2rem;
+    background: white;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    margin-bottom: 3rem;
+  }
+
+  .step-card {
+    border-radius: 15px;
+    padding: 1.5rem;
+    background: white;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    height: 100%;
+    transition: all 0.3s ease;
+  }
+
+  .step-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+  }
+
+  .step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 1rem;
+  }
+
+  .cta-section {
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+    padding: 4rem 0;
+    border-radius: 15px;
+    margin-top: 4rem;
+  }
+
+  .btn-role {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+  }
+
+  .btn-role:hover {
+    transform: translateY(-3px);
+  }
+
+  .btn-landlord {
+    background: linear-gradient(135deg, #4361ee, #3a0ca3);
+    color: white;
+  }
+
+  .btn-tenant {
+    background: linear-gradient(135deg, #06ffa5, #00b4d8);
+    color: var(--dark);
+  }
+
+  .btn-provider {
+    background: linear-gradient(135deg, #ffbe0b, #fb8500);
+    color: var(--dark);
+  }
+
+  .btn-admin {
+    background: linear-gradient(135deg, #f72585, #b5179e);
+    color: white;
+  }
+
+  @media (max-width: 768px) {
+    .hero-section {
+      padding: 3rem 0;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container text-center position-relative">
+    <h1 class="display-4 fw-bold mb-4">How HomeHub Works</h1>
+    <p class="lead mb-0">
+      A comprehensive platform connecting property owners, tenants, service
+      providers, and administrators
+    </p>
+    <p class="lead">Streamlining property management for everyone involved</p>
+  </div>
+</section>
+
+<!-- Overview Section -->
+<section class="py-5">
+  <div class="container">
+    <div class="overview-card">
+      <div class="row align-items-center">
+        <div class="col-lg-6">
+          <h2 class="mb-4">The HomeHub Ecosystem</h2>
+          <p>
+            HomeHub is designed to simplify property management by creating a
+            seamless connection between all parties involved in the rental
+            process. Our platform addresses the common challenges faced by
+            landlords, tenants, service providers, and administrators through
+            innovative technology and user-friendly interfaces.
+          </p>
+          <p>
+            Whether you're a property owner looking to manage your portfolio
+            efficiently, a tenant searching for your next home, a service
+            provider seeking maintenance opportunities, or an administrator
+            overseeing platform operations, HomeHub has the tools and features
+            to meet your needs.
+          </p>
+        </div>
+        <div class="col-lg-6">
+          <div class="ratio ratio-16x9 rounded overflow-hidden">
+            <img
+              src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80"
+              alt="HomeHub Platform"
+              class="img-fluid"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works Process Section -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="section-title">
+      <h2>How It Works</h2>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3">
+        <div class="step-card">
+          <div class="d-flex align-items-center mb-3">
+            <div class="step-number">1</div>
+            <h4 class="card-title">Sign Up</h4>
+          </div>
+          <p>
+            Create your account based on your role (landlord, tenant, service
+            provider, or administrator).
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="step-card">
+          <div class="d-flex align-items-center mb-3">
+            <div class="step-number">2</div>
+            <h4 class="card-title">Set Up Profile</h4>
+          </div>
+          <p>
+            Complete your profile with relevant information, preferences, and
+            verification details.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="step-card">
+          <div class="d-flex align-items-center mb-3">
+            <div class="step-number">3</div>
+            <h4 class="card-title">Connect & Transact</h4>
+          </div>
+          <p>
+            Use the platform to list properties, find homes, bid on jobs, or
+            manage operations.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="step-card">
+          <div class="d-flex align-items-center mb-3">
+            <div class="step-number">4</div>
+            <h4 class="card-title">Manage & Grow</h4>
+          </div>
+          <p>
+            Access tools and reports to manage your activities and grow your
+            business or portfolio.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- User Roles Section -->
+<section class="py-5">
+  <div class="container">
+    <div class="section-title">
+      <h2>HomeHub for Different Users</h2>
+    </div>
+
+    <div class="row">
+      <!-- Landlord Card -->
+      <div class="col-lg-6 mb-4">
+        <div class="user-card">
+          <div class="user-header landlord-header">
+            <div class="user-icon">
+              <i class="fas fa-home"></i>
+            </div>
+            <h3>For Landlords</h3>
+            <p>Manage properties and tenants efficiently</p>
+          </div>
+          <div class="user-body">
+            <p>
+              HomeHub provides landlords with comprehensive tools to streamline
+              property management, from listing properties to collecting rent
+              and handling maintenance requests.
+            </p>
+
+            <ul class="feature-list">
+              <li>
+                <i class="fas fa-check-circle landlord-icon"></i> List and
+                manage multiple properties
+              </li>
+              <li>
+                <i class="fas fa-check-circle landlord-icon"></i> Screen and
+                select quality tenants
+              </li>
+              <li>
+                <i class="fas fa-check-circle landlord-icon"></i> Automate rent
+                collection with M-Pesa
+              </li>
+              <li>
+                <i class="fas fa-check-circle landlord-icon"></i> Track
+                maintenance requests and repairs
+              </li>
+              <li>
+                <i class="fas fa-check-circle landlord-icon"></i> Generate
+                financial reports and analytics
+              </li>
+            </ul>
+
+            <a
+              href="{{ url_for('main.how_it_works_landlord') }}"
+              class="btn-role btn-landlord"
+              >Learn More for Landlords</a
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Tenant Card -->
+      <div class="col-lg-6 mb-4">
+        <div class="user-card">
+          <div class="user-header tenant-header">
+            <div class="user-icon">
+              <i class="fas fa-user"></i>
+            </div>
+            <h3>For Tenants</h3>
+            <p>Find homes and manage rentals seamlessly</p>
+          </div>
+          <div class="user-body">
+            <p>
+              Tenants can search for properties, apply for rentals, sign leases
+              digitally, and manage their rental experience all through
+              HomeHub's user-friendly platform.
+            </p>
+
+            <ul class="feature-list">
+              <li>
+                <i class="fas fa-check-circle tenant-icon"></i> Search for
+                properties by location and amenities
+              </li>
+              <li>
+                <i class="fas fa-check-circle tenant-icon"></i> Schedule virtual
+                or in-person property tours
+              </li>
+              <li>
+                <i class="fas fa-check-circle tenant-icon"></i> Sign leases with
+                secure e-signatures
+              </li>
+              <li>
+                <i class="fas fa-check-circle tenant-icon"></i> Pay rent
+                conveniently using M-Pesa
+              </li>
+              <li>
+                <i class="fas fa-check-circle tenant-icon"></i> Submit
+                maintenance requests and track progress
+              </li>
+            </ul>
+
+            <a
+              href="{{ url_for('main.how_it_works_tenant') }}"
+              class="btn-role btn-tenant"
+              >Learn More for Tenants</a
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Service Provider Card -->
+      <div class="col-lg-6 mb-4">
+        <div class="user-card">
+          <div class="user-header provider-header">
+            <div class="user-icon">
+              <i class="fas fa-tools"></i>
+            </div>
+            <h3>For Service Providers</h3>
+            <p>Connect with property maintenance opportunities</p>
+          </div>
+          <div class="user-body">
+            <p>
+              Service providers can join HomeHub to find maintenance jobs, bid
+              on projects, and grow their business by connecting with property
+              owners and managers.
+            </p>
+
+            <ul class="feature-list">
+              <li>
+                <i class="fas fa-check-circle provider-icon"></i> Create a
+                professional business profile
+              </li>
+              <li>
+                <i class="fas fa-check-circle provider-icon"></i> Receive
+                notifications for relevant jobs
+              </li>
+              <li>
+                <i class="fas fa-check-circle provider-icon"></i> Submit
+                competitive bids for maintenance work
+              </li>
+              <li>
+                <i class="fas fa-check-circle provider-icon"></i> Manage job
+                schedules and completion
+              </li>
+              <li>
+                <i class="fas fa-check-circle provider-icon"></i> Build
+                reputation with reviews and ratings
+              </li>
+            </ul>
+
+            <a
+              href="{{ url_for('main.how_it_works_provider') }}"
+              class="btn-role btn-provider"
+              >Learn More for Service Providers</a
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Administrator Card -->
+      <div class="col-lg-6 mb-4">
+        <div class="user-card">
+          <div class="user-header admin-header">
+            <div class="user-icon">
+              <i class="fas fa-cog"></i>
+            </div>
+            <h3>For Administrators</h3>
+            <p>Manage platform operations and resolve issues</p>
+          </div>
+          <div class="user-body">
+            <p>
+              Administrators have access to powerful tools to oversee platform
+              operations, mediate disputes, monitor activity, and ensure smooth
+              functioning for all users.
+            </p>
+
+            <ul class="feature-list">
+              <li>
+                <i class="fas fa-check-circle admin-icon"></i> Mediate disputes
+                between users
+              </li>
+              <li>
+                <i class="fas fa-check-circle admin-icon"></i> Monitor platform
+                activity and performance
+              </li>
+              <li>
+                <i class="fas fa-check-circle admin-icon"></i> Manage user
+                accounts and permissions
+              </li>
+              <li>
+                <i class="fas fa-check-circle admin-icon"></i> Generate
+                analytics and usage reports
+              </li>
+              <li>
+                <i class="fas fa-check-circle admin-icon"></i> Provide support
+                to all platform users
+              </li>
+            </ul>
+
+            <a
+              href="{{ url_for('main.how_it_works_admin') }}"
+              class="btn-role btn-admin"
+              >Learn More for Administrators</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="section-title">
+      <h2>Benefits of Using HomeHub</h2>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3">
+        <div class="text-center">
+          <div
+            class="user-icon"
+            style="
+              background: linear-gradient(
+                135deg,
+                var(--primary),
+                var(--primary-dark)
+              );
+              margin: 0 auto 1.5rem;
+            "
+          >
+            <i class="fas fa-clock"></i>
+          </div>
+          <h4>Save Time</h4>
+          <p>
+            Automate routine tasks and streamline processes to save valuable
+            time for all users.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="text-center">
+          <div
+            class="user-icon"
+            style="
+              background: linear-gradient(
+                135deg,
+                var(--primary),
+                var(--primary-dark)
+              );
+              margin: 0 auto 1.5rem;
+            "
+          >
+            <i class="fas fa-money-bill-wave"></i>
+          </div>
+          <h4>Reduce Costs</h4>
+          <p>
+            Eliminate middlemen and reduce administrative costs with our direct
+            platform.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="text-center">
+          <div
+            class="user-icon"
+            style="
+              background: linear-gradient(
+                135deg,
+                var(--primary),
+                var(--primary-dark)
+              );
+              margin: 0 auto 1.5rem;
+            "
+          >
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <h4>Increase Security</h4>
+          <p>
+            Secure transactions, verified users, and digital records for peace
+            of mind.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="text-center">
+          <div
+            class="user-icon"
+            style="
+              background: linear-gradient(
+                135deg,
+                var(--primary),
+                var(--primary-dark)
+              );
+              margin: 0 auto 1.5rem;
+            "
+          >
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h4>Grow Business</h4>
+          <p>
+            Access tools and insights to help grow your property portfolio or
+            service business.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="cta-section">
+  <div class="container text-center">
+    <h2 class="mb-4">Ready to Get Started with HomeHub?</h2>
+    <p class="lead mb-5">
+      Join thousands of users already benefiting from our comprehensive property
+      management platform
+    </p>
+    <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
+      <a href="#" class="btn btn-light btn-lg px-4">Sign Up as Landlord</a>
+      <a href="#" class="btn btn-light btn-lg px-4">Sign Up as Tenant</a>
+      <a href="#" class="btn btn-light btn-lg px-4">Join as Service Provider</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

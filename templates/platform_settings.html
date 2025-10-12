@@ -1,0 +1,109 @@
+<!-- homehub/templates/platform_settings.html -->
+{% extends "base.html" %}
+
+{% block title %}Platform Settings - HomeHub{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .settings-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2E6B2F; /* Darker Acacia Green */
+        }
+        input[type="number"], select {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #3D8B40; /* Acacia Green */
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #3D8B40; /* Acacia Green */
+            color: #F5E8C7; /* Savanna Beige */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2E6B2F; /* Darker Acacia Green */
+        }
+        .flash {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .flash.success { background-color: #d4edda; color: #155724; }
+        .flash.error { background-color: #f8d7da; color: #721c24; }
+        @media (max-width: 600px) {
+            .settings-container { padding: 10px; }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="settings-container">
+        <h1>Platform Settings</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <form method="POST" action="">
+            <div class="form-group">
+                <label for="max_listings">Maximum Listings:</label>
+                <input type="number" id="max_listings" name="max_listings" value="{{ settings.max_listings }}" min="1" required>
+            </div>
+            <div class="form-group">
+                <label for="default_status">Default House Status:</label>
+                <select id="default_status" name="default_status">
+                    <option value="active" {% if settings.default_status == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if settings.default_status == 'inactive' %}selected{% endif %}>Inactive</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="notification_enabled" {% if settings.notification_enabled %}checked{% endif %}>
+                    Enable Notifications
+                </label>
+            </div>
+            <button type="submit">Save Changes</button>
+        </form>
+        <p style="text-align: center;">
+            <a href="{{ url_for('admin.manage_users') }}">Back to Manage Users</a> |
+            <a href="{{ url_for('index') }}">Home</a>
+        </p>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        // Optional: Add JavaScript for form validation or dynamic updates
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const maxListings = document.getElementById('max_listings').value;
+            if (maxListings <= 0) {
+                e.preventDefault();
+                alert('Maximum listings must be greater than 0.');
+            }
+        });
+    </script>
+{% endblock %}

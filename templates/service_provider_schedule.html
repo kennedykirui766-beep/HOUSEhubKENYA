@@ -1,0 +1,1754 @@
+{% extends "base.html" %} {% block title %}Schedule - HomeHub{% endblock %} {%
+block content %}
+<style>
+  :root {
+    --primary: #4361ee;
+    --primary-dark: #3a0ca3;
+    --secondary: #7209b7;
+    --accent: #f72585;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --success: #06ffa5;
+    --info: #00b4d8;
+    --warning: #ffbe0b;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+    --border-radius: 12px;
+    --card-bg: #ffffff;
+    --section-bg: #f8f9fa;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      sans-serif;
+    background-color: #f8f9fa;
+    color: var(--dark);
+    line-height: 1.6;
+  }
+
+  .dashboard-wrapper {
+    width: 100%;
+    min-height: 100vh;
+    background: linear-gradient(120deg, #f8f9fa, #e9ecef);
+  }
+
+  /* Main Content */
+  .main-content {
+    width: 100%;
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Top Bar */
+  .top-bar {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 20px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .top-bar-left h1 {
+    font-size: 1.8rem;
+    color: var(--dark);
+    font-weight: 700;
+  }
+
+  .top-bar-left p {
+    color: #6c757d;
+    font-size: 0.95rem;
+  }
+
+  .top-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .notification-icon {
+    position: relative;
+    font-size: 1.3rem;
+    color: var(--dark);
+    cursor: pointer;
+    background-color: #f8f9fa;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+  }
+
+  .notification-icon:hover {
+    background-color: var(--primary);
+    color: white;
+  }
+
+  .notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: var(--accent);
+    color: var(--white-color);
+    font-size: 0.7rem;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+
+  .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 8px 15px;
+    border-radius: 30px;
+    transition: var(--transition);
+  }
+
+  .user-profile:hover {
+    background-color: #f8f9fa;
+  }
+
+  .user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary);
+  }
+
+  .user-info h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--dark);
+  }
+
+  .user-info p {
+    font-size: 0.8rem;
+    color: #6c757d;
+  }
+
+  /* Dashboard Container */
+  .dashboard-container {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    box-shadow: var(--shadow);
+    margin-bottom: 30px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .dashboard-header {
+    margin-bottom: 30px;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 20px;
+  }
+
+  .dashboard-title {
+    font-size: 2rem;
+    margin-bottom: 8px;
+    color: var(--dark);
+    font-weight: 700;
+  }
+
+  .dashboard-subtitle {
+    color: #6c757d;
+    font-size: 1.05rem;
+  }
+
+  /* Alert Styles */
+  .alert {
+    padding: 18px 22px;
+    border-radius: var(--border-radius);
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+  }
+
+  .alert-success {
+    background-color: rgba(6, 255, 165, 0.1);
+    color: var(--success);
+    border-left: 5px solid var(--success);
+  }
+
+  .alert-danger {
+    background-color: rgba(247, 37, 133, 0.1);
+    color: var(--accent);
+    border-left: 5px solid var(--accent);
+  }
+
+  .alert-info {
+    background-color: rgba(0, 180, 216, 0.1);
+    color: var(--info);
+    border-left: 5px solid var(--info);
+  }
+
+  .alert-warning {
+    background-color: rgba(255, 190, 11, 0.1);
+    color: var(--warning);
+    border-left: 5px solid var(--warning);
+  }
+
+  .alert-close {
+    margin-left: auto;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    opacity: 0.7;
+  }
+
+  .alert-close:hover {
+    opacity: 1;
+  }
+
+  /* Calendar Section */
+  .calendar-section {
+    margin-bottom: 40px;
+  }
+
+  .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+  }
+
+  .calendar-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  .calendar-nav {
+    display: flex;
+    gap: 15px;
+  }
+
+  .calendar-nav button {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .calendar-nav button:hover {
+    background-color: var(--primary-dark);
+    transform: scale(1.1);
+  }
+
+  .calendar-nav button i {
+    font-size: 1.2rem;
+  }
+
+  .calendar-view {
+    display: flex;
+    gap: 30px;
+  }
+
+  .calendar-main {
+    flex: 2;
+  }
+
+  .calendar-sidebar {
+    flex: 1;
+  }
+
+  .calendar-grid {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+  }
+
+  .calendar-weekday {
+    padding: 15px 5px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-auto-rows: minmax(100px, auto);
+  }
+
+  .calendar-day {
+    padding: 10px;
+    border-right: 1px solid #e9ecef;
+    border-bottom: 1px solid #e9ecef;
+    position: relative;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .calendar-day:hover {
+    background-color: #f8f9fa;
+  }
+
+  .calendar-day.other-month {
+    color: #ccc;
+    background-color: #f8f9fa;
+  }
+
+  .calendar-day.today {
+    background-color: rgba(67, 97, 238, 0.1);
+  }
+
+  .calendar-day.selected {
+    background-color: rgba(67, 97, 238, 0.2);
+  }
+
+  .calendar-day-number {
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+
+  .calendar-day-events {
+    font-size: 0.8rem;
+  }
+
+  .calendar-event {
+    background-color: var(--primary);
+    color: white;
+    padding: 2px 5px;
+    border-radius: 3px;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .calendar-event.appointment {
+    background-color: var(--info);
+  }
+
+  .calendar-event.blocked {
+    background-color: var(--accent);
+  }
+
+  /* Appointments Section */
+  .appointments-section {
+    margin-bottom: 40px;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title i {
+    color: var(--primary);
+  }
+
+  .filter-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .filter-controls select {
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    background-color: white;
+  }
+
+  .appointments-list {
+    display: grid;
+    gap: 20px;
+  }
+
+  .appointment-card {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: var(--transition);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .appointment-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  }
+
+  .appointment-info {
+    flex: 1;
+  }
+
+  .appointment-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+  }
+
+  .appointment-time {
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .appointment-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  .appointment-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
+  }
+
+  .appointment-detail {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #6c757d;
+    font-size: 0.9rem;
+  }
+
+  .appointment-detail i {
+    color: var(--primary);
+  }
+
+  .appointment-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .appointment-status {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .status-confirmed {
+    background-color: rgba(6, 255, 165, 0.15);
+    color: var(--success);
+  }
+
+  .status-pending {
+    background-color: rgba(255, 190, 11, 0.15);
+    color: var(--warning);
+  }
+
+  .status-completed {
+    background-color: rgba(0, 180, 216, 0.15);
+    color: var(--info);
+  }
+
+  .status-cancelled {
+    background-color: rgba(247, 37, 133, 0.15);
+    color: var(--accent);
+  }
+
+  /* Availability Section */
+  .availability-section {
+    margin-bottom: 40px;
+  }
+
+  .availability-card {
+    background-color: var(--section-bg);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .availability-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .availability-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+  }
+
+  .day-availability {
+    background-color: white;
+    border-radius: var(--border-radius);
+    padding: 15px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .day-name {
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--dark);
+    text-align: center;
+  }
+
+  .time-inputs {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .time-input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  .day-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: var(--transition);
+    border-radius: 24px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: var(--transition);
+    border-radius: 50%;
+  }
+
+  input:checked + .slider {
+    background-color: var(--success);
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(26px);
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    border-radius: 50px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.95rem;
+    gap: 8px;
+  }
+
+  .btn i {
+    font-size: 1rem;
+  }
+
+  .btn-primary {
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(
+      135deg,
+      var(--primary-dark) 0%,
+      var(--primary) 100%
+    );
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+  }
+
+  .btn-secondary {
+    background: linear-gradient(135deg, var(--secondary) 0%, #560bad 100%);
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background: linear-gradient(135deg, #560bad 0%, var(--secondary) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(114, 9, 183, 0.4);
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, var(--success) 0%, #00d960 100%);
+    color: white;
+  }
+
+  .btn-success:hover {
+    background: linear-gradient(135deg, #00d960 0%, var(--success) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(6, 255, 165, 0.4);
+  }
+
+  .btn-danger {
+    background: linear-gradient(135deg, var(--accent) 0%, #b5179e 100%);
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background: linear-gradient(135deg, #b5179e 0%, var(--accent) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(247, 37, 133, 0.4);
+  }
+
+  .btn-outline {
+    background-color: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+  }
+
+  .btn-outline:hover {
+    background-color: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(67, 97, 238, 0.2);
+  }
+
+  .btn-sm {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+
+  .btn-block {
+    display: block;
+    width: 100%;
+  }
+
+  /* Modal Styles */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal-content {
+    background-color: var(--card-bg);
+    margin: 5% auto;
+    padding: 0;
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    animation: slideIn 0.3s ease;
+  }
+
+  .modal-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #6c757d;
+  }
+
+  .modal-body {
+    padding: 25px;
+  }
+
+  .modal-footer {
+    padding: 20px 25px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+  }
+
+  /* Form Styles */
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--dark);
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ced4da;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: var(--transition);
+    background-color: white;
+  }
+
+  .form-control:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.2);
+  }
+
+  textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 20px;
+  }
+
+  .form-row .form-group {
+    flex: 1;
+  }
+
+  /* Footer */
+  .dashboard-footer {
+    text-align: center;
+    padding: 25px;
+    color: #6c757d;
+    font-size: 0.95rem;
+    background-color: var(--section-bg);
+    border-radius: var(--border-radius);
+    margin-top: 40px;
+  }
+
+  .dashboard-footer a {
+    color: var(--secondary);
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+  }
+
+  .dashboard-footer a:hover {
+    color: var(--primary);
+    text-decoration: underline;
+  }
+
+  /* Responsive Styles */
+  @media (max-width: 992px) {
+    .calendar-view {
+      flex-direction: column;
+    }
+
+    .availability-grid {
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+  }
+
+  @media (max-width: 768px) {
+    .calendar-weekdays {
+      font-size: 0.8rem;
+      padding: 10px 5px;
+    }
+
+    .calendar-day {
+      padding: 5px;
+      min-height: 80px;
+    }
+
+    .appointment-card {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+
+    .appointment-actions {
+      align-self: flex-end;
+    }
+
+    .filter-controls {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .user-info {
+      display: none;
+    }
+
+    .dashboard-title {
+      font-size: 1.7rem;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .dashboard-header {
+      text-align: center;
+    }
+
+    .top-bar {
+      padding: 15px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+
+    .dashboard-container {
+      padding: 20px;
+    }
+
+    .calendar-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+
+    .section-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+
+    .appointment-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .appointment-details {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .modal-content {
+      width: 95%;
+      margin: 10% auto;
+    }
+
+    .form-row {
+      flex-direction: column;
+      gap: 0;
+    }
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateY(-30px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+</style>
+
+<!-- Dashboard Wrapper -->
+<div class="dashboard-wrapper">
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <h1>My Schedule</h1>
+        <p>Manage your appointments and availability</p>
+      </div>
+
+      <div class="top-bar-right">
+        <div class="notification-icon">
+          <i class="fas fa-bell"></i>
+          {% if notifications %}
+          <span class="notification-badge">{{ notifications|length }}</span>
+          {% endif %}
+        </div>
+
+        <div class="user-profile">
+          <img
+            src="{{ url_for('static', filename='images/user-avatar.jpg') }}"
+            alt="User Avatar"
+            class="user-avatar"
+          />
+          <div class="user-info">
+            <h4>{{ current_user.name }}</h4>
+            <p>Service Provider</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %} {% for category, message in messages %}
+    <div
+      class="alert alert-{{ 'danger' if category == 'error' else 'success' }}"
+    >
+      <i
+        class="fas fa-{{ 'exclamation-circle' if category == 'error' else 'check-circle' }}"
+      ></i>
+      <span>{{ message }}</span>
+      <button class="alert-close">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    {% endfor %} {% endif %} {% endwith %}
+
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+      <!-- Calendar Section -->
+      <div class="calendar-section">
+        <div class="calendar-header">
+          <h2 class="calendar-title">Calendar View</h2>
+          <div class="calendar-nav">
+            <button id="prevMonth"><i class="fas fa-chevron-left"></i></button>
+            <button id="todayBtn">Today</button>
+            <button id="nextMonth"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <div class="calendar-view">
+          <div class="calendar-main">
+            <div class="calendar-grid">
+              <div class="calendar-weekdays">
+                <div class="calendar-weekday">Sun</div>
+                <div class="calendar-weekday">Mon</div>
+                <div class="calendar-weekday">Tue</div>
+                <div class="calendar-weekday">Wed</div>
+                <div class="calendar-weekday">Thu</div>
+                <div class="calendar-weekday">Fri</div>
+                <div class="calendar-weekday">Sat</div>
+              </div>
+              <div class="calendar-days" id="calendarDays">
+                <!-- Calendar days will be generated by JavaScript -->
+              </div>
+            </div>
+          </div>
+
+          <div class="calendar-sidebar">
+            <div class="availability-card">
+              <div class="availability-header">
+                <h3 class="section-title">
+                  <i class="fas fa-clock"></i>
+                  Quick Availability
+                </h3>
+                <button class="btn btn-sm btn-primary" id="addAvailabilityBtn">
+                  <i class="fas fa-plus"></i> Add
+                </button>
+              </div>
+              <div class="availability-grid">
+                <div class="day-availability">
+                  <div class="day-name">Monday</div>
+                  <div class="time-inputs">
+                    <input type="time" class="time-input" value="09:00" />
+                    <span>-</span>
+                    <input type="time" class="time-input" value="17:00" />
+                  </div>
+                  <div class="day-toggle">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked />
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="day-availability">
+                  <div class="day-name">Tuesday</div>
+                  <div class="time-inputs">
+                    <input type="time" class="time-input" value="09:00" />
+                    <span>-</span>
+                    <input type="time" class="time-input" value="17:00" />
+                  </div>
+                  <div class="day-toggle">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked />
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="day-availability">
+                  <div class="day-name">Wednesday</div>
+                  <div class="time-inputs">
+                    <input type="time" class="time-input" value="09:00" />
+                    <span>-</span>
+                    <input type="time" class="time-input" value="17:00" />
+                  </div>
+                  <div class="day-toggle">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked />
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="day-availability">
+                  <div class="day-name">Thursday</div>
+                  <div class="time-inputs">
+                    <input type="time" class="time-input" value="09:00" />
+                    <span>-</span>
+                    <input type="time" class="time-input" value="17:00" />
+                  </div>
+                  <div class="day-toggle">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked />
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="day-availability">
+                  <div class="day-name">Friday</div>
+                  <div class="time-inputs">
+                    <input type="time" class="time-input" value="09:00" />
+                    <span>-</span>
+                    <input type="time" class="time-input" value="17:00" />
+                  </div>
+                  <div class="day-toggle">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked />
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="day-availability">
+                  <div class="day-name">Saturday</div>
+                  <div class="time-inputs">
+                    <input type="time" class="time-input" value="10:00" />
+                    <span>-</span>
+                    <input type="time" class="time-input" value="15:00" />
+                  </div>
+                  <div class="day-toggle">
+                    <label class="toggle-switch">
+                      <input type="checkbox" />
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="day-availability">
+                  <div class="day-name">Sunday</div>
+                  <div class="time-inputs">
+                    <input type="time" class="time-input" value="10:00" />
+                    <span>-</span>
+                    <input type="time" class="time-input" value="15:00" />
+                  </div>
+                  <div class="day-toggle">
+                    <label class="toggle-switch">
+                      <input type="checkbox" />
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <button
+                class="btn btn-primary btn-block"
+                id="saveAvailabilityBtn"
+              >
+                <i class="fas fa-save"></i> Save Availability
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointments Section -->
+      <div class="appointments-section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <i class="fas fa-calendar-check"></i>
+            Upcoming Appointments
+          </h2>
+          <div class="filter-controls">
+            <select id="statusFilter">
+              <option value="all">All Statuses</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <button class="btn btn-primary" id="addAppointmentBtn">
+              <i class="fas fa-plus"></i> Add Appointment
+            </button>
+          </div>
+        </div>
+
+        <div class="appointments-list" id="appointmentsList">
+          <!-- Appointments will be dynamically loaded here -->
+          {% for appointment in appointments %}
+          <div class="appointment-card" data-status="{{ appointment.status }}">
+            <div class="appointment-info">
+              <div class="appointment-header">
+                <span class="appointment-time"
+                  >{{ appointment.date.strftime('%H:%M') }}</span
+                >
+                <h3 class="appointment-title">{{ appointment.title }}</h3>
+                <span class="appointment-status status-{{ appointment.status }}"
+                  >{{ appointment.status|title }}</span
+                >
+              </div>
+              <div class="appointment-details">
+                <div class="appointment-detail">
+                  <i class="fas fa-calendar-day"></i>
+                  <span>{{ appointment.date.strftime('%b %d, %Y') }}</span>
+                </div>
+                <div class="appointment-detail">
+                  <i class="fas fa-user"></i>
+                  <span>{{ appointment.client_name }}</span>
+                </div>
+                <div class="appointment-detail">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>{{ appointment.location }}</span>
+                </div>
+                <div class="appointment-detail">
+                  <i class="fas fa-phone"></i>
+                  <span>{{ appointment.client_phone }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="appointment-actions">
+              <button
+                class="btn btn-sm btn-outline view-appointment"
+                data-id="{{ appointment.id }}"
+              >
+                <i class="fas fa-eye"></i> View
+              </button>
+              <button
+                class="btn btn-sm btn-primary edit-appointment"
+                data-id="{{ appointment.id }}"
+              >
+                <i class="fas fa-edit"></i> Edit
+              </button>
+              {% if appointment.status != 'cancelled' %}
+              <button
+                class="btn btn-sm btn-danger cancel-appointment"
+                data-id="{{ appointment.id }}"
+              >
+                <i class="fas fa-times"></i> Cancel
+              </button>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Footer Links -->
+      <footer class="dashboard-footer">
+        <a href="/terms">Terms of Service</a> |
+        <a href="/privacy">Privacy Policy</a>
+      </footer>
+    </div>
+  </main>
+</div>
+
+<!-- Appointment Modal -->
+<div id="appointmentModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title" id="appointmentModalTitle">
+        Add New Appointment
+      </h3>
+      <button class="modal-close" id="closeAppointmentModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="appointmentForm">
+        <input type="hidden" id="appointmentId" />
+        <div class="form-group">
+          <label for="appointmentTitle">Appointment Title</label>
+          <input
+            type="text"
+            id="appointmentTitle"
+            class="form-control"
+            required
+          />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="appointmentDate">Date</label>
+            <input
+              type="date"
+              id="appointmentDate"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="appointmentTime">Time</label>
+            <input
+              type="time"
+              id="appointmentTime"
+              class="form-control"
+              required
+            />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="clientName">Client Name</label>
+          <input type="text" id="clientName" class="form-control" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="clientPhone">Client Phone</label>
+            <input type="tel" id="clientPhone" class="form-control" required />
+          </div>
+          <div class="form-group">
+            <label for="clientEmail">Client Email</label>
+            <input type="email" id="clientEmail" class="form-control" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="appointmentLocation">Location</label>
+          <input
+            type="text"
+            id="appointmentLocation"
+            class="form-control"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="appointmentNotes">Notes</label>
+          <textarea
+            id="appointmentNotes"
+            class="form-control"
+            rows="3"
+          ></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" id="cancelAppointmentBtn">
+        Cancel
+      </button>
+      <button type="button" class="btn btn-primary" id="saveAppointmentBtn">
+        Save Appointment
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Appointment Details Modal -->
+<div id="appointmentDetailsModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Appointment Details</h3>
+      <button class="modal-close" id="closeDetailsModal">&times;</button>
+    </div>
+    <div class="modal-body" id="appointmentDetailsContent">
+      <!-- Appointment details will be loaded here -->
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" id="closeDetailsBtn">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Alert Close
+    const alertCloseButtons = document.querySelectorAll(".alert-close");
+    alertCloseButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        this.parentElement.style.display = "none";
+      });
+    });
+
+    // Calendar functionality
+    const calendarDays = document.getElementById("calendarDays");
+    const prevMonthBtn = document.getElementById("prevMonth");
+    const nextMonthBtn = document.getElementById("nextMonth");
+    const todayBtn = document.getElementById("todayBtn");
+
+    let currentDate = new Date();
+    let currentMonth = currentDate.getMonth();
+    let currentYear = currentDate.getFullYear();
+
+    function renderCalendar() {
+      calendarDays.innerHTML = "";
+
+      const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+      const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+      // Previous month days
+      for (let i = firstDay - 1; i >= 0; i--) {
+        const day = daysInPrevMonth - i;
+        const dayElement = createDayElement(day, true);
+        calendarDays.appendChild(dayElement);
+      }
+
+      // Current month days
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayElement = createDayElement(day, false);
+
+        // Check if today
+        const today = new Date();
+        if (
+          day === today.getDate() &&
+          currentMonth === today.getMonth() &&
+          currentYear === today.getFullYear()
+        ) {
+          dayElement.classList.add("today");
+        }
+
+        // Add sample events
+        if (day % 5 === 0) {
+          const event = document.createElement("div");
+          event.className = "calendar-event appointment";
+          event.textContent = "Meeting";
+          dayElement.querySelector(".calendar-day-events").appendChild(event);
+        }
+
+        calendarDays.appendChild(dayElement);
+      }
+
+      // Next month days
+      const totalCells = calendarDays.children.length;
+      const nextMonthDays = 42 - totalCells; // 6 rows x 7 days
+      for (let day = 1; day <= nextMonthDays; day++) {
+        const dayElement = createDayElement(day, true);
+        calendarDays.appendChild(dayElement);
+      }
+    }
+
+    function createDayElement(day, isOtherMonth) {
+      const dayElement = document.createElement("div");
+      dayElement.className = "calendar-day";
+      if (isOtherMonth) {
+        dayElement.classList.add("other-month");
+      }
+
+      const dayNumber = document.createElement("div");
+      dayNumber.className = "calendar-day-number";
+      dayNumber.textContent = day;
+
+      const dayEvents = document.createElement("div");
+      dayEvents.className = "calendar-day-events";
+
+      dayElement.appendChild(dayNumber);
+      dayElement.appendChild(dayEvents);
+
+      dayElement.addEventListener("click", function () {
+        document.querySelectorAll(".calendar-day").forEach((el) => {
+          el.classList.remove("selected");
+        });
+        this.classList.add("selected");
+      });
+
+      return dayElement;
+    }
+
+    prevMonthBtn.addEventListener("click", function () {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      renderCalendar();
+    });
+
+    nextMonthBtn.addEventListener("click", function () {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      renderCalendar();
+    });
+
+    todayBtn.addEventListener("click", function () {
+      currentMonth = currentDate.getMonth();
+      currentYear = currentDate.getFullYear();
+      renderCalendar();
+    });
+
+    // Initial calendar render
+    renderCalendar();
+
+    // Appointment Modal
+    const appointmentModal = document.getElementById("appointmentModal");
+    const appointmentModalTitle = document.getElementById(
+      "appointmentModalTitle"
+    );
+    const closeAppointmentModal = document.getElementById(
+      "closeAppointmentModal"
+    );
+    const cancelAppointmentBtn = document.getElementById(
+      "cancelAppointmentBtn"
+    );
+    const saveAppointmentBtn = document.getElementById("saveAppointmentBtn");
+    const addAppointmentBtn = document.getElementById("addAppointmentBtn");
+    const appointmentForm = document.getElementById("appointmentForm");
+
+    // Appointment Details Modal
+    const appointmentDetailsModal = document.getElementById(
+      "appointmentDetailsModal"
+    );
+    const closeDetailsModal = document.getElementById("closeDetailsModal");
+    const closeDetailsBtn = document.getElementById("closeDetailsBtn");
+    const appointmentDetailsContent = document.getElementById(
+      "appointmentDetailsContent"
+    );
+
+    // Open appointment modal
+    addAppointmentBtn.addEventListener("click", function () {
+      appointmentModalTitle.textContent = "Add New Appointment";
+      appointmentForm.reset();
+      document.getElementById("appointmentId").value = "";
+      appointmentModal.style.display = "block";
+    });
+
+    // Edit appointment
+    document.querySelectorAll(".edit-appointment").forEach((button) => {
+      button.addEventListener("click", function () {
+        const appointmentId = this.getAttribute("data-id");
+        // In a real app, you would fetch appointment data here
+        appointmentModalTitle.textContent = "Edit Appointment";
+        // Populate form with appointment data
+        appointmentModal.style.display = "block";
+      });
+    });
+
+    // View appointment details
+    document.querySelectorAll(".view-appointment").forEach((button) => {
+      button.addEventListener("click", function () {
+        const appointmentId = this.getAttribute("data-id");
+        // In a real app, you would fetch appointment details here
+        appointmentDetailsContent.innerHTML = `
+          <div class="appointment-details-view">
+            <h4>Appointment Details</h4>
+            <p><strong>Title:</strong> Sample Appointment</p>
+            <p><strong>Date:</strong> June 15, 2023</p>
+            <p><strong>Time:</strong> 10:00 AM</p>
+            <p><strong>Client:</strong> John Doe</p>
+            <p><strong>Location:</strong> 123 Main St</p>
+            <p><strong>Phone:</strong> (555) 123-4567</p>
+            <p><strong>Email:</strong> john@example.com</p>
+            <p><strong>Notes:</strong> This is a sample appointment for demonstration purposes.</p>
+          </div>
+        `;
+        appointmentDetailsModal.style.display = "block";
+      });
+    });
+
+    // Cancel appointment
+    document.querySelectorAll(".cancel-appointment").forEach((button) => {
+      button.addEventListener("click", function () {
+        const appointmentId = this.getAttribute("data-id");
+        if (confirm("Are you sure you want to cancel this appointment?")) {
+          // In a real app, you would send a request to cancel the appointment
+          showNotification("Appointment cancelled successfully", "success");
+          // Remove the appointment card from the DOM
+          this.closest(".appointment-card").remove();
+        }
+      });
+    });
+
+    // Close modals
+    closeAppointmentModal.addEventListener("click", function () {
+      appointmentModal.style.display = "none";
+    });
+
+    cancelAppointmentBtn.addEventListener("click", function () {
+      appointmentModal.style.display = "none";
+    });
+
+    closeDetailsModal.addEventListener("click", function () {
+      appointmentDetailsModal.style.display = "none";
+    });
+
+    closeDetailsBtn.addEventListener("click", function () {
+      appointmentDetailsModal.style.display = "none";
+    });
+
+    // Save appointment
+    saveAppointmentBtn.addEventListener("click", function () {
+      if (appointmentForm.checkValidity()) {
+        // In a real app, you would send the form data to the server
+        showNotification("Appointment saved successfully", "success");
+        appointmentModal.style.display = "none";
+
+        // Add new appointment to the list (in a real app, this would be done by the server)
+        const newAppointment = {
+          id: Date.now(),
+          title: document.getElementById("appointmentTitle").value,
+          date: document.getElementById("appointmentDate").value,
+          time: document.getElementById("appointmentTime").value,
+          clientName: document.getElementById("clientName").value,
+          location: document.getElementById("appointmentLocation").value,
+          status: "pending",
+        };
+
+        addAppointmentToList(newAppointment);
+      } else {
+        appointmentForm.reportValidity();
+      }
+    });
+
+    // Status filter
+    const statusFilter = document.getElementById("statusFilter");
+    statusFilter.addEventListener("change", function () {
+      const status = this.value;
+      const appointmentCards = document.querySelectorAll(".appointment-card");
+
+      appointmentCards.forEach((card) => {
+        if (status === "all" || card.getAttribute("data-status") === status) {
+          card.style.display = "flex";
+        } else {
+          card.style.display = "none";
+        }
+      });
+    });
+
+    // Save availability
+    const saveAvailabilityBtn = document.getElementById("saveAvailabilityBtn");
+    saveAvailabilityBtn.addEventListener("click", function () {
+      // In a real app, you would send the availability data to the server
+      showNotification("Availability saved successfully", "success");
+    });
+
+    // Helper function to add appointment to list
+    function addAppointmentToList(appointment) {
+      const appointmentsList = document.getElementById("appointmentsList");
+      const appointmentCard = document.createElement("div");
+      appointmentCard.className = "appointment-card";
+      appointmentCard.setAttribute("data-status", appointment.status);
+
+      appointmentCard.innerHTML = `
+        <div class="appointment-info">
+          <div class="appointment-header">
+            <span class="appointment-time">${appointment.time}</span>
+            <h3 class="appointment-title">${appointment.title}</h3>
+            <span class="appointment-status status-${appointment.status}">${
+        appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)
+      }</span>
+          </div>
+          <div class="appointment-details">
+            <div class="appointment-detail">
+              <i class="fas fa-calendar-day"></i>
+              <span>${appointment.date}</span>
+            </div>
+            <div class="appointment-detail">
+              <i class="fas fa-user"></i>
+              <span>${appointment.clientName}</span>
+            </div>
+            <div class="appointment-detail">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>${appointment.location}</span>
+            </div>
+          </div>
+        </div>
+        <div class="appointment-actions">
+          <button class="btn btn-sm btn-outline view-appointment" data-id="${
+            appointment.id
+          }">
+            <i class="fas fa-eye"></i> View
+          </button>
+          <button class="btn btn-sm btn-primary edit-appointment" data-id="${
+            appointment.id
+          }">
+            <i class="fas fa-edit"></i> Edit
+          </button>
+          <button class="btn btn-sm btn-danger cancel-appointment" data-id="${
+            appointment.id
+          }">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+        </div>
+      `;
+
+      appointmentsList.insertBefore(
+        appointmentCard,
+        appointmentsList.firstChild
+      );
+
+      // Add event listeners to the new buttons
+      const viewBtn = appointmentCard.querySelector(".view-appointment");
+      const editBtn = appointmentCard.querySelector(".edit-appointment");
+      const cancelBtn = appointmentCard.querySelector(".cancel-appointment");
+
+      viewBtn.addEventListener("click", function () {
+        appointmentDetailsContent.innerHTML = `
+          <div class="appointment-details-view">
+            <h4>Appointment Details</h4>
+            <p><strong>Title:</strong> ${appointment.title}</p>
+            <p><strong>Date:</strong> ${appointment.date}</p>
+            <p><strong>Time:</strong> ${appointment.time}</p>
+            <p><strong>Client:</strong> ${appointment.clientName}</p>
+            <p><strong>Location:</strong> ${appointment.location}</p>
+          </div>
+        `;
+        appointmentDetailsModal.style.display = "block";
+      });
+
+      editBtn.addEventListener("click", function () {
+        appointmentModalTitle.textContent = "Edit Appointment";
+        document.getElementById("appointmentTitle").value = appointment.title;
+        document.getElementById("appointmentDate").value = appointment.date;
+        document.getElementById("appointmentTime").value = appointment.time;
+        document.getElementById("clientName").value = appointment.clientName;
+        document.getElementById("appointmentLocation").value =
+          appointment.location;
+        document.getElementById("appointmentId").value = appointment.id;
+        appointmentModal.style.display = "block";
+      });
+
+      cancelBtn.addEventListener("click", function () {
+        if (confirm("Are you sure you want to cancel this appointment?")) {
+          appointmentCard.remove();
+          showNotification("Appointment cancelled successfully", "success");
+        }
+      });
+    }
+
+    // Helper function to show notifications
+    function showNotification(message, type) {
+      const alert = document.createElement("div");
+      alert.className = `alert alert-${type}`;
+      alert.innerHTML = `
+        <i class="fas fa-${
+          type === "success" ? "check-circle" : "exclamation-circle"
+        }"></i>
+        <span>${message}</span>
+        <button class="alert-close">
+          <i class="fas fa-times"></i>
+        </button>
+      `;
+      document.querySelector(".dashboard-container").prepend(alert);
+
+      // Add close functionality
+      alert
+        .querySelector(".alert-close")
+        .addEventListener("click", function () {
+          alert.remove();
+        });
+
+      // Auto remove after 5 seconds
+      setTimeout(() => {
+        alert.remove();
+      }, 5000);
+    }
+
+    // Close modals when clicking outside
+    window.addEventListener("click", function (event) {
+      if (event.target === appointmentModal) {
+        appointmentModal.style.display = "none";
+      }
+      if (event.target === appointmentDetailsModal) {
+        appointmentDetailsModal.style.display = "none";
+      }
+    });
+  });
+</script>
+{% endblock %}

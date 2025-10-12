@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="HomeHub Property Management" />
+    <title>{% block title %}HomeHub{% endblock %}</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    />
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='images/favicon.ico') }}"
+      type="image/x-icon"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <style>
+      :root {
+        --primary-color: #3d8b40;
+        --secondary-color: #4a90e2;
+        --accent-color: #f28c38;
+        --dark-color: #1a1a1a;
+        --light-color: #f5f5f5;
+        --white-color: #ffffff;
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+        --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+        --border-radius: 8px;
+      }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--light-color);
+      }
+
+      main {
+        flex: 1 0 auto;
+        padding: 70px 1rem 20px;
+        transition: margin-left 0.3s ease;
+        width: 100%;
+      }
+
+      footer {
+        flex-shrink: 0;
+        width: 100%;
+        background-color: #2c3e50;
+        color: #fff;
+      }
+
+      .footer-content {
+        padding: 2rem 1rem;
+      }
+
+      .footer-section h5 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+      }
+
+      .footer-section p {
+        color: #d3d3d3;
+      }
+
+      .footer-section ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .footer-section ul li a {
+        color: #d3d3d3;
+        text-decoration: none;
+        transition: color 0.2s ease;
+      }
+
+      .footer-section ul li a:hover {
+        color: #f1c40f;
+      }
+
+      .footer-hr {
+        border-color: #4a4a4a;
+        margin: 1.5rem 0;
+      }
+
+      .footer-social a {
+        margin-right: 1rem;
+        color: #fff;
+        font-size: 1.5rem;
+        transition: color 0.2s ease;
+      }
+
+      .footer-social a:hover {
+        color: #f1c40f;
+      }
+
+      .dark-mode {
+        background-color: #1a1a1a !important;
+        color: #ffffff;
+      }
+
+      .dark-mode .navbar {
+        background-color: #2c2c2c !important;
+      }
+
+      .dark-mode .sidebar {
+        background-color: #2c2c2c !important;
+        color: #ffffff;
+      }
+
+      .dark-mode .sidebar .nav-link {
+        color: #ffffff;
+      }
+
+      .dark-mode .sidebar .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .dark-mode .card {
+        background-color: #2c2c2c;
+        color: #ffffff;
+      }
+
+      .dark-mode .btn-primary {
+        background-color: #4dabf7;
+        border-color: #4dabf7;
+      }
+
+      .dark-mode .btn-danger {
+        background-color: #f74d4d;
+        border-color: #f74d4d;
+      }
+
+      .navbar-brand,
+      .nav-link {
+        transition: color 0.3s ease;
+      }
+
+      .navbar {
+        padding: 0.5rem 1rem;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 1050;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: var(--dark-color);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .house-icon-link {
+        color: #fff;
+        text-decoration: none;
+        margin-right: 0.5rem;
+      }
+
+      .house-icon-link:hover {
+        color: #d3d3d3;
+      }
+
+      .navbar-brand-text {
+        color: #fff;
+        font-weight: bold;
+      }
+
+      #themeToggle {
+        background: none;
+        border: none;
+        padding: 0;
+        font-size: 1.5rem;
+        color: #fff;
+        cursor: pointer;
+      }
+
+      #themeToggle i {
+        transition: transform 0.3s ease;
+      }
+
+      #themeToggle:hover {
+        color: #d3d3d3;
+      }
+
+      /* Hamburger Menu Styles */
+      .hamburger-container {
+        display: flex;
+        align-items: center;
+      }
+
+      #hamburgerBtn {
+        background: none;
+        border: none;
+        padding: 0.25rem 0.5rem;
+        margin-right: 1rem;
+        color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.3s ease;
+        z-index: 1051;
+        outline: none !important;
+      }
+
+      #hamburgerBtn:hover {
+        transform: scale(1.1);
+      }
+
+      .hamburger-icon {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        position: relative;
+        transform: rotate(0deg);
+        transition: 0.5s ease-in-out;
+        cursor: pointer;
+      }
+
+      .hamburger-icon span {
+        display: block;
+        position: absolute;
+        height: 3px;
+        width: 100%;
+        background: #fff;
+        border-radius: 9px;
+        opacity: 1;
+        left: 0;
+        transform: rotate(0deg);
+        transition: 0.25s ease-in-out;
+      }
+
+      .hamburger-icon span:nth-child(1) {
+        top: 0px;
+      }
+
+      .hamburger-icon span:nth-child(2) {
+        top: 8px;
+      }
+
+      .hamburger-icon span:nth-child(3) {
+        top: 16px;
+      }
+
+      #hamburgerBtn.active .hamburger-icon span:nth-child(1) {
+        top: 8px;
+        transform: rotate(135deg);
+      }
+
+      #hamburgerBtn.active .hamburger-icon span:nth-child(2) {
+        opacity: 0;
+        left: -60px;
+      }
+
+      #hamburgerBtn.active .hamburger-icon span:nth-child(3) {
+        top: 8px;
+        transform: rotate(-135deg);
+      }
+
+      /* Sidebar Styles */
+      .sidebar {
+        position: fixed;
+        top: 56px;
+        left: -250px;
+        width: 250px;
+        height: calc(100% - 56px);
+        background-color: #f8f9fa;
+        transition: left 0.3s ease;
+        z-index: 1040;
+        overflow-y: auto;
+        box-shadow: var(--shadow-md);
+      }
+
+      .sidebar.show {
+        left: 0;
+      }
+
+      .sidebar-content {
+        opacity: 0;
+        visibility: hidden;
+        transform: translateX(-20px);
+        transition: all 0.3s ease;
+        pointer-events: none;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .sidebar.show .sidebar-content {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(0);
+        pointer-events: auto;
+      }
+
+      .sidebar-header {
+        padding: 1rem;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
+      }
+
+      .sidebar-title {
+        font-weight: 600;
+        color: var(--dark-color);
+      }
+
+      .sidebar-close {
+        background: none;
+        border: none;
+        font-size: 1.25rem;
+        color: #6c757d;
+        cursor: pointer;
+        transition: color 0.2s ease;
+      }
+
+      .sidebar-close:hover {
+        color: var(--dark-color);
+      }
+
+      .sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        overflow-y: auto;
+        flex-grow: 1;
+      }
+
+      .sidebar-menu .nav-item {
+        position: relative;
+      }
+
+      .sidebar-menu .nav-link {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        color: var(--dark-color);
+        text-decoration: none;
+        transition: var(--transition);
+      }
+
+      .sidebar-menu .nav-link:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+        color: var(--primary-color);
+      }
+
+      .sidebar-menu .nav-link.active {
+        background-color: rgba(61, 139, 64, 0.1);
+        color: var(--primary-color);
+        font-weight: 500;
+        border-left: 3px solid var(--primary-color);
+      }
+
+      .sidebar-menu .nav-link i {
+        margin-right: 0.75rem;
+        width: 20px;
+        text-align: center;
+      }
+
+      .sidebar-divider {
+        height: 1px;
+        margin: 0.5rem 0;
+        overflow: hidden;
+        background-color: #dee2e6;
+      }
+
+      .sidebar-submenu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        background-color: rgba(0, 0, 0, 0.02);
+      }
+
+      .sidebar-submenu .nav-link {
+        padding-left: 3rem;
+        font-size: 0.9rem;
+      }
+
+      .user-profile {
+        padding: 1rem;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-shrink: 0;
+      }
+
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      .user-info {
+        flex: 1;
+      }
+
+      .user-name {
+        font-weight: 600;
+        margin-bottom: 0;
+      }
+
+      .user-role {
+        font-size: 0.8rem;
+        color: #6c757d;
+      }
+
+      /* Overlay Styles */
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1030;
+        display: none;
+        transition: opacity 0.3s ease;
+      }
+
+      .overlay.show {
+        display: block;
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body
+    id="body"
+    data-page="{{ request.endpoint if request.endpoint else 'main.index' }}"
+  >
+    <nav
+      class="navbar navbar-expand-lg navbar-dark"
+      aria-label="Main navigation"
+    >
+      <div class="container-fluid">
+        <div class="hamburger-container">
+          <button
+            id="hamburgerBtn"
+            class="navbar-toggler"
+            type="button"
+            aria-label="Toggle navigation"
+            aria-expanded="false"
+            onclick="toggleSidebar()"
+          >
+            <div class="hamburger-icon">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </button>
+        </div>
+
+        <span class="navbar-brand">
+          <a href="{{ url_for('main.index') }}" class="house-icon-link">
+            <img
+              src="{{ url_for('static', filename='images/homehub.jpg') }}"
+              alt="HomeHub Logo"
+              style="height: 30px; margin-right: 0.5rem"
+            />
+          </a>
+          <span class="navbar-brand-text">HomeHub</span>
+        </span>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            {% if current_user.is_authenticated %}
+            <li class="nav-item">
+              <span class="nav-link">Welcome, {{ current_user.name }}</span>
+            </li>
+            {% endif %}
+            <div id="themeToggle" aria-label="Toggle dark mode">
+              <i class="fas fa-moon"></i>
+            </div>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-content">
+        <div class="sidebar-header">
+          <h5 class="sidebar-title">Menu</h5>
+          <button class="sidebar-close" onclick="toggleSidebar()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        {% if current_user.is_authenticated %}
+        <div class="user-profile">
+          <img
+            src="{{ url_for('static', filename='images/user-avatar.jpg') }}"
+            alt="User Avatar"
+            class="user-avatar"
+          />
+          <div class="user-info">
+            <p class="user-name">{{ current_user.name }}</p>
+            <p class="user-role">{{ current_user.role|title }}</p>
+          </div>
+        </div>
+        {% endif %}
+
+        <ul class="sidebar-menu">
+          <li class="nav-item">
+            <a
+              href="{{ url_for('main.index') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-home"></i>
+              <span>Home</span>
+            </a>
+          </li>
+
+          {% if current_user.is_authenticated %} {% if current_user.role.lower()
+          == 'landlord' %}
+          <li class="nav-item">
+            <a
+              href="{{ url_for('landlord.dashboard') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-tachometer-alt"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('landlord.properties') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-building"></i>
+              <span>Properties</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('landlord.add_property') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-plus-circle"></i>
+              <span>Add Property</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('landlord.tenants') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-users"></i>
+              <span>Tenants</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('landlord.payments') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-money-bill-wave"></i>
+              <span>Payments</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('landlord.maintenance') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-tools"></i>
+              <span>Maintenance</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('landlord.reports') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-chart-bar"></i>
+              <span>Reports</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('landlord.messages') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-envelope"></i>
+              <span>Messages</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a
+              href="{{ url_for('landlord.settings') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-cog"></i>
+              <span>Settings</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a
+              href="{{ url_for('landlord.profile') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-envelope"></i>
+              <span>My Profile</span>
+            </a>
+          </li>
+
+          {% elif current_user.role.lower() == 'tenant' %}
+          <li class="nav-item">
+            <a
+              href="{{ url_for('tenant.dashboard') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-tachometer-alt"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('house.hotels') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-search"></i>
+              <span>Browse Properties</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('tenant.all_bookings') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-search"></i>
+              <span>My Bookings</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('tenant.pay_rent') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-money-bill-wave"></i>
+              <span>Pay Rent</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('tenant.submit_request') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-tools"></i>
+              <span>Maintenance Requests</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('tenant.documents') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-file-alt"></i>
+              <span>Documents</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('tenant.messages') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-envelope"></i>
+              <span>Messages</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('tenant.profile') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-user"></i>
+              <span>My Profile</span>
+            </a>
+          </li>
+
+          {% elif current_user.role.lower() == 'admin' %}
+          <li class="nav-item">
+            <a
+              href="{{ url_for('admin.dashboard') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-tachometer-alt"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('admin.manage_users') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-users-cog"></i>
+              <span>Manage Users</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('admin.system_settings') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-cogs"></i>
+              <span>System Settings</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('admin.view_reports') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-chart-line"></i>
+              <span>Reports</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('admin.audit_logs') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-history"></i>
+              <span>Audit Logs</span>
+            </a>
+          </li>
+
+          {% elif current_user.role.lower() == 'service' %}
+          <li class="nav-item">
+            <a
+              href="{{ url_for('service_provider.dashboard') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-tachometer-alt"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('service_provider.requests') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-clipboard-list"></i>
+              <span>Service Requests</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('service_provider.schedule') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-calendar-alt"></i>
+              <span>Schedule</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('service_provider.earnings') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-money-bill-wave"></i>
+              <span>Earnings</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('service_provider.profile') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-user"></i>
+              <span>My Profile</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('service_provider.reviews') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-star"></i>
+              <span>Reviews</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('service_provider.settings') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-cog"></i>
+              <span>Settings</span>
+            </a>
+          </li>
+          {% endif %}
+
+          <li class="nav-item mt-3">
+            <div class="sidebar-divider"></div>
+          </li>
+
+          <li class="nav-item">
+            <a
+              href="{{ url_for('main.about') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-info-circle"></i>
+              <span>About Us</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('main.contact') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-envelope"></i>
+              <span>Contact</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('main.help') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-question-circle"></i>
+              <span>Help & Support</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <div class="sidebar-divider"></div>
+          </li>
+
+          <li class="nav-item">
+            <a
+              href="{{ url_for('auth.logout') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-sign-out-alt"></i>
+              <span>Logout</span>
+            </a>
+          </li>
+
+          {% else %}
+          <li class="nav-item">
+            <a
+              href="{{ url_for('auth.login') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-sign-in-alt"></i>
+              <span>Login</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('auth.signup') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-user-plus"></i>
+              <span>Sign Up</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <div class="sidebar-divider"></div>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('main.about') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-info-circle"></i>
+              <span>About Us</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('main.contact') }}"
+              class="nav-link"
+              onclick="closeSidebarOnMobile()"
+            >
+              <i class="fas fa-envelope"></i>
+              <span>Contact</span>
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+
+    <main class="container my-4" id="main">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div
+        class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show"
+        role="alert"
+      >
+        {{ message }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      {% endfor %} {% endif %} {% endwith %} {% block content %}{% endblock %}
+    </main>
+
+    <footer aria-label="Site footer">
+      <div class="footer-content">
+        <div class="row">
+          <div class="col-12 col-md-4 footer-section">
+            <h5>HomeHub</h5>
+            <img
+              src="{{ url_for('static', filename='images/logo.png') }}"
+              alt="HomeHub Logo"
+              style="height: 40px; margin-bottom: 1rem"
+            />
+            <p>
+              Your trusted platform for seamless property management, connecting
+              landlords, tenants, and service providers.
+            </p>
+          </div>
+          <div class="col-12 col-md-4 footer-section">
+            <h5>Quick Links</h5>
+            <ul class="space-y-2">
+              <li><a href="{{ url_for('main.index') }}">Home</a></li>
+              <li><a href="{{ url_for('main.about') }}">About Us</a></li>
+              <li><a href="{{ url_for('main.contact') }}">Contact</a></li>
+              {% if current_user.is_authenticated %} {% if
+              current_user.role.lower() == 'landlord' %}
+              <li>
+                <a href="{{ url_for('landlord.dashboard') }}">Dashboard</a>
+              </li>
+              <li>
+                <a href="{{ url_for('landlord.add_property') }}"
+                  >Add Property</a
+                >
+              </li>
+              {% elif current_user.role.lower() == 'tenant' %}
+              <li><a href="{{ url_for('tenant.dashboard') }}">Dashboard</a></li>
+              <li>
+                <a href="{{ url_for('house.hotels') }}">Browse Properties</a>
+              </li>
+              {% elif current_user.role.lower() == 'admin' %}
+              <li>
+                <a href="{{ url_for('admin.manage_users') }}">Manage Users</a>
+              </li>
+              {% elif current_user.role.lower() == 'service' %}
+              <li>
+                <a href="{{ url_for('service_provider.dashboard') }}"
+                  >Dashboard</a
+                >
+              </li>
+              {% endif %} {% else %}
+              <li><a href="{{ url_for('auth.signup') }}">Sign Up</a></li>
+              <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+              {% endif %}
+              <li>
+                <a href="{{ url_for('main.accessibility') }}"
+                  >Accessibility Statement</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="col-12 col-md-4 footer-section">
+            <h5>Contact Us</h5>
+            <p>
+              Email: <a href="mailto:support@homehub.com">support@homehub.com</a
+              ><br />
+              Phone: +1-800-555-1234
+            </p>
+            <div class="footer-social mt-4">
+              <a href="https://twitter.com/homehub" aria-label="Twitter">
+                <i class="fab fa-twitter"></i>
+              </a>
+              <a
+                href="https://linkedin.com/company/homehub"
+                aria-label="LinkedIn"
+              >
+                <i class="fab fa-linkedin-in"></i>
+              </a>
+              <a href="https://instagram.com/homehub" aria-label="Instagram">
+                <i class="fab fa-instagram"></i>
+              </a>
+            </div>
+            <div class="mt-4">
+              <h5>Stay Updated</h5>
+              <p>
+                <a href="{{ url_for('main.subscribe') }}"
+                  >Subscribe to our newsletter</a
+                >
+              </p>
+            </div>
+          </div>
+        </div>
+        <hr class="footer-hr" />
+        <p class="text-center">
+          &copy; <span id="currentYear"></span> HomeHub. All rights reserved.
+          <br />
+          <a href="{{ url_for('main.terms') }}">Terms of Service</a> |
+          <a href="{{ url_for('main.privacy') }}">Privacy Policy</a>
+        </p>
+      </div>
+    </footer>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/socket.io-client@4/dist/socket.io.min.js"
+      defer
+    ></script>
+    <script
+      src="{{ url_for('static', filename='javascript/main.js') }}"
+      defer
+    ></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Set current year in footer
+        document.getElementById("currentYear").textContent =
+          new Date().getFullYear();
+
+        // Dark mode toggle functionality
+        const themeToggle = document.getElementById("themeToggle");
+        const body = document.getElementById("body");
+        const icon = themeToggle ? themeToggle.querySelector("i") : null;
+
+        if (!themeToggle || !body || !icon) {
+          console.error("Theme toggle, body, or icon element not found");
+          return;
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem("theme");
+        if (savedTheme === "dark") {
+          body.classList.add("dark-mode");
+          icon.classList.replace("fa-moon", "fa-sun");
+        }
+
+        themeToggle.addEventListener("click", () => {
+          body.classList.toggle("dark-mode");
+          if (body.classList.contains("dark-mode")) {
+            icon.classList.replace("fa-moon", "fa-sun");
+            localStorage.setItem("theme", "dark");
+          } else {
+            icon.classList.replace("fa-sun", "fa-moon");
+            localStorage.setItem("theme", "light");
+          }
+        });
+
+        // Initialize sidebar state
+        initializeSidebar();
+
+        // Handle window resize
+        window.addEventListener("resize", initializeSidebar);
+      });
+
+      // Create and add overlay dynamically when needed
+      function createOverlay() {
+        // Check if overlay already exists
+        if (document.getElementById("overlay")) {
+          return document.getElementById("overlay");
+        }
+
+        // Create overlay element
+        const overlay = document.createElement("div");
+        overlay.id = "overlay";
+        overlay.className = "overlay";
+        overlay.style.position = "fixed";
+        overlay.style.top = "0";
+        overlay.style.left = "0";
+        overlay.style.width = "100%";
+        overlay.style.height = "100%";
+        overlay.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+        overlay.style.zIndex = "1030";
+        overlay.style.display = "none";
+        overlay.onclick = toggleSidebar;
+
+        // Add to body
+        document.body.appendChild(overlay);
+
+        return overlay;
+      }
+
+      // Sidebar toggle functionality
+      function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        const hamburgerBtn = document.getElementById("hamburgerBtn");
+        const overlay = createOverlay();
+
+        // Toggle classes
+        sidebar.classList.toggle("show");
+        hamburgerBtn.classList.toggle("active");
+        overlay.classList.toggle("show");
+
+        // Update aria-expanded attribute for accessibility
+        const isExpanded = hamburgerBtn.classList.contains("active");
+        hamburgerBtn.setAttribute("aria-expanded", isExpanded);
+      }
+
+      // Close sidebar when clicking on a link (all screen sizes)
+      function closeSidebarOnMobile() {
+        const sidebar = document.getElementById("sidebar");
+        const hamburgerBtn = document.getElementById("hamburgerBtn");
+        const overlay = document.getElementById("overlay");
+
+        // Remove classes to close sidebar
+        sidebar.classList.remove("show");
+        hamburgerBtn.classList.remove("active");
+        if (overlay) {
+          overlay.classList.remove("show");
+        }
+        hamburgerBtn.setAttribute("aria-expanded", "false");
+      }
+
+      // Initialize sidebar state
+      function initializeSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        const hamburgerBtn = document.getElementById("hamburgerBtn");
+        const overlay = document.getElementById("overlay");
+
+        // Sidebar is hidden by default on all screen sizes
+        sidebar.classList.remove("show");
+        hamburgerBtn.classList.remove("active");
+        hamburgerBtn.setAttribute("aria-expanded", "false");
+        if (overlay) {
+          overlay.classList.remove("show");
+        }
+      }
+    </script>
+  </body>
+</html>

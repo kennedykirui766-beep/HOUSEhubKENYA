@@ -1,0 +1,651 @@
+{% extends "base.html" %} {% block title %}Notification Settings - HomeHub{%
+endblock %} {% block content %}
+
+<style>
+  :root {
+    --primary: #4361ee;
+    --primary-dark: #3a0ca3;
+    --secondary: #7209b7;
+    --accent: #f72585;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --success: #06ffa5;
+    --info: #00b4d8;
+    --warning: #ffbe0b;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+    --border-radius: 15px;
+  }
+
+  body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      sans-serif;
+    background-color: #f8f9fa;
+    color: var(--dark);
+    line-height: 1.6;
+  }
+
+  .settings-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* Header Section */
+  .settings-header {
+    background: linear-gradient(135deg, var(--warning) 0%, #ff9f1c 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .settings-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')
+      no-repeat bottom;
+    background-size: cover;
+  }
+
+  .header-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header-title {
+    font-size: 2rem;
+    font-weight: 800;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 30px;
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: var(--transition);
+  }
+
+  .back-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  /* Notification Settings */
+  .notification-settings {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title i {
+    color: var(--warning);
+  }
+
+  .notification-group {
+    margin-bottom: 2rem;
+  }
+
+  .group-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0;
+    border-bottom: 1px solid #f8f9fa;
+  }
+
+  .toggle-container:last-child {
+    border-bottom: none;
+  }
+
+  .toggle-info h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--dark);
+  }
+
+  .toggle-info p {
+    color: #6c757d;
+    font-size: 0.9rem;
+  }
+
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: var(--transition);
+    border-radius: 30px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: var(--transition);
+    border-radius: 50%;
+  }
+
+  input:checked + .slider {
+    background: linear-gradient(135deg, var(--success), #00b4d8);
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(30px);
+  }
+
+  /* Email Preferences */
+  .email-preferences {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+  }
+
+  .preference-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    transition: var(--transition);
+  }
+
+  .preference-item:hover {
+    background: #e9ecef;
+  }
+
+  .preference-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .preference-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+  }
+
+  .icon-email {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  }
+
+  .icon-push {
+    background: linear-gradient(135deg, var(--warning), #ff9f1c);
+  }
+
+  .icon-sms {
+    background: linear-gradient(135deg, var(--info), #0077b6);
+  }
+
+  .preference-details h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .preference-details p {
+    color: #6c757d;
+    font-size: 0.85rem;
+  }
+
+  .preference-toggle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(67, 97, 238, 0.3);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+
+  .btn-outline:hover {
+    background: var(--primary);
+    color: white;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+  }
+
+  /* Notification Toast */
+  .notification-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    min-width: 300px;
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s;
+    animation-fill-mode: forwards;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  .notification-success {
+    background: linear-gradient(
+      135deg,
+      rgba(6, 255, 165, 0.9),
+      rgba(0, 180, 216, 0.9)
+    );
+    color: white;
+  }
+
+  .notification-warning {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 190, 11, 0.9),
+      rgba(255, 159, 28, 0.9)
+    );
+    color: white;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .settings-container {
+      padding: 1rem;
+    }
+
+    .header-title {
+      font-size: 1.5rem;
+    }
+
+    .form-actions {
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }
+</style>
+
+<div class="settings-container">
+  <!-- Settings Header -->
+  <div class="settings-header">
+    <div class="header-content">
+      <h1 class="header-title">Notification Settings</h1>
+      <div class="header-actions">
+        <a href="{{ url_for('service_provider.settings') }}" class="back-btn">
+          <i class="fas fa-arrow-left"></i> Back to Settings
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Settings -->
+  <div class="notification-settings">
+    <h2 class="section-title">
+      <i class="fas fa-bell"></i>
+      Notification Preferences
+    </h2>
+
+    <div class="notification-group">
+      <h3 class="group-title">Notification Channels</h3>
+
+      <div class="toggle-container">
+        <div class="toggle-info">
+          <h4>Email Notifications</h4>
+          <p>Receive notifications about your account via email</p>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="emailNotifications" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-container">
+        <div class="toggle-info">
+          <h4>Push Notifications</h4>
+          <p>Receive push notifications on your devices</p>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="pushNotifications" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-container">
+        <div class="toggle-info">
+          <h4>SMS Notifications</h4>
+          <p>Receive important updates via SMS</p>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="smsNotifications" />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="notification-group">
+      <h3 class="group-title">Notification Types</h3>
+
+      <div class="toggle-container">
+        <div class="toggle-info">
+          <h4>New Service Requests</h4>
+          <p>Get notified when new service requests are available</p>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="newRequests" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-container">
+        <div class="toggle-info">
+          <h4>Payment Notifications</h4>
+          <p>Receive notifications about payments and earnings</p>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="paymentNotifications" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-container">
+        <div class="toggle-info">
+          <h4>Customer Messages</h4>
+          <p>Get notified when customers send you messages</p>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="customerMessages" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-container">
+        <div class="toggle-info">
+          <h4>Review Notifications</h4>
+          <p>Receive notifications when customers leave reviews</p>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="reviewNotifications" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-container">
+        <div class="toggle-info">
+          <h4>Marketing Communications</h4>
+          <p>Receive updates about new features and promotions</p>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="marketingComms" />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-outline">Reset to Default</button>
+      <button type="button" class="btn btn-primary" id="saveNotifications">
+        Save Preferences
+      </button>
+    </div>
+  </div>
+
+  <!-- Email Preferences -->
+  <div class="email-preferences">
+    <h2 class="section-title">
+      <i class="fas fa-envelope"></i>
+      Email Frequency
+    </h2>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <div class="preference-icon icon-email">
+          <i class="fas fa-envelope"></i>
+        </div>
+        <div class="preference-details">
+          <h4>Daily Digest</h4>
+          <p>Receive a summary of daily activities</p>
+        </div>
+      </div>
+      <div class="preference-toggle">
+        <label class="toggle-switch">
+          <input type="checkbox" id="dailyDigest" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <div class="preference-icon icon-email">
+          <i class="fas fa-envelope"></i>
+        </div>
+        <div class="preference-details">
+          <h4>Weekly Summary</h4>
+          <p>Receive a weekly summary of your activities</p>
+        </div>
+      </div>
+      <div class="preference-toggle">
+        <label class="toggle-switch">
+          <input type="checkbox" id="weeklySummary" />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <div class="preference-icon icon-push">
+          <i class="fas fa-mobile-alt"></i>
+        </div>
+        <div class="preference-details">
+          <h4>Push Notifications</h4>
+          <p>Get instant notifications on your mobile device</p>
+        </div>
+      </div>
+      <div class="preference-toggle">
+        <label class="toggle-switch">
+          <input type="checkbox" id="pushPref" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="preference-item">
+      <div class="preference-info">
+        <div class="preference-icon icon-sms">
+          <i class="fas fa-sms"></i>
+        </div>
+        <div class="preference-details">
+          <h4>SMS Alerts</h4>
+          <p>Receive urgent notifications via text message</p>
+        </div>
+      </div>
+      <div class="preference-toggle">
+        <label class="toggle-switch">
+          <input type="checkbox" id="smsAlerts" />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %} {% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Notification Toast Function
+    function showToast(message, type = "success") {
+      // Remove any existing toasts
+      const existingToast = document.querySelector(".notification-toast");
+      if (existingToast) {
+        existingToast.remove();
+      }
+
+      // Create new toast
+      const toast = document.createElement("div");
+      toast.className = `notification-toast notification-${type}`;
+
+      // Set icon based on type
+      let icon = "fa-check-circle";
+      if (type === "warning") icon = "fa-exclamation-triangle";
+
+      toast.innerHTML = `
+        <i class="fas ${icon}"></i>
+        <span>${message}</span>
+      `;
+
+      // Add to DOM
+      document.body.appendChild(toast);
+
+      // Auto remove after animation completes
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    // Save Notification Preferences
+    const saveNotificationsBtn = document.getElementById("saveNotifications");
+
+    saveNotificationsBtn.addEventListener("click", function () {
+      showToast("Notification preferences saved successfully!", "success");
+    });
+
+    // Add event listeners for all toggle switches
+    const toggleSwitches = document.querySelectorAll(".toggle-switch input");
+
+    toggleSwitches.forEach((toggle) => {
+      toggle.addEventListener("change", function () {
+        const settingName = this.id;
+        const isChecked = this.checked;
+
+        // Here you would normally send the setting to your backend
+        console.log(`Setting ${settingName} changed to ${isChecked}`);
+
+        // Show a toast notification for immediate feedback
+        const settingText =
+          this.closest(".toggle-container").querySelector("h4").textContent;
+        showToast(
+          `${settingText} ${isChecked ? "enabled" : "disabled"}`,
+          "success"
+        );
+      });
+    });
+  });
+</script>
+{% endblock %}

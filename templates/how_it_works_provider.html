@@ -1,0 +1,470 @@
+{% extends "base.html" %} {% block title %}How It Works - Landlord{% endblock %}
+{% block content %}
+<style>
+  :root {
+    --primary: #ffbe0b;
+    --primary-dark: #fb8500;
+    --secondary: #f77f00;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --success: #06ffa5;
+    --info: #00b4d8;
+  }
+
+  .hero-section {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 5rem 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+    background-size: cover;
+  }
+
+  .feature-icon {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto 1.5rem;
+    font-size: 1.8rem;
+    color: white;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  }
+
+  .step-card {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    height: 100%;
+  }
+
+  .step-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+  }
+
+  .step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 1rem;
+  }
+
+  .benefit-card {
+    border-left: 4px solid var(--primary);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    background: var(--light);
+    border-radius: 0 10px 10px 0;
+    transition: all 0.3s ease;
+  }
+
+  .benefit-card:hover {
+    background: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  }
+
+  .testimonial {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    position: relative;
+  }
+
+  .testimonial::before {
+    content: """;
+    position: absolute;
+    top: 1rem;
+    left: 1.5rem;
+    font-size: 4rem;
+    color: rgba(255, 190, 11, 0.1);
+    font-family: serif;
+  }
+
+  .cta-section {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--dark);
+    padding: 4rem 0;
+    border-radius: 15px;
+    margin-top: 4rem;
+  }
+
+  @media (max-width: 768px) {
+    .hero-section {
+      padding: 3rem 0;
+    }
+  }
+</style>
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container text-center position-relative">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <h1 class="display-4 fw-bold mb-4">HomeHub for Service Providers</h1>
+        <p class="lead mb-5">
+          Find maintenance jobs in Kisumu, grow your business, and connect with
+          property owners through our platform
+        </p>
+        <a href="#features" class="btn btn-dark btn-lg px-4 me-2"
+          >Explore Features</a
+        >
+        <a href="#signup" class="btn btn-outline-dark btn-lg px-4">Join Now</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="py-5">
+  <div class="container">
+    <h2 class="text-center mb-5">Why Service Providers Choose HomeHub</h2>
+
+    <div class="row">
+      <div class="col-md-6 col-lg-4">
+        <div class="benefit-card">
+          <div class="d-flex align-items-center mb-3">
+            <div class="feature-icon">
+              <i class="fas fa-briefcase"></i>
+            </div>
+            <h4 class="ms-3">More Jobs</h4>
+          </div>
+          <p>
+            Access a steady stream of maintenance requests from property owners
+            in Kisumu and surrounding areas.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="benefit-card">
+          <div class="d-flex align-items-center mb-3">
+            <div class="feature-icon">
+              <i class="fas fa-handshake"></i>
+            </div>
+            <h4 class="ms-3">Fair Bidding</h4>
+          </div>
+          <p>
+            Compete transparently for jobs with our fair bidding system that
+            values quality and fair pricing.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="benefit-card">
+          <div class="d-flex align-items-center mb-3">
+            <div class="feature-icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <h4 class="ms-3">Business Growth</h4>
+          </div>
+          <p>
+            Build your reputation with reviews and ratings to attract more
+            clients and grow your business.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works Section -->
+<section id="features" class="py-5 bg-light">
+  <div class="container">
+    <h2 class="text-center mb-5">How HomeHub Works for Service Providers</h2>
+
+    <div class="row g-4">
+      <!-- Step 1 -->
+      <div class="col-md-6 col-lg-3">
+        <div class="step-card">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-3">
+              <div class="step-number">1</div>
+              <h4 class="card-title">Create Profile</h4>
+            </div>
+            <div class="text-center mb-3">
+              <div class="feature-icon">
+                <i class="fas fa-user-cog"></i>
+              </div>
+            </div>
+            <p class="card-text">
+              Sign up and create a professional profile showcasing your
+              services, experience, and qualifications.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="col-md-6 col-lg-3">
+        <div class="step-card">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-3">
+              <div class="step-number">2</div>
+              <h4 class="card-title">Get Verified</h4>
+            </div>
+            <div class="text-center mb-3">
+              <div class="feature-icon">
+                <i class="fas fa-certificate"></i>
+              </div>
+            </div>
+            <p class="card-text">
+              Complete our verification process to build trust with property
+              owners and stand out from competitors.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="col-md-6 col-lg-3">
+        <div class="step-card">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-3">
+              <div class="step-number">3</div>
+              <h4 class="card-title">Bid on Jobs</h4>
+            </div>
+            <div class="text-center mb-3">
+              <div class="feature-icon">
+                <i class="fas fa-gavel"></i>
+              </div>
+            </div>
+            <p class="card-text">
+              Browse maintenance requests in Kisumu and submit competitive bids
+              for jobs that match your expertise.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="col-md-6 col-lg-3">
+        <div class="step-card">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-3">
+              <div class="step-number">4</div>
+              <h4 class="card-title">Complete & Grow</h4>
+            </div>
+            <div class="text-center mb-3">
+              <div class="feature-icon">
+                <i class="fas fa-tasks"></i>
+              </div>
+            </div>
+            <p class="card-text">
+              Complete jobs, receive payments through the platform, and build
+              your reputation with positive reviews.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Key Features Section -->
+<section class="py-5">
+  <div class="container">
+    <h2 class="text-center mb-5">Key Features for Service Providers</h2>
+
+    <div class="row">
+      <div class="col-lg-6 mb-4">
+        <div class="d-flex align-items-start">
+          <div class="feature-icon me-4">
+            <i class="fas fa-user-tie"></i>
+          </div>
+          <div>
+            <h4>Professional Profile</h4>
+            <p>
+              Create a detailed profile with your services, experience,
+              certifications, and portfolio of completed work.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6 mb-4">
+        <div class="d-flex align-items-start">
+          <div class="feature-icon me-4">
+            <i class="fas fa-bell"></i>
+          </div>
+          <div>
+            <h4>Job Notifications</h4>
+            <p>
+              Receive instant alerts for new maintenance requests in your
+              service area and expertise category.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6 mb-4">
+        <div class="d-flex align-items-start">
+          <div class="feature-icon me-4">
+            <i class="fas fa-hammer"></i>
+          </div>
+          <div>
+            <h4>Bidding System</h4>
+            <p>
+              Submit competitive bids with detailed proposals, pricing, and
+              timelines for each maintenance job.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6 mb-4">
+        <div class="d-flex align-items-start">
+          <div class="feature-icon me-4">
+            <i class="fas fa-calendar-check"></i>
+          </div>
+          <div>
+            <h4>Job Management</h4>
+            <p>
+              Track all your active jobs, schedule appointments, and update
+              clients on progress through our platform.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6 mb-4">
+        <div class="d-flex align-items-start">
+          <div class="feature-icon me-4">
+            <i class="fas fa-money-check-alt"></i>
+          </div>
+          <div>
+            <h4>Secure Payments</h4>
+            <p>
+              Receive payments securely through the platform with transparent
+              transaction records and payment tracking.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6 mb-4">
+        <div class="d-flex align-items-start">
+          <div class="feature-icon me-4">
+            <i class="fas fa-star"></i>
+          </div>
+          <div>
+            <h4>Reputation Building</h4>
+            <p>
+              Collect reviews and ratings from satisfied clients to build your
+              reputation and attract more business.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <h2 class="text-center mb-5">What Service Providers Say About HomeHub</h2>
+
+    <div class="row">
+      <div class="col-lg-4 mb-4">
+        <div class="testimonial h-100">
+          <p class="mb-4">
+            "Since joining HomeHub, my plumbing business in Kisumu has grown by
+            40%. The bidding system is fair and I've built great relationships
+            with property managers."
+          </p>
+          <div class="d-flex align-items-center">
+            <div
+              class="rounded-circle bg-warning text-white d-flex align-items-center justify-content-center me-3"
+              style="width: 50px; height: 50px"
+            >
+              <span class="fw-bold">PN</span>
+            </div>
+            <div>
+              <h6 class="mb-0">Peter N.</h6>
+              <small class="text-muted">Plumber in Kisumu</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4 mb-4">
+        <div class="testimonial h-100">
+          <p class="mb-4">
+            "HomeHub has transformed how I find electrical jobs. I get
+            notifications for relevant work and the payment system is reliable
+            and transparent."
+          </p>
+          <div class="d-flex align-items-center">
+            <div
+              class="rounded-circle bg-warning text-white d-flex align-items-center justify-content-center me-3"
+              style="width: 50px; height: 50px"
+            >
+              <span class="fw-bold">EO</span>
+            </div>
+            <div>
+              <h6 class="mb-0">Esther O.</h6>
+              <small class="text-muted">Electrician</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4 mb-4">
+        <div class="testimonial h-100">
+          <p class="mb-4">
+            "As a new handyman service, HomeHub helped me establish my business
+            quickly. The reviews I've received have brought in even more
+            clients."
+          </p>
+          <div class="d-flex align-items-center">
+            <div
+              class="rounded-circle bg-warning text-white d-flex align-items-center justify-content-center me-3"
+              style="width: 50px; height: 50px"
+            >
+              <span class="fw-bold">JO</span>
+            </div>
+            <div>
+              <h6 class="mb-0">John O.</h6>
+              <small class="text-muted">Handyman Service</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section id="signup" class="cta-section">
+  <div class="container text-center">
+    <h2 class="mb-4">Ready to Grow Your Service Business?</h2>
+    <p class="lead mb-5">
+      Join hundreds of service providers in Kisumu who are expanding their
+      businesses through HomeHub
+    </p>
+    <a href="#" class="btn btn-dark btn-lg px-4 me-2">Sign Up Free</a>
+    <a href="#" class="btn btn-outline-dark btn-lg px-4">Learn More</a>
+  </div>
+</section>
+{% endblock %}

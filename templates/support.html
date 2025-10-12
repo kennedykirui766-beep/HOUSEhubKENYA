@@ -1,0 +1,400 @@
+{% extends 'base.html' %} {% block title %}Support{% endblock %} {% block
+content %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Support</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <style>
+      .error-message {
+        color: #b22222; /* Red Clay for errors */
+        font-size: 0.9em;
+        display: none;
+      }
+      .notifications .alert-success {
+        background-color: #4a90e2; /* Sky Blue for success */
+        color: white;
+      }
+      .notifications .alert-danger {
+        background-color: #b22222; /* Red Clay for errors */
+        color: white;
+      }
+      .btn-primary {
+        background-color: #3d8b40; /* Acacia Green */
+        border-color: #3d8b40;
+      }
+      .btn-link {
+        color: #f28c38; /* Sunset Orange */
+      }
+      .language-toggle {
+        background-color: #3d8b40; /* Acacia Green */
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+      }
+      .support-sidebar {
+        background-color: #f5e8c7; /* Savanna Beige */
+        padding: 15px;
+        border-radius: 5px;
+        margin-top: 20px;
+      }
+      .accordion-button {
+        background-color: #f5e8c7; /* Savanna Beige */
+        color: #3d8b40; /* Acacia Green */
+      }
+      .accordion-button:not(.collapsed) {
+        background-color: #3d8b40; /* Acacia Green */
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1
+        style="color: #3d8b40"
+        data-en="Support Center"
+        data-sw="Kituo cha Usaidizi"
+      >
+        Support Center
+      </h1>
+      <p
+        data-en="We're here to help! Contact us or check our FAQs below."
+        data-sw="Tuko hapa kukusaidia! Wasiliana nasi au angalia Maswali Yanayoulizwa Mara kwa Mara hapa chini."
+      >
+        We're here to help! Contact us or check our FAQs below.
+      </p>
+
+      <section class="notifications">
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %} {% for category, message in messages %}
+        <div
+          class="alert alert-{{ 'danger' if category == 'error' else 'success' }}"
+        >
+          {{ message }}
+        </div>
+        {% endfor %} {% endif %} {% endwith %}
+      </section>
+
+      <div class="row">
+        <div class="col-md-8">
+          <h3 data-en="Contact Us" data-sw="Wasiliana Nasi">Contact Us</h3>
+          <form
+            method="POST"
+            action="{{ url_for('auth.support') }}"
+            id="supportForm"
+          >
+            <div class="mb-3">
+              <label
+                for="name"
+                class="form-label"
+                data-en="Full Name"
+                data-sw="Jina Kamili"
+                >Full Name</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                name="name"
+                id="name"
+                placeholder="Your Name"
+                required
+              />
+              <p id="nameError" class="error-message">
+                Please enter your full name.
+              </p>
+            </div>
+            <div class="mb-3">
+              <label
+                for="email"
+                class="form-label"
+                data-en="Email"
+                data-sw="Barua Pepe"
+                >Email</label
+              >
+              <input
+                type="email"
+                class="form-control"
+                name="email"
+                id="email"
+                placeholder="example@email.com"
+                required
+              />
+              <p id="emailError" class="error-message">
+                Please enter a valid email address.
+              </p>
+            </div>
+            <div class="mb-3">
+              <label
+                for="message"
+                class="form-label"
+                data-en="Message"
+                data-sw="Ujumbe"
+                >Message</label
+              >
+              <textarea
+                class="form-control"
+                name="message"
+                id="message"
+                rows="5"
+                placeholder="Describe your issue or question"
+                required
+              ></textarea>
+              <p id="messageError" class="error-message">
+                Please enter a message.
+              </p>
+            </div>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              data-en="Submit Request"
+              data-sw="Tuma Ombi"
+            >
+              Submit Request
+            </button>
+          </form>
+
+          <h3
+            class="mt-5"
+            data-en="Frequently Asked Questions"
+            data-sw="Maswali Yanayoulizwa Mara kwa Mara"
+          >
+            Frequently Asked Questions
+          </h3>
+          <div class="accordion" id="faqAccordion">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="faq1">
+                <button
+                  class="accordion-button"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapse1"
+                  aria-expanded="true"
+                  aria-controls="collapse1"
+                  data-en="How do I reset my password?"
+                  data-sw="Je, ninawezaje kuweka upya nenosiri langu?"
+                >
+                  How do I reset my password?
+                </button>
+              </h2>
+              <div
+                id="collapse1"
+                class="accordion-collapse collapse show"
+                aria-labelledby="faq1"
+                data-bs-parent="#faqAccordion"
+              >
+                <div
+                  class="accordion-body"
+                  data-en="Go to the Forgot Password page, enter your email or phone number, and follow the reset link sent to you."
+                  data-sw="Nenda kwenye ukurasa wa Kusahau Nenosiri, ingiza barua pepe au nambari ya simu, na fuata kiungo cha kuweka upya kilichotumwa kwako."
+                >
+                  Go to the Forgot Password page, enter your email or phone
+                  number, and follow the reset link sent to you.
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="faq2">
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapse2"
+                  aria-expanded="false"
+                  aria-controls="collapse2"
+                  data-en="How do I update my profile?"
+                  data-sw="Je, ninawezaje kusasisha wasifu wangu?"
+                >
+                  How do I update my profile?
+                </button>
+              </h2>
+              <div
+                id="collapse2"
+                class="accordion-collapse collapse"
+                aria-labelledby="faq2"
+                data-bs-parent="#faqAccordion"
+              >
+                <div
+                  class="accordion-body"
+                  data-en="Log in, go to your profile page, and update your details in the provided form."
+                  data-sw="Ingia, nenda kwenye ukurasa wa wasifu wako, na usasishe maelezo yako kwenye fomu iliyotolewa."
+                >
+                  Log in, go to your profile page, and update your details in
+                  the provided form.
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="faq3">
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapse3"
+                  aria-expanded="false"
+                  aria-controls="collapse3"
+                  data-en="How can I contact a landlord?"
+                  data-sw="Je, ninawezaje kuwasiliana na mwenye nyumba?"
+                >
+                  How can I contact a landlord?
+                </button>
+              </h2>
+              <div
+                id="collapse3"
+                class="accordion-collapse collapse"
+                aria-labelledby="faq3"
+                data-bs-parent="#faqAccordion"
+              >
+                <div
+                  class="accordion-body"
+                  data-en="Tenants can contact landlords via the messaging feature in the tenant dashboard."
+                  data-sw="Wapangaji wanaweza kuwasiliana na wamiliki wa nyumba kupitia kipengele cha kutuma ujumbe kwenye dashibodi ya mpangaji."
+                >
+                  Tenants can contact landlords via the messaging feature in the
+                  tenant dashboard.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <aside class="support-sidebar">
+            <h4 data-en="Contact Information" data-sw="Maelezo ya Mawasiliano">
+              Contact Information
+            </h4>
+            <p>
+              <i class="bi bi-envelope"></i>
+              <a
+                href="mailto:support@homehub.com"
+                data-en="support@homehub.com"
+                data-sw="support@homehub.com"
+                >support@homehub.com</a
+              >
+            </p>
+            <p>
+              <i class="bi bi-telephone"></i>
+              <span data-en="+254 700 123 456" data-sw="+254 700 123 456"
+                >+254 700 123 456</span
+              >
+            </p>
+            <p>
+              <i class="bi bi-chat"></i>
+              <a
+                href="#"
+                id="liveChat"
+                data-en="Live Chat (Coming Soon)"
+                data-sw="Gumzo la Moja kwa Moja (Linakuja Hivi Karibuni)"
+                >Live Chat (Coming Soon)</a
+              >
+            </p>
+          </aside>
+        </div>
+      </div>
+
+      <p class="mt-3">
+        <a
+          href="{{ url_for('auth.login') }}"
+          class="btn btn-link"
+          data-en="Back to Login"
+          data-sw="Rudi kwenye Kuingia"
+          >Back to Login</a
+        >
+      </p>
+      <p class="mt-3">
+        <a
+          href="{{ url_for('root') }}"
+          class="btn btn-link"
+          data-en="Back to Home"
+          data-sw="Rudi Nyumbani"
+          >Back to Home</a
+        >
+      </p>
+      <button
+        class="language-toggle"
+        onclick="toggleLanguage()"
+        data-en="Switch to Swahili"
+        data-sw="Badili kwa Kiswahili"
+      >
+        Switch to Swahili
+      </button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      function toggleLanguage() {
+        const elements = document.querySelectorAll("[data-en][data-sw]");
+        const button = document.querySelector(".language-toggle");
+        const isSwahili =
+          button.getAttribute("data-en") === "Switch to Swahili";
+        elements.forEach((element) => {
+          element.textContent = isSwahili
+            ? element.getAttribute("data-sw")
+            : element.getAttribute("data-en");
+        });
+        button.textContent = isSwahili
+          ? button.getAttribute("data-sw")
+          : button.getAttribute("data-en");
+        button.setAttribute(
+          "data-en",
+          isSwahili ? "Switch to English" : "Switch to Swahili"
+        );
+        button.setAttribute(
+          "data-sw",
+          isSwahili ? "Badili kwa Kiingereza" : "Badili kwa Kiswahili"
+        );
+      }
+
+      document
+        .getElementById("supportForm")
+        .addEventListener("submit", function (event) {
+          const name = document.getElementById("name").value;
+          const email = document.getElementById("email").value;
+          const message = document.getElementById("message").value;
+          const nameError = document.getElementById("nameError");
+          const emailError = document.getElementById("emailError");
+          const messageError = document.getElementById("messageError");
+          let isValid = true;
+
+          // Validate name
+          if (!name.trim()) {
+            nameError.style.display = "block";
+            isValid = false;
+          } else {
+            nameError.style.display = "none";
+          }
+
+          // Validate email
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(email)) {
+            emailError.style.display = "block";
+            isValid = false;
+          } else {
+            emailError.style.display = "none";
+          }
+
+          // Validate message
+          if (!message.trim()) {
+            messageError.style.display = "block";
+            isValid = false;
+          } else {
+            messageError.style.display = "none";
+          }
+
+          if (!isValid) {
+            event.preventDefault();
+            console.log("Form submission prevented due to validation errors");
+          } else {
+            console.log("Form validation passed, submitting...");
+          }
+        });
+    </script>
+  </body>
+</html>
+{% endblock %}

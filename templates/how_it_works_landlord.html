@@ -1,0 +1,473 @@
+{% extends "base.html" %} {% block title %}How It Works - Landlord{% endblock %}
+{% block content %}
+<style>
+  :root {
+    --primary: #4361ee;
+    --primary-dark: #3a0ca3;
+    --secondary: #7209b7;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --success: #06ffa5;
+    --info: #00b4d8;
+  }
+
+  .hero-section {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 5rem 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+    background-size: cover;
+  }
+
+  .feature-icon {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto 1.5rem;
+    font-size: 1.8rem;
+    color: white;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  }
+
+  .step-card {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    height: 100%;
+  }
+
+  .step-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+  }
+
+  .step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 1rem;
+  }
+
+  .benefit-card {
+    border-left: 4px solid var(--primary);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    background: var(--light);
+    border-radius: 0 10px 10px 0;
+    transition: all 0.3s ease;
+  }
+
+  .benefit-card:hover {
+    background: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  }
+
+  .testimonial {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    position: relative;
+  }
+
+  .testimonial::before {
+    content: """;
+    position: absolute;
+    top: 1rem;
+    left: 1.5rem;
+    font-size: 4rem;
+    color: rgba(67, 97, 238, 0.1);
+    font-family: serif;
+  }
+
+  .cta-section {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 4rem 0;
+    border-radius: 15px;
+    margin-top: 4rem;
+  }
+
+  @media (max-width: 768px) {
+    .hero-section {
+      padding: 3rem 0;
+    }
+  }
+</style>
+
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container text-center position-relative">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <h1 class="display-4 fw-bold mb-4">HomeHub for Landlords</h1>
+        <p class="lead mb-5">
+          Streamline your property management, find quality tenants, and
+          maximize your rental income with our comprehensive platform
+        </p>
+        <a href="#features" class="btn btn-light btn-lg px-4 me-2"
+          >Explore Features</a
+        >
+        <a href="#signup" class="btn btn-outline-light btn-lg px-4"
+          >Get Started</a
+        >
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="py-5">
+  <div class="container">
+    <h2 class="text-center mb-5">Why Landlords Choose HomeHub</h2>
+
+    <div class="row">
+      <div class="col-md-6 col-lg-4">
+        <div class="benefit-card">
+          <div class="d-flex align-items-center mb-3">
+            <div class="feature-icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <h4 class="ms-3">Maximize Revenue</h4>
+          </div>
+          <p>
+            Optimize pricing with market insights and reduce vacancy rates with
+            our tenant matching system.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="benefit-card">
+          <div class="d-flex align-items-center mb-3">
+            <div class="feature-icon">
+              <i class="fas fa-clock"></i>
+            </div>
+            <h4 class="ms-3">Save Time</h4>
+          </div>
+          <p>
+            Automate rent collection, maintenance requests, and communications
+            to free up your schedule.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="benefit-card">
+          <div class="d-flex align-items-center mb-3">
+            <div class="feature-icon">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <h4 class="ms-3">Reduce Risk</h4>
+          </div>
+          <p>
+            Screen tenants thoroughly with background checks and digital lease
+            agreements for legal protection.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works Section -->
+<section id="features" class="py-5 bg-light">
+  <div class="container">
+    <h2 class="text-center mb-5">How HomeHub Works for Landlords</h2>
+
+    <div class="row g-4">
+      <!-- Step 1 -->
+      <div class="col-md-6 col-lg-3">
+        <div class="step-card">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-3">
+              <div class="step-number">1</div>
+              <h4 class="card-title">Create Account</h4>
+            </div>
+            <div class="text-center mb-3">
+              <div class="feature-icon">
+                <i class="fas fa-user-plus"></i>
+              </div>
+            </div>
+            <p class="card-text">
+              Sign up as a landlord with your property details and verification
+              documents.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="col-md-6 col-lg-3">
+        <div class="step-card">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-3">
+              <div class="step-number">2</div>
+              <h4 class="card-title">List Properties</h4>
+            </div>
+            <div class="text-center mb-3">
+              <div class="feature-icon">
+                <i class="fas fa-home"></i>
+              </div>
+            </div>
+            <p class="card-text">
+              Add your properties with photos, descriptions, amenities, and
+              rental terms.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="col-md-6 col-lg-3">
+        <div class="step-card">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-3">
+              <div class="step-number">3</div>
+              <h4 class="card-title">Manage Tenants</h4>
+            </div>
+            <div class="text-center mb-3">
+              <div class="feature-icon">
+                <i class="fas fa-users"></i>
+              </div>
+            </div>
+            <p class="card-text">
+              Review applications, screen tenants, and manage leases through our
+              platform.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="col-md-6 col-lg-3">
+        <div class="step-card">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-3">
+              <div class="step-number">4</div>
+              <h4 class="card-title">Grow Business</h4>
+            </div>
+            <div class="text-center mb-3">
+              <div class="feature-icon">
+                <i class="fas fa-chart-bar"></i>
+              </div>
+            </div>
+            <p class="card-text">
+              Track performance, collect rent, and expand your property
+              portfolio.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Key Features Section -->
+<section class="py-5">
+  <div class="container">
+    <h2 class="text-center mb-5">Key Features for Landlords</h2>
+
+    <div class="row">
+      <div class="col-lg-6 mb-4">
+        <div class="d-flex align-items-start">
+          <div class="feature-icon me-4">
+            <i class="fas fa-building"></i>
+          </div>
+          <div>
+            <h4>Property Management</h4>
+            <p>
+              List unlimited properties, track occupancy, and manage all details
+              from one dashboard.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6 mb-4">
+        <div class="d-flex align-items-start">
+          <div class="feature-icon me-4">
+            <i class="fas fa-user-check"></i>
+          </div>
+          <div>
+            <h4>Tenant Screening</h4>
+            <p>
+              Access comprehensive background checks, credit reports, and rental
+              history to find reliable tenants.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6 mb-4">
+        <div class="d-flex align-items-start">
+          <div class="feature-icon me-4">
+            <i class="fas fa-file-contract"></i>
+          </div>
+          <div>
+            <h4>Digital Leases</h4>
+            <p>
+              Create, sign, and store lease agreements digitally with
+              customizable templates.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6 mb-4">
+        <div class="d-flex align-items-start">
+          <div class="feature-icon me-4">
+            <i class="fas fa-money-bill-wave"></i>
+          </div>
+          <div>
+            <h4>Rent Collection</h4>
+            <p>
+              Automate rent payments, send reminders, and track payment history
+              with detailed reports.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6 mb-4">
+        <div class="d-flex align-items-start">
+          <div class="feature-icon me-4">
+            <i class="fas fa-tools"></i>
+          </div>
+          <div>
+            <h4>Maintenance Management</h4>
+            <p>
+              Receive, track, and resolve maintenance requests with our
+              integrated ticketing system.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6 mb-4">
+        <div class="d-flex align-items-start">
+          <div class="feature-icon me-4">
+            <i class="fas fa-chart-pie"></i>
+          </div>
+          <div>
+            <h4>Financial Reporting</h4>
+            <p>
+              Generate income statements, expense reports, and tax documents
+              with just a few clicks.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <h2 class="text-center mb-5">What Landlords Say About HomeHub</h2>
+
+    <div class="row">
+      <div class="col-lg-4 mb-4">
+        <div class="testimonial h-100">
+          <p class="mb-4">
+            "HomeHub has transformed how I manage my 12 properties. I've reduced
+            vacancy rates by 30% and saved hours of administrative work each
+            week."
+          </p>
+          <div class="d-flex align-items-center">
+            <div
+              class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3"
+              style="width: 50px; height: 50px"
+            >
+              <span class="fw-bold">AK</span>
+            </div>
+            <div>
+              <h6 class="mb-0">Amina K.</h6>
+              <small class="text-muted">Landlord in Mombasa</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4 mb-4">
+        <div class="testimonial h-100">
+          <p class="mb-4">
+            "The tenant screening feature is invaluable. I've found reliable
+            tenants who pay on time and take care of my properties. Highly
+            recommended!"
+          </p>
+          <div class="d-flex align-items-center">
+            <div
+              class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3"
+              style="width: 50px; height: 50px"
+            >
+              <span class="fw-bold">JO</span>
+            </div>
+            <div>
+              <h6 class="mb-0">Joseph O.</h6>
+              <small class="text-muted">Property Investor</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4 mb-4">
+        <div class="testimonial h-100">
+          <p class="mb-4">
+            "As a new landlord, HomeHub made everything so simple. The
+            step-by-step guidance and automated features helped me avoid common
+            mistakes."
+          </p>
+          <div class="d-flex align-items-center">
+            <div
+              class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3"
+              style="width: 50px; height: 50px"
+            >
+              <span class="fw-bold">SM</span>
+            </div>
+            <div>
+              <h6 class="mb-0">Sarah M.</h6>
+              <small class="text-muted">First-time Landlord</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section id="signup" class="cta-section">
+  <div class="container text-center">
+    <h2 class="mb-4">Ready to Transform Your Property Management?</h2>
+    <p class="lead mb-5">
+      Join thousands of landlords already benefiting from HomeHub's
+      comprehensive platform
+    </p>
+    <a href="#" class="btn btn-light btn-lg px-4 me-2">Sign Up Free</a>
+    <a href="#" class="btn btn-outline-light btn-lg px-4">Schedule Demo</a>
+  </div>
+</section>
+{% endblock %}

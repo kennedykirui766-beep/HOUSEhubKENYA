@@ -1,0 +1,986 @@
+{% extends 'base.html' %} {% block title %}HomeHub | Add Property{% endblock %}
+{% block content %}
+<div class="container dashboard-container">
+  <!-- Flashed Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %} {% if
+  messages %} {% for category, message in messages %}
+  <div
+    class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show"
+    role="alert"
+  >
+    {{ message }}
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="alert"
+      aria-label="Close"
+    ></button>
+  </div>
+  {% endfor %} {% endif %} {% endwith %}
+
+  <!-- Page Header with Contextual Guidance -->
+  <header class="mb-4" aria-label="Page header">
+    <h1 class="fw-bold" style="color: #4caf50; font-size: 2rem">
+      List Your Property on HomeHub
+    </h1>
+    <p class="text-muted">
+      Fill out the details below to attract tenants quickly.
+    </p>
+  </header>
+
+  <div class="row">
+    <!-- Main Form Section -->
+    <div class="col-lg-8">
+      <section class="mb-5" aria-label="Add new property">
+        <h2 class="fw-bold mb-4" style="color: #4caf50; font-size: 1.8rem">
+          Add a New Property
+        </h2>
+        <!-- Progress Indicator -->
+        <div
+          class="progress mb-4"
+          role="progressbar"
+          aria-label="Form progress"
+          aria-valuenow="33"
+          aria-valuemin="0"
+          aria-valuemax="100"
+        >
+          <div class="progress-bar" style="width: 33%" id="progressBar">
+            Step 1: Details
+          </div>
+        </div>
+        <div class="card p-4 bg-dark text-light" style="border-radius: 10px">
+          <form
+            id="addPropertyForm"
+            enctype="multipart/form-data"
+            method="POST"
+            action="{{ url_for('landlord.add_property') }}"
+            aria-label="Add new property"
+          >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <!-- Property Details -->
+            <div class="mb-3">
+              <h5 class="text-info mb-2">Property Name</h5>
+              <input
+                type="text"
+                class="form-control bg-secondary text-light"
+                id="propertyName"
+                name="title"
+                required
+                placeholder="e.g., Cozy Apartment"
+                aria-required="true"
+              />
+              <div class="invalid-feedback">Please enter a property name.</div>
+            </div>
+            <div class="mb-3">
+              <h5 class="text-info mb-2">Address</h5>
+              <input
+                type="text"
+                class="form-control bg-secondary text-light"
+                id="addressLine1"
+                name="address_line1"
+                required
+                placeholder="e.g., 123 Main St"
+                aria-required="true"
+              />
+              <div class="invalid-feedback">
+                Please enter a valid street address.
+              </div>
+            </div>
+            <div class="mb-3">
+              <input
+                type="text"
+                class="form-control bg-secondary text-light"
+                id="addressLine2"
+                name="address_line2"
+                placeholder="e.g., Apt 4B"
+              />
+            </div>
+            <div class="mb-3">
+              <input
+                type="text"
+                class="form-control bg-secondary text-light"
+                id="city"
+                name="city"
+                required
+                placeholder="e.g., New York"
+                aria-required="true"
+              />
+              <div class="invalid-feedback">Please enter a city.</div>
+            </div>
+            <div class="mb-3">
+              <input
+                type="text"
+                class="form-control bg-secondary text-light"
+                id="stateProvince"
+                name="state_province"
+                required
+                placeholder="e.g., NY"
+                aria-required="true"
+              />
+              <div class="invalid-feedback">
+                Please enter a state or province.
+              </div>
+            </div>
+            <div class="mb-3">
+              <input
+                type="text"
+                class="form-control bg-secondary text-light"
+                id="postalCode"
+                name="postal_code"
+                required
+                placeholder="e.g., 10001"
+                aria-required="true"
+              />
+              <div class="invalid-feedback">
+                Please enter a valid postal/ZIP code.
+              </div>
+            </div>
+            <div class="mb-3">
+              <select
+                class="form-control bg-secondary text-light"
+                id="country"
+                name="country"
+                required
+                aria-required="true"
+              >
+                <option value="" disabled selected>Select country</option>
+                <option value="United States">United States</option>
+                <option value="Canada">Canada</option>
+                <option value="Kenya">Kenya</option>
+              </select>
+              <div class="invalid-feedback">Please select a country.</div>
+            </div>
+            <div class="mb-3">
+              <h5 class="text-info mb-2">Rent Amount (KSH/month)</h5>
+              <input
+                type="number"
+                class="form-control bg-secondary text-light"
+                id="rentAmount"
+                name="rent_amount"
+                required
+                min="0"
+                step="0.01"
+                placeholder="e.g., 50000"
+                aria-required="true"
+              />
+              <div class="invalid-feedback">
+                Please enter a valid rent amount.
+              </div>
+            </div>
+            <div class="mb-3">
+              <h5 class="text-info mb-2">Property Type</h5>
+              <select
+                class="form-control bg-secondary text-light"
+                id="propertyType"
+                name="property_type"
+                required
+                aria-required="true"
+              >
+                <option value="" disabled selected>Select property type</option>
+                <option value="Apartment">Apartment</option>
+                <option value="House">House</option>
+                <option value="Condo">Condo</option>
+                <option value="Townhouse">Townhouse</option>
+              </select>
+              <div class="invalid-feedback">Please select a property type.</div>
+            </div>
+            <div class="mb-3">
+              <h5 class="text-info mb-2">Description</h5>
+              <textarea
+                class="form-control bg-secondary text-light"
+                id="propertyDescription"
+                name="description"
+                rows="4"
+                required
+                placeholder="e.g., Modern 2-bedroom apartment with balcony"
+                maxlength="500"
+                aria-required="true"
+              ></textarea>
+              <small class="text-muted" id="charCount">0/500 characters</small>
+              <div class="invalid-feedback">Please provide a description.</div>
+            </div>
+            <div class="mb-3">
+              <h5 class="text-info mb-2">Upload Images (max 5, JPG/PNG)</h5>
+              <input
+                type="file"
+                class="form-control bg-secondary text-light"
+                id="propertyImages"
+                name="images"
+                accept="image/jpeg,image/png"
+                multiple
+                aria-describedby="imageHelp"
+              />
+              <small id="imageHelp" class="text-muted"
+                >Upload up to 5 images (JPG or PNG, max 5MB each).</small
+              >
+              <div class="invalid-feedback">
+                Please upload valid images (JPG/PNG, max 5).
+              </div>
+              <div id="imagePreview" class="mt-2 d-flex flex-wrap gap-2"></div>
+            </div>
+            <div class="mb-3">
+              <h5 class="text-info mb-2">Bedrooms</h5>
+              <input
+                type="number"
+                class="form-control bg-secondary text-light"
+                id="bedrooms"
+                name="bedrooms"
+                required
+                min="0"
+                placeholder="e.g., 2"
+                aria-required="true"
+              />
+              <div class="invalid-feedback">
+                Please enter the number of bedrooms.
+              </div>
+            </div>
+            <div class="mb-3">
+              <h5 class="text-info mb-2">Bathrooms</h5>
+              <input
+                type="number"
+                class="form-control bg-secondary text-light"
+                id="bathrooms"
+                name="bathrooms"
+                required
+                min="0"
+                step="0.5"
+                placeholder="e.g., 1.5"
+                aria-required="true"
+              />
+              <div class="invalid-feedback">
+                Please enter the number of bathrooms.
+              </div>
+            </div>
+            <div class="mb-3">
+              <h5 class="text-info mb-2">Square Footage</h5>
+              <input
+                type="number"
+                class="form-control bg-secondary text-light"
+                id="squareFootage"
+                name="square_footage"
+                min="0"
+                placeholder="e.g., 1000"
+              />
+            </div>
+            <div class="mb-3">
+              <h5 class="text-info mb-2">Lease Term</h5>
+              <select
+                class="form-control bg-secondary text-light"
+                id="leaseTerm"
+                name="lease_term"
+                required
+                aria-required="true"
+              >
+                <option value="" disabled selected>Select lease term</option>
+                <option value="6 months">6 months</option>
+                <option value="12 months">12 months</option>
+                <option value="24 months">24 months</option>
+              </select>
+              <div class="invalid-feedback">Please select a lease term.</div>
+            </div>
+            <div class="mb-3">
+              <h5 class="text-info mb-2">Availability Date</h5>
+              <input
+                type="date"
+                class="form-control bg-secondary text-light"
+                id="availabilityDate"
+                name="availability_date"
+                required
+                placeholder="e.g., 2025-09-01"
+                aria-required="true"
+              />
+              <div class="invalid-feedback">
+                Please select an availability date.
+              </div>
+            </div>
+            <div class="mb-3">
+              <h5 class="text-info mb-2">Utilities Included</h5>
+              <div class="form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="utilityWater"
+                  name="utilities"
+                  value="Water"
+                />
+                <label class="form-check-label text-light" for="utilityWater"
+                  >Water</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="utilityElectricity"
+                  name="utilities"
+                  value="Electricity"
+                />
+                <label
+                  class="form-check-label text-light"
+                  for="utilityElectricity"
+                  >Electricity</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="utilityGas"
+                  name="utilities"
+                  value="Gas"
+                />
+                <label class="form-check-label text-light" for="utilityGas"
+                  >Gas</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="utilityInternet"
+                  name="utilities"
+                  value="Internet"
+                />
+                <label class="form-check-label text-light" for="utilityInternet"
+                  >Internet</label
+                >
+              </div>
+            </div>
+            <div class="mb-3">
+              <h5 class="text-info mb-2">Pets Allowed</h5>
+              <div class="form-check">
+                <input
+                  type="radio"
+                  class="form-check-input"
+                  id="petsYes"
+                  name="pets_allowed"
+                  value="Yes"
+                />
+                <label class="form-check-label text-light" for="petsYes"
+                  >Yes</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  type="radio"
+                  class="form-check-input"
+                  id="petsNo"
+                  name="pets_allowed"
+                  value="No"
+                  checked
+                />
+                <label class="form-check-label text-light" for="petsNo"
+                  >No</label
+                >
+              </div>
+              <input
+                type="text"
+                class="form-control bg-secondary text-light mt-2"
+                id="petRestrictions"
+                name="pet_restrictions"
+                placeholder="e.g., Small dogs only"
+              />
+            </div>
+            <div class="mb-3">
+              <h5 class="text-info mb-2">Parking Availability</h5>
+              <select
+                class="form-control bg-secondary text-light"
+                id="parkingAvailability"
+                name="parking_availability"
+              >
+                <option value="None" selected>None</option>
+                <option value="Street Parking">Street Parking</option>
+                <option value="Garage">Garage</option>
+                <option value="Driveway">Driveway</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <h5 class="text-info mb-2">Furnished Status</h5>
+              <div class="form-check">
+                <input
+                  type="radio"
+                  class="form-check-input"
+                  id="furnishedFully"
+                  name="furnished_status"
+                  value="Fully Furnished"
+                />
+                <label class="form-check-label text-light" for="furnishedFully"
+                  >Fully Furnished</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  type="radio"
+                  class="form-check-input"
+                  id="furnishedPartially"
+                  name="furnished_status"
+                  value="Partially Furnished"
+                />
+                <label
+                  class="form-check-label text-light"
+                  for="furnishedPartially"
+                  >Partially Furnished</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  type="radio"
+                  class="form-check-input"
+                  id="furnishedUnfurnished"
+                  name="furnished_status"
+                  value="Unfurnished"
+                  checked
+                />
+                <label
+                  class="form-check-label text-light"
+                  for="furnishedUnfurnished"
+                  >Unfurnished</label
+                >
+              </div>
+            </div>
+            <div class="mb-3">
+              <h5 class="text-info mb-2">Amenities</h5>
+              <div class="form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="amenityAC"
+                  name="amenities"
+                  value="Air Conditioning"
+                />
+                <label class="form-check-label text-light" for="amenityAC"
+                  >Air Conditioning</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="amenityWasherDryer"
+                  name="amenities"
+                  value="Washer/Dryer"
+                />
+                <label
+                  class="form-check-label text-light"
+                  for="amenityWasherDryer"
+                  >Washer/Dryer</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="amenityBalcony"
+                  name="amenities"
+                  value="Balcony"
+                />
+                <label class="form-check-label text-light" for="amenityBalcony"
+                  >Balcony</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="amenityGym"
+                  name="amenities"
+                  value="Gym"
+                />
+                <label class="form-check-label text-light" for="amenityGym"
+                  >Gym</label
+                >
+              </div>
+            </div>
+            <div class="mb-3">
+              <h5 class="text-info mb-2">Security Deposit</h5>
+              <input
+                type="number"
+                class="form-control bg-secondary text-light"
+                id="securityDeposit"
+                name="security_deposit"
+                min="0"
+                step="0.01"
+                placeholder="e.g., 1500.00"
+              />
+            </div>
+            <div class="mb-3">
+              <h5 class="text-info mb-2">Smoking Policy</h5>
+              <div class="form-check">
+                <input
+                  type="radio"
+                  class="form-check-input"
+                  id="smokingAllowed"
+                  name="smoking_policy"
+                  value="Smoking Allowed"
+                />
+                <label class="form-check-label text-light" for="smokingAllowed"
+                  >Smoking Allowed</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  type="radio"
+                  class="form-check-input"
+                  id="smokingNon"
+                  name="smoking_policy"
+                  value="Non-Smoking"
+                  checked
+                />
+                <label class="form-check-label text-light" for="smokingNon"
+                  >Non-Smoking</label
+                >
+              </div>
+            </div>
+            <div class="mb-3">
+              <h5 class="text-info mb-2">Accessibility Features</h5>
+              <div class="form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="accessWheelchair"
+                  name="accessibility_features"
+                  value="Wheelchair Access"
+                />
+                <label
+                  class="form-check-label text-light"
+                  for="accessWheelchair"
+                  >Wheelchair Access</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="accessElevator"
+                  name="accessibility_features"
+                  value="Elevator"
+                />
+                <label class="form-check-label text-light" for="accessElevator"
+                  >Elevator</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="accessGrabBars"
+                  name="accessibility_features"
+                  value="Grab Bars"
+                />
+                <label class="form-check-label text-light" for="accessGrabBars"
+                  >Grab Bars</label
+                >
+              </div>
+            </div>
+            <!-- Form Buttons -->
+            <div class="d-flex gap-2">
+              <button
+                type="submit"
+                class="btn btn-success flex-grow-1"
+                id="submitProperty"
+                aria-label="List property"
+              >
+                List Property
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                id="saveDraft"
+                aria-label="Save as draft"
+              >
+                Save as Draft
+              </button>
+              <a
+                href="{{ url_for('landlord.dashboard') }}"
+                class="btn btn-outline-light"
+                aria-label="Cancel and return to dashboard"
+                >Cancel</a
+              >
+            </div>
+          </form>
+          <div
+            id="addPropertyFeedback"
+            class="alert mt-3"
+            style="display: none"
+          ></div>
+        </div>
+      </section>
+      <!-- Notifications Section -->
+      <section class="mb-5" aria-label="Recent activity">
+        <h5 class="text-info mb-3">Recent Activity</h5>
+        <div id="recentActivity" class="text-muted">
+          <p>No recent activity.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- Sidebar with Tips and Preview -->
+    <div class="col-lg-4">
+      <!-- Tips Sidebar -->
+      <aside class="mb-5" aria-label="Listing tips">
+        <h5 class="fw-bold mb-3" style="color: #4caf50">
+          Tips for a Great Listing
+        </h5>
+        <div class="card p-3 bg-dark text-light">
+          <ul class="list-unstyled">
+            <li class="mb-2">
+              📸 Use high-quality images to showcase your property.
+            </li>
+            <li class="mb-2">
+              ✍️ Write clear, detailed descriptions to attract tenants.
+            </li>
+            <li class="mb-2">
+              💰 Set competitive rent prices based on market rates.
+            </li>
+          </ul>
+          <button
+            class="btn btn-link text-info p-0"
+            id="toggleTips"
+            aria-expanded="true"
+          >
+            Hide Tips
+          </button>
+        </div>
+      </aside>
+      <!-- Preview Section -->
+      <section aria-label="Property preview">
+        <h5 class="fw-bold mb-3" style="color: #4caf50">Listing Preview</h5>
+        <div class="card p-3 bg-dark text-light" id="listingPreview">
+          <h6 id="previewTitle">Property Name</h6>
+          <p id="previewAddressLine1">Address Line 1</p>
+          <p id="previewAddressLine2">Address Line 2</p>
+          <p id="previewCity">City</p>
+          <p id="previewStateProvince">State/Province</p>
+          <p id="previewPostalCode">Postal/ZIP Code</p>
+          <p id="previewCountry">Country</p>
+          <p id="previewRent">Rent Amount</p>
+          <p id="previewType">Property Type</p>
+          <p id="previewDescription">Description</p>
+          <p id="previewBedrooms">Bedrooms</p>
+          <p id="previewBathrooms">Bathrooms</p>
+          <p id="previewSquareFootage">Square Footage</p>
+          <p id="previewLeaseTerm">Lease Term</p>
+          <p id="previewAvailabilityDate">Availability Date</p>
+          <p id="previewUtilities">Utilities Included</p>
+          <p id="previewPets">Pets Allowed</p>
+          <p id="previewParking">Parking Availability</p>
+          <p id="previewFurnished">Furnished Status</p>
+          <p id="previewAmenities">Amenities</p>
+          <p id="previewSecurityDeposit">Security Deposit</p>
+          <p id="previewSmokingPolicy">Smoking Policy</p>
+          <p id="previewAccessibility">Accessibility Features</p>
+          <div id="previewImages" class="d-flex flex-wrap gap-2"></div>
+        </div>
+      </section>
+      <!-- Help Link -->
+      <div class="mt-3">
+        <a
+          href="/support"
+          class="btn btn-link text-info"
+          aria-label="Get support"
+          >Need Help?</a
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Landlord Access Badge -->
+  <div
+    class="position-fixed bottom-0 end-0 m-3"
+    aria-label="Landlord access indicator"
+  >
+    <span class="badge bg-success">Landlord Access Only</span>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdlZxGxvJ3/4sk7Lg"
+  crossorigin="anonymous"
+></script>
+<!-- Custom JavaScript -->
+<script src="{{ url_for('static', filename='scripts.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('addPropertyForm');
+      const feedback = document.getElementById('addPropertyFeedback');
+      const submitButton = document.getElementById('submitProperty');
+      const saveDraftButton = document.getElementById('saveDraft');
+      const toggleTipsButton = document.getElementById('toggleTips');
+      const tipsCard = toggleTipsButton.parentElement;
+      const progressBar = document.getElementById('progressBar');
+      const preview = {
+        title: document.getElementById('previewTitle'),
+        addressLine1: document.getElementById('previewAddressLine1'),
+        addressLine2: document.getElementById('previewAddressLine2'),
+        city: document.getElementById('previewCity'),
+        stateProvince: document.getElementById('previewStateProvince'),
+        postalCode: document.getElementById('previewPostalCode'),
+        country: document.getElementById('previewCountry'),
+        rent: document.getElementById('previewRent'),
+        type: document.getElementById('previewType'),
+        description: document.getElementById('previewDescription'),
+        bedrooms: document.getElementById('previewBedrooms'),
+        bathrooms: document.getElementById('previewBathrooms'),
+        squareFootage: document.getElementById('previewSquareFootage'),
+        leaseTerm: document.getElementById('previewLeaseTerm'),
+        availabilityDate: document.getElementById('previewAvailabilityDate'),
+        utilities: document.getElementById('previewUtilities'),
+        pets: document.getElementById('previewPets'),
+        parking: document.getElementById('previewParking'),
+        furnished: document.getElementById('previewFurnished'),
+        amenities: document.getElementById('previewAmenities'),
+        securityDeposit: document.getElementById('previewSecurityDeposit'),
+        smokingPolicy: document.getElementById('previewSmokingPolicy'),
+        accessibility: document.getElementById('previewAccessibility'),
+        images: document.getElementById('previewImages')
+      };
+      const inputs = {
+        name: document.getElementById('propertyName'),
+        addressLine1: document.getElementById('addressLine1'),
+        addressLine2: document.getElementById('addressLine2'),
+        city: document.getElementById('city'),
+        stateProvince: document.getElementById('stateProvince'),
+        postalCode: document.getElementById('postalCode'),
+        country: document.getElementById('country'),
+        rent: document.getElementById('rentAmount'),
+        type: document.getElementById('propertyType'),
+        description: document.getElementById('propertyDescription'),
+        images: document.getElementById('propertyImages'),
+        bedrooms: document.getElementById('bedrooms'),
+        bathrooms: document.getElementById('bathrooms'),
+        squareFootage: document.getElementById('squareFootage'),
+        leaseTerm: document.getElementById('leaseTerm'),
+        availabilityDate: document.getElementById('availabilityDate'),
+        utilities: document.querySelectorAll('input[name="utilities"]'),
+        pets: document.querySelectorAll('input[name="pets_allowed"]'),
+        petRestrictions: document.getElementById('petRestrictions'),
+        parking: document.getElementById('parkingAvailability'),
+        furnished: document.querySelectorAll('input[name="furnished_status"]'),
+        amenities: document.querySelectorAll('input[name="amenities"]'),
+        securityDeposit: document.getElementById('securityDeposit'),
+        smokingPolicy: document.querySelectorAll('input[name="smoking_policy"]'),
+        accessibility: document.querySelectorAll('input[name="accessibility_features"]')
+      };
+      const charCount = document.getElementById('charCount');
+      const imagePreview = document.getElementById('imagePreview');
+
+      // Real-time preview updates
+      function updatePreview() {
+        preview.title.textContent = inputs.name.value || 'Property Name';
+        preview.addressLine1.textContent = inputs.addressLine1.value || 'Address Line 1';
+        preview.addressLine2.textContent = inputs.addressLine2.value || 'Address Line 2';
+        preview.city.textContent = inputs.city.value || 'City';
+        preview.stateProvince.textContent = inputs.stateProvince.value || 'State/Province';
+        preview.postalCode.textContent = inputs.postalCode.value || 'Postal/ZIP Code';
+        preview.country.textContent = inputs.country.value || 'Country';
+        preview.rent.textContent = inputs.rent.value ? `KSH ${inputs.rent.value}/month` : 'Rent Amount';
+        preview.type.textContent = inputs.type.value || 'Property Type';
+        preview.description.textContent = inputs.description.value || 'Description';
+        preview.bedrooms.textContent = inputs.bedrooms.value ? `${inputs.bedrooms.value} Bedrooms` : 'Bedrooms';
+        preview.bathrooms.textContent = inputs.bathrooms.value ? `${inputs.bathrooms.value} Bathrooms` : 'Bathrooms';
+        preview.squareFootage.textContent = inputs.squareFootage.value ? `${inputs.squareFootage.value} Sq Ft` : 'Square Footage';
+        preview.leaseTerm.textContent = inputs.leaseTerm.value || 'Lease Term';
+        preview.availabilityDate.textContent = inputs.availabilityDate.value || 'Availability Date';
+        preview.utilities.textContent = Array.from(inputs.utilities).filter(u => u.checked).map(u => u.value).join(', ') || 'Utilities Included';
+        preview.pets.textContent = Array.from(inputs.pets).find(p => p.checked)?.value + (inputs.petRestrictions.value ? `: ${inputs.petRestrictions.value}` : '') || 'Pets Allowed';
+        preview.parking.textContent = inputs.parking.value || 'Parking Availability';
+        preview.furnished.textContent = Array.from(inputs.furnished).find(f => f.checked)?.value || 'Furnished Status';
+        preview.amenities.textContent = Array.from(inputs.amenities).filter(a => a.checked).map(a => a.value).join(', ') || 'Amenities';
+        preview.securityDeposit.textContent = inputs.securityDeposit.value ? `KSH ${inputs.securityDeposit.value}` : 'Security Deposit';
+        preview.smokingPolicy.textContent = Array.from(inputs.smokingPolicy).find(s => s.checked)?.value || 'Smoking Policy';
+        preview.accessibility.textContent = Array.from(inputs.accessibility).filter(a => a.checked).map(a => a.value).join(', ') || 'Accessibility Features';
+      }
+
+      // Image preview
+      inputs.images.addEventListener('change', () => {
+        imagePreview.innerHTML = '';
+        preview.images.innerHTML = '';
+        const files = inputs.images.files;
+        if (files.length > 5) {
+          inputs.images.classList.add('is-invalid');
+          imagePreview.innerHTML = '<div class="text-danger">Maximum 5 images allowed.</div>';
+          return;
+        }
+        for (const file of files) {
+          if (!['image/jpeg', 'image/png'].includes(file.type) || file.size > 5 * 1024 * 1024) {
+            inputs.images.classList.add('is-invalid');
+            imagePreview.innerHTML = '<div class="text-danger">Only JPG/PNG files under 5MB allowed.</div>';
+            return;
+          }
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(file);
+          img.style.maxWidth = '100px';
+          img.style.borderRadius = '5px';
+          imagePreview.appendChild(img);
+          preview.images.appendChild(img.cloneNode());
+        }
+        inputs.images.classList.remove('is-invalid');
+      });
+
+      // Character count for description
+      inputs.description.addEventListener('input', () => {
+        const count = inputs.description.value.length;
+        charCount.textContent = `${count}/500 characters`;
+        if (count > 500) {
+          inputs.description.classList.add('is-invalid');
+        } else {
+          inputs.description.classList.remove('is-invalid');
+        }
+        updatePreview();
+      });
+
+      // Real-time validation and preview
+      Object.values(inputs).forEach(input => {
+        if (input instanceof NodeList) {
+          input.forEach(i => {
+            i.addEventListener('change', updatePreview);
+          });
+        } else if (input !== inputs.images) {
+          input.addEventListener('input', () => {
+            input.classList.toggle('is-invalid', !input.checkValidity());
+            updatePreview();
+          });
+        }
+      });
+
+      // Toggle tips sidebar
+      toggleTipsButton.addEventListener('click', () => {
+        const isHidden = tipsCard.classList.toggle('d-none');
+        toggleTipsButton.textContent = isHidden ? 'Show Tips' : 'Hide Tips';
+        toggleTipsButton.setAttribute('aria-expanded', !isHidden);
+      });
+
+      // Progress indicator simulation
+      form.addEventListener('input', () => {
+        const filled = Object.values(inputs).filter(input => {
+          if (input instanceof NodeList) {
+            return Array.from(input).some(i => i.checked || i.value);
+          }
+          return input.value && input.checkValidity();
+        }).length;
+        const progress = (filled / 17) * 100; // 17 fields (excluding images, utilities, etc.)
+        progressBar.style.width = `${progress}%`;
+        progressBar.setAttribute('aria-valuenow', progress);
+        progressBar.textContent = progress < 50 ? 'Step 1: Details' : progress < 100 ? 'Step 2: Images' : 'Step 3: Submit';
+      });
+
+      // Form submission
+      form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    if (!form.checkValidity()) {
+      form.classList.add('was-validated');
+      return;
+    }
+
+    submitButton.disabled = true;
+    feedback.style.display = 'none';
+    feedback.className = 'alert alert-info mt-3';
+    feedback.textContent = 'Adding property...';
+    feedback.style.display = 'block';
+
+    const formData = new FormData(form);
+    formData.append('user_id', {{ current_user.id }});
+
+    // ✅ Grab CSRF token from hidden input
+    const csrfToken = form.querySelector('input[name="csrf_token"]').value;
+
+    try {
+      const response = await fetch('{{ url_for("landlord.add_property") }}', {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrfToken,  // 👈 Flask-WTF checks this
+        },
+        body: formData,
+        credentials: 'include',      // ensures session cookie is sent
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        feedback.className = 'alert alert-success mt-3';
+        feedback.textContent = result.message || 'Property added successfully!';
+        form.reset();
+      } else {
+        feedback.className = 'alert alert-danger mt-3';
+        feedback.textContent = result.message || 'Error adding property.';
+      }
+    } catch (error) {
+      feedback.className = 'alert alert-danger mt-3';
+      feedback.textContent = 'Something went wrong. Try again.';
+    } finally {
+      submitButton.disabled = false;
+    }
+  });
+
+
+      // Save draft (optional, requires backend route)
+      saveDraftButton.addEventListener('click', async () => {
+        feedback.style.display = 'none';
+        feedback.className = 'alert alert-info mt-3';
+        feedback.textContent = 'Saving draft...';
+        feedback.style.display = 'block';
+
+        const formData = new FormData(form);
+        formData.append('user_id', {{ current_user.id }});
+
+        try {
+          const response = await fetch('/landlord/save_draft', {
+            method: 'POST',
+            body: formData,
+          });
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const result = await response.json();
+          feedback.className = 'alert alert-success mt-3';
+          feedback.textContent = result.message || 'Draft saved successfully!';
+          feedback.style.display = 'block';
+        } catch (error) {
+          feedback.className = 'alert alert-danger mt-3';
+          feedback.textContent = `Error: ${error.message}`;
+          feedback.style.display = 'block';
+        }
+      });
+
+      // Example API call to /landlord/api/add_property (optional, uncomment if needed)
+      /*
+      document.getElementById('someButton').addEventListener('click', async () => {
+        const formData = new FormData(form);
+        const data = {};
+        formData.forEach((value, key) => {
+          if (key === 'utilities' || key === 'amenities' || key === 'accessibility_features') {
+            data[key] = formData.getAll(key);
+          } else {
+            data[key] = value;
+          }
+        });
+        data.user_id = {{ current_user.id }};
+        try {
+          const response = await fetch('{{ url_for("landlord.api_add_property") }}', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': document.querySelector('input[name="csrf_token"]').value
+            },
+            body: JSON.stringify(data)
+          });
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const result = await response.json();
+          feedback.className = 'alert alert-success mt-3';
+          feedback.textContent = result.message || 'Property added via API successfully!';
+          feedback.style.display = 'block';
+        } catch (error) {
+          feedback.className = 'alert alert-danger mt-3';
+          feedback.textContent = `Error: ${error.message}`;
+          feedback.style.display = 'block';
+        }
+      });
+      */
+    });
+</script>
+{% endblock %}

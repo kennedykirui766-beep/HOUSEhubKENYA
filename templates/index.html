@@ -1,0 +1,2754 @@
+{% extends 'base.html' %} {% block title %}HomeHub - Your Property Management
+Solution{% endblock %} {% block content %}
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-overlay"></div>
+  <div class="container hero-content">
+    <h1 class="hero-title animate-fade-in">HomeHub: Connect, Manage, Thrive</h1>
+    <p class="hero-subtitle animate-fade-in-delay">
+      Your all-in-one property management solution for landlords, tenants,
+      service providers, and admins.
+    </p>
+    <div class="hero-cta animate-fade-in-delay-2">
+      <a
+        href="{{ url_for('auth.signup') }}"
+        class="btn btn-primary btn-lg pulse-animation"
+        aria-label="Register for HomeHub"
+      >
+        <i class="fas fa-rocket"></i> Get Started
+      </a>
+      <a
+        href="#properties"
+        class="btn btn-secondary btn-lg"
+        aria-label="Explore Properties"
+      >
+        <i class="fas fa-search"></i> Explore Properties
+      </a>
+      <a href="{{ url_for('main.how_it_works_general') }}"
+   class="btn btn-outline btn-lg"
+   aria-label="Learn More">
+  <i class="fas fa-info-circle"></i> Learn More
+</a>
+
+  </div>
+  <div class="scroll-indicator">
+    <i class="fas fa-chevron-down bounce-animation"></i>
+  </div>
+</section>
+
+<!-- Welcome Message -->
+<section class="welcome-section">
+  <div class="container">
+    <div class="welcome-content">
+      <div class="welcome-text">
+        <h2 class="section-title">Welcome to HomeHub</h2>
+        <p class="section-subtitle">
+          HomeHub connects landlords, tenants, service providers, and admins for
+          efficient property management. Simplify property management with
+          HomeHub.
+        </p>
+        <div class="welcome-features">
+          <div class="feature-icon-text">
+            <div class="icon-circle">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <div>
+              <h4>Secure Platform</h4>
+              <p>Your data is protected with industry-leading security</p>
+            </div>
+          </div>
+          <div class="feature-icon-text">
+            <div class="icon-circle">
+              <i class="fas fa-mobile-alt"></i>
+            </div>
+            <div>
+              <h4>Mobile Friendly</h4>
+              <p>Access HomeHub from any device, anywhere</p>
+            </div>
+          </div>
+          <div class="feature-icon-text">
+            <div class="icon-circle">
+              <i class="fas fa-headset"></i>
+            </div>
+            <div>
+              <h4>24/7 Support</h4>
+              <p>Our team is always ready to assist you</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="welcome-image">
+        <img
+          src="{{ url_for('static', filename='images/dashboard-preview.png') }}"
+          alt="HomeHub Dashboard Preview"
+          class="img-shadow"
+        />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Search Bar -->
+<section class="search-section">
+  <div class="container">
+    <div class="search-container">
+      <h3>Find Your Perfect Property</h3>
+      <form
+        action="{{ url_for('tenant.properties') }}"
+        method="GET"
+        class="search-form"
+      >
+        <div class="search-input-group">
+          <input
+            type="text"
+            name="query"
+            placeholder="Search properties by city, location, or type"
+            aria-label="Search properties"
+            class="search-input"
+          />
+          <select name="property_type" class="search-select">
+            <option value="">All Types</option>
+            <option value="apartment">Apartment</option>
+            <option value="house">House</option>
+            <option value="studio">Studio</option>
+            <option value="commercial">Commercial</option>
+          </select>
+          <select name="price_range" class="search-select">
+            <option value="">Price Range</option>
+            <option value="0-10000">Under KES 10,000</option>
+            <option value="10000-25000">KES 10,000 - 25,000</option>
+            <option value="25000-50000">KES 25,000 - 50,000</option>
+            <option value="50000+">Over KES 50,000</option>
+          </select>
+          <button type="submit" class="btn btn-primary search-btn">
+            <i class="fas fa-search"></i> Search
+          </button>
+        </div>
+      </form>
+      <div class="popular-searches">
+        <span>Popular searches:</span>
+        <a href="{{ url_for('tenant.properties', query='Nairobi') }}"
+          >Nairobi</a
+        >
+        <a href="{{ url_for('tenant.properties', query='Mombasa') }}"
+          >Mombasa</a
+        >
+        <a href="{{ url_for('tenant.properties', query='Kisumu') }}">Kisumu</a>
+        <a href="{{ url_for('tenant.properties', query='apartments') }}"
+          >Apartments</a
+        >
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works-section" aria-label="How HomeHub works">
+  <div class="container">
+    <div class="section-header text-center">
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-subtitle">
+        HomeHub simplifies property management for everyone
+      </p>
+    </div>
+    <div class="process-flow">
+      <div class="process-step">
+        <div class="step-number">1</div>
+        <div class="step-icon">
+          <i class="fas fa-user-tie"></i>
+        </div>
+        <h3>Landlords</h3>
+        <p>
+          List your property in Nairobi and manage tenants easily with our
+          intuitive dashboard.
+        </p>
+        <a href="{{ url_for('main.how_it_works_landlord') }}" class="btn-link"
+          >Learn More <i class="fas fa-arrow-right"></i
+        ></a>
+      </div>
+      <div class="process-step">
+        <div class="step-number">2</div>
+        <div class="step-icon">
+          <i class="fas fa-home"></i>
+        </div>
+        <h3>Tenants</h3>
+        <p>
+          Find your dream home in Mombasa with secure payments via M-Pesa and
+          digital lease signing.
+        </p>
+        <a href="{{ url_for('main.how_it_works_tenant') }}" class="btn-link"
+          >Learn More <i class="fas fa-arrow-right"></i
+        ></a>
+      </div>
+      <div class="process-step">
+        <div class="step-number">3</div>
+        <div class="step-icon">
+          <i class="fas fa-tools"></i>
+        </div>
+        <h3>Service Providers</h3>
+        <p>
+          Bid on maintenance jobs in Kisumu and grow your business with our
+          platform.
+        </p>
+        <a href="{{ url_for('main.how_it_works_provider') }}" class="btn-link"
+          >Learn More <i class="fas fa-arrow-right"></i
+        ></a>
+      </div>
+      <div class="process-step">
+        <div class="step-number">4</div>
+        <div class="step-icon">
+          <i class="fas fa-user-shield"></i>
+        </div>
+        <h3>Admins</h3>
+        <p>
+          Moderate users and resolve disputes efficiently with our comprehensive
+          admin tools.
+        </p>
+        <a href="{{ url_for('main.how_it_works_admin') }}" class="btn-link"
+          >Learn More <i class="fas fa-arrow-right"></i
+        ></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Feature Highlights Section -->
+<section id="features" class="features-section" aria-label="Platform features">
+  <div class="container">
+    <div class="section-header text-center">
+      <h2 class="section-title">Our Features</h2>
+      <p class="section-subtitle">
+        Everything you need for seamless property management
+      </p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-money-check-alt"></i>
+        </div>
+        <h3>Secure M-Pesa Payments</h3>
+        <p>
+          Pay rent or services securely via M-Pesa with instant confirmation and
+          digital receipts.
+        </p>
+        <a href="#" class="feature-link">Learn More</a>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-file-contract"></i>
+        </div>
+        <h3>Lease Management</h3>
+        <p>
+          Create, sign, and manage leases digitally with automated reminders and
+          renewal notifications.
+        </p>
+        <a href="#" class="feature-link">Learn More</a>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-hammer"></i>
+        </div>
+        <h3>Maintenance Requests</h3>
+        <p>
+          Submit and bid on maintenance jobs with photo uploads and progress
+          tracking.
+        </p>
+        <a href="#" class="feature-link">Learn More</a>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-comments"></i>
+        </div>
+        <h3>In-App Messaging</h3>
+        <p>
+          Communicate directly with landlords, tenants, and service providers
+          within the platform.
+        </p>
+        <a href="#" class="feature-link">Learn More</a>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <h3>Analytics Dashboard</h3>
+        <p>
+          Track property performance, occupancy rates, and financial metrics
+          with detailed reports.
+        </p>
+        <a href="#" class="feature-link">Learn More</a>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-calendar-check"></i>
+        </div>
+        <h3>Booking System</h3>
+        <p>
+          Schedule property viewings and manage appointments with automated
+          reminders.
+        </p>
+        <a href="#" class="feature-link">Learn More</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Properties Section -->
+<section class="properties-section" aria-label="Featured properties">
+  <div class="container">
+    <div class="section-header text-center">
+      <h2 class="section-title">
+        {% if query %} Search Results for "{{ query }}" {% else %} Featured
+        Properties {% endif %}
+      </h2>
+      <div class="property-filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="apartment">Apartments</button>
+        <button class="filter-btn" data-filter="house">Houses</button>
+        <button class="filter-btn" data-filter="featured">Featured</button>
+      </div>
+    </div>
+
+    <div id="properties" class="properties-grid">
+      {% if houses and houses|length > 0 %} {% for property in houses %}
+      <div
+        class="property-card"
+        data-property-type="{{ property.category }}"
+        onclick="viewProperty('{{ property.id }}')"
+      >
+        <div class="property-image-container">
+          {% if property.image_urls %}
+          <img
+            src="{{ url_for('static', filename='images/' ~ property.image_urls) }}"
+            alt="{{ property.title }}"
+            class="property-image"
+          />
+          {% if property.featured %}
+          <span class="property-badge featured">Featured</span>
+          {% endif %}
+          <span class="property-badge price">KES {{ property.price }}/mo</span>
+          {% else %}
+          <div class="property-no-image">
+            <i class="fas fa-image"></i>
+            <p>No image available</p>
+          </div>
+          {% endif %}
+        </div>
+        <div class="property-details">
+          <h3 class="property-title">{{ property.title }}</h3>
+          <div class="property-location">
+            <i class="fas fa-map-marker-alt"></i> {{ property.location }}
+          </div>
+          <div class="property-features">
+            {% if property.bedrooms %}
+            <span><i class="fas fa-bed"></i> {{ property.bedrooms }} Bed</span>
+            {% endif %} {% if property.bathrooms %}
+            <span
+              ><i class="fas fa-bath"></i> {{ property.bathrooms }} Bath</span
+            >
+            {% endif %} {% if property.area %}
+            <span
+              ><i class="fas fa-ruler-combined"></i> {{ property.area }}
+              sqft</span
+            >
+            {% endif %}
+          </div>
+          <p class="property-description">
+            {{ property.description[:100] }}{% if property.description|length >
+            100 %}...{% endif %}
+          </p>
+          <div class="property-actions">
+            <a
+              href="{{ url_for('house.view_property', property_id=property.id) }}"
+              class="btn btn-outline btn-sm"
+            >
+              <i class="fas fa-eye"></i> View Details
+            </a>
+            {% if not is_guest %}
+            <a
+              href="{{ url_for('tenant.bookings', house_id=property.id) }}"
+              class="btn btn-primary btn-sm"
+            >
+              <i class="fas fa-calendar-plus"></i> Book Now
+            </a>
+            {% else %}
+            <a
+              href="{{ url_for('auth.signup') }}"
+              class="btn btn-primary btn-sm"
+            >
+              <i class="fas fa-user-plus"></i> Sign Up to Book
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %} {% else %}
+      <div class="no-properties">
+        <i class="fas fa-home"></i>
+        <h3>No Properties Available</h3>
+        <p>
+          There are no properties available at the moment. Please check back
+          later.
+        </p>
+        <a href="{{ url_for('main.index') }}" class="btn btn-primary"
+          >Return to Home</a
+        >
+      </div>
+      {% endif %}
+    </div>
+
+    {% if houses and houses|length > 6 %}
+    <div class="text-center mt-4">
+      <a href="{{ url_for('tenant.properties') }}" class="btn btn-outline">
+        View All Properties <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="testimonials-section" aria-label="User testimonials">
+  <div class="container">
+    <div class="section-header text-center">
+      <h2 class="section-title">What Our Users Say</h2>
+      <p class="section-subtitle">Don't just take our word for it</p>
+    </div>
+    <div class="testimonials-slider">
+      <div class="testimonial-card">
+        <div class="testimonial-content">
+          <div class="testimonial-text">
+            <i class="fas fa-quote-left"></i>
+            <p>
+              "HomeHub made managing my Nairobi rentals seamless! I've saved
+              countless hours on tenant management and rent collection."
+            </p>
+          </div>
+          <div class="testimonial-author">
+            <img
+              src="{{ url_for('static', filename='images/testimonial-jane.jpg') }}"
+              alt="Jane, Landlord"
+              class="author-image"
+            />
+            <div>
+              <h4>Jane W.</h4>
+              <p>Landlord in Nairobi</p>
+              <div class="testimonial-rating">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-content">
+          <div class="testimonial-text">
+            <i class="fas fa-quote-left"></i>
+            <p>
+              "Found my perfect apartment in Mombasa through HomeHub. The
+              booking process was smooth and the digital lease signing saved me
+              a trip!"
+            </p>
+          </div>
+          <div class="testimonial-author">
+            <img
+              src="{{ url_for('static', filename='images/testimonial-john.jpg') }}"
+              alt="John, Tenant"
+              class="author-image"
+            />
+            <div>
+              <h4>John M.</h4>
+              <p>Tenant in Mombasa</p>
+              <div class="testimonial-rating">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-content">
+          <div class="testimonial-text">
+            <i class="fas fa-quote-left"></i>
+            <p>
+              "As a service provider, HomeHub has connected me with more clients
+              in Kisumu than any other platform. Easy bidding and payment
+              system!"
+            </p>
+          </div>
+          <div class="testimonial-author">
+            <img
+              src="{{ url_for('static', filename='images/testimonial-alex.jpg') }}"
+              alt="Alex, Service Provider"
+              class="author-image"
+            />
+            <div>
+              <h4>Alex K.</h4>
+              <p>Service Provider in Kisumu</p>
+              <div class="testimonial-rating">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-nav">
+      <button class="testimonial-prev">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <button class="testimonial-next">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Quick Stats Section -->
+<section class="stats-section" aria-label="Platform statistics">
+  <div class="container">
+    <div class="section-header text-center">
+      <h2 class="section-title">Why Choose HomeHub?</h2>
+      <p class="section-subtitle">
+        Join thousands of satisfied users across Kenya
+      </p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-building"></i>
+        </div>
+        <div class="stat-number" data-target="10000">0</div>
+        <div class="stat-label">Properties Listed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-number" data-target="50000">0</div>
+        <div class="stat-label">Happy Users</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-money-bill-wave"></i>
+        </div>
+        <div class="stat-number" data-target="1000">0</div>
+        <div class="stat-label">Payments Processed Daily</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-tools"></i>
+        </div>
+        <div class="stat-number" data-target="500">0</div>
+        <div class="stat-label">Service Providers</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Interactive Map -->
+<section class="map-section" aria-label="Property locations map">
+  <div class="container">
+    <div class="section-header text-center">
+      <h2 class="section-title">Explore Properties Across Kenya</h2>
+      <p class="section-subtitle">Find properties in your preferred location</p>
+    </div>
+    <div class="map-container">
+      <div id="map" class="property-map"></div>
+      <div class="map-controls">
+        <button class="map-control-btn" data-location="nairobi">
+          <i class="fas fa-map-marker-alt"></i> Nairobi
+        </button>
+        <button class="map-control-btn" data-location="mombasa">
+          <i class="fas fa-map-marker-alt"></i> Mombasa
+        </button>
+        <button class="map-control-btn" data-location="kisumu">
+          <i class="fas fa-map-marker-alt"></i> Kisumu
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="faq-section" aria-label="Frequently Asked Questions">
+  <div class="container">
+    <div class="section-header text-center">
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <p class="section-subtitle">Find answers to common questions</p>
+    </div>
+    <div class="faq-container">
+      <div class="faq-category">
+        <h3>For Landlords</h3>
+        <div class="faq-item">
+          <button class="faq-question">
+            How do I list a property on HomeHub?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>
+              As a landlord, simply log in to your account and navigate to your
+              dashboard. Click on "Add New Property" and fill in all the
+              required details including property description, images, location,
+              and rental price. Once submitted, your property will be reviewed
+              and published within 24 hours.
+            </p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            How does rent collection work?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>
+              HomeHub offers automated rent collection through M-Pesa
+              integration. Tenants can pay directly through the app, and you'll
+              receive instant notifications. The system also sends automatic
+              payment reminders to tenants and tracks all payment history in
+              your dashboard.
+            </p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            Can I manage multiple properties with one account?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>
+              Yes, HomeHub allows landlords to manage unlimited properties from
+              a single account. You can add as many properties as you own and
+              manage them all from your centralized dashboard with individual
+              analytics for each property.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-category">
+        <h3>For Tenants</h3>
+        <div class="faq-item">
+          <button class="faq-question">
+            Is rent payment secure on HomeHub?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>
+              Absolutely! We use secure integrations like M-Pesa and Stripe for
+              all payments. All transactions are encrypted and processed through
+              secure channels. You'll also receive digital receipts for every
+              payment made through the platform.
+            </p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            How do I submit maintenance requests?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>
+              You can easily submit maintenance requests through the HomeHub
+              app. Navigate to your rented property, click on "Maintenance
+              Request," describe the issue, and upload photos if applicable.
+              Your landlord will be notified immediately, and you can track the
+              status of your request in real-time.
+            </p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            Can I schedule property viewings through the app?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>
+              Yes, HomeHub has an integrated booking system that allows you to
+              schedule property viewings at your convenience. Simply select a
+              property, choose an available time slot, and confirm your booking.
+              You'll receive reminders before your scheduled viewing.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-category">
+        <h3>For Service Providers</h3>
+        <div class="faq-item">
+          <button class="faq-question">
+            How do I bid on maintenance jobs?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>
+              Service providers can browse open maintenance requests in their
+              area and submit competitive bids. Simply review the job details,
+              provide your quote and estimated completion time, and submit your
+              bid. If selected, you'll be notified and can communicate directly
+              with the property owner through the platform.
+            </p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            How do I get paid for completed jobs?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>
+              Once a job is completed and approved by the property owner,
+              payment is processed through HomeHub's secure payment system. You
+              can choose to receive payments via M-Pesa or direct bank transfer.
+              Most payments are processed within 24-48 hours after job
+              completion.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="text-center mt-4">
+      <p class="faq-more">Still have questions?</p>
+      <a href="{{ url_for('main.contact') }}" class="btn btn-primary"
+        >Contact Support</a
+      >
+    </div>
+  </div>
+</section>
+
+<!-- Newsletter Signup Form -->
+<section class="newsletter-section" aria-label="Newsletter signup">
+  <div class="container">
+    <div class="newsletter-content">
+      <div class="newsletter-text">
+        <h2>Stay Updated</h2>
+        <p>
+          Subscribe to our newsletter for the latest property listings, market
+          trends, and platform updates.
+        </p>
+        <ul class="newsletter-benefits">
+          <li><i class="fas fa-check"></i> Exclusive property listings</li>
+          <li><i class="fas fa-check"></i> Market insights and reports</li>
+          <li>
+            <i class="fas fa-check"></i> Platform updates and new features
+          </li>
+        </ul>
+      </div>
+      <div class="newsletter-form-container">
+        <form
+          action="{{ url_for('main.subscribe') }}"
+          method="POST"
+          class="newsletter-form"
+        >
+          <div class="form-group">
+            <input
+              type="text"
+              name="name"
+              placeholder="Your Name"
+              required
+              class="form-control"
+            />
+          </div>
+          <div class="form-group">
+            <input
+              type="email"
+              name="email"
+              placeholder="Your Email"
+              required
+              class="form-control"
+            />
+          </div>
+          <div class="form-group">
+            <select name="user_type" class="form-control">
+              <option value="">I am a...</option>
+              <option value="landlord">Landlord</option>
+              <option value="tenant">Tenant</option>
+              <option value="provider">Service Provider</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">
+            <i class="fas fa-paper-plane"></i> Subscribe
+          </button>
+          <p class="form-privacy">
+            We respect your privacy. Unsubscribe at any time.
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Social Media Sharing -->
+<section class="social-section" aria-label="Social media sharing">
+  <div class="container">
+    <div class="social-content">
+      <h2>Share HomeHub</h2>
+      <p>Help others discover the easiest way to manage properties</p>
+      <div class="social-buttons">
+        <a
+          href="https://x.com/intent/tweet?text=Discover HomeHub Kenya! The ultimate property management solution for landlords, tenants & service providers. &url=https://homehub.co.ke"
+          class="social-btn twitter"
+          target="_blank"
+        >
+          <i class="fab fa-twitter"></i> Share on X
+        </a>
+        <a
+          href="https://api.whatsapp.com/send?text=Check out HomeHub Kenya: The ultimate property management solution. Find properties, manage rentals, and connect with service providers all in one place. https://homehub.co.ke"
+          class="social-btn whatsapp"
+          target="_blank"
+        >
+          <i class="fab fa-whatsapp"></i> Share on WhatsApp
+        </a>
+        <a
+          href="https://www.facebook.com/sharer/sharer.php?u=https://homehub.co.ke"
+          class="social-btn facebook"
+          target="_blank"
+        >
+          <i class="fab fa-facebook-f"></i> Share on Facebook
+        </a>
+        <a
+          href="https://www.linkedin.com/sharing/share-offsite/?url=https://homehub.co.ke"
+          class="social-btn linkedin"
+          target="_blank"
+        >
+          <i class="fab fa-linkedin-in"></i> Share on LinkedIn
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Live Chat Widget -->
+<div class="chat-widget" aria-label="Live chat support">
+  <button class="chat-toggle" onclick="toggleChat()">
+    <i class="fas fa-comments"></i>
+    <span class="chat-status" id="agent-status">(Offline)</span>
+  </button>
+  <div class="chat-window" id="chat-window">
+    <div class="chat-header">
+      <div class="chat-header-info">
+        <h4>Support Chat</h4>
+        <span class="status-indicator" id="status-indicator">Offline</span>
+      </div>
+      <button class="chat-close" onclick="toggleChat()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="chat-body">
+      <div class="chat-welcome">
+        <p>Welcome to HomeHub Support! How can we help you today?</p>
+      </div>
+      <ul id="messages" class="chat-messages"></ul>
+    </div>
+    <div class="chat-footer">
+      <form id="chat-form" class="chat-input-form">
+        <input
+          type="text"
+          id="message_input"
+          class="chat-input"
+          placeholder="Type a message..."
+          aria-label="Type a message"
+        />
+        <button type="submit" class="chat-send">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </form>
+      <div class="chat-quick-actions">
+        <button
+          type="button"
+          class="quick-action"
+          onclick="sendQuickReply('How do I list a property?')"
+        >
+          <i class="fas fa-home"></i> List Property
+        </button>
+        <button
+          type="button"
+          class="quick-action"
+          onclick="sendQuickReply('Payment issues?')"
+        >
+          <i class="fas fa-credit-card"></i> Payment
+        </button>
+        <button
+          type="button"
+          class="quick-action"
+          onclick="sendQuickReply('Maintenance request?')"
+        >
+          <i class="fas fa-tools"></i> Maintenance
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Social Proof / Partner Logos -->
+<section class="partners-section">
+  <div class="container">
+    <div class="section-header text-center">
+      <h2 class="section-title">Trusted Partners</h2>
+      <p class="section-subtitle">
+        We work with industry leaders to provide the best service
+      </p>
+    </div>
+    <div class="partners-grid">
+      <div class="partner-logo">
+        <img
+          src="{{ url_for('static', filename='images/stripe-logo.png') }}"
+          alt="Stripe"
+        />
+      </div>
+      <div class="partner-logo">
+        <img
+          src="{{ url_for('static', filename='images/mpesa-logo.png') }}"
+          alt="M-Pesa"
+        />
+      </div>
+      <div class="partner-logo">
+        <img
+          src="{{ url_for('static', filename='images/partner-bank.png') }}"
+          alt="Partner Bank"
+        />
+      </div>
+      <div class="partner-logo">
+        <img
+          src="{{ url_for('static', filename='images/partner-realtor.png') }}"
+          alt="Partner Realtor"
+        />
+      </div>
+      <div class="partner-logo">
+        <img
+          src="{{ url_for('static', filename='images/partner-insurance.png') }}"
+          alt="Partner Insurance"
+        />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Guest Access CTA -->
+<section class="guest-cta-section">
+  <div class="container">
+    <div class="guest-cta-content">
+      <h2>Explore Properties as a Guest</h2>
+      <p>
+        Not ready to sign up yet? Browse our property listings without creating
+        an account.
+      </p>
+      <div class="guest-cta-buttons">
+        <a
+          href="{{ url_for('tenant.properties') }}"
+          class="btn btn-primary btn-lg"
+        >
+          <i class="fas fa-search"></i> Browse Properties
+        </a>
+        <a href="{{ url_for('auth.signup') }}" class="btn btn-outline btn-lg">
+          <i class="fas fa-user-plus"></i> Create Account
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Scripts -->
+<script>
+  // Property view function
+  function viewProperty(id) {
+    window.location.href = "/houses/view/" + id;
+  }
+
+  // Chat toggle function
+  function toggleChat() {
+    var chatWindow = document.getElementById("chat-window");
+    chatWindow.classList.toggle("active");
+  }
+
+  // Send quick reply
+  function sendQuickReply(message) {
+    document.getElementById("message_input").value = message;
+    document.getElementById("chat-form").dispatchEvent(new Event('submit'));
+  }
+
+  // FAQ Accordion
+  document.addEventListener('DOMContentLoaded', function() {
+    const faqQuestions = document.querySelectorAll('.faq-question');
+
+    faqQuestions.forEach(question => {
+      question.addEventListener('click', () => {
+        const answer = question.nextElementSibling;
+        const icon = question.querySelector('i');
+
+        // Toggle active class
+        question.classList.toggle('active');
+        answer.classList.toggle('active');
+
+        // Rotate icon
+        if (question.classList.contains('active')) {
+          icon.style.transform = 'rotate(180deg)';
+        } else {
+          icon.style.transform = 'rotate(0)';
+        }
+
+        // Close other answers in the same category
+        const category = question.closest('.faq-category');
+        const otherQuestions = category.querySelectorAll('.faq-question');
+
+        otherQuestions.forEach(otherQuestion => {
+          if (otherQuestion !== question) {
+            const otherAnswer = otherQuestion.nextElementSibling;
+            const otherIcon = otherQuestion.querySelector('i');
+
+            otherQuestion.classList.remove('active');
+            otherAnswer.classList.remove('active');
+            otherIcon.style.transform = 'rotate(0)';
+          }
+        });
+      });
+    });
+
+    // Property filters
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const propertyCards = document.querySelectorAll('.property-card');
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Update active button
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const filter = btn.getAttribute('data-filter');
+
+        // Filter properties
+        propertyCards.forEach(card => {
+          if (filter === 'all') {
+            card.style.display = 'block';
+          } else if (filter === 'featured') {
+            if (card.querySelector('.featured')) {
+              card.style.display = 'block';
+            } else {
+              card.style.display = 'none';
+            }
+          } else {
+            const propertyType = card.getAttribute('data-property-type');
+            if (propertyType === filter) {
+              card.style.display = 'block';
+            } else {
+              card.style.display = 'none';
+            }
+          }
+        });
+      });
+    });
+
+    // Animated counter for stats
+    const statNumbers = document.querySelectorAll('.stat-number');
+
+    const animateValue = (element, start, end, duration) => {
+      let startTimestamp = null;
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const value = Math.floor(progress * (end - start) + start);
+        element.textContent = value.toLocaleString();
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        }
+      };
+      window.requestAnimationFrame(step);
+    };
+
+    // Intersection Observer for triggering animations
+    const observerOptions = {
+      threshold: 0.5,
+      rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const target = entry.target;
+          const endValue = parseInt(target.getAttribute('data-target'));
+          animateValue(target, 0, endValue, 2000);
+          observer.unobserve(target);
+        }
+      });
+    }, observerOptions);
+
+    statNumbers.forEach(stat => {
+      observer.observe(stat);
+    });
+
+    // Testimonial slider
+    const testimonialSlider = document.querySelector('.testimonials-slider');
+    const testimonialCards = document.querySelectorAll('.testimonial-card');
+    const prevBtn = document.querySelector('.testimonial-prev');
+    const nextBtn = document.querySelector('.testimonial-next');
+
+    let currentIndex = 0;
+    const cardWidth = testimonialCards[0].offsetWidth + 20; // width + margin
+
+    const updateSliderPosition = () => {
+      testimonialSlider.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+    };
+
+    prevBtn.addEventListener('click', () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updateSliderPosition();
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (currentIndex < testimonialCards.length - 1) {
+        currentIndex++;
+        updateSliderPosition();
+      }
+    });
+
+    // Enhanced Chat Functionality
+    const socket = io();
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('message_input');
+    const messages = document.getElementById('messages');
+    const statusIndicator = document.getElementById('status-indicator');
+    const agentStatus = document.getElementById('agent-status');
+
+    // Connection status
+    socket.on('connect', function() {
+      console.log('Connected to Socket.IO');
+      statusIndicator.textContent = 'Online';
+      statusIndicator.style.color = '#4CAF50';
+      agentStatus.textContent = '(Online)';
+    });
+
+    socket.on('disconnect', function() {
+      statusIndicator.textContent = 'Offline';
+      statusIndicator.style.color = '#F44336';
+      agentStatus.textContent = '(Offline)';
+    });
+
+    // Agent status update
+    socket.on('agent_status', function(data) {
+      if (data.online) {
+        statusIndicator.textContent = 'Online';
+        statusIndicator.style.color = '#4CAF50';
+        agentStatus.textContent = '(Online)';
+      } else {
+        statusIndicator.textContent = 'Offline';
+        statusIndicator.style.color = '#F44336';
+        agentStatus.textContent = '(Offline)';
+      }
+    });
+
+    // Receive message
+    socket.on('message', function(data) {
+      const item = document.createElement('li');
+      item.classList.add('chat-message');
+
+      if (data.name === '{{ current_user.name if current_user.is_authenticated else "Guest" }}') {
+        item.classList.add('sent');
+        item.innerHTML = `
+          <div class="message-content">
+            <p>${data.message}</p>
+            <span class="message-time">${new Date(data.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+          </div>
+        `;
+      } else {
+        item.classList.add('received');
+        item.innerHTML = `
+          <div class="message-avatar">
+            <i class="fas fa-user-circle"></i>
+          </div>
+          <div class="message-content">
+            <div class="message-sender">${data.name}</div>
+            <p>${data.message}</p>
+            <span class="message-time">${new Date(data.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+          </div>
+        `;
+      }
+
+      messages.appendChild(item);
+      messages.scrollTop = messages.scrollHeight;
+
+      // Notification
+      if (!document.hasFocus()) {
+        new Notification('New message from support', { body: data.message.substring(0, 50) + '...' });
+      }
+    });
+
+    // Send message
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (input.value.trim() !== '') {
+        const messageData = {
+          message: input.value,
+          name: '{{ current_user.name if current_user.is_authenticated else "Guest" }}',
+          role: '{{ current_user.role if current_user.is_authenticated else "guest" }}',
+          timestamp: new Date().toISOString()
+        };
+        socket.emit('message', messageData);
+        input.value = '';
+      }
+    });
+
+    // Request permission for notifications
+    if (Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
+    // Load chat history on open
+    socket.emit('load_history', { user_id: {{ current_user.id if current_user.is_authenticated else 0 }} });
+
+    // Error handling
+    socket.on('error', function(data) {
+      console.error('Chat error:', data);
+      alert('An error occurred: ' + data.message);
+    });
+
+    // Rate limiting feedback
+    socket.on('rate_limit', function() {
+      alert('Please wait before sending another message.');
+    });
+  });
+</script>
+
+<!-- Leaflet for Map -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  // Initialize map
+  var map = L.map("map").setView([-1.2921, 36.8219], 6); // Centered on Kenya
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  }).addTo(map);
+
+  // Add markers for major cities
+  const cities = {
+    nairobi: { coords: [-1.2921, 36.8219], name: "Nairobi", properties: 1250 },
+    mombasa: { coords: [-4.0435, 39.6682], name: "Mombasa", properties: 850 },
+    kisumu: { coords: [-0.0917, 34.768], name: "Kisumu", properties: 420 },
+    nakuru: { coords: [-0.3031, 36.0699], name: "Nakuru", properties: 380 },
+    eldoret: { coords: [0.5143, 35.2698], name: "Eldoret", properties: 290 },
+  };
+
+  // Add city markers
+  Object.keys(cities).forEach((cityKey) => {
+    const city = cities[cityKey];
+    const marker = L.marker(city.coords).addTo(map);
+    marker.bindPopup(
+      `<b>${city.name}</b><br>${city.properties} properties available`
+    );
+  });
+
+  // Map control buttons
+  document.querySelectorAll(".map-control-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const location = btn.getAttribute("data-location");
+      if (cities[location]) {
+        map.setView(cities[location].coords, 12);
+        // Open popup for selected city
+        map.eachLayer((layer) => {
+          if (layer instanceof L.Marker) {
+            const latLng = layer.getLatLng();
+            if (
+              latLng.lat === cities[location].coords[0] &&
+              latLng.lng === cities[location].coords[1]
+            ) {
+              layer.openPopup();
+            }
+          }
+        });
+      }
+    });
+  });
+</script>
+
+<!-- Additional Styles -->
+<style>
+  /* Base Styles */
+  :root {
+    --primary-color: #3d8b40;
+    --secondary-color: #4a90e2;
+    --accent-color: #f28c38;
+    --dark-color: #1a1a1a;
+    --light-color: #f5f5f5;
+    --white-color: #ffffff;
+    --success-color: #4caf50;
+    --warning-color: #ffc107;
+    --danger-color: #f44336;
+    --info-color: #2196f3;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+    --border-radius: 8px;
+    --max-width: 1200px;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: var(--dark-color);
+    background-color: var(--light-color);
+    overflow-x: hidden;
+  }
+
+  .container {
+    width: 100%;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* Typography */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-bottom: 1rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+  }
+  h2 {
+    font-size: 2rem;
+  }
+  h3 {
+    font-size: 1.75rem;
+  }
+  h4 {
+    font-size: 1.5rem;
+  }
+  h5 {
+    font-size: 1.25rem;
+  }
+  h6 {
+    font-size: 1rem;
+  }
+
+  p {
+    margin-bottom: 1rem;
+  }
+
+  a {
+    color: var(--secondary-color);
+    text-decoration: none;
+    transition: var(--transition);
+  }
+
+  a:hover {
+    color: var(--primary-color);
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .btn i {
+    margin-right: 0.5rem;
+  }
+
+  .btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+  }
+
+  .btn-block {
+    display: block;
+    width: 100%;
+  }
+
+  .btn-primary {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+  }
+
+  .btn-primary:hover {
+    background-color: #327334;
+    color: var(--white-color);
+  }
+
+  .btn-secondary {
+    background-color: var(--secondary-color);
+    color: var(--white-color);
+  }
+
+  .btn-secondary:hover {
+    background-color: #3a7bc8;
+    color: var(--white-color);
+  }
+
+  .btn-outline {
+    background-color: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  .btn-outline:hover {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+  }
+
+  .btn-link {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    padding: 0;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .btn-link:hover {
+    text-decoration: underline;
+  }
+
+  /* Sections */
+  section {
+    padding: 5rem 0;
+    position: relative;
+  }
+
+  .section-header {
+    margin-bottom: 3rem;
+  }
+
+  .section-title {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 1rem;
+  }
+
+  .section-title:after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -10px;
+    width: 50px;
+    height: 3px;
+    background-color: var(--primary-color);
+  }
+
+  .section-subtitle {
+    color: #666;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  /* Hero Section */
+  .hero {
+    position: relative;
+    height: 100vh;
+    min-height: 600px;
+    background-image: url("{{ url_for("static", filename="images/property-background.jpg") }}");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--white-color);
+    overflow: hidden;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      135deg,
+      rgba(0, 0, 0, 0.7) 0%,
+      rgba(0, 0, 0, 0.5) 100%
+    );
+    z-index: 1;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+  }
+
+  .hero-title {
+    font-size: 3.5rem;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .hero-subtitle {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-cta {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    font-size: 1.5rem;
+    animation: bounce 2s infinite;
+  }
+
+  /* Animations */
+  @keyframes bounce {
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+      transform: translateY(0) translateX(-50%);
+    }
+    40% {
+      transform: translateY(-20px) translateX(-50%);
+    }
+    60% {
+      transform: translateY(-10px) translateX(-50%);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 1s ease-in-out;
+  }
+
+  .animate-fade-in-delay {
+    animation: fadeIn 1s ease-in-out 0.3s both;
+  }
+
+  .animate-fade-in-delay-2 {
+    animation: fadeIn 1s ease-in-out 0.6s both;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .pulse-animation {
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(61, 139, 64, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(61, 139, 64, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(61, 139, 64, 0);
+    }
+  }
+
+  /* Welcome Section */
+  .welcome-section {
+    background-color: var(--white-color);
+    padding: 5rem 0;
+  }
+
+  .welcome-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  .welcome-text h2 {
+    margin-bottom: 1.5rem;
+  }
+
+  .welcome-features {
+    margin-top: 2rem;
+  }
+
+  .feature-icon-text {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+  }
+
+  .icon-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: rgba(61, 139, 64, 0.1);
+    color: var(--primary-color);
+    margin-right: 1rem;
+    flex-shrink: 0;
+  }
+
+  .icon-circle i {
+    font-size: 1.25rem;
+  }
+
+  .feature-icon-text h4 {
+    margin-bottom: 0.25rem;
+  }
+
+  .welcome-image {
+    position: relative;
+  }
+
+  .img-shadow {
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    height: auto;
+  }
+
+  /* Search Section */
+  .search-section {
+    background-color: var(--light-color);
+    padding: 3rem 0;
+  }
+
+  .search-container {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .search-container h3 {
+    margin-bottom: 1.5rem;
+  }
+
+  .search-form {
+    margin-bottom: 1.5rem;
+  }
+
+  .search-input-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .search-input,
+  .search-select {
+    padding: 0.75rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    min-width: 200px;
+  }
+
+  .search-btn {
+    padding: 0.75rem 1.5rem;
+  }
+
+  .popular-searches {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.875rem;
+  }
+
+  .popular-searches span {
+    color: #666;
+  }
+
+  .popular-searches a {
+    color: var(--primary-color);
+    padding: 0.25rem 0.75rem;
+    border: 1px solid var(--primary-color);
+    border-radius: 20px;
+    transition: var(--transition);
+  }
+
+  .popular-searches a:hover {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+  }
+
+  /* How It Works Section */
+  .how-it-works-section {
+    background-color: var(--white-color);
+  }
+
+  .process-flow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+  }
+
+  .process-step {
+    text-align: center;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    background-color: var(--light-color);
+    transition: var(--transition);
+    position: relative;
+  }
+
+  .process-step:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .step-number {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 30px;
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+
+  .step-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 1.5rem;
+    background-color: rgba(61, 139, 64, 0.1);
+    color: var(--primary-color);
+    border-radius: 50%;
+    font-size: 1.75rem;
+  }
+
+  /* Features Section */
+  .features-section {
+    background-color: var(--light-color);
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+  }
+
+  .feature-card {
+    background-color: var(--white-color);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .feature-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    margin-bottom: 1.5rem;
+    background-color: rgba(61, 139, 64, 0.1);
+    color: var(--primary-color);
+    border-radius: 50%;
+    font-size: 1.5rem;
+  }
+
+  .feature-card h3 {
+    margin-bottom: 1rem;
+  }
+
+  .feature-card p {
+    margin-bottom: 1.5rem;
+    flex-grow: 1;
+  }
+
+  .feature-link {
+    color: var(--primary-color);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .feature-link i {
+    margin-left: 0.5rem;
+    transition: var(--transition);
+  }
+
+  .feature-link:hover i {
+    transform: translateX(5px);
+  }
+
+  /* Properties Section */
+  .properties-section {
+    background-color: var(--white-color);
+  }
+
+  .property-filters {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 0.5rem 1rem;
+    background-color: var(--light-color);
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .filter-btn.active {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+  }
+
+  .properties-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+  }
+
+  .property-card {
+    background-color: var(--white-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+    cursor: pointer;
+  }
+
+  .property-card:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .property-image-container {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+  }
+
+  .property-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition);
+  }
+
+  .property-card:hover .property-image {
+    transform: scale(1.05);
+  }
+
+  .property-badge {
+    position: absolute;
+    padding: 0.25rem 0.75rem;
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .property-badge.featured {
+    top: 1rem;
+    left: 1rem;
+  }
+
+  .property-badge.price {
+    bottom: 1rem;
+    right: 1rem;
+    background-color: var(--accent-color);
+  }
+
+  .property-no-image {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background-color: var(--light-color);
+    color: #999;
+  }
+
+  .property-no-image i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .property-details {
+    padding: 1.5rem;
+  }
+
+  .property-title {
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+  }
+
+  .property-location {
+    display: flex;
+    align-items: center;
+    color: #666;
+    margin-bottom: 1rem;
+  }
+
+  .property-location i {
+    margin-right: 0.5rem;
+    color: var(--primary-color);
+  }
+
+  .property-features {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .property-features span {
+    display: flex;
+    align-items: center;
+    font-size: 0.875rem;
+    color: #666;
+  }
+
+  .property-features i {
+    margin-right: 0.25rem;
+    color: var(--primary-color);
+  }
+
+  .property-description {
+    color: #666;
+    margin-bottom: 1.5rem;
+  }
+
+  .property-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .no-properties {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+  }
+
+  .no-properties i {
+    font-size: 3rem;
+    color: #ccc;
+    margin-bottom: 1rem;
+  }
+
+  /* Testimonials Section */
+  .testimonials-section {
+    background-color: var(--light-color);
+    overflow: hidden;
+  }
+
+  .testimonials-slider {
+    display: flex;
+    transition: transform 0.5s ease;
+  }
+
+  .testimonial-card {
+    min-width: 100%;
+    padding: 0 1rem;
+  }
+
+  .testimonial-content {
+    background-color: var(--white-color);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+  }
+
+  .testimonial-text {
+    position: relative;
+    margin-bottom: 1.5rem;
+    padding-left: 2rem;
+  }
+
+  .testimonial-text i {
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--primary-color);
+    opacity: 0.3;
+    font-size: 1.5rem;
+  }
+
+  .testimonial-author {
+    display: flex;
+    align-items: center;
+  }
+
+  .author-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 1rem;
+  }
+
+  .testimonial-rating {
+    margin-top: 0.5rem;
+    color: var(--warning-color);
+  }
+
+  .testimonial-nav {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .testimonial-prev,
+  .testimonial-next {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--white-color);
+    border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .testimonial-prev:hover,
+  .testimonial-next:hover {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    border-color: var(--primary-color);
+  }
+
+  /* Stats Section */
+  .stats-section {
+    background-color: var(--white-color);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+  }
+
+  .stat-card {
+    text-align: center;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    background-color: var(--light-color);
+    transition: var(--transition);
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 1rem;
+    background-color: rgba(61, 139, 64, 0.1);
+    color: var(--primary-color);
+    border-radius: 50%;
+    font-size: 1.5rem;
+  }
+
+  .stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-label {
+    color: #666;
+  }
+
+  /* Map Section */
+  .map-section {
+    background-color: var(--light-color);
+  }
+
+  .map-container {
+    position: relative;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .property-map {
+    height: 500px;
+    width: 100%;
+  }
+
+  .map-controls {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .map-control-btn {
+    padding: 0.5rem 1rem;
+    background-color: var(--white-color);
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .map-control-btn:hover {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+  }
+
+  /* FAQ Section */
+  .faq-section {
+    background-color: var(--white-color);
+  }
+
+  .faq-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+  }
+
+  .faq-category h3 {
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--primary-color);
+  }
+
+  .faq-item {
+    margin-bottom: 1rem;
+    border: 1px solid #eee;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+  }
+
+  .faq-question {
+    width: 100%;
+    padding: 1rem;
+    background-color: var(--light-color);
+    border: none;
+    text-align: left;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: var(--transition);
+  }
+
+  .faq-question:hover {
+    background-color: #f0f0f0;
+  }
+
+  .faq-question.active {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+  }
+
+  .faq-question i {
+    transition: var(--transition);
+  }
+
+  .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    background-color: var(--white-color);
+  }
+
+  .faq-answer.active {
+    max-height: 500px;
+  }
+
+  .faq-answer p {
+    padding: 1rem;
+  }
+
+  .faq-more {
+    margin-bottom: 1rem;
+    color: #666;
+  }
+
+  /* Newsletter Section */
+  .newsletter-section {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #2e6b30 100%);
+    color: var(--white-color);
+  }
+
+  .newsletter-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  .newsletter-text h2 {
+    margin-bottom: 1rem;
+  }
+
+  .newsletter-benefits {
+    list-style: none;
+    margin-top: 1.5rem;
+  }
+
+  .newsletter-benefits li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+
+  .newsletter-benefits i {
+    margin-right: 0.5rem;
+    color: var(--warning-color);
+  }
+
+  .newsletter-form-container {
+    background-color: var(--white-color);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    color: var(--dark-color);
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+
+  .form-control:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(61, 139, 64, 0.2);
+  }
+
+  .form-privacy {
+    font-size: 0.875rem;
+    color: #666;
+    text-align: center;
+    margin-top: 1rem;
+  }
+
+  /* Social Section */
+  .social-section {
+    background-color: var(--light-color);
+  }
+
+  .social-content {
+    text-align: center;
+  }
+
+  .social-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .social-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    color: var(--white-color);
+    transition: var(--transition);
+  }
+
+  .social-btn.twitter {
+    background-color: #1da1f2;
+  }
+
+  .social-btn.whatsapp {
+    background-color: #25d366;
+  }
+
+  .social-btn.facebook {
+    background-color: #4267b2;
+  }
+
+  .social-btn.linkedin {
+    background-color: #0077b5;
+  }
+
+  .social-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Chat Widget */
+  .chat-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+  }
+
+  .chat-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    border: none;
+    border-radius: 50px;
+    box-shadow: var(--shadow-lg);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .chat-toggle:hover {
+    background-color: #327334;
+  }
+
+  .chat-status {
+    font-size: 0.75rem;
+    opacity: 0.8;
+  }
+
+  .chat-window {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    width: 350px;
+    height: 450px;
+    background-color: var(--white-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(20px);
+    visibility: hidden;
+    transition: var(--transition);
+  }
+
+  .chat-window.active {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+  }
+
+  .chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: var(--primary-color);
+    color: var(--white-color);
+  }
+
+  .chat-header-info h4 {
+    margin: 0;
+  }
+
+  .status-indicator {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .chat-close {
+    background: none;
+    border: none;
+    color: var(--white-color);
+    cursor: pointer;
+    font-size: 1.25rem;
+  }
+
+  .chat-body {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    background-color: #f9f9f9;
+  }
+
+  .chat-welcome {
+    text-align: center;
+    padding: 1rem;
+    background-color: var(--white-color);
+    border-radius: var(--border-radius);
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .chat-messages {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .chat-message {
+    display: flex;
+    margin-bottom: 1rem;
+  }
+
+  .chat-message.sent {
+    justify-content: flex-end;
+  }
+
+  .message-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: var(--light-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .message-content {
+    max-width: 70%;
+    padding: 0.75rem;
+    border-radius: var(--border-radius);
+  }
+
+  .chat-message.sent .message-content {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+  }
+
+  .chat-message.received .message-content {
+    background-color: var(--white-color);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .message-sender {
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+  }
+
+  .message-time {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    display: block;
+    text-align: right;
+    margin-top: 0.25rem;
+  }
+
+  .chat-footer {
+    padding: 1rem;
+    background-color: var(--white-color);
+    border-top: 1px solid #eee;
+  }
+
+  .chat-input-form {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .chat-input {
+    flex-grow: 1;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    font-size: 0.875rem;
+  }
+
+  .chat-send {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .chat-quick-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .quick-action {
+    padding: 0.5rem;
+    background-color: var(--light-color);
+    border: none;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .quick-action:hover {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+  }
+
+  /* Partners Section */
+  .partners-section {
+    background-color: var(--white-color);
+  }
+
+  .partners-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+  }
+
+  .partner-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    height: 100px;
+    filter: grayscale(100%);
+    opacity: 0.7;
+    transition: var(--transition);
+  }
+
+  .partner-logo:hover {
+    filter: grayscale(0%);
+    opacity: 1;
+  }
+
+  .partner-logo img {
+    max-width: 100%;
+    max-height: 60px;
+  }
+
+  /* Guest CTA Section */
+  .guest-cta-section {
+    background-color: var(--light-color);
+  }
+
+  .guest-cta-content {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .guest-cta-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  /* Responsive Styles */
+  @media (max-width: 992px) {
+    .welcome-content {
+      grid-template-columns: 1fr;
+    }
+
+    .newsletter-content {
+      grid-template-columns: 1fr;
+    }
+
+    .hero-title {
+      font-size: 2.5rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 2rem;
+    }
+    h2 {
+      font-size: 1.75rem;
+    }
+    h3 {
+      font-size: 1.5rem;
+    }
+
+    section {
+      padding: 3rem 0;
+    }
+
+    .hero {
+      height: auto;
+      min-height: 500px;
+      padding: 4rem 0;
+    }
+
+    .hero-cta {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .hero-cta .btn {
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .process-flow {
+      grid-template-columns: 1fr;
+    }
+
+    .features-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .properties-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .faq-container {
+      grid-template-columns: 1fr;
+    }
+
+    .social-buttons {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .social-btn {
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .chat-window {
+      width: 90vw;
+      right: 5vw;
+    }
+
+    .guest-cta-buttons {
+      flex-direction: column;
+    }
+
+    .guest-cta-buttons .btn {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .search-input-group {
+      flex-direction: column;
+    }
+
+    .search-input,
+    .search-select {
+      width: 100%;
+    }
+
+    .testimonial-nav {
+      display: none;
+    }
+
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .partners-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
+
+{% endblock %}

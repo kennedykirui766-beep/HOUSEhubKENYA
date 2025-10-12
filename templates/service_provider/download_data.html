@@ -1,0 +1,1126 @@
+{% extends "base.html" %} {% block title %}Download My Data - HomeHub{% endblock
+%} {% block content %}
+
+<style>
+  :root {
+    --primary: #4361ee;
+    --primary-dark: #3a0ca3;
+    --secondary: #7209b7;
+    --accent: #f72585;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --success: #06ffa5;
+    --info: #00b4d8;
+    --warning: #ffbe0b;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+    --border-radius: 15px;
+  }
+
+  body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      sans-serif;
+    background-color: #f8f9fa;
+    color: var(--dark);
+    line-height: 1.6;
+  }
+
+  .download-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* Header Section */
+  .download-header {
+    background: linear-gradient(135deg, var(--info) 0%, var(--primary) 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .download-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')
+      no-repeat bottom;
+    background-size: cover;
+  }
+
+  .header-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header-title {
+    font-size: 2rem;
+    font-weight: 800;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 30px;
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: var(--transition);
+  }
+
+  .back-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  /* Info Section */
+  .info-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title i {
+    color: var(--info);
+  }
+
+  .info-content {
+    color: var(--dark);
+    margin-bottom: 1.5rem;
+  }
+
+  .info-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .info-card {
+    background: linear-gradient(
+      135deg,
+      rgba(0, 180, 216, 0.05),
+      rgba(67, 97, 238, 0.05)
+    );
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    border-left: 4px solid var(--info);
+  }
+
+  .info-card h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--info);
+  }
+
+  .info-card p {
+    color: #6c757d;
+    font-size: 0.9rem;
+  }
+
+  /* Download Form Section */
+  .download-form-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+  }
+
+  /* Data Categories */
+  .data-categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .category-card {
+    background: #f8f9fa;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    border: 2px solid transparent;
+    transition: var(--transition);
+    cursor: pointer;
+  }
+
+  .category-card:hover {
+    border-color: var(--primary);
+  }
+
+  .category-card.selected {
+    border-color: var(--primary);
+    background: rgba(67, 97, 238, 0.05);
+  }
+
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 0.5rem;
+  }
+
+  .category-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: white;
+  }
+
+  .profile-icon {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  }
+
+  .activity-icon {
+    background: linear-gradient(135deg, var(--success), #00b4d8);
+  }
+
+  .messages-icon {
+    background: linear-gradient(135deg, var(--warning), #ff9f1c);
+  }
+
+  .settings-icon {
+    background: linear-gradient(135deg, var(--secondary), var(--accent));
+  }
+
+  .category-name {
+    font-weight: 600;
+    color: var(--dark);
+  }
+
+  .category-desc {
+    color: #6c757d;
+    font-size: 0.85rem;
+  }
+
+  .category-checkbox {
+    margin-left: auto;
+    width: 20px;
+    height: 20px;
+    accent-color: var(--primary);
+  }
+
+  /* Format Selection */
+  .format-options {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .format-option {
+    flex: 1;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: var(--border-radius);
+    border: 2px solid transparent;
+    transition: var(--transition);
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .format-option:hover {
+    border-color: var(--primary);
+  }
+
+  .format-option.selected {
+    border-color: var(--primary);
+    background: rgba(67, 97, 238, 0.05);
+  }
+
+  .format-name {
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 0.25rem;
+  }
+
+  .format-desc {
+    color: #6c757d;
+    font-size: 0.85rem;
+  }
+
+  .format-radio {
+    margin-top: 0.5rem;
+  }
+
+  /* Date Range */
+  .date-range {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .date-input {
+    flex: 1;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+
+  .form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+    outline: none;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(67, 97, 238, 0.3);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+
+  .btn-outline:hover {
+    background: var(--primary);
+    color: white;
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, var(--success), #00b4d8);
+    color: white;
+  }
+
+  .btn-success:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(6, 255, 165, 0.3);
+  }
+
+  .btn-block {
+    display: block;
+    width: 100%;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  /* Download History */
+  .download-history {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+  }
+
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+  }
+
+  .history-table th,
+  .history-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #f8f9fa;
+  }
+
+  .history-table th {
+    font-weight: 600;
+    color: var(--dark);
+  }
+
+  .history-table tr:hover {
+    background: #f8f9fa;
+  }
+
+  .download-status {
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    display: inline-block;
+  }
+
+  .status-ready {
+    background: rgba(6, 255, 165, 0.1);
+    color: var(--success);
+  }
+
+  .status-processing {
+    background: rgba(255, 190, 11, 0.1);
+    color: var(--warning);
+  }
+
+  .status-expired {
+    background: rgba(247, 37, 133, 0.1);
+    color: var(--accent);
+  }
+
+  .download-link {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .download-link:hover {
+    text-decoration: underline;
+  }
+
+  /* Confirmation Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
+  .modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 0;
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 500px;
+    box-shadow: var(--shadow);
+    animation: modalFadeIn 0.3s ease;
+  }
+
+  @keyframes modalFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--info);
+  }
+
+  .close {
+    color: #aaa;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .close:hover {
+    color: var(--dark);
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .modal-footer {
+    padding: 1.5rem;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+  }
+
+  .download-summary {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+
+  .summary-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .summary-label {
+    font-weight: 600;
+    color: var(--dark);
+  }
+
+  .summary-value {
+    color: #6c757d;
+  }
+
+  /* Notification Toast */
+  .notification-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    min-width: 300px;
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s;
+    animation-fill-mode: forwards;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  .notification-success {
+    background: linear-gradient(
+      135deg,
+      rgba(6, 255, 165, 0.9),
+      rgba(0, 180, 216, 0.9)
+    );
+    color: white;
+  }
+
+  .notification-danger {
+    background: linear-gradient(
+      135deg,
+      rgba(247, 37, 133, 0.9),
+      rgba(230, 57, 70, 0.9)
+    );
+    color: white;
+  }
+
+  .notification-warning {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 190, 11, 0.9),
+      rgba(255, 159, 28, 0.9)
+    );
+    color: white;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .download-container {
+      padding: 1rem;
+    }
+
+    .header-title {
+      font-size: 1.5rem;
+    }
+
+    .data-categories {
+      grid-template-columns: 1fr;
+    }
+
+    .format-options {
+      flex-direction: column;
+    }
+
+    .date-range {
+      flex-direction: column;
+    }
+
+    .form-actions {
+      flex-direction: column;
+    }
+
+    .btn {
+      width: 100%;
+    }
+
+    .history-table {
+      font-size: 0.9rem;
+    }
+
+    .history-table th,
+    .history-table td {
+      padding: 0.75rem 0.5rem;
+    }
+  }
+</style>
+
+<div class="download-container">
+  <!-- Download Header -->
+  <div class="download-header">
+    <div class="header-content">
+      <h1 class="header-title">Download My Data</h1>
+      <div class="header-actions">
+        <a href="{{ url_for('service_provider.settings') }}" class="back-btn">
+          <i class="fas fa-arrow-left"></i> Back to Settings
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Section -->
+  <div class="info-section">
+    <h2 class="section-title">
+      <i class="fas fa-info-circle"></i>
+      About Your Data
+    </h2>
+    <p class="info-content">
+      You can download a copy of your data stored on HomeHub. This includes your
+      profile information, activity history, messages, and settings. You can
+      choose which data categories to include and the format you prefer.
+    </p>
+
+    <div class="info-cards">
+      <div class="info-card">
+        <h4><i class="fas fa-shield-alt"></i> Your Data is Secure</h4>
+        <p>
+          We use industry-standard encryption to protect your data during
+          download.
+        </p>
+      </div>
+      <div class="info-card">
+        <h4><i class="fas fa-clock"></i> Processing Time</h4>
+        <p>
+          Large data requests may take some time to prepare. You'll receive an
+          email when ready.
+        </p>
+      </div>
+      <div class="info-card">
+        <h4><i class="fas fa-calendar-alt"></i> Availability</h4>
+        <p>
+          Your download will be available for 7 days before it expires for
+          security reasons.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Download Form Section -->
+  <div class="download-form-section">
+    <h2 class="section-title">
+      <i class="fas fa-download"></i>
+      Request Data Download
+    </h2>
+
+    <form id="downloadForm">
+      <!-- Data Categories -->
+      <div class="form-group">
+        <label>Select Data Categories</label>
+        <div class="data-categories">
+          <div class="category-card selected" onclick="toggleCategory(this)">
+            <div class="category-header">
+              <div class="category-icon profile-icon">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="category-name">Profile</div>
+              <input type="checkbox" class="category-checkbox" checked />
+            </div>
+            <div class="category-desc">
+              Personal information and account details
+            </div>
+          </div>
+
+          <div class="category-card selected" onclick="toggleCategory(this)">
+            <div class="category-header">
+              <div class="category-icon activity-icon">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <div class="category-name">Activity</div>
+              <input type="checkbox" class="category-checkbox" checked />
+            </div>
+            <div class="category-desc">Your activity history and logs</div>
+          </div>
+
+          <div class="category-card" onclick="toggleCategory(this)">
+            <div class="category-header">
+              <div class="category-icon messages-icon">
+                <i class="fas fa-comments"></i>
+              </div>
+              <div class="category-name">Messages</div>
+              <input type="checkbox" class="category-checkbox" />
+            </div>
+            <div class="category-desc">
+              Your conversations and communications
+            </div>
+          </div>
+
+          <div class="category-card selected" onclick="toggleCategory(this)">
+            <div class="category-header">
+              <div class="category-icon settings-icon">
+                <i class="fas fa-cog"></i>
+              </div>
+              <div class="category-name">Settings</div>
+              <input type="checkbox" class="category-checkbox" checked />
+            </div>
+            <div class="category-desc">Your preferences and configuration</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Format Selection -->
+      <div class="form-group">
+        <label>Select Format</label>
+        <div class="format-options">
+          <div
+            class="format-option selected"
+            onclick="selectFormat(this, 'json')"
+          >
+            <div class="format-name">JSON</div>
+            <div class="format-desc">Machine-readable format</div>
+            <div class="format-radio">
+              <input type="radio" name="format" value="json" checked />
+            </div>
+          </div>
+
+          <div class="format-option" onclick="selectFormat(this, 'csv')">
+            <div class="format-name">CSV</div>
+            <div class="format-desc">Spreadsheet-compatible format</div>
+            <div class="format-radio">
+              <input type="radio" name="format" value="csv" />
+            </div>
+          </div>
+
+          <div class="format-option" onclick="selectFormat(this, 'pdf')">
+            <div class="format-name">PDF</div>
+            <div class="format-desc">Human-readable document</div>
+            <div class="format-radio">
+              <input type="radio" name="format" value="pdf" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Date Range -->
+      <div class="form-group">
+        <label>Date Range (Optional)</label>
+        <div class="date-range">
+          <div class="date-input">
+            <input
+              type="date"
+              class="form-control"
+              id="start-date"
+              placeholder="Start Date"
+            />
+          </div>
+          <div class="date-input">
+            <input
+              type="date"
+              class="form-control"
+              id="end-date"
+              placeholder="End Date"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" onclick="resetForm()">
+          <i class="fas fa-redo"></i> Reset
+        </button>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-download"></i> Request Download
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Download History -->
+  <div class="download-history">
+    <h2 class="section-title">
+      <i class="fas fa-history"></i>
+      Download History
+    </h2>
+
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th>Date Requested</th>
+          <th>Data Categories</th>
+          <th>Format</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Jun 15, 2023</td>
+          <td>Profile, Activity</td>
+          <td>JSON</td>
+          <td><span class="download-status status-expired">Expired</span></td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>May 28, 2023</td>
+          <td>All Data</td>
+          <td>CSV</td>
+          <td><span class="download-status status-ready">Ready</span></td>
+          <td>
+            <a href="#" class="download-link">
+              <i class="fas fa-download"></i> Download
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>Apr 10, 2023</td>
+          <td>Profile, Settings</td>
+          <td>PDF</td>
+          <td><span class="download-status status-ready">Ready</span></td>
+          <td>
+            <a href="#" class="download-link">
+              <i class="fas fa-download"></i> Download
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>Mar 5, 2023</td>
+          <td>Activity, Messages</td>
+          <td>JSON</td>
+          <td>
+            <span class="download-status status-processing">Processing</span>
+          </td>
+          <td>-</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Confirm Download Request</h3>
+      <span class="close" onclick="closeModal()">&times;</span>
+    </div>
+    <div class="modal-body">
+      <p>
+        You're about to request a download of your data. Please review your
+        selection:
+      </p>
+
+      <div class="download-summary">
+        <div class="summary-item">
+          <span class="summary-label">Data Categories:</span>
+          <span class="summary-value" id="summary-categories"
+            >Profile, Activity, Settings</span
+          >
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Format:</span>
+          <span class="summary-value" id="summary-format">JSON</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Date Range:</span>
+          <span class="summary-value" id="summary-dates">All time</span>
+        </div>
+      </div>
+
+      <p>
+        Once submitted, we'll prepare your data and notify you when it's ready
+        for download.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitDownloadRequest()">
+        <i class="fas fa-check"></i> Confirm Request
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Toggle category selection
+  function toggleCategory(element) {
+    const checkbox = element.querySelector(".category-checkbox");
+    checkbox.checked = !checkbox.checked;
+
+    if (checkbox.checked) {
+      element.classList.add("selected");
+    } else {
+      element.classList.remove("selected");
+    }
+  }
+
+  // Select format
+  function selectFormat(element, format) {
+    // Remove selected class from all format options
+    document.querySelectorAll(".format-option").forEach((option) => {
+      option.classList.remove("selected");
+    });
+
+    // Add selected class to clicked option
+    element.classList.add("selected");
+
+    // Check the radio button
+    element.querySelector('input[type="radio"]').checked = true;
+  }
+
+  // Reset form
+  function resetForm() {
+    document.getElementById("downloadForm").reset();
+
+    // Reset category selections
+    document.querySelectorAll(".category-card").forEach((card) => {
+      card.classList.remove("selected");
+      card.querySelector(".category-checkbox").checked = false;
+    });
+
+    // Select default categories
+    const defaultCategories = ["profile", "activity", "settings"];
+    defaultCategories.forEach((category) => {
+      const card = document
+        .querySelector(`.${category}-icon`)
+        .closest(".category-card");
+      card.classList.add("selected");
+      card.querySelector(".category-checkbox").checked = true;
+    });
+
+    // Reset format selection
+    document.querySelectorAll(".format-option").forEach((option) => {
+      option.classList.remove("selected");
+    });
+    document.querySelector(".format-option").classList.add("selected");
+    document.querySelector('input[name="format"][value="json"]').checked = true;
+
+    // Reset date inputs
+    document.getElementById("start-date").value = "";
+    document.getElementById("end-date").value = "";
+  }
+
+  // Handle form submission
+  document
+    .getElementById("downloadForm")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      // Get selected categories
+      const selectedCategories = [];
+      document
+        .querySelectorAll(".category-checkbox:checked")
+        .forEach((checkbox) => {
+          const card = checkbox.closest(".category-card");
+          const categoryName = card.querySelector(".category-name").textContent;
+          selectedCategories.push(categoryName);
+        });
+
+      // Get selected format
+      const selectedFormat = document
+        .querySelector('input[name="format"]:checked')
+        .value.toUpperCase();
+
+      // Get date range
+      const startDate = document.getElementById("start-date").value;
+      const endDate = document.getElementById("end-date").value;
+      let dateRange = "All time";
+      if (startDate && endDate) {
+        dateRange = `${startDate} to ${endDate}`;
+      } else if (startDate) {
+        dateRange = `From ${startDate}`;
+      } else if (endDate) {
+        dateRange = `Until ${endDate}`;
+      }
+
+      // Update summary in modal
+      document.getElementById("summary-categories").textContent =
+        selectedCategories.join(", ");
+      document.getElementById("summary-format").textContent = selectedFormat;
+      document.getElementById("summary-dates").textContent = dateRange;
+
+      // Show confirmation modal
+      document.getElementById("confirmModal").style.display = "block";
+    });
+
+  // Close modal
+  function closeModal() {
+    document.getElementById("confirmModal").style.display = "none";
+  }
+
+  // Submit download request
+  function submitDownloadRequest() {
+    // In a real application, this would make an API call to request the data download
+    console.log("Submitting download request...");
+
+    // Close modal
+    closeModal();
+
+    // Show processing notification
+    showNotification(
+      "Your download request has been submitted. We'll notify you when it's ready.",
+      "success"
+    );
+
+    // Add new entry to download history (simulated)
+    const historyTable = document.querySelector(".history-table tbody");
+    const newRow = document.createElement("tr");
+
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+
+    const selectedCategories = [];
+    document
+      .querySelectorAll(".category-checkbox:checked")
+      .forEach((checkbox) => {
+        const card = checkbox.closest(".category-card");
+        const categoryName = card.querySelector(".category-name").textContent;
+        selectedCategories.push(categoryName);
+      });
+
+    const selectedFormat = document
+      .querySelector('input[name="format"]:checked')
+      .value.toUpperCase();
+
+    newRow.innerHTML = `
+      <td>${formattedDate}</td>
+      <td>${selectedCategories.join(", ")}</td>
+      <td>${selectedFormat}</td>
+      <td><span class="download-status status-processing">Processing</span></td>
+      <td>-</td>
+    `;
+
+    // Add to top of table
+    historyTable.insertBefore(newRow, historyTable.firstChild);
+
+    // Reset form
+    resetForm();
+  }
+
+  // Show notification
+  function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement("div");
+    notification.className = `notification-toast notification-${type}`;
+
+    // Add icon based on type
+    let icon = "";
+    if (type === "success") {
+      icon = '<i class="fas fa-check-circle"></i>';
+    } else if (type === "danger") {
+      icon = '<i class="fas fa-exclamation-circle"></i>';
+    } else if (type === "warning") {
+      icon = '<i class="fas fa-exclamation-triangle"></i>';
+    }
+
+    notification.innerHTML = `${icon} ${message}`;
+
+    // Add to DOM
+    document.body.appendChild(notification);
+
+    // Remove after animation completes
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
+  }
+
+  // Close modal when clicking outside of it
+  window.onclick = function (event) {
+    const modal = document.getElementById("confirmModal");
+    if (event.target === modal) {
+      closeModal();
+    }
+  };
+</script>
+
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}BNBs & Lodgings{% endblock %}
+{% block content %}
+<h2>BNBs & Lodgings</h2>
+
+<div class="house-list">
+  {% for house in houses %}
+    <div class="house-card">
+      <h3>{{ house.title }}</h3>
+      <p>{{ house.description }}</p>
+      <p><strong>Location:</strong> {{ house.location }}</p>
+      <div class="images">
+        {% for url in house.image_urls.split(',') %}
+          <img src="{{ url }}" alt="Lodging Image" />
+        {% endfor %}
+      </div>
+      <a href="/book/{{ house.id }}">Book</a>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}
+
+

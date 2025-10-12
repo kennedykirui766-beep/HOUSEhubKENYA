@@ -1,0 +1,945 @@
+{% extends "base.html" %} {% block title %}How It Works - Landlord{% endblock %}
+{% block content %}
+<style>
+  :root {
+    --primary: #4361ee;
+    --primary-dark: #3a0ca3;
+    --secondary: #7209b7;
+    --accent: #f72585;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --success: #06ffa5;
+    --info: #00b4d8;
+    --warning: #ffbe0b;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+  }
+
+  .property-container {
+    display: flex;
+    min-height: calc(100vh - 56px);
+    background-color: var(--light);
+  }
+
+  .property-sidebar {
+    width: 260px;
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+    padding: 2rem 1.5rem;
+    position: fixed;
+    top: 56px;
+    left: 0;
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: var(--shadow);
+  }
+
+  .property-sidebar h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .property-sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .property-sidebar ul li {
+    margin-bottom: 1rem;
+  }
+
+  .property-sidebar ul li a {
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    transition: var(--transition);
+  }
+
+  .property-sidebar ul li a:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+  }
+
+  .property-sidebar ul li a i {
+    margin-right: 0.75rem;
+  }
+
+  .property-main {
+    flex: 1;
+    padding: 2rem;
+    margin-left: 260px;
+  }
+
+  .property-header {
+    background: white;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+
+  .property-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 1rem;
+  }
+
+  .property-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    color: var(--dark);
+  }
+
+  .meta-item i {
+    color: var(--primary);
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+  }
+
+  .property-gallery {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 250px 120px;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    height: 380px;
+  }
+
+  .gallery-main {
+    grid-row: 1 / 3;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .gallery-main img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition);
+  }
+
+  .gallery-main:hover img {
+    transform: scale(1.05);
+  }
+
+  .gallery-thumb {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+  }
+
+  .gallery-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition);
+  }
+
+  .gallery-thumb:hover img {
+    transform: scale(1.05);
+  }
+
+  .property-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+  }
+
+  .property-details {
+    background: white;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    padding: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--light);
+    display: flex;
+    align-items: center;
+  }
+
+  .section-title i {
+    color: var(--primary);
+    margin-right: 0.75rem;
+    font-size: 1.5rem;
+  }
+
+  .property-description {
+    line-height: 1.6;
+    color: #555;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+  }
+
+  .amenities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .amenity-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    background: var(--light);
+    border-radius: 8px;
+    transition: var(--transition);
+  }
+
+  .amenity-item:hover {
+    background: #e9ecef;
+    transform: translateY(-3px);
+  }
+
+  .amenity-item i {
+    color: var(--primary);
+    margin-right: 0.75rem;
+    font-size: 1.2rem;
+  }
+
+  .property-sidebar-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .info-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+    transition: var(--transition);
+  }
+
+  .info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  }
+
+  .info-card h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--light);
+    display: flex;
+    align-items: center;
+  }
+
+  .info-card h3 i {
+    color: var(--primary);
+    margin-right: 0.5rem;
+  }
+
+  .price {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .price-period {
+    font-size: 0.9rem;
+    color: #777;
+  }
+
+  .owner-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .owner-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 1rem;
+  }
+
+  .owner-details h4 {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .owner-details p {
+    font-size: 0.85rem;
+    color: #777;
+    margin: 0;
+  }
+
+  .property-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    font-size: 1rem;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(67, 97, 238, 0.3);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+
+  .btn-outline:hover {
+    background: var(--primary);
+    color: white;
+  }
+
+  .contact-methods {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .contact-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--light);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+  }
+
+  .contact-btn:hover {
+    background: var(--primary);
+    color: white;
+  }
+
+  .property-map {
+    height: 250px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-top: 1rem;
+  }
+
+  .property-map iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  .availability-status {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .available {
+    background: rgba(6, 255, 165, 0.2);
+    color: #00b4d8;
+  }
+
+  .unavailable {
+    background: rgba(247, 37, 133, 0.2);
+    color: var(--accent);
+  }
+
+  .location-info {
+    background: linear-gradient(
+      135deg,
+      rgba(67, 97, 238, 0.1),
+      rgba(58, 12, 163, 0.1)
+    );
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--primary);
+  }
+
+  .location-info h3 {
+    color: var(--primary-dark);
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+  }
+
+  .location-info p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #555;
+  }
+
+  .additional-info {
+    background: white;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .additional-info h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--light);
+    display: flex;
+    align-items: center;
+  }
+
+  .additional-info h3 i {
+    color: var(--primary);
+    margin-right: 0.5rem;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .info-item {
+    padding: 1rem;
+    background: var(--light);
+    border-radius: 8px;
+    transition: var(--transition);
+  }
+
+  .info-item:hover {
+    background: #e9ecef;
+    transform: translateY(-3px);
+  }
+
+  .info-item h4 {
+    font-size: 0.9rem;
+    color: #777;
+    margin-bottom: 0.25rem;
+  }
+
+  .info-item p {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin: 0;
+  }
+
+  .dark-mode .property-sidebar {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+  }
+
+  .dark-mode .property-header,
+  .dark-mode .property-details,
+  .dark-mode .info-card {
+    background: #2d3748;
+    color: #e2e8f0;
+  }
+
+  .dark-mode .property-title,
+  .dark-mode .section-title,
+  .dark-mode .info-card h3 {
+    color: #e2e8f0;
+  }
+
+  .dark-mode .property-description {
+    color: #cbd5e0;
+  }
+
+  .dark-mode .amenity-item {
+    background: #4a5568;
+  }
+
+  .dark-mode .amenity-item:hover {
+    background: #2d3748;
+  }
+
+  .dark-mode .meta-item {
+    color: #e2e8f0;
+  }
+
+  .dark-mode .owner-details p {
+    color: #a0aec0;
+  }
+
+  .dark-mode .location-info {
+    background: linear-gradient(
+      135deg,
+      rgba(67, 97, 238, 0.2),
+      rgba(58, 12, 163, 0.2)
+    );
+  }
+
+  .dark-mode .location-info h3 {
+    color: #90cdf4;
+  }
+
+  .dark-mode .location-info p {
+    color: #cbd5e0;
+  }
+
+  .dark-mode .info-item {
+    background: #4a5568;
+  }
+
+  .dark-mode .info-item:hover {
+    background: #2d3748;
+  }
+
+  @media (max-width: 992px) {
+    .property-content {
+      grid-template-columns: 1fr;
+    }
+
+    .property-sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    .property-sidebar.active {
+      transform: translateX(0);
+    }
+
+    .property-main {
+      margin-left: 0;
+    }
+
+    .mobile-menu-toggle {
+      display: block;
+      position: fixed;
+      top: 70px;
+      left: 20px;
+      z-index: 101;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .property-gallery {
+      grid-template-columns: 1fr;
+      grid-template-rows: 250px repeat(3, 100px);
+      height: auto;
+    }
+
+    .gallery-main {
+      grid-row: 1;
+    }
+
+    .amenities-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .info-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+<button class="mobile-menu-toggle d-lg-none" id="mobileMenuToggle">
+  <i class="fas fa-bars"></i>
+</button>
+
+<div class="property-container">
+  <!-- Sidebar -->
+  <aside class="property-sidebar" id="propertySidebar">
+    <h2>Property Navigation</h2>
+    <ul>
+      {% if current_user.is_authenticated and current_user.role.lower() ==
+      'landlord' and property.owner_id == current_user.id %}
+      <li>
+        <a href="{{ url_for('house.edit_property', property_id=property.id) }}">
+          <i class="fas fa-edit"></i> Edit Property
+        </a>
+      </li>
+      {% endif %}
+      <li>
+        <a href="{{ url_for('house.hotels') }}">
+          <i class="fas fa-arrow-left"></i> Back to Properties
+        </a>
+      </li>
+      <li>
+        <a href="{{ url_for('auth.profile') }}">
+          <i class="fas fa-user"></i> Profile
+        </a>
+      </li>
+      <li>
+        <a href="{{ url_for('auth.logout') }}">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="property-main">
+    <!-- Property Header -->
+    <div class="property-header">
+      <h1 class="property-title">{{ property.title }}</h1>
+
+      <div class="property-meta">
+        <div class="meta-item">
+          <i class="fas fa-map-marker-alt"></i>
+          <span>{{ property.location }}</span>
+        </div>
+        <div class="meta-item">
+          <i class="fas fa-bed"></i>
+          <span>{{ property.bedrooms or 3 }} Bedrooms</span>
+        </div>
+        <div class="meta-item">
+          <i class="fas fa-bath"></i>
+          <span>{{ property.bathrooms or 2 }} Bathrooms</span>
+        </div>
+        <div class="meta-item">
+          <i class="fas fa-ruler-combined"></i>
+          <span>{{ property.size or '1200' }} sq ft</span>
+        </div>
+      </div>
+
+      <div
+        class="availability-status {% if property.is_available %}available{% else %}unavailable{% endif %}"
+      >
+        {% if property.is_available %}Available Now{% else %}Currently
+        Unavailable{% endif %}
+      </div>
+    </div>
+
+    <!-- Property Gallery -->
+    <div class="property-gallery">
+      <div class="gallery-main">
+        {% if property.image_urls %}
+        <img
+          src="{{ url_for('static', filename='images/' ~ property.image_urls.split(',')[0]) }}"
+          alt="{{ property.title }}"
+        />
+        {% else %}
+        <img
+          src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80"
+          alt="{{ property.title }}"
+        />
+        {% endif %}
+      </div>
+
+      {% if property.image_urls and property.image_urls.split(',')|length > 1 %}
+      {% for image in property.image_urls.split(',')[1:4] %}
+      <div class="gallery-thumb">
+        <img
+          src="{{ url_for('static', filename='images/' ~ image) }}"
+          alt="{{ property.title }}"
+        />
+      </div>
+      {% endfor %} {% else %}
+      <div class="gallery-thumb">
+        <img
+          src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80"
+          alt="{{ property.title }}"
+        />
+      </div>
+      <div class="gallery-thumb">
+        <img
+          src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80"
+          alt="{{ property.title }}"
+        />
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Property Content -->
+    <div class="property-content">
+      <!-- Property Details -->
+      <div class="property-details">
+        <h2 class="section-title">
+          <i class="fas fa-info-circle"></i> Property Description
+        </h2>
+        <p class="property-description">{{ property.description | safe }}</p>
+
+        <h2 class="section-title"><i class="fas fa-star"></i> Amenities</h2>
+        <div class="amenities-grid">
+          <div class="amenity-item">
+            <i class="fas fa-wifi"></i>
+            <span>High-Speed WiFi</span>
+          </div>
+          <div class="amenity-item">
+            <i class="fas fa-car"></i>
+            <span>Parking Space</span>
+          </div>
+          <div class="amenity-item">
+            <i class="fas fa-snowflake"></i>
+            <span>Air Conditioning</span>
+          </div>
+          <div class="amenity-item">
+            <i class="fas fa-tv"></i>
+            <span>Cable TV</span>
+          </div>
+          <div class="amenity-item">
+            <i class="fas fa-swimming-pool"></i>
+            <span>Swimming Pool</span>
+          </div>
+          <div class="amenity-item">
+            <i class="fas fa-dumbbell"></i>
+            <span>Gym</span>
+          </div>
+          <div class="amenity-item">
+            <i class="fas fa-shield-alt"></i>
+            <span>24/7 Security</span>
+          </div>
+          <div class="amenity-item">
+            <i class="fas fa-bolt"></i>
+            <span>Backup Power</span>
+          </div>
+        </div>
+
+        <h2 class="section-title">
+          <i class="fas fa-map-marked-alt"></i> Location
+        </h2>
+        <div class="location-info">
+          <h3>{{ property.location }}</h3>
+          <p>
+            This property is located in a vibrant neighborhood with easy access
+            to shopping centers, restaurants, schools, and public
+            transportation. The area is well-connected and offers a convenient
+            lifestyle for residents.
+          </p>
+        </div>
+
+        <div class="property-map">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.486447547632!2d35.28501631475363!3d-0.368319999749814!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182a119e2337a6c7%3A0x6d8b6a7f7d7e8e9f!2sKericho%2C%20Kenya!5e0!3m2!1sen!2sus!4v1629785466789!5m2!1sen!2sus"
+            allowfullscreen=""
+            loading="lazy"
+          >
+          </iframe>
+        </div>
+
+        <div class="additional-info">
+          <h3><i class="fas fa-list-alt"></i> Additional Information</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <h4>Property Type</h4>
+              <p>{{ property.property_type or 'Apartment' }}</p>
+            </div>
+            <div class="info-item">
+              <h4>Furnishing</h4>
+              <p>{{ property.furnishing or 'Semi-Furnished' }}</p>
+            </div>
+            <div class="info-item">
+              <h4>Pet Policy</h4>
+              <p>{{ property.pet_policy or 'Pets Allowed' }}</p>
+            </div>
+            <div class="info-item">
+              <h4>Lease Term</h4>
+              <p>{{ property.lease_term or '12 Months' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Property Sidebar Content -->
+      <div class="property-sidebar-content">
+        <!-- Pricing Card -->
+        <div class="info-card">
+          <h3><i class="fas fa-tag"></i> Rental Information</h3>
+          <div class="price">KES {{ property.price or '35,000' }}</div>
+          <div class="price-period">per month</div>
+
+          <div class="property-actions">
+            {% if current_user.is_authenticated and current_user.role.lower() ==
+            'tenant' %} {% if property.is_available %}
+            <form
+              action="{{ url_for('house.request_rental', property_id=property.id) }}"
+              method="POST"
+            >
+              <button type="submit" class="btn btn-primary">
+                Request Rental
+              </button>
+            </form>
+            <a href="#" class="btn btn-outline">Schedule Tour</a>
+            {% else %}
+            <button class="btn btn-outline" disabled>
+              Property Unavailable
+            </button>
+            <a href="{{ url_for('house.hotles') }}" class="btn btn-primary"
+              >View Similar Properties</a
+            >
+            {% endif %} {% endif %}
+          </div>
+        </div>
+
+        <!-- Owner Information -->
+        <div class="info-card">
+          <h3><i class="fas fa-user-tie"></i> Property Owner</h3>
+          <div class="owner-info">
+            <div class="owner-avatar">{{ property.owner.name[0]|upper }}</div>
+            <div class="owner-details">
+              <h4>{{ property.owner.name }}</h4>
+              <p>{{ property.owner.email }}</p>
+            </div>
+          </div>
+
+          <p>
+            Listed since {{ property.created_at.strftime('%B %Y') if
+            property.created_at else 'January 2023' }}
+          </p>
+
+          <div class="contact-methods">
+            <a
+              href="tel:{{ property.owner.phone or '+254712345678' }}"
+              class="contact-btn"
+              title="Call Owner"
+            >
+              <i class="fas fa-phone"></i>
+            </a>
+            <a
+              href="mailto:{{ property.owner.email }}"
+              class="contact-btn"
+              title="Email Owner"
+            >
+              <i class="fas fa-envelope"></i>
+            </a>
+            <a href="#" class="contact-btn" title="WhatsApp Owner">
+              <i class="fab fa-whatsapp"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="info-card">
+          <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+          <div class="property-actions">
+            <a href="#" class="btn btn-outline">
+              <i class="fas fa-heart me-2"></i> Save Property
+            </a>
+            <a href="#" class="btn btn-outline">
+              <i class="fas fa-share-alt me-2"></i> Share Property
+            </a>
+            <a href="#" class="btn btn-outline">
+              <i class="fas fa-calculator me-2"></i> Mortgage Calculator
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById("mobileMenuToggle");
+    const propertySidebar = document.getElementById("propertySidebar");
+
+    if (mobileMenuToggle) {
+      mobileMenuToggle.addEventListener("click", function () {
+        propertySidebar.classList.toggle("active");
+      });
+    }
+
+    // Gallery image click handler
+    const galleryThumbs = document.querySelectorAll(".gallery-thumb img");
+    const galleryMain = document.querySelector(".gallery-main img");
+
+    galleryThumbs.forEach((thumb) => {
+      thumb.addEventListener("click", function () {
+        const tempSrc = galleryMain.src;
+        galleryMain.src = this.src;
+        this.src = tempSrc;
+      });
+    });
+
+    // Form submission handler
+    const rentalForm = document.querySelector('form[action*="request_rental"]');
+    if (rentalForm) {
+      rentalForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        // Here you would normally submit the form
+        // For demo purposes, we'll show a success message
+        alert(
+          "Your rental request has been submitted successfully! The property owner will contact you soon."
+        );
+      });
+    }
+
+    // Save property functionality
+    const savePropertyBtn = document.querySelector('a[href="#"].btn-outline');
+    if (
+      savePropertyBtn &&
+      savePropertyBtn.textContent.includes("Save Property")
+    ) {
+      savePropertyBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+
+        // Toggle saved state
+        const icon = this.querySelector("i");
+        if (icon.classList.contains("fas")) {
+          icon.classList.remove("fas");
+          icon.classList.add("far");
+          this.innerHTML = '<i class="far fa-heart me-2"></i> Save Property';
+        } else {
+          icon.classList.remove("far");
+          icon.classList.add("fas");
+          this.innerHTML = '<i class="fas fa-heart me-2"></i> Saved Property';
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,792 @@
+{% extends "base.html" %} {% block title %}Available Houses - HomeHub{% endblock
+%} {% block content %}
+<style>
+  :root {
+    --primary: #4361ee;
+    --primary-dark: #3a0ca3;
+    --secondary: #7209b7;
+    --accent: #f72585;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --success: #06ffa5;
+    --info: #00b4d8;
+    --warning: #ffbe0b;
+    --shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      sans-serif;
+    background-color: #f8f9fa;
+    color: var(--dark);
+    line-height: 1.6;
+  }
+
+  .houses-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* Hero Section */
+  .houses-hero {
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+    padding: 4rem 2rem;
+    border-radius: 20px;
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .houses-hero::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')
+      no-repeat bottom;
+    background-size: cover;
+  }
+
+  .houses-hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+  }
+
+  .houses-hero h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+  }
+
+  .houses-hero p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+  }
+
+  /* Search and Filter Section */
+  .search-filter-section {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 3rem;
+    box-shadow: var(--shadow);
+  }
+
+  .search-filter-form {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 1rem;
+    align-items: end;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+  }
+
+  .form-control,
+  .form-select {
+    padding: 0.75rem 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+  }
+
+  .btn-search {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    height: fit-content;
+  }
+
+  .btn-search:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(67, 97, 238, 0.3);
+  }
+
+  /* Results Header */
+  .results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .results-count {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--dark);
+  }
+
+  .sort-dropdown {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Property Grid */
+  .property-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  /* Property Card */
+  .property-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .property-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  .property-image {
+    height: 220px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .property-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition);
+  }
+
+  .property-card:hover .property-image img {
+    transform: scale(1.05);
+  }
+
+  .property-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    z-index: 1;
+  }
+
+  .badge-available {
+    background: rgba(6, 255, 165, 0.9);
+    color: var(--dark);
+  }
+
+  .badge-unavailable {
+    background: rgba(247, 37, 133, 0.9);
+    color: white;
+  }
+
+  .property-content {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .property-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+  }
+
+  .property-location {
+    display: flex;
+    align-items: center;
+    color: #6c757d;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+  }
+
+  .property-location i {
+    color: var(--primary);
+    margin-right: 0.5rem;
+  }
+
+  .property-description {
+    color: #495057;
+    margin-bottom: 1rem;
+    flex: 1;
+  }
+
+  .property-features {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .feature {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #6c757d;
+  }
+
+  .feature i {
+    color: var(--primary);
+    margin-right: 0.25rem;
+  }
+
+  .property-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+  }
+
+  .property-price {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .property-price span {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #6c757d;
+  }
+
+  .btn-view {
+    padding: 0.5rem 1.25rem;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-view:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+  }
+
+  /* No Results */
+  .no-results {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .no-results i {
+    font-size: 4rem;
+    color: #dee2e6;
+    margin-bottom: 1rem;
+  }
+
+  .no-results h3 {
+    font-size: 1.5rem;
+    color: var(--dark);
+    margin-bottom: 1rem;
+  }
+
+  .no-results p {
+    color: #6c757d;
+    margin-bottom: 2rem;
+  }
+
+  /* Chat Widget */
+  .chat-widget {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 350px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .chat-header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .chat-messages {
+    height: 300px;
+    overflow-y: auto;
+    padding: 1rem;
+    background: #f8f9fa;
+  }
+
+  .chat-form {
+    padding: 1rem;
+    border-top: 1px solid #e9ecef;
+    background: white;
+  }
+
+  .chat-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e9ecef;
+    border-radius: 50px;
+    margin-bottom: 0.5rem;
+  }
+
+  .chat-button {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    border: none;
+    box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+    z-index: 999;
+  }
+
+  .chat-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 25px rgba(67, 97, 238, 0.6);
+  }
+
+  .message {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border-radius: 10px;
+    max-width: 80%;
+  }
+
+  .message.sent {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    align-self: flex-end;
+    margin-left: auto;
+  }
+
+  .message.received {
+    background: #e9ecef;
+    color: var(--dark);
+  }
+
+  .message small {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    opacity: 0.7;
+  }
+
+  .chat-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .chat-actions .btn {
+    flex: 1;
+    padding: 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 992px) {
+    .search-filter-form {
+      grid-template-columns: 1fr;
+    }
+
+    .property-grid {
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+  }
+
+  @media (max-width: 768px) {
+    .houses-container {
+      padding: 1rem;
+    }
+
+    .houses-hero h1 {
+      font-size: 2rem;
+    }
+
+    .property-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .chat-widget {
+      width: calc(100% - 40px);
+      right: 20px;
+      left: 20px;
+    }
+  }
+</style>
+<div class="houses-container">
+  <!-- Hero Section -->
+  <div class="houses-hero">
+    <div class="houses-hero-content">
+      <h1>Available Houses</h1>
+      <p>Find your perfect home from our wide selection of properties</p>
+    </div>
+  </div>
+
+  <!-- Search and Filter Section -->
+  <div class="search-filter-section">
+    <form class="search-filter-form">
+      <div class="form-group">
+        <label for="search">Search Properties</label>
+        <input
+          type="text"
+          id="search"
+          class="form-control"
+          placeholder="Enter location, property name..."
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="property-type">Property Type</label>
+        <select id="property-type" class="form-select">
+          <option value="">All Types</option>
+          <option value="apartment">Apartment</option>
+          <option value="house">House</option>
+          <option value="studio">Studio</option>
+          <option value="condo">Condo</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="bedrooms">Bedrooms</label>
+        <select id="bedrooms" class="form-select">
+          <option value="">Any</option>
+          <option value="1">1 Bedroom</option>
+          <option value="2">2 Bedrooms</option>
+          <option value="3">3 Bedrooms</option>
+          <option value="4">4+ Bedrooms</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn-search">Search</button>
+    </form>
+  </div>
+
+  <!-- Results Header -->
+  <div class="results-header">
+    <div class="results-count">
+      {% if houses %} Found {{ houses|length }} properties {% else %} No
+      properties found {% endif %}
+    </div>
+
+    <div class="sort-dropdown">
+      <label for="sort">Sort by:</label>
+      <select id="sort" class="form-select">
+        <option value="newest">Newest First</option>
+        <option value="price-low">Price: Low to High</option>
+        <option value="price-high">Price: High to Low</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Property Grid -->
+  <div class="property-grid">
+    {% if houses %} {% for house in houses %} {% if house.owner.role ==
+    'landlord' %}
+    <div class="property-card">
+      <div class="property-image">
+        {% if house.image_urls %}
+        <img
+          src="{{ url_for('static', filename='images/' ~ house.image_urls.split(',')[0]) }}"
+          alt="{{ house.title }}"
+        />
+        {% else %}
+        <img
+          src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80"
+          alt="{{ house.title }}"
+        />
+        {% endif %}
+
+        <div
+          class="property-badge {% if house.available %}badge-available{% else %}badge-unavailable{% endif %}"
+        >
+          {% if house.available %}Available{% else %}Unavailable{% endif %}
+        </div>
+      </div>
+
+      <div class="property-content">
+        <h3 class="property-title">{{ house.title }}</h3>
+
+        <div class="property-location">
+          <i class="fas fa-map-marker-alt"></i>
+          <span>{{ house.location }}</span>
+        </div>
+
+        <p class="property-description">
+          {{ house.description | truncate(100) }}
+        </p>
+
+        <div class="property-features">
+          <div class="feature">
+            <i class="fas fa-bed"></i>
+            <span>{{ house.bedrooms or 1 }} Beds</span>
+          </div>
+          <div class="feature">
+            <i class="fas fa-bath"></i>
+            <span>{{ house.bathrooms or 1 }} Baths</span>
+          </div>
+          <div class="feature">
+            <i class="fas fa-ruler-combined"></i>
+            <span>{{ house.size or '1200' }} sq ft</span>
+          </div>
+        </div>
+
+        <div class="property-footer">
+          <div class="property-price">
+            KES {{ house.rent_amount or '35,000' }}
+            <span>/month</span>
+          </div>
+          <a
+            href="{{ url_for('house.book_house', house_id=house.id) }}"
+            class="btn-view"
+            >Book</a
+          >
+        </div>
+      </div>
+    </div>
+    {% endif %} {% endfor %} {% else %}
+    <div class="no-results">
+      <i class="fas fa-home"></i>
+      <h3>No Houses Available</h3>
+      <p>
+        No houses available at the moment. Please check back later or adjust
+        your search criteria.
+      </p>
+      <a href="{{ url_for('house.hotels') }}" class="btn btn-primary"
+        >Refresh</a
+      >
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Chat Widget -->
+<div id="chat-widget" class="chat-widget">
+  <div class="chat-header">
+    Chat with Support
+    <button id="close-chat" class="btn btn-sm btn-light">X</button>
+  </div>
+  <ul id="chat-messages" class="chat-messages"></ul>
+  <form id="chat-form" class="chat-form">
+    <input
+      type="text"
+      id="chat-input"
+      class="chat-input"
+      placeholder="Type your message..."
+    />
+    <div class="chat-actions">
+      <button type="submit" class="btn btn-primary btn-sm">Send</button>
+      <button
+        type="button"
+        id="upload-file-btn"
+        class="btn btn-secondary btn-sm"
+      >
+        <i class="fas fa-paperclip"></i> Attach
+      </button>
+    </div>
+  </form>
+  <form
+    id="file-form"
+    action="{{ url_for('support.upload_file') }}"
+    method="post"
+    enctype="multipart/form-data"
+  >
+    <input
+      type="file"
+      id="file-input"
+      name="file"
+      style="display: none"
+      accept=".png,.jpg,.jpeg,.gif,.pdf"
+    />
+  </form>
+  {% if current_user.is_authenticated %}
+  <div class="chat-actions" style="padding: 0 1rem 1rem">
+    <a href="{{ url_for('support.chat') }}" class="btn btn-primary btn-sm"
+      >Full Chat</a
+    >
+    {% if current_user.role.lower() == 'landlord' %}
+    <a href="{{ url_for('house.add_house') }}" class="btn btn-info btn-sm"
+      >List Property</a
+    >
+    {% endif %} {% if current_user.role.lower() == 'tenant' %}
+    <a href="{{ url_for('tenant.pay_rent') }}" class="btn btn-info btn-sm"
+      >Pay Rent</a
+    >
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="chat-actions" style="padding: 0 1rem 1rem">
+    <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-sm"
+      >Login to Chat</a
+    >
+  </div>
+  {% endif %}
+</div>
+
+<button id="open-chat" class="chat-button">
+  <i class="fas fa-comment-dots"></i>
+</button>
+{% endblock %} {% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Chat functionality
+    const socket = io();
+    const userId = {{ (current_user.id if current_user.is_authenticated else 0) | tojson }};
+    const userName = {{ (current_user.name if current_user.is_authenticated else "Guest") | tojson }};
+
+    document.getElementById('open-chat').addEventListener('click', () => {
+        document.getElementById('chat-widget').style.display = 'flex';
+        socket.emit('load_history', { user_id: userId });
+    });
+
+    document.getElementById('close-chat').addEventListener('click', () => {
+        document.getElementById('chat-widget').style.display = 'none';
+    });
+
+    document.getElementById('chat-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const message = document.getElementById('chat-input').value.trim();
+        if (message) {
+            socket.emit('message', {
+                user_id: userId,
+                name: userName,
+                message: message
+            });
+            document.getElementById('chat-input').value = '';
+        }
+    });
+
+    document.getElementById('upload-file-btn').addEventListener('click', () => {
+        document.getElementById('file-input').click();
+    });
+
+    document.getElementById('file-input').addEventListener('change', () => {
+        const form = document.getElementById('file-form');
+        const formData = new FormData(form);
+        fetch('{{ url_for("support.upload_file") }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.file_url) {
+                socket.emit('message', {
+                    user_id: userId,
+                    name: userName,
+                    message: `File uploaded: <a href="${data.file_url}" target="_blank">${data.filename}</a>`
+                });
+            } else {
+                alert('File upload failed: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error uploading file:', error);
+            alert('Error uploading file.');
+        });
+        form.reset();
+    });
+
+    socket.on('message', (data) => {
+        const messages = document.getElementById('chat-messages');
+        const li = document.createElement('li');
+        li.className = `message ${data.user_id == userId ? 'sent' : 'received'}`;
+        li.innerHTML = `
+          <div>${data.message}</div>
+          <small>${new Date(data.timestamp).toLocaleTimeString()}</small>
+        `;
+        messages.appendChild(li);
+        messages.scrollTop = messages.scrollHeight;
+    });
+
+    socket.on('load_history', (messages) => {
+        const messagesDiv = document.getElementById('chat-messages');
+        messagesDiv.innerHTML = '';
+        messages.forEach(msg => {
+            const li = document.createElement('li');
+            li.className = `message ${msg.user_id == userId ? 'sent' : 'received'}`;
+            li.innerHTML = `
+              <div>${msg.message}</div>
+              <small>${new Date(msg.timestamp).toLocaleTimeString()}</small>
+            `;
+            messagesDiv.appendChild(li);
+        });
+        messagesDiv.scrollTop = messages.scrollHeight;
+    });
+
+    if (Notification.permission === 'granted') {
+        socket.on('message', (data) => {
+            if (data.user_id != userId) {
+                new Notification('New Support Message', {
+                    body: `${data.name}: ${data.message}`,
+                    icon: '/static/images/favicon.ico'
+                });
+            }
+        });
+    } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission();
+    }
+  });
+</script>
+{% endblock %}

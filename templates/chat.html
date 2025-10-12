@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat with Support - HomeHub</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+  </head>
+  <body>
+    {% extends "base.html" %} {% block content %}
+    <div class="container mt-4">
+      <h2>Chat with Support</h2>
+      <div class="card">
+        <div class="card-header">
+          Support Chat {% if current_user.role.lower() == 'admin' %}
+          <a
+            href="{{ url_for('support.admin') }}"
+            class="btn btn-sm btn-secondary float-right"
+            >Admin Dashboard</a
+          >
+          {% endif %}
+        </div>
+        <div
+          class="card-body"
+          id="chat-box"
+          style="height: 400px; overflow-y: auto"
+        >
+          <ul id="chat-messages">
+            {% for message in messages %}
+            <li
+              class="message {% if message.user_id == current_user.id %}sent{% else %}received{% endif %} mb-2"
+            >
+              <strong>
+                {{ message.user.name if message.user_id == current_user.id else
+                'Support' }}:
+              </strong>
+              {{ message.message }}
+              <small class="text-muted float-right">
+                {{ message.timestamp | timeago }}
+              </small>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="card-footer">
+          <!-- Chat Message Form -->
+          <form id="chat-form" action="#" method="post">
+            <div class="input-group">
+              <input
+                type="text"
+                id="chat-input"
+                class="form-control"
+                placeholder="Type your message..."
+                required
+              />
+              <div class="input-group-append">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-paper-plane"></i> Send
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <!-- File Upload (separate form) -->
+          <form
+            id="file-form"
+            action="{{ url_for('support.upload') }}"
+            method="post"
+            enctype="multipart/form-data"
+          >
+            <input
+              type="file"
+              id="file-input"
+              name="file"
+              style="display: none"
+              accept=".png,.jpg,.jpeg,.gif,.pdf"
+            />
+          </form>
+
+          <!-- File Button OUTSIDE form -->
+          <button
+            type="button"
+            id="upload-file-btn"
+            class="btn btn-secondary mt-2"
+          >
+            <i class="fas fa-paperclip"></i> Attach File
+          </button>
+
+          <!-- Action Buttons (just links, no form) -->
+          <div class="mt-2">
+            {% if current_user.role.lower() == 'landlord' %}
+            <a
+              href="{{ url_for('house.add_house') }}"
+              class="btn btn-sm btn-info"
+              >List Property</a
+            >
+            {% endif %} {% if current_user.role.lower() == 'tenant' %}
+            <a
+              href="{{ url_for('tenant.payments') }}"
+              class="btn btn-sm btn-info"
+              >Make Payment</a
+            >
+            <a
+              href="{{ url_for('tenant.maintenance') }}"
+              class="btn btn-sm btn-info"
+              >Submit Maintenance Request</a
+            >
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      const socket = io();
+      const userId = {{ current_user.id | tojson }};
+      const userName = {{ current_user.name | tojson }};
+
+      // Load chat history
+      socket.emit('load_history', { user_id: userId });
+
+      // Handle incoming messages
+      socket.on('message', (data) => {
+        const messages = document.getElementById('chat-messages');
+        const li = document.createElement('li');
+        li.className = `message ${data.user_id == userId ? 'sent' : 'received'} mb-2`;
+        li.innerHTML = `<strong>${data.user_id == userId ? userName : 'Support'}:</strong> ${data.message} <small class="text-muted float-right">${new Date(data.timestamp).toLocaleTimeString()}</small>`;
+        messages.appendChild(li);
+        messages.scrollTop = messages.scrollHeight;
+      });
+
+      // Handle chat history
+      socket.on('load_history', (messages) => {
+        const messagesDiv = document.getElementById('chat-messages');
+        messagesDiv.innerHTML = '';
+        messages.forEach(msg => {
+          const li = document.createElement('li');
+          li.className = `message ${msg.user_id == userId ? 'sent' : 'received'} mb-2`;
+          li.innerHTML = `<strong>${msg.user_id == userId ? userName : 'Support'}:</strong> ${msg.message} <small class="text-muted float-right">${new Date(msg.timestamp).toLocaleTimeString()}</small>`;
+          messagesDiv.appendChild(li);
+        });
+        messagesDiv.scrollTop = messages.scrollHeight;
+      });
+
+      // Handle message form submission
+      document.getElementById('chat-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const messageInput = document.getElementById('chat-input');
+        const message = messageInput.value.trim();
+        if (message) {
+          socket.emit('message', {
+            user_id: userId,
+            name: userName,
+            message: message
+          });
+          messageInput.value = '';
+        }
+      });
+
+      // ✅ Send message on Enter key
+      document.getElementById('chat-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          document.getElementById('chat-form').dispatchEvent(new Event('submit'));
+        }
+      });
+
+      // Handle file upload button
+      document.getElementById('upload-file-btn').addEventListener('click', () => {
+        document.getElementById('file-input').click();
+      });
+
+      // Handle file selection and submission
+      document.getElementById('file-input').addEventListener('change', () => {
+        const form = document.getElementById('file-form');
+        const formData = new FormData(form);
+        fetch('{{ url_for("support.upload") }}', {
+          method: 'POST',
+          body: formData
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.file_url) {
+              socket.emit('message', {
+                user_id: userId,
+                name: userName,
+                message: `File uploaded: <a href="${data.file_url}" target="_blank">${data.filename}</a>`
+              });
+            } else {
+              alert('File upload failed: ' + (data.error || 'Unknown error'));
+            }
+          })
+          .catch(error => {
+            console.error('Error uploading file:', error);
+            alert('Error uploading file.');
+          });
+        form.reset();
+      });
+
+      // Browser notifications
+      if (Notification.permission === 'granted') {
+        socket.on('message', (data) => {
+          if (data.user_id != userId) {
+            new Notification('New Support Message', {
+              body: `${data.name}: ${data.message}`,
+              icon: '/static/images/favicon.ico'
+            });
+          }
+        });
+      } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission();
+      }
+    </script>
+    {% endblock %}
+  </body>
+</html>

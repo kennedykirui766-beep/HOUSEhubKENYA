@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Rental Houses{% endblock %}
+{% block content %}
+<h2>Available Rental Houses</h2>
+
+<!-- Search Filter -->
+<form method="GET" action="/rentals/search">
+  <input type="text" name="query" placeholder="Search rentals...">
+  <button type="submit">Search</button>
+</form>
+
+<div class="house-list">
+  {% for house in houses %}
+    <div class="house-card">
+      <h3>{{ house.title }}</h3>
+      <p>{{ house.description }}</p>
+      <p><strong>Location:</strong> {{ house.location }}</p>
+      <div class="images">
+        {% for url in house.image_urls.split(',') %}
+          <img src="{{ url }}" alt="House Image" />
+        {% endfor %}
+      </div>
+      <a href="/book/{{ house.id }}">Book</a>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- Optional: Embed a map here if required -->
+
+{% endblock %}
+

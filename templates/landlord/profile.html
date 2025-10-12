@@ -1,0 +1,960 @@
+{% extends 'base.html' %} {% block title %}Your Profile{% endblock %} {% block
+content %}
+
+<style>
+  :root {
+    --primary: #4361ee;
+    --primary-dark: #3a0ca3;
+    --secondary: #7209b7;
+    --accent: #f72585;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --success: #06ffa5;
+    --info: #00b4d8;
+    --warning: #ffbe0b;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+    --border-radius: 15px;
+  }
+
+  body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      sans-serif;
+    background-color: #f8f9fa;
+    color: var(--dark);
+    line-height: 1.6;
+  }
+
+  .profile-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* Header Section */
+  .profile-header {
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+    padding: 3rem 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .profile-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')
+      no-repeat bottom;
+    background-size: cover;
+  }
+
+  .header-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .header-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+  }
+
+  .header-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    max-width: 600px;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .notification-icon {
+    position: relative;
+    font-size: 1.3rem;
+    color: white;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.2);
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+  }
+
+  .notification-icon:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-3px);
+  }
+
+  .notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: var(--accent);
+    color: white;
+    font-size: 0.7rem;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+
+  .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 8px 15px;
+    border-radius: 30px;
+    transition: var(--transition);
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .user-profile:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+  }
+
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+  }
+
+  .user-info h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+  }
+
+  .user-info p {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  /* Profile Card */
+  .profile-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+  }
+
+  .profile-avatar-container {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid var(--primary);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+  }
+
+  .profile-avatar:hover {
+    transform: scale(1.03);
+  }
+
+  .avatar-upload {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    border: 3px solid white;
+  }
+
+  .avatar-upload:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(67, 97, 238, 0.3);
+  }
+
+  .avatar-upload i {
+    font-size: 1.2rem;
+  }
+
+  .profile-info {
+    flex: 1;
+  }
+
+  .profile-name {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--dark);
+  }
+
+  .profile-role {
+    display: inline-block;
+    padding: 0.5rem 1.2rem;
+    background: linear-gradient(
+      135deg,
+      rgba(67, 97, 238, 0.1),
+      rgba(58, 12, 163, 0.1)
+    );
+    color: var(--primary);
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  .profile-stats {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 25px;
+    flex-wrap: wrap;
+  }
+
+  .profile-stat {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: var(--border-radius);
+    padding: 1.2rem;
+    min-width: 120px;
+    text-align: center;
+    transition: var(--transition);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .profile-stat:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .stat-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Form Section */
+  .form-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title i {
+    color: var(--primary);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+  }
+
+  .form-control {
+    padding: 0.75rem 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+
+  .form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+  }
+
+  textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(67, 97, 238, 0.3);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+
+  .btn-outline:hover {
+    background: var(--primary);
+    color: white;
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, var(--success), #00b4d8);
+    color: white;
+  }
+
+  .btn-success:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(6, 255, 165, 0.3);
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+  }
+
+  /* Alert Styles */
+  .alert {
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+  }
+
+  .alert-success {
+    background: linear-gradient(
+      135deg,
+      rgba(6, 255, 165, 0.1),
+      rgba(0, 180, 216, 0.1)
+    );
+    color: var(--success);
+    border-left: 5px solid var(--success);
+  }
+
+  .alert-danger {
+    background: linear-gradient(
+      135deg,
+      rgba(247, 37, 133, 0.1),
+      rgba(230, 57, 70, 0.1)
+    );
+    color: var(--accent);
+    border-left: 5px solid var(--accent);
+  }
+
+  .alert-info {
+    background: linear-gradient(
+      135deg,
+      rgba(0, 180, 216, 0.1),
+      rgba(0, 119, 182, 0.1)
+    );
+    color: var(--info);
+    border-left: 5px solid var(--info);
+  }
+
+  .alert-close {
+    margin-left: auto;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    opacity: 0.7;
+  }
+
+  .alert-close:hover {
+    opacity: 1;
+  }
+
+  /* Password Section */
+  .password-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+  }
+
+  /* Notification Toast */
+  .notification-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    min-width: 300px;
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s;
+    animation-fill-mode: forwards;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  .notification-success {
+    background: linear-gradient(
+      135deg,
+      rgba(6, 255, 165, 0.9),
+      rgba(0, 180, 216, 0.9)
+    );
+    color: white;
+  }
+
+  .notification-danger {
+    background: linear-gradient(
+      135deg,
+      rgba(247, 37, 133, 0.9),
+      rgba(230, 57, 70, 0.9)
+    );
+    color: white;
+  }
+
+  /* Responsive */
+  @media (max-width: 992px) {
+    .header-content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.5rem;
+    }
+
+    .profile-card {
+      flex-direction: column;
+      text-align: center;
+      gap: 2rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .profile-container {
+      padding: 1rem;
+    }
+
+    .header-title {
+      font-size: 2rem;
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    .profile-stats {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .profile-stat {
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .form-actions {
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }
+</style>
+
+<div class="profile-container">
+  <!-- Profile Header -->
+  <div class="profile-header">
+    <div class="header-content">
+      <div>
+        <h1 class="header-title">Your Profile</h1>
+        <p class="header-subtitle">
+          Manage your account information and preferences
+        </p>
+      </div>
+      <div class="header-actions">
+        <div class="notification-icon">
+          <i class="fas fa-bell"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="user-profile">
+          <img
+            src="https://randomuser.me/api/portraits/men/32.jpg"
+            alt="User Avatar"
+            class="user-avatar"
+          />
+          <div class="user-info">
+            <h4>{{ current_user.name }}</h4>
+            <p>{{ current_user.role }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Card -->
+  <div class="profile-card">
+    <div class="profile-avatar-container">
+      <img
+        src="https://randomuser.me/api/portraits/men/32.jpg"
+        alt="Profile Picture"
+        class="profile-avatar"
+        id="profileAvatar"
+      />
+      <label for="avatarUpload" class="avatar-upload">
+        <i class="fas fa-camera"></i>
+      </label>
+      <input
+        type="file"
+        id="avatarUpload"
+        accept="image/*"
+        style="display: none"
+      />
+    </div>
+
+    <div class="profile-info">
+      <h2 class="profile-name">{{ current_user.name }}</h2>
+      <span class="profile-role">{{ current_user.role }}</span>
+
+      <div class="profile-stats">
+        <div class="profile-stat">
+          <div class="stat-value">{{ current_user.id }}</div>
+          <div class="stat-label">User ID</div>
+        </div>
+        <div class="profile-stat">
+          <div class="stat-value">{{ current_user.role }}</div>
+          <div class="stat-label">Role</div>
+        </div>
+        <div class="profile-stat">
+          <div class="stat-value">Active</div>
+          <div class="stat-label">Status</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Form -->
+  <div class="form-section">
+    <div class="section-header">
+      <h3 class="section-title">
+        <i class="fas fa-user-edit"></i>
+        Edit Profile Information
+      </h3>
+    </div>
+
+    <form id="profileForm" method="POST" action="/update_profile">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            class="form-control"
+            value="{{ current_user.name }}"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-control"
+            value="{{ current_user.email }}"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            class="form-control"
+            value="{{ current_user.phone_number or '' }}"
+            placeholder="Enter your phone number"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="location">Location</label>
+          <input
+            type="text"
+            id="location"
+            name="location"
+            class="form-control"
+            value="{{ current_user.location or '' }}"
+            placeholder="Enter your location"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="bio">Bio</label>
+        <textarea
+          id="bio"
+          name="bio"
+          class="form-control"
+          rows="4"
+          placeholder="Tell us about yourself"
+        >
+{{ current_user.bio or '' }}</textarea
+        >
+      </div>
+
+      <div class="form-actions">
+        <a
+          href="{% if current_user.role == 'tenant' %}
+            {{ url_for('tenant.tenant_dashboard') }}
+        {% elif current_user.role == 'service' %}
+            {{ url_for('service_provider.dashboard') }}
+        {% elif current_user.role == 'landlord' %}
+            {{ url_for('landlord.dashboard') }}
+        {% elif current_user.role == 'admin' %}
+            {{ url_for('admin.dashboard') }}
+        {% else %}
+            {{ url_for('main.index') }}
+        {% endif %}"
+          class="btn btn-outline"
+        >
+          <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save"></i> Save Changes
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Password Change Section -->
+  <div class="password-section">
+    <div class="section-header">
+      <h3 class="section-title">
+        <i class="fas fa-key"></i>
+        Change Password
+      </h3>
+    </div>
+    <form id="passwordForm" method="POST" action="/change_password">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="current_password">Current Password</label>
+          <input
+            type="password"
+            id="current_password"
+            name="current_password"
+            class="form-control"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="new_password">New Password</label>
+          <input
+            type="password"
+            id="new_password"
+            name="new_password"
+            class="form-control"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="confirm_password">Confirm New Password</label>
+        <input
+          type="password"
+          id="confirm_password"
+          name="confirm_password"
+          class="form-control"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn btn-success">
+        <i class="fas fa-key"></i> Update Password
+      </button>
+    </form>
+  </div>
+</div>
+
+{% endblock %} {% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Notification Toast Function
+    function showToast(message, type = "success") {
+      // Remove any existing toasts
+      const existingToast = document.querySelector(".notification-toast");
+      if (existingToast) {
+        existingToast.remove();
+      }
+
+      // Create new toast
+      const toast = document.createElement("div");
+      toast.className = `notification-toast notification-${type}`;
+
+      // Set icon based on type
+      let icon = "fa-check-circle";
+      if (type === "danger") icon = "fa-exclamation-circle";
+
+      toast.innerHTML = `
+        <i class="fas ${icon}"></i>
+        <span>${message}</span>
+      `;
+
+      // Add to DOM
+      document.body.appendChild(toast);
+
+      // Auto remove after animation completes
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    // Avatar Upload Preview
+    const avatarUpload = document.getElementById("avatarUpload");
+    const profileAvatar = document.getElementById("profileAvatar");
+
+    avatarUpload.addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+          profileAvatar.src = event.target.result;
+          showToast("Profile picture updated successfully", "success");
+        };
+
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Profile Form Submission
+    const profileForm = document.getElementById("profileForm");
+
+    profileForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      // Show loading state
+      const submitButton = this.querySelector('button[type="submit"]');
+      const originalText = submitButton.innerHTML;
+      submitButton.innerHTML =
+        '<i class="fas fa-spinner fa-spin"></i> Saving...';
+      submitButton.disabled = true;
+
+      // Get form data
+      const formData = new FormData(this);
+
+      // Send form data using fetch
+      fetch(this.action, {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          // Reset button state
+          submitButton.innerHTML = originalText;
+          submitButton.disabled = false;
+
+          // Show success message
+          showToast("Profile updated successfully!", "success");
+        })
+        .catch((error) => {
+          // Reset button state
+          submitButton.innerHTML = originalText;
+          submitButton.disabled = false;
+
+          // Show error message
+          showToast("Error updating profile. Please try again.", "danger");
+          console.error("Error:", error);
+        });
+    });
+
+    // Password Form Submission
+    const passwordForm = document.getElementById("passwordForm");
+
+    passwordForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      // Validate passwords match
+      const newPassword = document.getElementById("new_password").value;
+      const confirmPassword = document.getElementById("confirm_password").value;
+
+      if (newPassword !== confirmPassword) {
+        showToast("Passwords do not match", "danger");
+        return;
+      }
+
+      // Show loading state
+      const submitButton = this.querySelector('button[type="submit"]');
+      const originalText = submitButton.innerHTML;
+      submitButton.innerHTML =
+        '<i class="fas fa-spinner fa-spin"></i> Updating...';
+      submitButton.disabled = true;
+
+      // Get form data
+      const formData = new FormData(this);
+
+      // Send form data using fetch
+      fetch(this.action, {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          // Reset button state and form
+          submitButton.innerHTML = originalText;
+          submitButton.disabled = false;
+          this.reset();
+
+          // Show success message
+          showToast("Password updated successfully!", "success");
+        })
+        .catch((error) => {
+          // Reset button state
+          submitButton.innerHTML = originalText;
+          submitButton.disabled = false;
+
+          // Show error message
+          showToast("Error updating password. Please try again.", "danger");
+          console.error("Error:", error);
+        });
+    });
+
+    // Add animation to profile stats
+    const profileStats = document.querySelectorAll(".profile-stat");
+    profileStats.forEach((stat, index) => {
+      stat.style.animationDelay = `${index * 0.1}s`;
+      stat.classList.add("fade-in");
+    });
+
+    // Add fade-in animation
+    const style = document.createElement("style");
+    style.textContent = `
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .fade-in {
+        animation: fadeIn 0.5s ease forwards;
+        opacity: 0;
+      }
+    `;
+    document.head.appendChild(style);
+  });
+</script>
+{% endblock %}
