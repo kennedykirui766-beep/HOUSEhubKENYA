@@ -1,58 +1,24 @@
 # config.py
 import os
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY')
-    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI') or os.getenv('DATABASE_URL')
+    # Secret key for Flask
+    SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret")  # fallback for local dev
+
+    # PostgreSQL connection via DATABASE_URL (Render provides this)
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///app.db")
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'static', 'images')
 
-    # Debug print statements
-    print("Loaded DB URI:", os.getenv("DATABASE_URL"))
-    print("Loaded UPLOAD_FOLDER:", UPLOAD_FOLDER)
+    # Upload folders
+    UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER", os.path.join(os.getcwd(), "static/images"))
+    CHAT_UPLOAD_FOLDER = os.environ.get("CHAT_UPLOAD_FOLDER", os.path.join(os.getcwd(), "static/uploads/chat"))
 
-# Commented-out version 1
-#import os
-#from dotenv import load_dotenv
+    # Allowed file types
+    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "pdf"}
+    MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 MB
 
-#load_dotenv()
-
-#class Config:
-#    SQLALCHEMY_DATABASE_URI = (
-#        f"mysql+pymysql://{os.getenv('DB_USERNAME')}:{os.getenv('DB_PASSWORD')}@"
-#        f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
-#    )
-#    SQLALCHEMY_TRACK_MODIFICATIONS = False
-#    SECRET_KEY = os.environ.get('SECRET_KEY')
-
-## `config.py`
-
-#import os
-#from dotenv import load_dotenv
-
-#load_dotenv()
-
-#class Config:
-#    SECRET_KEY = os.getenv('SECRET_KEY')
-#    SQLALCHEMY_DATABASE_URI = (
-#        f"mysql+pymysql://{os.getenv('MYSQL_USER')}:"
-#        f"{os.getenv('MYSQL_PASSWORD')}@"
-#        f"{os.getenv('MYSQL_HOST')}/"
-#        f"{os.getenv('MYSQL_DB')}"
-#    )
-#    SQLALCHEMY_TRACK_MODIFICATIONS = False
-#    UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static', 'images')
-
-#class Config:
-#    SECRET_KEY = os.getenv("SECRET_KEY")
-#    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
-#    SQLALCHEMY_TRACK_MODIFICATIONS = False
-#    GOOGLE_MAPS_API_KEY = os.getenv("AIzaSyDYURPPj9xzbF6elY_xKfNH8AMPahTQtpA")
-#    UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static/images/')
-
-#app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'static/images/')
-#print("Loaded DB URI:", os.getenv("DATABASE_URL"))
+    # Debug prints (optional)
+    print("Using DB URI:", SQLALCHEMY_DATABASE_URI)
+    print("UPLOAD_FOLDER:", UPLOAD_FOLDER)
+    print("CHAT_UPLOAD_FOLDER:", CHAT_UPLOAD_FOLDER)
