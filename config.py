@@ -3,22 +3,34 @@ import os
 
 class Config:
     # Secret key for Flask
-    SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret")  # fallback for local dev
+    import os
 
-    # PostgreSQL connection via DATABASE_URL (Render provides this)
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///app.db")
+class Config:
+    SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret")
+
+    database_url = os.environ.get("DATABASE_URL", "sqlite:///app.db")
+
+    # Fix for PostgreSQL on Render
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+    SQLALCHEMY_DATABASE_URI = database_url
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # Upload folders
-    UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER", os.path.join(os.getcwd(), "static/images"))
-    CHAT_UPLOAD_FOLDER = os.environ.get("CHAT_UPLOAD_FOLDER", os.path.join(os.getcwd(), "static/uploads/chat"))
+    UPLOAD_FOLDER = os.environ.get(
+        "UPLOAD_FOLDER",
+        os.path.join(os.getcwd(), "static/images")
+    )
+
+    CHAT_UPLOAD_FOLDER = os.environ.get(
+        "CHAT_UPLOAD_FOLDER",
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "static/images")
+    )
+
+    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "pdf"}
+    MAX_CONTENT_LENGTH = 5 * 1024 * 1024
 
     # Allowed file types
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "pdf"}
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 MB
-
-    # Debug prints (optional)
-    print("Using DB URI:", SQLALCHEMY_DATABASE_URI)
-    print("UPLOAD_FOLDER:", UPLOAD_FOLDER)
-    print("CHAT_UPLOAD_FOLDER:", CHAT_UPLOAD_FOLDER)
