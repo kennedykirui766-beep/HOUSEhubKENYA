@@ -2,6 +2,250 @@
 
 {% block title %}Landlord Dashboard - HomeHub{% endblock %}
 
+{% block styles %}
+<style>
+  /* Dashboard Specific Styles - Themed Blue + Dark Navy */
+  :root {
+    --primary-color: #3B82F6;      /* Blue */
+    --primary-hover: #2563EB;
+    --accent-color: #F59E0B;       /* Amber for warnings */
+    --bg-dark: #0F172A;            /* Dark Navy */
+    --bg-card: #1E293B;            /* Card background */
+    --text-light: #E2E8F0;         /* Soft white */
+    --text-muted: #94a3b8;
+    --border-radius: 8px;
+    --success-color: #10B981;
+    --danger-color: #EF4444;
+  }
+
+  /* Dashboard Container */
+  .dashboard-container {
+    background-color: transparent; /* Transparent to show base background */
+    padding: 0;
+  }
+
+  .dashboard-header {
+    margin-bottom: 2rem;
+  }
+
+  .dashboard-title {
+    font-size: 1.8rem;
+    color: var(--text-light);
+  }
+
+  .dashboard-subtitle {
+    color: var(--text-muted);
+  }
+
+  /* Stats Cards */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background-color: var(--bg-card);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: transform 0.3s, border-color 0.3s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary-color);
+  }
+
+  .stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--primary-color);
+  }
+
+  .stat-card.revenue .stat-icon { color: var(--success-color); background-color: rgba(16, 185, 129, 0.1); }
+  .stat-card.maintenance .stat-icon { color: var(--accent-color); background-color: rgba(245, 158, 11, 0.1); }
+
+  .stat-content h3 {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-light);
+  }
+
+  /* Content Cards */
+  .content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .content-card {
+    background-color: var(--bg-card);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-light);
+    margin: 0;
+  }
+
+  .card-action {
+    font-size: 0.9rem;
+    color: var(--primary-color);
+    font-weight: 500;
+  }
+
+  /* Property List Items */
+  .property-item {
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    background-color: rgba(255,255,255,0.03);
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .property-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-light);
+    margin-bottom: 0.25rem;
+  }
+
+  .property-address {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .property-details {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  
+  .property-details i { color: var(--primary-color); }
+
+  .property-status {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .status-occupied { background-color: rgba(16, 185, 129, 0.15); color: var(--success-color); }
+  .status-vacant { background-color: rgba(239, 68, 68, 0.15); color: var(--danger-color); }
+
+  /* Tables */
+  .table-container { overflow-x: auto; }
+  
+  table { width: 100%; border-collapse: collapse; }
+  
+  th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: var(--text-muted);
+  }
+  
+  th { color: var(--text-light); font-weight: 600; background-color: rgba(0,0,0,0.2); }
+
+  /* Map */
+  .map-container {
+    height: 350px;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  #map { height: 100%; width: 100%; }
+
+  /* Dashboard Top Bar (Internal) */
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    background-color: var(--bg-card);
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .user-profile { display: flex; align-items: center; gap: 10px; }
+  .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color); }
+  .user-info h4 { font-size: 0.95rem; color: var(--text-light); margin: 0; }
+  .user-info p { font-size: 0.8rem; color: var(--text-muted); margin: 0; }
+
+  .notification-icon {
+    position: relative;
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .notification-icon:hover { color: var(--text-light); }
+  
+  .notification-badge {
+    position: absolute;
+    top: -5px; right: -5px;
+    background-color: var(--danger-color);
+    color: white;
+    font-size: 0.7rem;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Chat Widget Overrides for Dark Theme */
+  .chat-box { background-color: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); }
+  .chat-header { background-color: var(--primary-color); }
+  .chat-body { background-color: var(--bg-dark); }
+  .chat-message.received .chat-bubble { background-color: var(--bg-card); color: var(--text-light); box-shadow: none; }
+  .chat-message.sent .chat-bubble { background-color: var(--primary-color); color: white; }
+  .chat-input { background-color: var(--bg-card); border-color: rgba(255,255,255,0.1); color: var(--text-light); }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .content-grid { grid-template-columns: 1fr; }
+    .top-bar { flex-direction: column; gap: 1rem; text-align: center; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <!-- Top Bar / Welcome Section -->
 <div class="top-bar">
@@ -107,7 +351,7 @@
         </div>
         {% endfor %} {% else %}
         <p class="text-center text-muted py-4">No properties found.</p>
-        <a href="{{ url_for('landlord.add_property') }}" class="btn btn-primary w-100">Add Property</a>
+        <a href="{{ url_for('landlord.add_property') }}" class="btn btn-primary btn-block">Add Property</a>
         {% endif %}
       </div>
     </div>
@@ -190,7 +434,7 @@
   </div>
 </div>
 
-<!-- Chat Widget (HTML Structure) -->
+<!-- Chat Widget -->
 <div class="chat-widget">
   <div class="chat-toggle" onclick="toggleChat()">
     <i class="fas fa-comments"></i>
@@ -211,4 +455,98 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Google Maps Script - Note: Replace key in production -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCCGkhU-aZlUelsOQypH5jTjkf5lIRBL7Y&callback=initMap" async defer></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Map
+    window.initMap = function() {
+        const mapDiv = document.getElementById('map');
+        if(!mapDiv) return;
+        
+        const map = new google.maps.Map(mapDiv, {
+          zoom: 12,
+          center: { lat: -1.286389, lng: 36.817223 }, // Default Nairobi
+          styles: [ /* Dark Map Styles */
+            {elementType: 'geometry', stylers: [{color: '#1E293B'}]}, // Card BG
+            {elementType: 'labels.text.stroke', stylers: [{color: '#1E293B'}]},
+            {elementType: 'labels.text.fill', stylers: [{color: '#94a3b8'}]},
+            {featureType: 'road', elementType: 'geometry', stylers: [{color: '#334155'}]},
+            {featureType: 'water', elementType: 'geometry', stylers: [{color: '#0F172A'}]},
+            {featureType: 'poi', elementType: 'geometry', stylers: [{color: '#1E293B'}]},
+            {featureType: 'poi.park', elementType: 'geometry', stylers: [{color: '#1E293B'}]}
+          ]
+        });
+
+        // Add markers
+        {% for property in houses %}
+          {% if property.lat and property.lng %}
+            new google.maps.Marker({
+              position: { lat: {{ property.lat }}, lng: {{ property.lng }} },
+              map: map,
+              title: "{{ property.title }}"
+            });
+          {% endif %}
+        {% endfor %}
+    };
+    
+    // Trigger initMap if script loaded already
+    if (window.google && window.google.maps) {
+        window.initMap();
+    }
+  });
+
+  // Chat Functions
+  function toggleChat() {
+    const chatBox = document.getElementById('chatBox');
+    chatBox.classList.toggle('active');
+  }
+
+  function sendChatMessage() {
+    const chatInput = document.getElementById('chatInput');
+    const chatBody = document.getElementById('chatBody');
+    const message = chatInput.value.trim();
+
+    if (message) {
+      const userMessage = document.createElement('div');
+      userMessage.className = 'chat-message sent';
+      userMessage.innerHTML = `<div class="chat-bubble">${message}</div>`;
+      chatBody.appendChild(userMessage);
+      chatInput.value = '';
+      chatBody.scrollTop = chatBody.scrollHeight;
+
+      setTimeout(() => {
+        const botMessage = document.createElement('div');
+        botMessage.className = 'chat-message received';
+        botMessage.innerHTML = `<div class="chat-bubble">Thank you. Our team will get back to you shortly.</div>`;
+        chatBody.appendChild(botMessage);
+        chatBody.scrollTop = chatBody.scrollHeight;
+      }, 1000);
+    }
+  }
+  
+  document.getElementById('chatInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') sendChatMessage();
+  });
+
+  // Confirm Delete
+  function confirmDelete(propertyId) {
+    if (confirm('Are you sure you want to delete this property?')) {
+      fetch(`/landlord/delete_property/${propertyId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) location.reload();
+        else alert('Error: ' + data.error);
+      });
+    }
+  }
+</script>
 {% endblock %}
