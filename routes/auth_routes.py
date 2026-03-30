@@ -45,7 +45,7 @@ def login():
 
             if not user.check_password(password):
                 flash("Incorrect password.", "danger")
-                return render_template("login.html")
+                return render_template("Login.html")
 
             # Handle 2FA if enabled
             if user.two_factor_enabled:
