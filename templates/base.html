@@ -16,44 +16,37 @@
     
     <style>
         :root {
-            /* Primary Brand Colors */
-            --primary-color: #202A54;       /* Classic Blue - Trust & Stability */
-            --primary-light: #3B5998;       /* Lighter blue for hover states */
-            --primary-dark: #0F172A;        /* Dark blue for emphasis */
+            /* Core Theme Colors */
+            --primary-color: #0F766E;       /* Teal - Main Navigation & Branding */
+            --primary-light: #14B8A6;       /* Lighter Teal for hover states */
+            --primary-dark: #0D5D57;        /* Darker Teal for emphasis */
             
-            /* Secondary Accent Colors */
-            --secondary-color: #2C9143;     /* Trust Green - Growth & Harmony */
-            --secondary-light: #34A853;     /* Lighter green for hover */
-            --secondary-dark: #1E7E34;      /* Darker green for emphasis */
+            --secondary-color: #FFFFFF;     /* White - Backgrounds */
+            --bg-tertiary: #F0FDFA;         /* Very Light Teal for section backgrounds */
             
-            /* Neutral Colors */
-            --bg-color: #F8FAFC;            /* Light Gray Background */
-            --bg-secondary: #FFFFFF;        /* White for cards/sections */
-            --bg-tertiary: #F1F5F9;         /* Very light gray for alternating sections */
+            --accent-color: #22C55E;        /* Soft Green - Action Buttons */
+            --accent-light: #4ADE80;        /* Lighter Green for hover */
+            --accent-dark: #16A34A;         /* Darker Green */
             
             /* Text Colors */
-            --text-primary: #1E293B;        /* Deep Charcoal - Primary text */
-            --text-secondary: #475569;      /* Slate - Secondary text */
-            --text-muted: #64748B;          /* Muted slate for subtle text */
-            --text-light: #94A3B8;          /* Light text for disabled states */
+            --text-primary: #1F2937;        /* Dark Gray - Primary text */
+            --text-secondary: #4B5563;      /* Medium Gray */
+            --text-muted: #9CA3AF;          /* Light Gray */
+            --text-on-primary: #FFFFFF;     /* White text for teal backgrounds */
             
             /* Semantic Colors */
-            --danger-color: #DC2626;        /* Red for errors/danger */
-            --danger-light: #FEE2E2;        /* Light red background */
-            --warning-color: #F59E0B;       /* Amber for warnings */
-            --warning-light: #FEF3C7;       /* Light amber background */
-            --success-color: #10B981;       /* Emerald for success */
-            --success-light: #D1FAE5;       /* Light emerald background */
-            --info-color: #3B82F6;          /* Blue for informational */
-            --info-light: #DBEAFE;          /* Light blue background */
+            --danger-color: #EF4444;
+            --danger-light: #FEE2E2;
+            --warning-color: #F59E0B;
+            --warning-light: #FEF3C7;
+            --info-color: #0EA5E9;
+            --info-light: #E0F2FE;
             
-            /* Accent Colors */
-            --accent-gold: #F6D200;         /* Gold for premium/highlights */
-            --accent-coral: #F97316;        /* Coral for CTAs */
+            /* UI Elements */
+            --border-color: #E5E7EB;
+            --border-light: #F3F4F6;
             
-            /* Borders & Shadows */
-            --border-color: #E2E8F0;
-            --border-light: #F1F5F9;
+            /* Shadows */
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -62,52 +55,19 @@
             /* Transitions */
             --transition-fast: 150ms ease;
             --transition-normal: 200ms ease;
-            --transition-slow: 300ms ease;
-            
-            /* Border Radius */
-            --radius-sm: 0.375rem;
-            --radius-md: 0.5rem;
-            --radius-lg: 0.75rem;
-            --radius-xl: 1rem;
-            --radius-2xl: 1.5rem;
         }
 
         /* Base Styles */
         body {
-            background-color: var(--bg-color);
+            background-color: var(--secondary-color); /* White background */
             color: var(--text-primary);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             overflow-x: hidden;
             line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Typography */
-        h1, h2, h3, h4, h5, h6 {
-            font-weight: 600;
-            line-height: 1.3;
-            color: var(--text-primary);
-        }
-
-        h1 { font-size: 2.5rem; font-weight: 700; }
-        h2 { font-size: 2rem; }
-        h3 { font-size: 1.75rem; }
-        h4 { font-size: 1.5rem; }
-        h5 { font-size: 1.25rem; }
-        h6 { font-size: 1rem; }
-
-        p { margin-bottom: 1rem; }
-
-        a {
-            color: var(--primary-color);
-            text-decoration: none;
-            transition: color var(--transition-fast);
-        }
-
-        a:hover {
-            color: var(--primary-light);
-        }
+        a { color: var(--primary-color); text-decoration: none; transition: 0.2s; }
+        a:hover { color: var(--primary-dark); }
 
         /* --- Sidebar Styling --- */
         .sidebar {
@@ -116,26 +76,25 @@
             left: 0;
             width: 280px;
             height: 100vh;
-            background-color: var(--bg-secondary);
+            background-color: var(--primary-color); /* Teal */
+            color: var(--text-on-primary);
             box-shadow: var(--shadow-xl);
             transform: translateX(-100%);
-            transition: transform var(--transition-slow);
+            transition: transform 0.3s ease-in-out;
             z-index: 1050;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid var(--border-color);
         }
 
         .sidebar.active { transform: translateX(0); }
 
         .sidebar-header {
             padding: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background-color: rgba(0,0,0,0.05);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            min-height: 80px;
         }
 
         .sidebar-brand {
@@ -144,132 +103,87 @@
             color: white;
             display: flex;
             align-items: center;
-            gap: 12px;
-            letter-spacing: -0.5px;
-        }
-
-        .sidebar-brand i {
-            font-size: 1.75rem;
+            gap: 10px;
         }
 
         .close-btn {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255,255,255,0.1);
             border: none;
             color: white;
             font-size: 1.25rem;
             cursor: pointer;
             padding: 0.5rem;
-            border-radius: var(--radius-md);
-            transition: background var(--transition-fast);
+            border-radius: 8px;
         }
 
-        .close-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
+        .close-btn:hover { background: rgba(255,255,255,0.2); }
 
         /* User Profile in Sidebar */
         .profile-section {
             padding: 1.5rem;
             text-align: center;
-            border-bottom: 1px solid var(--border-color);
-            background: var(--bg-tertiary);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
         .profile-avatar {
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
-            border: 4px solid var(--secondary-color);
+            border: 3px solid var(--accent-color); /* Green accent on avatar */
             object-fit: cover;
-            margin-bottom: 0.75rem;
-            box-shadow: var(--shadow-md);
+            margin-bottom: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .profile-name {
-            font-weight: 700;
-            font-size: 1.1rem;
-            margin: 0;
-            color: var(--text-primary);
-        }
+        .profile-name { font-weight: 600; font-size: 1.1rem; margin: 0; color: white; }
         
         .profile-role {
             font-size: 0.75rem;
-            color: var(--secondary-color);
+            color: var(--accent-light); /* Light green for role */
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 1px;
             font-weight: 600;
-            margin-top: 0.25rem;
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            background: var(--success-light);
-            border-radius: 20px;
         }
 
         /* Navigation Menu */
-        .nav-menu {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 1rem 0;
-        }
+        .nav-menu { flex-grow: 1; overflow-y: auto; padding: 1rem 0; }
 
         .nav-item { list-style: none; }
         
         .nav-link {
             display: flex;
             align-items: center;
-            padding: 0.875rem 1.5rem;
-            color: var(--text-secondary);
+            padding: 0.8rem 1.5rem;
+            color: rgba(255,255,255,0.8);
             font-weight: 500;
-            transition: all var(--transition-fast);
-            margin: 0.125rem 0.75rem;
-            border-radius: var(--radius-md);
-            font-size: 0.95rem;
+            transition: all 0.2s;
         }
 
-        .nav-link i {
-            width: 24px;
-            margin-right: 12px;
-            font-size: 1.1rem;
-            text-align: center;
-            opacity: 0.7;
-        }
+        .nav-link i { width: 24px; margin-right: 12px; font-size: 1.1rem; }
 
-        .nav-link:hover {
-            background-color: var(--bg-tertiary);
-            color: var(--primary-color);
-            transform: translateX(4px);
-        }
-
-        .nav-link.active {
-            background-color: var(--primary-color);
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(255,255,255,0.1);
             color: white;
-            font-weight: 600;
-        }
-
-        .nav-link.active i {
-            opacity: 1;
+            border-left: 4px solid var(--accent-color); /* Green active indicator */
         }
 
         .sidebar-divider {
             height: 1px;
-            background-color: var(--border-color);
+            background-color: rgba(255,255,255,0.1);
             margin: 1rem 1.5rem;
         }
 
         /* Logout Style */
-        .nav-link.text-danger { 
-            color: var(--danger-color) !important; 
-        }
-        
+        .nav-link.text-danger { color: #FCA5A5 !important; }
         .nav-link.text-danger:hover { 
-            background-color: var(--danger-light); 
-            color: var(--danger-color) !important;
+            background-color: rgba(239, 68, 68, 0.2); 
+            color: white !important;
         }
 
         /* --- Main Content Area --- */
         .main-wrapper {
             margin-left: 0;
-            transition: margin-left var(--transition-slow);
+            transition: margin-left 0.3s;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -277,259 +191,132 @@
 
         /* Top Navbar */
         .top-nav {
-            background-color: var(--bg-secondary);
-            padding: 1rem 1.5rem;
+            background-color: var(--primary-color); /* Teal */
+            padding: 0.8rem 1.5rem;
             display: flex;
             align-items: center;
             box-shadow: var(--shadow-md);
             position: sticky;
             top: 0;
             z-index: 1000;
-            border-bottom: 1px solid var(--border-color);
         }
 
         .hamburger-btn {
             background: none;
             border: none;
-            color: var(--text-primary);
+            color: white;
             font-size: 1.5rem;
             cursor: pointer;
             padding: 0.5rem;
-            transition: color var(--transition-fast);
-            border-radius: var(--radius-md);
         }
 
-        .hamburger-btn:hover { 
-            color: var(--primary-color);
-            background-color: var(--bg-tertiary);
-        }
-
-        .top-nav-brand {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
+        .top-nav-brand { color: white; font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
+        
         .content-area {
             flex: 1;
             padding: 2rem;
             max-width: 1400px;
             margin: 0 auto;
             width: 100%;
+            background-color: var(--secondary-color); /* White */
         }
 
-        /* Cards & Containers */
+        /* Cards */
         .card {
-            background-color: var(--bg-secondary);
+            background-color: var(--secondary-color);
             border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
+            border-radius: 0.75rem;
             box-shadow: var(--shadow-sm);
-            transition: box-shadow var(--transition-normal);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
+        .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .card-header { background-color: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); font-weight: 600; color: var(--primary-dark); }
+        .card-body { padding: 1.5rem; }
 
-        .card:hover {
-            box-shadow: var(--shadow-md);
-        }
-
-        .card-header {
-            background-color: var(--bg-tertiary);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 1.5rem;
-            font-weight: 600;
-        }
-
-        .card-body {
-            padding: 1.5rem;
-        }
-
-        /* Buttons */
+        /* --- BUTTONS --- */
         .btn {
             font-weight: 500;
             padding: 0.5rem 1rem;
-            border-radius: var(--radius-md);
-            transition: all var(--transition-fast);
+            border-radius: 0.5rem;
+            transition: all 0.2s;
             border: none;
         }
 
+        /* Primary Action: Green (View Property, Save) */
         .btn-primary {
-            background-color: var(--primary-color);
+            background-color: var(--accent-color); /* Soft Green */
             color: white;
         }
-
         .btn-primary:hover {
-            background-color: var(--primary-light);
+            background-color: var(--accent-dark);
             transform: translateY(-1px);
             box-shadow: var(--shadow-md);
         }
 
-        .btn-secondary {
-            background-color: var(--secondary-color);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background-color: var(--secondary-light);
-        }
-
+        /* Secondary Action: Teal Outline */
         .btn-outline-primary {
             border: 2px solid var(--primary-color);
             color: var(--primary-color);
             background: transparent;
         }
-
         .btn-outline-primary:hover {
             background-color: var(--primary-color);
             color: white;
         }
-
-        .btn-outline-secondary {
-            border: 2px solid var(--secondary-color);
-            color: var(--secondary-color);
-            background: transparent;
+        
+        /* Tertiary/Navigation: Teal Solid */
+        .btn-secondary, .btn-teal {
+            background-color: var(--primary-color);
+            color: white;
         }
-
-        .btn-outline-secondary:hover {
-            background-color: var(--secondary-color);
+        .btn-secondary:hover, .btn-teal:hover {
+            background-color: var(--primary-dark);
             color: white;
         }
 
         /* Forms */
         .form-control, .form-select {
             border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
+            border-radius: 0.5rem;
             padding: 0.75rem 1rem;
-            background-color: var(--bg-secondary);
-            color: var(--text-primary);
-            transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+            background-color: #F9FAFB;
         }
-
         .form-control:focus, .form-select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(32, 42, 84, 0.1);
-            outline: none;
-        }
-
-        .form-label {
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+            background-color: white;
         }
 
         /* Alerts */
         .alert {
             border: none;
-            border-radius: var(--radius-lg);
-            padding: 1rem 1.5rem;
-            display: flex;
-            align-items: center;
+            border-radius: 0.75rem;
+            background-color: white;
+            color: var(--text-primary);
             box-shadow: var(--shadow-sm);
-            margin-bottom: 1.5rem;
         }
-
-        .alert-success {
-            background-color: var(--success-light);
-            color: var(--success-color);
-            border-left: 4px solid var(--success-color);
-        }
-
-        .alert-danger {
-            background-color: var(--danger-light);
-            color: var(--danger-color);
-            border-left: 4px solid var(--danger-color);
-        }
-
-        .alert-warning {
-            background-color: var(--warning-light);
-            color: var(--warning-color);
-            border-left: 4px solid var(--warning-color);
-        }
-
-        .alert-info {
-            background-color: var(--info-light);
-            color: var(--info-color);
-            border-left: 4px solid var(--info-color);
-        }
-
-        /* Badges */
-        .badge {
-            padding: 0.5rem 0.75rem;
-            border-radius: 20px;
-            font-weight: 500;
-            font-size: 0.75rem;
-        }
-
-        .badge-primary {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .badge-secondary {
-            background-color: var(--secondary-color);
-            color: white;
-        }
-
-        /* Tables */
-        .table {
-            color: var(--text-primary);
-        }
-
-        .table thead th {
-            background-color: var(--bg-tertiary);
-            border-bottom: 2px solid var(--border-color);
-            color: var(--text-primary);
-            font-weight: 600;
-            padding: 1rem;
-        }
-
-        .table tbody td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-light);
-            vertical-align: middle;
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: var(--bg-tertiary);
-        }
+        .alert-success { border-left: 4px solid var(--accent-color); background-color: var(--bg-tertiary); }
+        .alert-danger { border-left: 4px solid var(--danger-color); background-color: #FEF2F2; }
 
         /* Footer */
         footer {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            background-color: var(--primary-color); /* Teal */
             color: white;
             padding: 4rem 0 2rem;
             margin-top: auto;
         }
 
-        .footer-logo {
-            height: 50px;
-            margin-bottom: 1.5rem;
-            filter: brightness(0) invert(1);
-        }
+        .footer-logo { height: 50px; margin-bottom: 1rem; filter: brightness(0) invert(1); }
         
         .footer-section h5 {
             color: white;
             font-weight: 700;
             margin-bottom: 1.5rem;
-            font-size: 1.1rem;
-            letter-spacing: -0.3px;
         }
 
-        .footer-links li {
-            margin-bottom: 0.75rem;
-            list-style: none;
-        }
-        
-        .footer-links a {
-            color: rgba(255, 255, 255, 0.8);
-            transition: color var(--transition-fast);
-        }
-        
-        .footer-links a:hover {
-            color: white;
-            text-decoration: underline;
-        }
+        .footer-links li { margin-bottom: 0.8rem; list-style: none; }
+        .footer-links a { color: rgba(255,255,255,0.8); }
+        .footer-links a:hover { color: var(--accent-light); text-decoration: underline; } /* Green hover */
 
         .footer-social a {
             display: inline-flex;
@@ -537,35 +324,25 @@
             justify-content: center;
             width: 40px;
             height: 40px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255,255,255,0.1);
             border-radius: 50%;
             color: white;
-            margin-right: 0.75rem;
-            transition: all var(--transition-fast);
+            margin-right: 0.5rem;
+            transition: 0.3s;
         }
 
-        .footer-social a:hover {
-            background: white;
-            color: var(--primary-color);
+        .footer-social a:hover { 
+            background: var(--accent-color); /* Green hover on social */
             transform: translateY(-3px);
-            box-shadow: var(--shadow-md);
         }
 
         .footer-bottom {
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            border-top: 1px solid rgba(255,255,255,0.2);
             padding-top: 2rem;
             margin-top: 3rem;
             text-align: center;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(255,255,255,0.7);
             font-size: 0.9rem;
-        }
-
-        .footer-bottom a {
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .footer-bottom a:hover {
-            color: white;
         }
 
         /* Overlay for mobile */
@@ -575,77 +352,30 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(15, 23, 42, 0.5);
+            background: rgba(15, 118, 110, 0.2); /* Teal tint overlay */
             backdrop-filter: blur(4px);
             z-index: 1040;
             display: none;
-            opacity: 0;
-            transition: opacity var(--transition-normal);
         }
-        
-        .overlay.active {
-            display: block;
-            opacity: 1;
-        }
+        .overlay.active { display: block; }
 
         /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: var(--bg-tertiary);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary-light);
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-color);
-        }
-
-        /* Utility Classes */
-        .text-primary { color: var(--primary-color) !important; }
-        .text-secondary { color: var(--secondary-color) !important; }
-        .bg-primary { background-color: var(--primary-color) !important; }
-        .bg-secondary-custom { background-color: var(--secondary-color) !important; }
-        .bg-tertiary { background-color: var(--bg-tertiary) !important; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #F9FAFB; }
+        ::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary-color); }
 
         /* Responsive Adjustments */
         @media (min-width: 992px) {
-            .sidebar {
-                transform: translateX(0);
-            }
-            
-            .main-wrapper {
-                margin-left: 280px;
-            }
-            
-            .top-nav {
-                padding-left: 2rem;
-                padding-right: 2rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .content-area {
-                padding: 1rem;
-            }
-            
-            h1 { font-size: 2rem; }
-            h2 { font-size: 1.75rem; }
-            h3 { font-size: 1.5rem; }
+            .sidebar { transform: translateX(0); }
+            .main-wrapper { margin-left: 280px; }
         }
     </style>
     
-    <!-- Block for page-specific styles -->
     {% block styles %}{% endblock %}
 </head>
 <body>
 
-    <!-- Overlay (Mobile click to close) -->
     <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
     <!-- Sidebar -->
@@ -659,7 +389,6 @@
             </button>
         </div>
 
-        <!-- Profile Section (If Authenticated) -->
         {% if current_user.is_authenticated %}
         <div class="profile-section">
             <img src="{{ current_user.profile_image if current_user.profile_image else url_for('static', filename='images/default-avatar.png') }}" alt="Avatar" class="profile-avatar">
@@ -675,14 +404,12 @@
         {% endif %}
 
         <ul class="nav-menu">
-            <!-- Home Link -->
             <li class="nav-item">
                 <a href="{{ url_for('main.index') }}" class="nav-link" onclick="closeSidebar()">
                     <i class="fas fa-home"></i> <span>Home</span>
                 </a>
             </li>
 
-            <!-- Dynamic Role Based Links -->
             {% if current_user.is_authenticated %} 
                 {% if current_user.role.lower() == 'landlord' %}
                 <li class="nav-item"><a href="{{ url_for('landlord.dashboard') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
@@ -723,13 +450,10 @@
                 <li class="nav-item"><a href="{{ url_for('service_provider.settings') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
                 {% endif %}
 
-                <!-- Common Links -->
                 <li class="nav-item mt-3"><div class="sidebar-divider"></div></li>
                 <li class="nav-item"><a href="{{ url_for('main.about') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-info-circle"></i> <span>About Us</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('main.contact') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-envelope"></i> <span>Contact</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('main.help') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-question-circle"></i> <span>Help & Support</span></a></li>
                 
-                <!-- Logout -->
                 <li class="nav-item"><div class="sidebar-divider"></div></li>
                 <li class="nav-item">
                     <a href="{{ url_for('auth.logout') }}" class="nav-link text-danger" onclick="closeSidebar()">
@@ -738,12 +462,8 @@
                 </li>
 
             {% else %}
-                <!-- Not Authenticated Links -->
                 <li class="nav-item"><a href="{{ url_for('auth.login') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-sign-in-alt"></i> <span>Login</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('auth.signup') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-user-plus"></i> <span>Sign Up</span></a></li>
-                <li class="nav-item"><div class="sidebar-divider"></div></li>
-                <li class="nav-item"><a href="{{ url_for('main.about') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-info-circle"></i> <span>About Us</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('main.contact') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-envelope"></i> <span>Contact</span></a></li>
             {% endif %}
         </ul>
     </nav>
@@ -762,27 +482,21 @@
                 </span>
             </div>
             <div class="ms-auto d-flex align-items-center gap-3">
-                <!-- Add any additional top nav items here -->
                 {% if current_user.is_authenticated %}
                 <div class="dropdown">
-                    <button class="btn btn-outline-primary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-user-circle me-1"></i>
                         {{ current_user.name if current_user.name else 'Account' }}
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Profile</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
                     </ul>
                 </div>
                 {% else %}
-                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary">
-                    <i class="fas fa-sign-in-alt me-1"></i> Login
-                </a>
-                <a href="{{ url_for('auth.signup') }}" class="btn btn-primary">
-                    <i class="fas fa-user-plus me-1"></i> Sign Up
-                </a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light">Login</a>
+                <a href="{{ url_for('auth.signup') }}" class="btn btn-primary">Sign Up</a>
                 {% endif %}
             </div>
         </header>
@@ -808,7 +522,6 @@
         <footer>
             <div class="container">
                 <div class="row">
-                    <!-- Branding Section -->
                     <div class="col-12 col-md-4 mb-4">
                         <h5>HomeHub</h5>
                         <img src="{{ url_for('static', filename='images/logo.png') }}" alt="HomeHub Logo" class="footer-logo" onerror="this.style.display='none'"/>
@@ -817,75 +530,55 @@
                         </p>
                     </div>
 
-                    <!-- Quick Links -->
                     <div class="col-6 col-md-2 mb-4">
                         <h5>Quick Links</h5>
                         <ul class="list-unstyled footer-links">
                             <li><a href="{{ url_for('main.index') }}">Home</a></li>
                             <li><a href="{{ url_for('main.about') }}">About Us</a></li>
-                            <li><a href="{{ url_for('main.contact') }}">Contact</a></li>
-                            
                             {% if current_user.is_authenticated %} 
                                 {% if current_user.role.lower() == 'landlord' %}
                                 <li><a href="{{ url_for('landlord.dashboard') }}">Dashboard</a></li>
-                                <li><a href="{{ url_for('landlord.add_property') }}">Add Property</a></li>
-                                
                                 {% elif current_user.role.lower() == 'tenant' %}
                                 <li><a href="{{ url_for('tenant.dashboard') }}">Dashboard</a></li>
-                                <li><a href="{{ url_for('house.hotels') }}">Browse Properties</a></li>
-                                
                                 {% elif current_user.role.lower() == 'admin' %}
                                 <li><a href="{{ url_for('admin.manage_users') }}">Manage Users</a></li>
-                                
                                 {% elif current_user.role.lower() == 'service' %}
                                 <li><a href="{{ url_for('service_provider.dashboard') }}">Dashboard</a></li>
                                 {% endif %} 
                             {% else %}
                             <li><a href="{{ url_for('auth.signup') }}">Sign Up</a></li>
-                            <li><a href="{{ url_for('auth.login') }}">Login</a></li>
                             {% endif %}
-                            <li><a href="{{ url_for('main.accessibility') }}">Accessibility</a></li>
                         </ul>
                     </div>
 
-                    <!-- Contact Section -->
                     <div class="col-6 col-md-3 mb-4">
                         <h5>Contact Us</h5>
                         <ul class="list-unstyled" style="color: rgba(255,255,255,0.9);">
                             <li class="mb-2"><i class="fas fa-envelope me-2"></i> support@homehub.com</li>
                             <li class="mb-2"><i class="fas fa-phone me-2"></i> +1-800-555-1234</li>
-                            <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i> 123 Property Lane, Real Estate City</li>
                         </ul>
                         <div class="footer-social mt-3">
                             <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
                             <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
                             <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
                         </div>
                     </div>
 
-                    <!-- Newsletter -->
                     <div class="col-12 col-md-3 mb-4">
                         <h5>Stay Updated</h5>
-                        <p style="color: rgba(255,255,255,0.9);">Subscribe to our newsletter for the latest updates and property listings.</p>
-                        <form class="mt-3">
-                            <div class="input-group">
-                                <input type="email" class="form-control" placeholder="Enter your email" aria-label="Email">
-                                <button class="btn btn-light" type="submit">Subscribe</button>
-                            </div>
-                        </form>
+                        <p style="color: rgba(255,255,255,0.9);">Subscribe to our newsletter.</p>
+                        <a href="{{ url_for('main.subscribe') }}" class="btn btn-primary">Subscribe</a>
                     </div>
                 </div>
 
-                <!-- Bottom Footer Bar -->
                 <div class="footer-bottom">
-                    <div class="row align-items-center">
+                    <div class="row">
                         <div class="col-md-6">
                             &copy; <span id="currentYear"></span> HomeHub. All rights reserved.
                         </div>
                         <div class="col-md-6 text-md-end">
-                            <a href="{{ url_for('main.terms') }}" class="me-3">Terms of Service</a> 
-                            <a href="{{ url_for('main.privacy') }}">Privacy Policy</a>
+                            <a href="{{ url_for('main.terms') }}">Terms</a> | 
+                            <a href="{{ url_for('main.privacy') }}">Privacy</a>
                         </div>
                     </div>
                 </div>
@@ -897,7 +590,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // Sidebar Toggle Logic
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
 
@@ -911,34 +603,9 @@
             overlay.classList.remove('active');
         }
 
-        // Dynamic Year
         document.getElementById('currentYear').textContent = new Date().getFullYear();
-        
-        // Auto-close alerts after 5 seconds
-        document.addEventListener('DOMContentLoaded', function() {
-            const alerts = document.querySelectorAll('.alert-dismissible');
-            alerts.forEach(function(alert) {
-                setTimeout(function() {
-                    const bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
-                }, 5000);
-            });
-        });
-        
-        // Add active class to current page nav link
-        document.addEventListener('DOMContentLoaded', function() {
-            const currentPath = window.location.pathname;
-            const navLinks = document.querySelectorAll('.nav-link');
-            
-            navLinks.forEach(link => {
-                if (link.getAttribute('href') === currentPath) {
-                    link.classList.add('active');
-                }
-            });
-        });
     </script>
     
-    <!-- Block for page-specific scripts -->
     {% block scripts %}{% endblock %}
 </body>
 </html>
