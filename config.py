@@ -8,7 +8,7 @@ class Config:
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret")
 
-    database_url = os.environ.get("DATABASE_URL", "sqlite:///app.db")
+    database_url = os.environ.get("DATABASE_URL")
 
     # Fix for PostgreSQL on Render
     if database_url.startswith("postgres://"):
