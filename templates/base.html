@@ -9,65 +9,26 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts - Inter for modern, clean typography -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            /* Core Theme Colors */
-            --primary-color: #0F766E;       /* Teal - Main Navigation & Branding */
-            --primary-light: #14B8A6;       /* Lighter Teal for hover states */
-            --primary-dark: #0D5D57;        /* Darker Teal for emphasis */
-            
-            --secondary-color: #FFFFFF;     /* White - Backgrounds */
-            --bg-tertiary: #F0FDFA;         /* Very Light Teal for section backgrounds */
-            
-            --accent-color: #22C55E;        /* Soft Green - Action Buttons */
-            --accent-light: #4ADE80;        /* Lighter Green for hover */
-            --accent-dark: #16A34A;         /* Darker Green */
-            
-            /* Text Colors */
-            --text-primary: #1F2937;        /* Dark Gray - Primary text */
-            --text-secondary: #4B5563;      /* Medium Gray */
-            --text-muted: #9CA3AF;          /* Light Gray */
-            --text-on-primary: #FFFFFF;     /* White text for teal backgrounds */
-            
-            /* Semantic Colors */
+            --primary-color: #3B82F6;
+            --bg-color: #0F172A;
+            --secondary-bg: #1E293B;
+            --text-color: #E2E8F0;
+            --text-muted: #94a3b8;
             --danger-color: #EF4444;
-            --danger-light: #FEE2E2;
-            --warning-color: #F59E0B;
-            --warning-light: #FEF3C7;
-            --info-color: #0EA5E9;
-            --info-light: #E0F2FE;
-            
-            /* UI Elements */
-            --border-color: #E5E7EB;
-            --border-light: #F3F4F6;
-            
-            /* Shadows */
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            
-            /* Transitions */
-            --transition-fast: 150ms ease;
-            --transition-normal: 200ms ease;
         }
 
-        /* Base Styles */
         body {
-            background-color: var(--secondary-color); /* White background */
-            color: var(--text-primary);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow-x: hidden;
-            line-height: 1.6;
         }
 
-        a { color: var(--primary-color); text-decoration: none; transition: 0.2s; }
-        a:hover { color: var(--primary-dark); }
+        a { color: var(--text-color); text-decoration: none; transition: 0.3s; }
+        a:hover { color: var(--primary-color); }
 
         /* --- Sidebar Styling --- */
         .sidebar {
@@ -76,14 +37,14 @@
             left: 0;
             width: 280px;
             height: 100vh;
-            background-color: var(--primary-color); /* Teal */
-            color: var(--text-on-primary);
-            box-shadow: var(--shadow-xl);
+            background-color: var(--secondary-bg);
+            box-shadow: 4px 0 15px rgba(0,0,0,0.3);
             transform: translateX(-100%);
             transition: transform 0.3s ease-in-out;
             z-index: 1050;
             display: flex;
             flex-direction: column;
+            border-right: 1px solid rgba(255,255,255,0.05);
         }
 
         .sidebar.active { transform: translateX(0); }
@@ -91,7 +52,6 @@
         .sidebar-header {
             padding: 1.5rem;
             border-bottom: 1px solid rgba(255,255,255,0.1);
-            background-color: rgba(0,0,0,0.05);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -99,54 +59,53 @@
 
         .sidebar-brand {
             font-size: 1.5rem;
-            font-weight: 800;
-            color: white;
+            font-weight: bold;
+            color: var(--primary-color);
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
         .close-btn {
-            background: rgba(255,255,255,0.1);
+            background: none;
             border: none;
-            color: white;
-            font-size: 1.25rem;
+            color: var(--text-muted);
+            font-size: 1.5rem;
             cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 8px;
         }
-
-        .close-btn:hover { background: rgba(255,255,255,0.2); }
 
         /* User Profile in Sidebar */
         .profile-section {
             padding: 1.5rem;
             text-align: center;
             border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.2);
         }
 
         .profile-avatar {
             width: 70px;
             height: 70px;
             border-radius: 50%;
-            border: 3px solid var(--accent-color); /* Green accent on avatar */
+            border: 3px solid var(--primary-color);
             object-fit: cover;
             margin-bottom: 0.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .profile-name { font-weight: 600; font-size: 1.1rem; margin: 0; color: white; }
+        .profile-name { font-weight: 600; font-size: 1.1rem; margin: 0; }
         
         .profile-role {
-            font-size: 0.75rem;
-            color: var(--accent-light); /* Light green for role */
+            font-size: 0.85rem;
+            color: var(--primary-color);
             text-transform: uppercase;
             letter-spacing: 1px;
-            font-weight: 600;
         }
 
         /* Navigation Menu */
-        .nav-menu { flex-grow: 1; overflow-y: auto; padding: 1rem 0; }
+        .nav-menu {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 1rem 0;
+        }
 
         .nav-item { list-style: none; }
         
@@ -154,17 +113,21 @@
             display: flex;
             align-items: center;
             padding: 0.8rem 1.5rem;
-            color: rgba(255,255,255,0.8);
+            color: var(--text-muted);
             font-weight: 500;
             transition: all 0.2s;
         }
 
-        .nav-link i { width: 24px; margin-right: 12px; font-size: 1.1rem; }
+        .nav-link i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
 
         .nav-link:hover, .nav-link.active {
-            background-color: rgba(255,255,255,0.1);
-            color: white;
-            border-left: 4px solid var(--accent-color); /* Green active indicator */
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--primary-color);
+            border-left: 4px solid var(--primary-color);
         }
 
         .sidebar-divider {
@@ -174,10 +137,10 @@
         }
 
         /* Logout Style */
-        .nav-link.text-danger { color: #FCA5A5 !important; }
+        .nav-link.text-danger { color: var(--danger-color) !important; }
         .nav-link.text-danger:hover { 
-            background-color: rgba(239, 68, 68, 0.2); 
-            color: white !important;
+            background-color: rgba(239, 68, 68, 0.1); 
+            border-left-color: var(--danger-color);
         }
 
         /* --- Main Content Area --- */
@@ -191,11 +154,11 @@
 
         /* Top Navbar */
         .top-nav {
-            background-color: var(--primary-color); /* Teal */
+            background-color: var(--secondary-bg);
             padding: 0.8rem 1.5rem;
             display: flex;
             align-items: center;
-            box-shadow: var(--shadow-md);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -204,144 +167,72 @@
         .hamburger-btn {
             background: none;
             border: none;
-            color: white;
+            color: var(--text-color);
             font-size: 1.5rem;
             cursor: pointer;
             padding: 0.5rem;
+            transition: color 0.2s;
         }
 
-        .top-nav-brand { color: white; font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
-        
+        .hamburger-btn:hover { color: var(--primary-color); }
+
+        /* Removed fixed padding to allow full-width hero sections */
         .content-area {
             flex: 1;
-            padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
-            background-color: var(--secondary-color); /* White */
-        }
-
-        /* Cards */
-        .card {
-            background-color: var(--secondary-color);
-            border: 1px solid var(--border-color);
-            border-radius: 0.75rem;
-            box-shadow: var(--shadow-sm);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-        .card-header { background-color: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); font-weight: 600; color: var(--primary-dark); }
-        .card-body { padding: 1.5rem; }
-
-        /* --- BUTTONS --- */
-        .btn {
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            transition: all 0.2s;
-            border: none;
-        }
-
-        /* Primary Action: Green (View Property, Save) */
-        .btn-primary {
-            background-color: var(--accent-color); /* Soft Green */
-            color: white;
-        }
-        .btn-primary:hover {
-            background-color: var(--accent-dark);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
-        }
-
-        /* Secondary Action: Teal Outline */
-        .btn-outline-primary {
-            border: 2px solid var(--primary-color);
-            color: var(--primary-color);
-            background: transparent;
-        }
-        .btn-outline-primary:hover {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        /* Tertiary/Navigation: Teal Solid */
-        .btn-secondary, .btn-teal {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        .btn-secondary:hover, .btn-teal:hover {
-            background-color: var(--primary-dark);
-            color: white;
-        }
-
-        /* Forms */
-        .form-control, .form-select {
-            border: 1px solid var(--border-color);
-            border-radius: 0.5rem;
-            padding: 0.75rem 1rem;
-            background-color: #F9FAFB;
-        }
-        .form-control:focus, .form-select:focus {
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
-            background-color: white;
+            /* padding is handled by specific pages or components now */
         }
 
         /* Alerts */
         .alert {
             border: none;
-            border-radius: 0.75rem;
-            background-color: white;
-            color: var(--text-primary);
-            box-shadow: var(--shadow-sm);
+            border-radius: 8px;
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
         }
-        .alert-success { border-left: 4px solid var(--accent-color); background-color: var(--bg-tertiary); }
-        .alert-danger { border-left: 4px solid var(--danger-color); background-color: #FEF2F2; }
+        .alert-success { border-left: 4px solid #10B981; }
+        .alert-danger { border-left: 4px solid var(--danger-color); background-color: rgba(239, 68, 68, 0.1); }
 
         /* Footer */
         footer {
-            background-color: var(--primary-color); /* Teal */
-            color: white;
+            background-color: var(--secondary-bg);
+            border-top: 1px solid rgba(255,255,255,0.05);
             padding: 4rem 0 2rem;
             margin-top: auto;
         }
 
-        .footer-logo { height: 50px; margin-bottom: 1rem; filter: brightness(0) invert(1); }
+        .footer-logo { height: 50px; margin-bottom: 1rem; }
         
         .footer-section h5 {
-            color: white;
+            color: var(--primary-color);
             font-weight: 700;
             margin-bottom: 1.5rem;
         }
 
         .footer-links li { margin-bottom: 0.8rem; list-style: none; }
-        .footer-links a { color: rgba(255,255,255,0.8); }
-        .footer-links a:hover { color: var(--accent-light); text-decoration: underline; } /* Green hover */
+        .footer-links a { color: var(--text-muted); }
+        .footer-links a:hover { color: var(--text-color); }
 
         .footer-social a {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+            display: inline-block;
             width: 40px;
             height: 40px;
-            background: rgba(255,255,255,0.1);
+            line-height: 40px;
+            text-align: center;
+            background: var(--bg-color);
             border-radius: 50%;
-            color: white;
+            color: var(--text-color);
             margin-right: 0.5rem;
             transition: 0.3s;
         }
 
-        .footer-social a:hover { 
-            background: var(--accent-color); /* Green hover on social */
-            transform: translateY(-3px);
-        }
+        .footer-social a:hover { background: var(--primary-color); transform: translateY(-3px); }
 
         .footer-bottom {
-            border-top: 1px solid rgba(255,255,255,0.2);
+            border-top: 1px solid rgba(255,255,255,0.1);
             padding-top: 2rem;
             margin-top: 3rem;
             text-align: center;
-            color: rgba(255,255,255,0.7);
+            color: var(--text-muted);
             font-size: 0.9rem;
         }
 
@@ -352,30 +243,24 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(15, 118, 110, 0.2); /* Teal tint overlay */
-            backdrop-filter: blur(4px);
+            background: rgba(0,0,0,0.6);
             z-index: 1040;
             display: none;
         }
         .overlay.active { display: block; }
 
         /* Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #F9FAFB; }
-        ::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--primary-color); }
-
-        /* Responsive Adjustments */
-        @media (min-width: 992px) {
-            .sidebar { transform: translateX(0); }
-            .main-wrapper { margin-left: 280px; }
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 3px; }
     </style>
     
+    <!-- Block for page-specific styles -->
     {% block styles %}{% endblock %}
 </head>
 <body>
 
+    <!-- Overlay (Mobile click to close) -->
     <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
     <!-- Sidebar -->
@@ -389,6 +274,7 @@
             </button>
         </div>
 
+        <!-- Profile Section (If Authenticated) -->
         {% if current_user.is_authenticated %}
         <div class="profile-section">
             <img src="{{ current_user.profile_image if current_user.profile_image else url_for('static', filename='images/default-avatar.png') }}" alt="Avatar" class="profile-avatar">
@@ -404,12 +290,14 @@
         {% endif %}
 
         <ul class="nav-menu">
+            <!-- Home Link -->
             <li class="nav-item">
                 <a href="{{ url_for('main.index') }}" class="nav-link" onclick="closeSidebar()">
                     <i class="fas fa-home"></i> <span>Home</span>
                 </a>
             </li>
 
+            <!-- Dynamic Role Based Links -->
             {% if current_user.is_authenticated %} 
                 {% if current_user.role.lower() == 'landlord' %}
                 <li class="nav-item"><a href="{{ url_for('landlord.dashboard') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
@@ -450,10 +338,13 @@
                 <li class="nav-item"><a href="{{ url_for('service_provider.settings') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
                 {% endif %}
 
+                <!-- Common Links -->
                 <li class="nav-item mt-3"><div class="sidebar-divider"></div></li>
                 <li class="nav-item"><a href="{{ url_for('main.about') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-info-circle"></i> <span>About Us</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('main.contact') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-envelope"></i> <span>Contact</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('main.help') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-question-circle"></i> <span>Help & Support</span></a></li>
                 
+                <!-- Logout -->
                 <li class="nav-item"><div class="sidebar-divider"></div></li>
                 <li class="nav-item">
                     <a href="{{ url_for('auth.logout') }}" class="nav-link text-danger" onclick="closeSidebar()">
@@ -462,8 +353,12 @@
                 </li>
 
             {% else %}
+                <!-- Not Authenticated Links -->
                 <li class="nav-item"><a href="{{ url_for('auth.login') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-sign-in-alt"></i> <span>Login</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('auth.signup') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-user-plus"></i> <span>Sign Up</span></a></li>
+                <li class="nav-item"><div class="sidebar-divider"></div></li>
+                <li class="nav-item"><a href="{{ url_for('main.about') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-info-circle"></i> <span>About Us</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('main.contact') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-envelope"></i> <span>Contact</span></a></li>
             {% endif %}
         </ul>
     </nav>
@@ -477,27 +372,7 @@
                 <i class="fas fa-bars"></i>
             </button>
             <div class="ms-3 d-flex align-items-center">
-                <span class="top-nav-brand d-none d-sm-inline">
-                    <i class="fas fa-home"></i> HomeHub
-                </span>
-            </div>
-            <div class="ms-auto d-flex align-items-center gap-3">
-                {% if current_user.is_authenticated %}
-                <div class="dropdown">
-                    <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-user-circle me-1"></i>
-                        {{ current_user.name if current_user.name else 'Account' }}
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Profile</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
-                    </ul>
-                </div>
-                {% else %}
-                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light">Login</a>
-                <a href="{{ url_for('auth.signup') }}" class="btn btn-primary">Sign Up</a>
-                {% endif %}
+                <span class="d-none d-sm-inline" style="font-weight: 600; color: var(--primary-color);">HomeHub</span>
             </div>
         </header>
 
@@ -509,7 +384,7 @@
                     <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
                         <i class="fas fa-{% if category == 'error' %}exclamation-circle{% else %}check-circle{% endif %} me-2"></i>
                         {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                     {% endfor %} 
                 {% endif %} 
@@ -522,40 +397,52 @@
         <footer>
             <div class="container">
                 <div class="row">
+                    <!-- Branding Section -->
                     <div class="col-12 col-md-4 mb-4">
                         <h5>HomeHub</h5>
                         <img src="{{ url_for('static', filename='images/logo.png') }}" alt="HomeHub Logo" class="footer-logo" onerror="this.style.display='none'"/>
-                        <p style="color: rgba(255,255,255,0.9);">
+                        <p class="text-muted mt-3">
                             Your trusted platform for property management, connecting landlords, tenants, and service providers seamlessly.
                         </p>
                     </div>
 
+                    <!-- Quick Links -->
                     <div class="col-6 col-md-2 mb-4">
                         <h5>Quick Links</h5>
                         <ul class="list-unstyled footer-links">
                             <li><a href="{{ url_for('main.index') }}">Home</a></li>
                             <li><a href="{{ url_for('main.about') }}">About Us</a></li>
+                            <li><a href="{{ url_for('main.contact') }}">Contact</a></li>
+                            
                             {% if current_user.is_authenticated %} 
                                 {% if current_user.role.lower() == 'landlord' %}
                                 <li><a href="{{ url_for('landlord.dashboard') }}">Dashboard</a></li>
+                                <li><a href="{{ url_for('landlord.add_property') }}">Add Property</a></li>
+                                
                                 {% elif current_user.role.lower() == 'tenant' %}
                                 <li><a href="{{ url_for('tenant.dashboard') }}">Dashboard</a></li>
+                                <li><a href="{{ url_for('house.hotels') }}">Browse Properties</a></li>
+                                
                                 {% elif current_user.role.lower() == 'admin' %}
                                 <li><a href="{{ url_for('admin.manage_users') }}">Manage Users</a></li>
+                                
                                 {% elif current_user.role.lower() == 'service' %}
                                 <li><a href="{{ url_for('service_provider.dashboard') }}">Dashboard</a></li>
                                 {% endif %} 
                             {% else %}
                             <li><a href="{{ url_for('auth.signup') }}">Sign Up</a></li>
+                            <li><a href="{{ url_for('auth.login') }}">Login</a></li>
                             {% endif %}
+                            <li><a href="{{ url_for('main.accessibility') }}">Accessibility</a></li>
                         </ul>
                     </div>
 
+                    <!-- Contact Section -->
                     <div class="col-6 col-md-3 mb-4">
                         <h5>Contact Us</h5>
-                        <ul class="list-unstyled" style="color: rgba(255,255,255,0.9);">
-                            <li class="mb-2"><i class="fas fa-envelope me-2"></i> support@homehub.com</li>
-                            <li class="mb-2"><i class="fas fa-phone me-2"></i> +1-800-555-1234</li>
+                        <ul class="list-unstyled text-muted">
+                            <li><i class="fas fa-envelope me-2"></i> support@homehub.com</li>
+                            <li class="mt-2"><i class="fas fa-phone me-2"></i> +1-800-555-1234</li>
                         </ul>
                         <div class="footer-social mt-3">
                             <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
@@ -564,21 +451,23 @@
                         </div>
                     </div>
 
+                    <!-- Newsletter -->
                     <div class="col-12 col-md-3 mb-4">
                         <h5>Stay Updated</h5>
-                        <p style="color: rgba(255,255,255,0.9);">Subscribe to our newsletter.</p>
-                        <a href="{{ url_for('main.subscribe') }}" class="btn btn-primary">Subscribe</a>
+                        <p class="text-muted">Subscribe to our newsletter for the latest updates.</p>
+                        <a href="{{ url_for('main.subscribe') }}" class="btn btn-sm btn-outline-primary">Subscribe</a>
                     </div>
                 </div>
 
+                <!-- Bottom Footer Bar -->
                 <div class="footer-bottom">
-                    <div class="row">
+                    <div class="row align-items-center">
                         <div class="col-md-6">
                             &copy; <span id="currentYear"></span> HomeHub. All rights reserved.
                         </div>
                         <div class="col-md-6 text-md-end">
-                            <a href="{{ url_for('main.terms') }}">Terms</a> | 
-                            <a href="{{ url_for('main.privacy') }}">Privacy</a>
+                            <a href="{{ url_for('main.terms') }}">Terms of Service</a> | 
+                            <a href="{{ url_for('main.privacy') }}">Privacy Policy</a>
                         </div>
                     </div>
                 </div>
@@ -590,6 +479,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
+        // Sidebar Toggle Logic
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
 
@@ -603,9 +493,11 @@
             overlay.classList.remove('active');
         }
 
+        // Dynamic Year
         document.getElementById('currentYear').textContent = new Date().getFullYear();
     </script>
     
+    <!-- Block for page-specific scripts -->
     {% block scripts %}{% endblock %}
 </body>
 </html>
