@@ -1,3 +1,5 @@
+import eventlet
+eventlet.monkey_patch()
 from flask import Flask, redirect, url_for, flash, render_template, request
 from config import Config
 from extensions import db, migrate, login_manager, csrf

@@ -25,7 +25,7 @@ class Config:
 
     CHAT_UPLOAD_FOLDER = os.environ.get(
         "CHAT_UPLOAD_FOLDER",
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), "static/images")
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "static/uploads/chat")
     )
 
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "pdf"}
