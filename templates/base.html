@@ -1,411 +1,305 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}HomeHub{% endblock %}</title>
     
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
     <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome 6 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root {
-            --bg-primary: #000000;
-            --bg-secondary: #121212;
-            --bg-tertiary: #1e1e1e;
-            --bg-card: #222222;
-            --text-primary: #ffffff;
-            --text-secondary: #b0b0b0;
-            --text-muted: #6c757d;
-            --accent-color: #3a3a3a;
-            --border-color: #333333;
-            --hover-bg: #2c2c2c;
-            --shadow-color: rgba(0, 0, 0, 0.5);
-            --navbar-height: 60px;
-            --sidebar-width: 280px;
-        }
-
-        [data-theme="light"] {
-            --bg-primary: #f8f9fa;
-            --bg-secondary: #ffffff;
-            --bg-tertiary: #f1f3f5;
-            --bg-card: #ffffff;
-            --text-primary: #212529;
-            --text-secondary: #495057;
-            --text-muted: #6c757d;
-            --accent-color: #e9ecef;
-            --border-color: #dee2e6;
-            --hover-bg: #e9ecef;
-            --shadow-color: rgba(0, 0, 0, 0.1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            --primary-color: #3B82F6;
+            --bg-color: #0F172A;
+            --secondary-bg: #1E293B;
+            --text-color: #E2E8F0;
+            --text-muted: #94a3b8;
+            --danger-color: #EF4444;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
         }
 
-        /* --- Navbar Styling --- */
-        .navbar {
-            background-color: var(--bg-secondary);
-            border-bottom: 1px solid var(--border-color);
-            height: var(--navbar-height);
-            padding: 0 1.5rem;
-            box-shadow: 0 2px 10px var(--shadow-color);
-            z-index: 1030;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-        }
-
-        .navbar-brand-text {
-            font-weight: 700;
-            font-size: 1.4rem;
-            color: var(--text-primary);
-            letter-spacing: -0.5px;
-        }
-
-        .navbar-brand img { border-radius: 6px; }
-        .navbar-toggler {
-            border-color: var(--text-secondary);
-            color: var(--text-primary);
-        }
-
-        .navbar-nav .nav-link {
-            color: var(--text-secondary);
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-        .navbar-nav .nav-link:hover { color: var(--text-primary); }
-
-        #themeToggle {
-            cursor: pointer;
-            padding: 0.5rem 1rem;
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            transition: transform 0.2s;
-        }
-        #themeToggle:hover {
-            transform: rotate(15deg);
-            color: var(--text-primary);
-        }
-
-        /* --- Layout Wrapper (Pushes Content) --- */
-        .layout-wrapper {
-            display: flex;
-            margin-top: var(--navbar-height);
-            min-height: calc(100vh - var(--navbar-height));
-        }
+        a { color: var(--text-color); text-decoration: none; transition: 0.3s; }
+        a:hover { color: var(--primary-color); }
 
         /* --- Sidebar Styling --- */
         .sidebar {
-            background-color: var(--bg-secondary);
-            border-right: 1px solid var(--border-color);
-            width: var(--sidebar-width);
-            overflow-y: auto;
-            flex-shrink: 0; /* Prevents sidebar from shrinking */
-        }
-
-        /* Mobile Specific Sidebar Rules (Overlay Mode) */
-        @media (max-width: 991.98px) {
-            .layout-wrapper {
-                display: block; /* Stack layout on mobile */
-            }
-            
-            .sidebar {
-                position: fixed;
-                top: var(--navbar-height);
-                left: -280px;
-                height: calc(100vh - var(--navbar-height));
-                z-index: 1050;
-                transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                box-shadow: 5px 0 15px var(--shadow-color);
-            }
-
-            .sidebar.active {
-                left: 0;
-            }
-
-            .sidebar-overlay {
-                position: fixed;
-                top: var(--navbar-height);
-                left: 0;
-                width: 100%;
-                height: calc(100vh - var(--navbar-height));
-                background: rgba(0, 0, 0, 0.6);
-                z-index: 1040;
-                display: none;
-                opacity: 0;
-                transition: opacity 0.3s;
-            }
-
-            .sidebar-overlay.active {
-                display: block;
-                opacity: 1;
-            }
-        }
-
-        /* Desktop Specific Sidebar Rules (Static Push Mode) */
-        @media (min-width: 992px) {
-            .sidebar {
-                position: sticky; /* Sticks while scrolling */
-                top: var(--navbar-height);
-                height: calc(100vh - var(--navbar-height));
-                left: 0;
-            }
-            
-            /* Hide mobile specific elements */
-            .sidebar-overlay { display: none !important; }
-            #sidebarToggle { display: none !important; }
-            
-            .sidebar-close { display: none; }
-            .sidebar-header { display: none; } /* Hide header on desktop if desired, or keep it */
-        }
-
-        /* Sidebar Internal Components */
-        .sidebar-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background-color: var(--secondary-bg);
+            box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 1050;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .sidebar.active { transform: translateX(0); }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
             align-items: center;
-            padding: 1.2rem 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            background-color: var(--bg-tertiary);
+            justify-content: space-between;
         }
 
-        .sidebar-title {
-            margin: 0;
-            font-weight: 600;
-            color: var(--text-primary);
+        .sidebar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .sidebar-close {
+        .close-btn {
             background: none;
             border: none;
-            color: var(--text-secondary);
-            font-size: 1.25rem;
+            color: var(--text-muted);
+            font-size: 1.5rem;
             cursor: pointer;
         }
 
-        .user-profile {
+        /* User Profile in Sidebar */
+        .profile-section {
             padding: 1.5rem;
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            background-color: var(--bg-tertiary);
-        }
-
-        .user-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--border-color);
-            margin-right: 1rem;
-        }
-
-        .user-info p { margin: 0; }
-        .user-name { font-weight: 600; color: var(--text-primary); }
-        .user-role { font-size: 0.85rem; color: var(--text-secondary); }
-
-        .sidebar-menu {
-            list-style: none;
-            padding: 1rem 0;
-            margin: 0;
-        }
-
-        .sidebar-menu .nav-item { width: 100%; }
-
-        .sidebar-menu .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 0.9rem 1.5rem;
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: all 0.2s;
-            font-weight: 500;
-            font-size: 0.95rem;
-        }
-
-        .sidebar-menu .nav-link i {
-            margin-right: 1rem;
-            width: 20px;
             text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.2);
         }
 
-        .sidebar-menu .nav-link:hover {
-            background-color: var(--hover-bg);
-            color: var(--text-primary);
+        .profile-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid var(--primary-color);
+            object-fit: cover;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-name { font-weight: 600; font-size: 1.1rem; margin: 0; }
+        
+        .profile-role {
+            font-size: 0.85rem;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Navigation Menu */
+        .nav-menu {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 1rem 0;
+        }
+
+        .nav-item { list-style: none; }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-link i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--primary-color);
+            border-left: 4px solid var(--primary-color);
         }
 
         .sidebar-divider {
             height: 1px;
-            background-color: var(--border-color);
-            margin: 0.5rem 1.5rem;
+            background-color: rgba(255,255,255,0.1);
+            margin: 1rem 1.5rem;
+        }
+
+        /* Logout Style */
+        .nav-link.text-danger { color: var(--danger-color) !important; }
+        .nav-link.text-danger:hover { 
+            background-color: rgba(239, 68, 68, 0.1); 
+            border-left-color: var(--danger-color);
         }
 
         /* --- Main Content Area --- */
-        main.container {
-            flex: 1; /* Fills remaining space */
-            padding: 2rem;
-            max-width: 100%;
+        .main-wrapper {
+            margin-left: 0;
+            transition: margin-left 0.3s;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Flash Messages */
+        /* Top Navbar */
+        .top-nav {
+            background-color: var(--secondary-bg);
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: color 0.2s;
+        }
+
+        .hamburger-btn:hover { color: var(--primary-color); }
+
+        /* Removed fixed padding to allow full-width hero sections */
+        .content-area {
+            flex: 1;
+            /* padding is handled by specific pages or components now */
+        }
+
+        /* Alerts */
         .alert {
             border: none;
             border-radius: 8px;
-            color: #fff;
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
         }
-        .alert-success { background-color: #2e7d32; }
-        .alert-danger { background-color: #c62828; }
-        .alert-dismissible .btn-close { filter: invert(1); }
+        .alert-success { border-left: 4px solid #10B981; }
+        .alert-danger { border-left: 4px solid var(--danger-color); background-color: rgba(239, 68, 68, 0.1); }
 
-        /* --- Footer Styling --- */
+        /* Footer */
         footer {
-            background-color: var(--bg-secondary);
-            border-top: 1px solid var(--border-color);
-            padding: 3rem 0 1.5rem;
-            color: var(--text-secondary);
+            background-color: var(--secondary-bg);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding: 4rem 0 2rem;
+            margin-top: auto;
         }
 
-        footer h5 {
-            color: var(--text-primary);
-            font-weight: 600;
-            margin-bottom: 1.2rem;
+        .footer-logo { height: 50px; margin-bottom: 1rem; }
+        
+        .footer-section h5 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
         }
 
-        footer a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-        footer a:hover { color: var(--text-primary); text-decoration: underline; }
-
-        .footer-section { margin-bottom: 2rem; }
+        .footer-links li { margin-bottom: 0.8rem; list-style: none; }
+        .footer-links a { color: var(--text-muted); }
+        .footer-links a:hover { color: var(--text-color); }
 
         .footer-social a {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+            display: inline-block;
             width: 40px;
             height: 40px;
+            line-height: 40px;
+            text-align: center;
+            background: var(--bg-color);
             border-radius: 50%;
-            background-color: var(--bg-tertiary);
-            color: var(--text-primary);
+            color: var(--text-color);
             margin-right: 0.5rem;
-            transition: background-color 0.2s;
-        }
-        .footer-social a:hover { background-color: var(--hover-bg); text-decoration: none; }
-
-        .footer-hr {
-            border-top: 1px solid var(--border-color);
-            margin: 2rem 0;
+            transition: 0.3s;
         }
 
-        @media (max-width: 768px) {
-            main.container { padding: 1rem; }
-            footer { text-align: center; }
-            .footer-social { justify-content: center; display: flex; }
+        .footer-social a:hover { background: var(--primary-color); transform: translateY(-3px); }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 2rem;
+            margin-top: 3rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
         }
+
+        /* Overlay for mobile */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1040;
+            display: none;
+        }
+        .overlay.active { display: block; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 3px; }
     </style>
+    
+    <!-- Block for page-specific styles -->
+    {% block styles %}{% endblock %}
 </head>
 <body>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg fixed-top">
-      <div class="container-fluid">
-        <!-- Hamburger Toggle for Sidebar (Visible only on mobile) -->
-        <button class="navbar-toggler me-2" type="button" id="sidebarToggle" aria-label="Toggle navigation">
-            <i class="fas fa-bars"></i>
-        </button>
+    <!-- Overlay (Mobile click to close) -->
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
-        <span class="navbar-brand d-flex align-items-center">
-          <a href="{{ url_for('main.index') }}" class="house-icon-link">
-            <img
-              src="{{ url_for('static', filename='images/homehub.jpg') }}"
-              alt="HomeHub Logo"
-              style="height: 30px; margin-right: 0.5rem"
-            />
-          </a>
-          <span class="navbar-brand-text">HomeHub</span>
-        </span>
-
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto align-items-center">
-            {% if current_user.is_authenticated %}
-            <li class="nav-item">
-              <span class="nav-link">Welcome, {{ current_user.name }}</span>
-            </li>
-            {% endif %}
-            <li class="nav-item">
-                <div id="themeToggle" aria-label="Toggle dark mode" onclick="toggleTheme()">
-                    <i class="fas fa-moon"></i>
-                </div>
-            </li>
-          </ul>
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">
+                <i class="fas fa-home"></i> HomeHub
+            </div>
+            <button class="close-btn d-lg-none" onclick="closeSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
-      </div>
-    </nav>
 
-    <!-- Layout Wrapper: Handles the Sidebar + Content Flex layout -->
-    <div class="layout-wrapper">
-        
-        <!-- Sidebar Overlay (Mobile Only) -->
-        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+        <!-- Profile Section (If Authenticated) -->
+        {% if current_user.is_authenticated %}
+        <div class="profile-section">
+            <img src="{{ current_user.profile_image if current_user.profile_image else url_for('static', filename='images/default-avatar.png') }}" alt="Avatar" class="profile-avatar">
+            <h5 class="profile-name">{{ current_user.name if current_user.name else current_user.email }}</h5>
+            <span class="profile-role">
+                {% if current_user.role.lower() == 'landlord' %} 🏠 Landlord
+                {% elif current_user.role.lower() == 'tenant' %} 🏡 Tenant
+                {% elif current_user.role.lower() == 'admin' %} ⚙️ Admin
+                {% elif current_user.role.lower() == 'service' %} 🔧 Service Provider
+                {% endif %}
+            </span>
+        </div>
+        {% endif %}
 
-        <!-- Sidebar -->
-        <div class="sidebar" id="sidebar">
-            <!-- Mobile Header (Hidden on Desktop) -->
-            <div class="sidebar-header d-lg-none">
-                <h5 class="sidebar-title">Menu</h5>
-                <button class="sidebar-close" onclick="closeSidebar()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
+        <ul class="nav-menu">
+            <!-- Home Link -->
+            <li class="nav-item">
+                <a href="{{ url_for('main.index') }}" class="nav-link" onclick="closeSidebar()">
+                    <i class="fas fa-home"></i> <span>Home</span>
+                </a>
+            </li>
 
-            {% if current_user.is_authenticated %}
-            <!-- User Profile Section -->
-            <div class="user-profile">
-                <img
-                    src="{{ url_for('static', filename='images/user-avatar.jpg') }}"
-                    alt="User Avatar"
-                    class="user-avatar"
-                />
-                <div class="user-info">
-                    <p class="user-name">{{ current_user.name }}</p>
-                    <p class="user-role">{{ current_user.role|title }}</p>
-                </div>
-            </div>
-            {% endif %}
-
-            <ul class="sidebar-menu">
-                <li class="nav-item">
-                    <a href="{{ url_for('main.index') }}" class="nav-link" onclick="closeSidebar()">
-                        <i class="fas fa-home"></i> <span>Home</span>
-                    </a>
-                </li>
-
-                {% if current_user.is_authenticated %} 
-                    {% if current_user.role.lower() == 'landlord' %}
+            <!-- Dynamic Role Based Links -->
+            {% if current_user.is_authenticated %} 
+                {% if current_user.role.lower() == 'landlord' %}
                 <li class="nav-item"><a href="{{ url_for('landlord.dashboard') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('landlord.properties') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-building"></i> <span>Properties</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('landlord.add_property') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-plus-circle"></i> <span>Add Property</span></a></li>
@@ -417,7 +311,7 @@
                 <li class="nav-item"><a href="{{ url_for('landlord.settings') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('landlord.profile') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-user"></i> <span>My Profile</span></a></li>
 
-                    {% elif current_user.role.lower() == 'tenant' %}
+                {% elif current_user.role.lower() == 'tenant' %}
                 <li class="nav-item"><a href="{{ url_for('tenant.dashboard') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('house.hotels') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-search"></i> <span>Browse Properties</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('tenant.all_bookings') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-calendar-check"></i> <span>My Bookings</span></a></li>
@@ -427,14 +321,14 @@
                 <li class="nav-item"><a href="{{ url_for('tenant.messages') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-envelope"></i> <span>Messages</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('tenant.profile') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-user"></i> <span>My Profile</span></a></li>
 
-                    {% elif current_user.role.lower() == 'admin' %}
+                {% elif current_user.role.lower() == 'admin' %}
                 <li class="nav-item"><a href="{{ url_for('admin.dashboard') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('admin.manage_users') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-users-cog"></i> <span>Manage Users</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('admin.system_settings') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-cogs"></i> <span>System Settings</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('admin.view_reports') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-chart-line"></i> <span>Reports</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('admin.audit_logs') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-history"></i> <span>Audit Logs</span></a></li>
 
-                    {% elif current_user.role.lower() == 'service' %}
+                {% elif current_user.role.lower() == 'service' %}
                 <li class="nav-item"><a href="{{ url_for('service_provider.dashboard') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('service_provider.requests') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-clipboard-list"></i> <span>Service Requests</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('service_provider.schedule') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-calendar-alt"></i> <span>Schedule</span></a></li>
@@ -442,33 +336,55 @@
                 <li class="nav-item"><a href="{{ url_for('service_provider.profile') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-user"></i> <span>My Profile</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('service_provider.reviews') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-star"></i> <span>Reviews</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('service_provider.settings') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
-                    {% endif %}
+                {% endif %}
 
+                <!-- Common Links -->
                 <li class="nav-item mt-3"><div class="sidebar-divider"></div></li>
                 <li class="nav-item"><a href="{{ url_for('main.about') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-info-circle"></i> <span>About Us</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('main.contact') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-envelope"></i> <span>Contact</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('main.help') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-question-circle"></i> <span>Help & Support</span></a></li>
+                
+                <!-- Logout -->
                 <li class="nav-item"><div class="sidebar-divider"></div></li>
-                <li class="nav-item"><a href="{{ url_for('auth.logout') }}" class="nav-link text-danger" onclick="closeSidebar()"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+                <li class="nav-item">
+                    <a href="{{ url_for('auth.logout') }}" class="nav-link text-danger" onclick="closeSidebar()">
+                        <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+                    </a>
+                </li>
 
-                {% else %}
+            {% else %}
+                <!-- Not Authenticated Links -->
                 <li class="nav-item"><a href="{{ url_for('auth.login') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-sign-in-alt"></i> <span>Login</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('auth.signup') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-user-plus"></i> <span>Sign Up</span></a></li>
                 <li class="nav-item"><div class="sidebar-divider"></div></li>
                 <li class="nav-item"><a href="{{ url_for('main.about') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-info-circle"></i> <span>About Us</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('main.contact') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-envelope"></i> <span>Contact</span></a></li>
-                {% endif %}
-            </ul>
-        </div>
+            {% endif %}
+        </ul>
+    </nav>
 
-        <!-- Main Content Area -->
-        <main class="container my-4" id="main">
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+        
+        <!-- Top Navigation Bar -->
+        <header class="top-nav">
+            <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="ms-3 d-flex align-items-center">
+                <span class="d-none d-sm-inline" style="font-weight: 600; color: var(--primary-color);">HomeHub</span>
+            </div>
+        </header>
+
+        <!-- Flash Messages & Content -->
+        <main class="content-area">
             {% with messages = get_flashed_messages(with_categories=true) %} 
                 {% if messages %} 
                     {% for category, message in messages %}
                     <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-{% if category == 'error' %}exclamation-circle{% else %}check-circle{% endif %} me-2"></i>
                         {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                     {% endfor %} 
                 {% endif %} 
@@ -476,116 +392,112 @@
             
             {% block content %}{% endblock %}
         </main>
-    </div>
 
-    <footer>
-        <div class="container footer-content">
-            <div class="row">
-                <div class="col-12 col-md-4 footer-section">
-                    <h5>HomeHub</h5>
-                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="HomeHub Logo" style="height: 40px; margin-bottom: 1rem" />
-                    <p>Your trusted platform for seamless property management, connecting landlords, tenants, and service providers.</p>
-                </div>
-                <div class="col-12 col-md-4 footer-section">
-                    <h5>Quick Links</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="{{ url_for('main.index') }}">Home</a></li>
-                        <li><a href="{{ url_for('main.about') }}">About Us</a></li>
-                        <li><a href="{{ url_for('main.contact') }}">Contact</a></li>
-                        {% if current_user.is_authenticated %} 
-                            {% if current_user.role.lower() == 'landlord' %}
-                            <li><a href="{{ url_for('landlord.dashboard') }}">Dashboard</a></li>
-                            <li><a href="{{ url_for('landlord.add_property') }}">Add Property</a></li>
-                            {% elif current_user.role.lower() == 'tenant' %}
-                            <li><a href="{{ url_for('tenant.dashboard') }}">Dashboard</a></li>
-                            <li><a href="{{ url_for('house.hotels') }}">Browse Properties</a></li>
-                            {% elif current_user.role.lower() == 'admin' %}
-                            <li><a href="{{ url_for('admin.manage_users') }}">Manage Users</a></li>
-                            {% elif current_user.role.lower() == 'service' %}
-                            <li><a href="{{ url_for('service_provider.dashboard') }}">Dashboard</a></li>
-                            {% endif %} 
-                        {% else %}
-                        <li><a href="{{ url_for('auth.signup') }}">Sign Up</a></li>
-                        <li><a href="{{ url_for('auth.login') }}">Login</a></li>
-                        {% endif %}
-                        <li><a href="{{ url_for('main.accessibility') }}">Accessibility Statement</a></li>
-                    </ul>
-                </div>
-                <div class="col-12 col-md-4 footer-section">
-                    <h5>Contact Us</h5>
-                    <p>Email: <a href="mailto:support@homehub.com">support@homehub.com</a><br />Phone: +1-800-555-1234</p>
-                    <div class="footer-social mt-3">
-                        <a href="https://twitter.com/homehub" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                        <a href="https://linkedin.com/company/homehub" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="https://instagram.com/homehub" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <!-- Footer -->
+        <footer>
+            <div class="container">
+                <div class="row">
+                    <!-- Branding Section -->
+                    <div class="col-12 col-md-4 mb-4">
+                        <h5>HomeHub</h5>
+                        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="HomeHub Logo" class="footer-logo" onerror="this.style.display='none'"/>
+                        <p class="text-muted mt-3">
+                            Your trusted platform for property management, connecting landlords, tenants, and service providers seamlessly.
+                        </p>
                     </div>
-                    <div class="mt-4">
+
+                    <!-- Quick Links -->
+                    <div class="col-6 col-md-2 mb-4">
+                        <h5>Quick Links</h5>
+                        <ul class="list-unstyled footer-links">
+                            <li><a href="{{ url_for('main.index') }}">Home</a></li>
+                            <li><a href="{{ url_for('main.about') }}">About Us</a></li>
+                            <li><a href="{{ url_for('main.contact') }}">Contact</a></li>
+                            
+                            {% if current_user.is_authenticated %} 
+                                {% if current_user.role.lower() == 'landlord' %}
+                                <li><a href="{{ url_for('landlord.dashboard') }}">Dashboard</a></li>
+                                <li><a href="{{ url_for('landlord.add_property') }}">Add Property</a></li>
+                                
+                                {% elif current_user.role.lower() == 'tenant' %}
+                                <li><a href="{{ url_for('tenant.dashboard') }}">Dashboard</a></li>
+                                <li><a href="{{ url_for('house.hotels') }}">Browse Properties</a></li>
+                                
+                                {% elif current_user.role.lower() == 'admin' %}
+                                <li><a href="{{ url_for('admin.manage_users') }}">Manage Users</a></li>
+                                
+                                {% elif current_user.role.lower() == 'service' %}
+                                <li><a href="{{ url_for('service_provider.dashboard') }}">Dashboard</a></li>
+                                {% endif %} 
+                            {% else %}
+                            <li><a href="{{ url_for('auth.signup') }}">Sign Up</a></li>
+                            <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+                            {% endif %}
+                            <li><a href="{{ url_for('main.accessibility') }}">Accessibility</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Contact Section -->
+                    <div class="col-6 col-md-3 mb-4">
+                        <h5>Contact Us</h5>
+                        <ul class="list-unstyled text-muted">
+                            <li><i class="fas fa-envelope me-2"></i> support@homehub.com</li>
+                            <li class="mt-2"><i class="fas fa-phone me-2"></i> +1-800-555-1234</li>
+                        </ul>
+                        <div class="footer-social mt-3">
+                            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+
+                    <!-- Newsletter -->
+                    <div class="col-12 col-md-3 mb-4">
                         <h5>Stay Updated</h5>
-                        <p><a href="{{ url_for('main.subscribe') }}">Subscribe to our newsletter</a></p>
+                        <p class="text-muted">Subscribe to our newsletter for the latest updates.</p>
+                        <a href="{{ url_for('main.subscribe') }}" class="btn btn-sm btn-outline-primary">Subscribe</a>
+                    </div>
+                </div>
+
+                <!-- Bottom Footer Bar -->
+                <div class="footer-bottom">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            &copy; <span id="currentYear"></span> HomeHub. All rights reserved.
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <a href="{{ url_for('main.terms') }}">Terms of Service</a> | 
+                            <a href="{{ url_for('main.privacy') }}">Privacy Policy</a>
+                        </div>
                     </div>
                 </div>
             </div>
-            <hr class="footer-hr" />
-            <p class="text-center mb-0">
-                &copy; <span id="currentYear"></span> HomeHub. All rights reserved.
-                <br class="d-md-none"/>
-                <a href="{{ url_for('main.terms') }}">Terms of Service</a> |
-                <a href="{{ url_for('main.privacy') }}">Privacy Policy</a>
-            </p>
-        </div>
-    </footer>
+        </footer>
+    </div>
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Custom Scripts -->
     <script>
         // Sidebar Toggle Logic
         const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        const sidebarToggle = document.getElementById('sidebarToggle');
+        const overlay = document.getElementById('overlay');
 
-        function openSidebar() {
-            sidebar.classList.add('active');
-            overlay.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Prevent scrolling
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
         }
 
         function closeSidebar() {
             sidebar.classList.remove('active');
             overlay.classList.remove('active');
-            document.body.style.overflow = 'auto'; // Enable scrolling
         }
 
-        if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', openSidebar);
-        }
-
-        // Theme Toggle Logic
-        function toggleTheme() {
-            const html = document.documentElement;
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            
-            // Update Icon
-            const icon = document.querySelector('#themeToggle i');
-            icon.className = newTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
-        }
-
-        // Load saved theme on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const savedTheme = localStorage.getItem('theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            
-            const icon = document.querySelector('#themeToggle i');
-            icon.className = savedTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
-            
-            // Set current year in footer
-            document.getElementById('currentYear').textContent = new Date().getFullYear();
-        });
+        // Dynamic Year
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
     </script>
+    
+    <!-- Block for page-specific scripts -->
+    {% block scripts %}{% endblock %}
 </body>
 </html>
