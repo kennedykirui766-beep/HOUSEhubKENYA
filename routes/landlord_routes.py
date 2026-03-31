@@ -46,34 +46,130 @@ def properties():
 
 
 # ---------------- Add Property ----------------
+from datetime import datetime
+import json
+
 @landlord_bp.route("/properties/add", methods=["GET", "POST"])
 @login_required
 def add_property():
     if current_user.role != "landlord":
-        flash("Access denied.", "danger")
-        return redirect(url_for("main.index"))
+        return {"message": "Access denied"}, 403
 
     if request.method == "POST":
-        title = request.form.get("title")
-        description = request.form.get("description")
-        location = request.form.get("location")
-        rent_amount = request.form.get("rent_amount")
+        try:
+            # ---- Basic Info ----
+            title = request.form.get("title")
+            description = request.form.get("description")
+            property_type = request.form.get("property_type")
 
-        house = House(
-            title=title,
-            description=description,
-            location=location,
-            rent_amount=rent_amount,
-            owner_id=current_user.id,
-        )
-        db.session.add(house)
-        db.session.commit()
+            # ---- Location ----
+            address_line1 = request.form.get("address_line1")
+            address_line2 = request.form.get("address_line2")
+            city = request.form.get("city")
+            state_province = request.form.get("state_province")
+            postal_code = request.form.get("postal_code")
+            country = request.form.get("country")
 
-        flash("Property added successfully!", "success")
-        return redirect(url_for("landlord.properties"))
+            # Combine location string
+            location = f"{address_line1}, {city}, {country}"
+
+            # ---- Pricing ----
+            rent_amount = float(request.form.get("rent_amount") or 0)
+            security_deposit = float(request.form.get("security_deposit") or 0)
+            lease_term = request.form.get("lease_term")
+
+            availability_date = request.form.get("availability_date")
+            availability_date = datetime.strptime(availability_date, "%Y-%m-%d") if availability_date else None
+
+            # ---- Specifications ----
+            bedrooms = int(request.form.get("bedrooms") or 0)
+            bathrooms = float(request.form.get("bathrooms") or 0)
+            size = request.form.get("square_footage")
+
+            # ---- Features ----
+            parking_availability = request.form.get("parking_availability")
+            furnished_status = request.form.get("furnished_status")
+
+            utilities = request.form.getlist("utilities")
+            amenities = request.form.getlist("amenities")
+
+            utilities = ",".join(utilities)
+            amenities = ",".join(amenities)
+
+            # ---- Policies ----
+            pets_allowed = request.form.get("pets_allowed")
+            pet_restrictions = request.form.get("pet_restrictions")
+            smoking_policy = request.form.get("smoking_policy")
+
+            accessibility_features = request.form.getlist("accessibility_features")
+            accessibility_features = ",".join(accessibility_features)
+
+            # ---- Images Upload (Cloudinary or Local) ----
+            image_files = request.files.getlist("images")
+            image_urls = []
+
+            for image in image_files:
+                if image and image.filename:
+                    # 👉 Replace with your Cloudinary upload
+                    # result = cloudinary.uploader.upload(image)
+                    # image_urls.append(result["secure_url"])
+
+                    # TEMP (local save example)
+                    filepath = f"static/uploads/{image.filename}"
+                    image.save(filepath)
+                    image_urls.append("/" + filepath)
+
+            image_urls_json = json.dumps(image_urls)
+
+            # ---- Create House ----
+            house = House(
+                title=title,
+                description=description,
+                category=property_type,
+                location=location,
+
+                address_line1=address_line1,
+                address_line2=address_line2,
+                city=city,
+                state_province=state_province,
+                postal_code=postal_code,
+                country=country,
+
+                rent_amount=rent_amount,
+                security_deposit=security_deposit,
+                lease_term=lease_term,
+                availability_date=availability_date,
+
+                property_type=property_type,
+                bedrooms=bedrooms,
+                bathrooms=bathrooms,
+                size=size,
+
+                parking_availability=parking_availability,
+                furnished_status=furnished_status,
+                utilities=utilities,
+                amenities=amenities,
+
+                pets_allowed=pets_allowed,
+                pet_restrictions=pet_restrictions,
+                smoking_policy=smoking_policy,
+                accessibility_features=accessibility_features,
+
+                image_urls=image_urls_json,
+
+                owner_id=current_user.id,
+            )
+
+            db.session.add(house)
+            db.session.commit()
+
+            return {"message": "Property added successfully!"}, 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {"message": str(e)}, 500
 
     return render_template("landlord/add_property.html", stats={})
-
 
 # ---------------- Manage Tenants ----------------
 @landlord_bp.route("/tenants")
