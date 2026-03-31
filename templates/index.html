@@ -4,51 +4,7 @@
 
 {% block styles %}
 <style>
-  /* Index Page Specific Styles - Updated to Blue + Dark Navy Theme */
-  :root {
-    --primary-color: #3B82F6;      /* Blue */
-    --primary-hover: #2563EB;      /* Darker Blue */
-    --accent-color: #F59E0B;       /* Amber for contrast */
-    --bg-dark: #0F172A;            /* Dark Navy */
-    --bg-card: #1E293B;            /* Secondary/Card background */
-    --text-light: #E2E8F0;         /* Soft white */
-    --text-muted: #94a3b8;
-    --border-radius: 8px;
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  }
-
-  /* Typography */
-  h1, h2, h3, h4, h5, h6 { color: var(--text-light); }
-  p { color: var(--text-muted); }
-
-  /* Buttons Override for Index Page */
-  .btn-primary {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-  }
-  .btn-primary:hover {
-    background-color: var(--primary-hover);
-    border-color: var(--primary-hover);
-  }
-  
-  .btn-outline {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-  }
-  .btn-outline:hover {
-    background-color: var(--primary-color);
-    color: var(--text-light);
-  }
-
-  .btn-secondary {
-    background-color: var(--bg-card);
-    color: var(--text-light);
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-  .btn-secondary:hover {
-    background-color: #334155;
-  }
+  /* ========== PAGE-SPECIFIC STYLES ONLY ========== */
 
   /* Sections */
   section {
@@ -62,19 +18,72 @@
     position: relative;
     display: inline-block;
     margin-bottom: 1rem;
+    color: var(--text-primary);
   }
 
-  .section-title:after {
+  .section-title::after {
     content: "";
     position: absolute;
     left: 0;
     bottom: -10px;
     width: 50px;
     height: 3px;
-    background-color: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+    border-radius: 2px;
   }
 
-  /* Hero Section */
+  .section-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+  }
+
+  /* Buttons */
+  .btn-primary-custom {
+    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+    border: none;
+    color: white;
+    padding: 0.75rem 1.75rem;
+    border-radius: 10px;
+    font-weight: 500;
+    transition: var(--transition);
+  }
+  .btn-primary-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+    color: white;
+  }
+
+  .btn-secondary-custom {
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--sidebar-border);
+    padding: 0.75rem 1.75rem;
+    border-radius: 10px;
+    font-weight: 500;
+    transition: var(--transition);
+  }
+  .btn-secondary-custom:hover {
+    background-color: var(--sidebar-hover);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  .btn-outline-custom {
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 0.75rem 1.75rem;
+    border-radius: 10px;
+    font-weight: 500;
+    background: transparent;
+    transition: var(--transition);
+  }
+  .btn-outline-custom:hover {
+    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+    border-color: transparent;
+    color: white;
+  }
+
+  /* ========== HERO SECTION ========== */
   .hero {
     position: relative;
     height: 100vh;
@@ -86,175 +95,1096 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    color: var(--text-light);
     overflow: hidden;
+    margin-top: calc(-1 * var(--navbar-height));
+    padding-top: var(--navbar-height);
   }
 
   .hero-overlay {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0.7) 100%);
+    background: linear-gradient(135deg, 
+      rgba(15, 23, 42, 0.92) 0%, 
+      rgba(15, 23, 42, 0.75) 50%,
+      rgba(99, 102, 241, 0.3) 100%);
     z-index: 1;
   }
 
-  .hero-content { position: relative; z-index: 2; max-width: 800px; }
-  .hero-title { font-size: 3.5rem; margin-bottom: 1.5rem; }
-  .hero-subtitle { font-size: 1.25rem; margin-bottom: 2rem; color: var(--text-muted); max-width: 600px; margin-left: auto; margin-right: auto; }
-  .hero-cta { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+  [data-bs-theme="dark"] .hero-overlay {
+    background: linear-gradient(135deg, 
+      rgba(2, 6, 23, 0.95) 0%, 
+      rgba(2, 6, 23, 0.85) 50%,
+      rgba(99, 102, 241, 0.2) 100%);
+  }
+
+  .hero-content { 
+    position: relative; 
+    z-index: 2; 
+    max-width: 800px; 
+    padding: 2rem;
+  }
+
+  .hero-title { 
+    font-size: 3.5rem; 
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    color: #ffffff;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+
+  .hero-title .text-gradient-hero {
+    background: linear-gradient(135deg, #818cf8, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-subtitle { 
+    font-size: 1.2rem; 
+    margin-bottom: 2.5rem; 
+    color: rgba(255, 255, 255, 0.7);
+    max-width: 600px; 
+    margin-left: auto; 
+    margin-right: auto;
+    line-height: 1.7;
+  }
+
+  .hero-cta { 
+    display: flex; 
+    justify-content: center; 
+    gap: 1rem; 
+    flex-wrap: wrap;
+  }
+
+  .hero-cta .btn {
+    min-width: 160px;
+  }
 
   .scroll-indicator {
-    position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
-    z-index: 2; font-size: 1.5rem; color: var(--primary-color);
+    position: absolute; 
+    bottom: 2rem; 
+    left: 50%; 
+    transform: translateX(-50%);
+    z-index: 2; 
+    color: rgba(255, 255, 255, 0.5);
     animation: bounce 2s infinite;
   }
 
-  /* Animations */
-  @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-20px);} 60% {transform: translateY(-10px);} }
-  @keyframes fadeIn { from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);} }
+  /* ========== ANIMATIONS ========== */
+  @keyframes bounce { 
+    0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); } 
+    40% { transform: translateX(-50%) translateY(-15px); } 
+    60% { transform: translateX(-50%) translateY(-8px); } 
+  }
   
-  .animate-fade-in { animation: fadeIn 1s ease-in-out; }
-  .animate-fade-in-delay { animation: fadeIn 1s ease-in-out 0.3s both; }
-  .animate-fade-in-delay-2 { animation: fadeIn 1s ease-in-out 0.6s both; }
+  @keyframes fadeInUp { 
+    from { opacity: 0; transform: translateY(30px); } 
+    to { opacity: 1; transform: translateY(0); } 
+  }
+  
+  .animate-fade-in { animation: fadeInUp 0.8s ease-out; }
+  .animate-fade-in-delay { animation: fadeInUp 0.8s ease-out 0.2s both; }
+  .animate-fade-in-delay-2 { animation: fadeInUp 0.8s ease-out 0.4s both; }
+  
+  @keyframes pulse { 
+    0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.6); } 
+    70% { box-shadow: 0 0 0 15px rgba(99, 102, 241, 0); } 
+    100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); } 
+  }
   .pulse-animation { animation: pulse 2s infinite; }
-  
-  @keyframes pulse { 0% {box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);} 70% {box-shadow: 0 0 0 15px rgba(59, 130, 246, 0);} 100% {box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);} }
 
-  /* Welcome Section */
-  .welcome-section { background-color: var(--bg-dark); }
-  .welcome-content { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+  /* ========== WELCOME SECTION ========== */
+  .welcome-section { 
+    background-color: var(--body-bg); 
+  }
+
+  .welcome-content { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 3rem; 
+    align-items: center; 
+  }
+
   .welcome-features { margin-top: 2rem; }
   
-  .feature-icon-text { display: flex; align-items: flex-start; margin-bottom: 1.5rem; }
-  .icon-circle {
-    display: flex; align-items: center; justify-content: center;
-    width: 50px; height: 50px; border-radius: 50%;
-    background-color: rgba(59, 130, 246, 0.1); color: var(--primary-color);
-    margin-right: 1rem; flex-shrink: 0;
+  .feature-icon-text { 
+    display: flex; 
+    align-items: flex-start; 
+    margin-bottom: 1.5rem; 
   }
-  .feature-icon-text h4 { margin-bottom: 0.25rem; color: var(--text-light); }
-  
-  .img-shadow { border-radius: var(--border-radius); box-shadow: var(--shadow-lg); width: 100%; }
 
-  /* Search Section */
-  .search-section { background-color: var(--bg-card); padding: 3rem 0; }
-  .search-container { max-width: 900px; margin: 0 auto; text-align: center; }
-  .search-input-group { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
+  .icon-circle {
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    width: 52px; 
+    height: 52px; 
+    border-radius: 14px;
+    background: var(--primary-light);
+    color: var(--primary-color);
+    margin-right: 1rem; 
+    flex-shrink: 0;
+    font-size: 1.1rem;
+    transition: var(--transition);
+  }
+
+  .feature-icon-text:hover .icon-circle {
+    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+    color: white;
+    transform: scale(1.05);
+  }
+
+  .feature-icon-text h4 { 
+    margin-bottom: 0.25rem; 
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .feature-icon-text p { 
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+  }
+  
+  .img-shadow { 
+    border-radius: 16px; 
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    border: 1px solid var(--sidebar-border);
+  }
+
+  /* ========== SEARCH SECTION ========== */
+  .search-section { 
+    background-color: var(--card-bg); 
+    padding: 3rem 0;
+    border-top: 1px solid var(--sidebar-border);
+    border-bottom: 1px solid var(--sidebar-border);
+  }
+
+  .search-container { 
+    max-width: 900px; 
+    margin: 0 auto; 
+    text-align: center; 
+  }
+
+  .search-container h3 {
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+  }
+
+  .search-input-group { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 0.75rem; 
+    justify-content: center; 
+  }
   
   .search-input, .search-select {
-    padding: 0.75rem 1rem; border: 1px solid rgba(255,255,255,0.1);
-    border-radius: var(--border-radius); font-size: 1rem; min-width: 200px;
-    background-color: var(--bg-dark); color: var(--text-light);
+    padding: 0.85rem 1.25rem;
+    border: 2px solid var(--sidebar-border);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    min-width: 200px;
+    background-color: var(--body-bg);
+    color: var(--text-primary);
+    transition: var(--transition);
+  }
+
+  .search-input:focus, .search-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px var(--primary-light);
   }
   
+  .popular-searches {
+    margin-top: 1.25rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
   .popular-searches a {
-    color: var(--primary-color); padding: 0.25rem 0.75rem;
-    border: 1px solid var(--primary-color); border-radius: 20px;
-    transition: all 0.3s;
+    color: var(--primary-color);
+    padding: 0.3rem 0.85rem;
+    border: 1px solid var(--primary-color);
+    border-radius: 50px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: var(--transition);
+    display: inline-block;
   }
-  .popular-searches a:hover { background-color: var(--primary-color); color: white; }
 
-  /* How It Works & Features */
-  .how-it-works-section, .properties-section, .stats-section, .faq-section { background-color: var(--bg-dark); }
-  .features-section, .testimonials-section, .map-section, .social-section, .guest-cta-section { background-color: var(--bg-card); }
+  .popular-searches a:hover { 
+    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+    color: white; 
+    border-color: transparent;
+    transform: translateY(-2px);
+  }
 
-  .process-flow, .features-grid, .stats-grid, .faq-container { display: grid; gap: 2rem; margin-top: 3rem; }
-  .process-flow { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
-  .features-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-  .stats-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  /* ========== HOW IT WORKS ========== */
+  .how-it-works-section { 
+    background-color: var(--body-bg); 
+  }
+
+  .process-flow { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+    gap: 2rem; 
+    margin-top: 3rem; 
+  }
   
-  .process-step, .feature-card, .stat-card {
-    background-color: var(--bg-card); border-radius: var(--border-radius); padding: 2rem;
-    border: 1px solid rgba(255,255,255,0.05); transition: transform 0.3s;
+  .process-step { 
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    padding: 2rem 1.5rem; 
+    border: 1px solid var(--sidebar-border);
+    transition: var(--transition);
+    text-align: center;
+    position: relative;
   }
-  .process-step:hover, .feature-card:hover { transform: translateY(-5px); border-color: var(--primary-color); }
+
+  .process-step:hover { 
+    transform: translateY(-8px); 
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-lg);
+  }
   
   .step-number {
-    position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
-    width: 30px; height: 30px; background-color: var(--primary-color);
-    color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-weight: bold;
+    position: absolute; 
+    top: -15px; 
+    left: 50%; 
+    transform: translateX(-50%);
+    width: 32px; 
+    height: 32px;
+    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+    color: white; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.4);
+  }
+
+  .step-icon {
+    width: 64px;
+    height: 64px;
+    margin: 1rem auto 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-light);
+    color: var(--primary-color);
+    border-radius: 16px;
+    font-size: 1.5rem;
+    transition: var(--transition);
+  }
+
+  .process-step:hover .step-icon {
+    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+    color: white;
+  }
+
+  .process-step h3 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+  }
+
+  .process-step p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .btn-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: var(--transition);
+  }
+
+  .btn-link:hover {
+    color: #8b5cf6;
+  }
+
+  /* ========== FEATURES SECTION ========== */
+  .features-section { 
+    background-color: var(--card-bg);
+    border-top: 1px solid var(--sidebar-border);
+    border-bottom: 1px solid var(--sidebar-border);
+  }
+
+  .features-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+    gap: 1.5rem; 
+    margin-top: 3rem; 
   }
   
-  .feature-icon, .stat-icon {
-    display: flex; align-items: center; justify-content: center;
-    width: 60px; height: 60px; margin-bottom: 1.5rem;
-    background-color: rgba(59, 130, 246, 0.1); color: var(--primary-color);
-    border-radius: 50%; font-size: 1.5rem;
+  .feature-card { 
+    background-color: var(--body-bg);
+    border-radius: 16px;
+    padding: 2rem; 
+    border: 1px solid var(--sidebar-border);
+    transition: var(--transition);
+  }
+
+  .feature-card:hover { 
+    transform: translateY(-5px); 
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-lg);
   }
   
-  .stat-number { font-size: 2.5rem; font-weight: 700; color: var(--primary-color); }
-
-  /* Properties Grid */
-  .properties-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2rem; }
-  
-  .property-card {
-    background-color: var(--bg-card); border-radius: var(--border-radius);
-    overflow: hidden; border: 1px solid rgba(255,255,255,0.05);
-    transition: 0.3s; cursor: pointer;
+  .feature-icon { 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    width: 56px; 
+    height: 56px; 
+    margin-bottom: 1.25rem;
+    background: var(--primary-light);
+    color: var(--primary-color);
+    border-radius: 14px;
+    font-size: 1.35rem;
+    transition: var(--transition);
   }
-  .property-card:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+
+  .feature-card:hover .feature-icon {
+    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+    color: white;
+  }
+
+  .feature-card h3 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+  }
+
+  .feature-card p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .feature-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+
+  .feature-link:hover {
+    color: #8b5cf6;
+  }
+
+  /* ========== PROPERTIES SECTION ========== */
+  .properties-section { 
+    background-color: var(--body-bg); 
+  }
+
+  .property-filters {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+
+  .filter-btn {
+    padding: 0.5rem 1.25rem;
+    border: 2px solid var(--sidebar-border);
+    border-radius: 50px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .filter-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  .filter-btn.active {
+    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+    border-color: transparent;
+    color: white;
+  }
+
+  .properties-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+    gap: 1.5rem; 
+  }
   
-  .property-badge { position: absolute; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.875rem; font-weight: 500; }
-  .property-badge.featured { top: 1rem; left: 1rem; background-color: var(--primary-color); color: white; }
-  .property-badge.price { bottom: 1rem; right: 1rem; background-color: var(--accent-color); color: #000; }
+  .property-card { 
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    overflow: hidden; 
+    border: 1px solid var(--sidebar-border);
+    transition: var(--transition);
+    cursor: pointer;
+  }
+
+  .property-card:hover { 
+    transform: translateY(-8px); 
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
+  }
+
+  .property-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    transition: var(--transition);
+  }
+
+  .property-card:hover .property-image {
+    transform: scale(1.03);
+  }
+
+  .property-image-container {
+    overflow: hidden;
+    position: relative;
+  }
   
-  .property-location, .property-description { color: var(--text-muted); }
-  .property-features i, .property-location i { color: var(--primary-color); }
+  .property-badge { 
+    position: absolute; 
+    padding: 0.3rem 0.85rem; 
+    border-radius: 8px;
+    font-size: 0.8rem; 
+    font-weight: 600;
+  }
 
-  /* Testimonials */
-  .testimonials-slider { display: flex; transition: transform 0.5s ease; }
-  .testimonial-card { min-width: 100%; padding: 0 1rem; }
-  .testimonial-content { background-color: var(--bg-dark); border-radius: var(--border-radius); padding: 2rem; border: 1px solid rgba(255,255,255,0.05); }
-  .testimonial-text i { color: var(--primary-color); opacity: 0.3; font-size: 1.5rem; }
-  .testimonial-rating { color: var(--accent-color); }
-  .author-image { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 1rem; border: 2px solid var(--primary-color); }
+  .property-badge.featured { 
+    top: 1rem; 
+    left: 1rem; 
+    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+    color: white;
+  }
 
-  /* Map Section */
-  .property-map { height: 500px; width: 100%; border-radius: var(--border-radius); }
-  .map-container { border-radius: var(--border-radius); overflow: hidden; box-shadow: var(--shadow-lg); }
-  .map-control-btn { background-color: var(--bg-dark); color: var(--text-light); border: 1px solid rgba(255,255,255,0.1); padding: 0.5rem 1rem; cursor: pointer; transition: 0.3s; }
-  .map-control-btn:hover { background-color: var(--primary-color); color: white; }
+  .property-badge.price { 
+    bottom: 1rem; 
+    right: 1rem; 
+    background-color: #f59e0b;
+    color: #000;
+  }
 
-  /* FAQ */
-  .faq-item { margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.05); border-radius: var(--border-radius); overflow: hidden; }
+  .property-details {
+    padding: 1.25rem;
+  }
+
+  .property-title { 
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .property-location { 
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .property-location i { 
+    color: var(--primary-color);
+    margin-right: 0.25rem;
+  }
+
+  .property-features { 
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .property-features i { 
+    color: var(--primary-color);
+    margin-right: 0.2rem;
+  }
+
+  .property-description { 
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+
+  .property-actions .btn {
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.45rem 1rem;
+  }
+
+  .property-actions .btn-outline-custom {
+    border-width: 1px;
+    padding: 0.45rem 1rem;
+    font-size: 0.85rem;
+    border-radius: 8px;
+  }
+
+  .property-actions .btn-primary-custom {
+    padding: 0.45rem 1rem;
+    font-size: 0.85rem;
+    border-radius: 8px;
+  }
+
+  .property-no-image {
+    background-color: var(--sidebar-hover) !important;
+    color: var(--text-secondary);
+  }
+
+  .no-properties {
+    grid-column: 1 / -1;
+    color: var(--text-secondary);
+  }
+
+  /* ========== TESTIMONIALS ========== */
+  .testimonials-section { 
+    background-color: var(--card-bg);
+    border-top: 1px solid var(--sidebar-border);
+    border-bottom: 1px solid var(--sidebar-border);
+  }
+
+  .testimonials-slider { 
+    overflow: hidden;
+  }
+
+  .testimonials-track {
+    display: flex;
+    transition: transform 0.5s ease;
+  }
+
+  .testimonial-card { 
+    min-width: 100%; 
+    padding: 0 1rem; 
+  }
+
+  .testimonial-content { 
+    background-color: var(--body-bg);
+    border-radius: 16px;
+    padding: 2.5rem;
+    border: 1px solid var(--sidebar-border);
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .testimonial-text i { 
+    color: var(--primary-color);
+    opacity: 0.2; 
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .testimonial-text p {
+    color: var(--text-primary);
+    font-size: 1.05rem;
+    font-style: italic;
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+  }
+
+  .testimonial-rating { 
+    color: #f59e0b;
+    font-size: 0.9rem;
+  }
+
+  .author-image { 
+    width: 56px; 
+    height: 56px; 
+    border-radius: 50%; 
+    object-fit: cover; 
+    margin-right: 1rem; 
+    border: 3px solid var(--primary-color);
+  }
+
+  .testimonial-author h4 {
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.15rem;
+  }
+
+  .testimonial-author p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin: 0;
+  }
+
+  .testimonial-nav .btn {
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--sidebar-border);
+    color: var(--text-secondary);
+    background: transparent;
+    transition: var(--transition);
+  }
+
+  .testimonial-nav .btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: var(--primary-light);
+  }
+
+  /* ========== STATS SECTION ========== */
+  .stats-section { 
+    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+    color: white;
+  }
+
+  .stats-section .section-title {
+    color: white;
+  }
+
+  .stats-section .section-title::after {
+    background-color: rgba(255, 255, 255, 0.5);
+  }
+
+  .stats-section .section-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .stats-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+    gap: 2rem; 
+    margin-top: 3rem; 
+  }
+  
+  .stat-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: var(--transition);
+  }
+
+  .stat-card:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-5px);
+  }
+  
+  .stat-icon {
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    width: 56px; 
+    height: 56px; 
+    margin: 0 auto 1.25rem;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 14px;
+    font-size: 1.35rem;
+  }
+  
+  .stat-number { 
+    font-size: 2.5rem; 
+    font-weight: 800; 
+    color: white;
+    line-height: 1;
+  }
+
+  .stat-label {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-top: 0.5rem;
+  }
+
+  /* ========== MAP SECTION ========== */
+  .map-section { 
+    background-color: var(--body-bg); 
+  }
+
+  .map-container { 
+    border-radius: 16px; 
+    overflow: hidden; 
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--sidebar-border);
+  }
+
+  .property-map { 
+    height: 450px; 
+    width: 100%; 
+  }
+
+  .map-control-btn { 
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--sidebar-border);
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.85rem;
+    font-weight: 500;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .map-control-btn:hover { 
+    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+    color: white;
+    border-color: transparent;
+  }
+
+  /* ========== FAQ SECTION ========== */
+  .faq-section { 
+    background-color: var(--card-bg);
+    border-top: 1px solid var(--sidebar-border);
+  }
+
+  .faq-category h3 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .faq-item { 
+    margin-bottom: 0.75rem; 
+    border: 1px solid var(--sidebar-border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: var(--transition);
+  }
+
+  .faq-item:hover {
+    border-color: var(--primary-color);
+  }
+
   .faq-question {
-    width: 100%; padding: 1rem; background-color: var(--bg-dark);
-    border: none; text-align: left; font-weight: 500; cursor: pointer;
-    display: flex; justify-content: space-between; align-items: center;
-    color: var(--text-light); transition: 0.3s;
+    width: 100%; 
+    padding: 1rem 1.25rem;
+    background-color: var(--body-bg);
+    border: none; 
+    text-align: left; 
+    font-weight: 500;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    color: var(--text-primary);
+    transition: var(--transition);
   }
-  .faq-question:hover, .faq-question.active { background-color: var(--primary-color); }
-  .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; background-color: var(--bg-card); }
-  .faq-answer.active { max-height: 500px; }
-  .faq-answer p { padding: 1rem; color: var(--text-muted); }
 
-  /* Newsletter */
-  .newsletter-section { background: linear-gradient(135deg, var(--primary-color) 0%, #1d4ed8 100%); color: white; }
-  .newsletter-content { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
-  .newsletter-form-container { background-color: var(--bg-card); border-radius: var(--border-radius); padding: 2rem; color: var(--text-light); }
-  .form-control { background-color: var(--bg-dark); border: 1px solid rgba(255,255,255,0.1); color: var(--text-light); }
+  .faq-question:hover, 
+  .faq-question.active { 
+    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+    color: white;
+  }
 
-  /* Chat Widget */
-  .chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 999; }
-  .chat-toggle { background-color: var(--primary-color); color: white; border: none; padding: 1rem; border-radius: 50px; cursor: pointer; box-shadow: var(--shadow-lg); }
-  .chat-window { position: absolute; bottom: 70px; right: 0; width: 350px; height: 450px; background-color: var(--bg-card); border-radius: var(--border-radius); display: none; flex-direction: column; border: 1px solid rgba(255,255,255,0.1); }
-  .chat-window.active { display: flex; }
-  .chat-header { background-color: var(--primary-color); padding: 1rem; color: white; display: flex; justify-content: space-between; align-items: center; }
-  .chat-body { flex: 1; overflow-y: auto; padding: 1rem; background-color: var(--bg-dark); }
-  .chat-footer { padding: 1rem; background-color: var(--bg-card); }
-  .chat-input { width: 100%; padding: 0.5rem; border-radius: 20px; border: none; background-color: var(--bg-dark); color: white; }
-  
-  /* Responsive */
+  .faq-question i {
+    transition: transform 0.3s ease;
+    font-size: 0.8rem;
+  }
+
+  .faq-question.active i {
+    transform: rotate(180deg);
+  }
+
+  .faq-answer { 
+    max-height: 0; 
+    overflow: hidden; 
+    transition: max-height 0.3s ease;
+    background-color: var(--card-bg);
+  }
+
+  .faq-answer.active { 
+    max-height: 200px;
+  }
+
+  .faq-answer p { 
+    padding: 1rem 1.25rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+  }
+
+  /* ========== NEWSLETTER SECTION ========== */
+  .newsletter-section { 
+    background: linear-gradient(135deg, var(--primary-color) 0%, #8b5cf6 50%, #6d28d9 100%);
+    color: white;
+  }
+
+  .newsletter-text h2 {
+    color: white;
+  }
+
+  .newsletter-text p {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .newsletter-content { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 3rem; 
+    align-items: center; 
+  }
+
+  .newsletter-form-container { 
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    padding: 2rem;
+    color: var(--text-primary);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .newsletter-form-container .form-control {
+    background-color: var(--body-bg);
+    border: 2px solid var(--sidebar-border);
+    color: var(--text-primary);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    transition: var(--transition);
+  }
+
+  .newsletter-form-container .form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px var(--primary-light);
+  }
+
+  .newsletter-form-container .form-control::placeholder {
+    color: var(--text-secondary);
+  }
+
+  /* ========== SOCIAL SECTION ========== */
+  .social-section {
+    background-color: var(--body-bg);
+    padding: 3rem 0;
+  }
+
+  .social-section h2 {
+    color: var(--text-primary);
+  }
+
+  .social-section p {
+    color: var(--text-secondary);
+  }
+
+  .social-buttons .btn {
+    border-radius: 50px;
+    padding: 0.6rem 1.25rem;
+    border: 2px solid var(--sidebar-border);
+    color: var(--text-secondary);
+    background: transparent;
+    font-weight: 500;
+    transition: var(--transition);
+  }
+
+  .social-buttons .btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: var(--primary-light);
+  }
+
+  /* ========== CHAT WIDGET ========== */
+  .chat-widget { 
+    position: fixed; 
+    bottom: 24px; 
+    right: 24px; 
+    z-index: 999; 
+  }
+
+  .chat-toggle { 
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+    color: white; 
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+    font-size: 1.25rem;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .chat-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 30px rgba(99, 102, 241, 0.5);
+  }
+
+  .chat-window { 
+    position: absolute; 
+    bottom: 70px; 
+    right: 0; 
+    width: 360px;
+    height: 460px;
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    display: none; 
+    flex-direction: column;
+    border: 1px solid var(--sidebar-border);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+  }
+
+  .chat-window.active { 
+    display: flex;
+    animation: fadeInUp 0.3s ease-out;
+  }
+
+  .chat-header { 
+    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+    padding: 1rem 1.25rem;
+    color: white; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+  }
+
+  .chat-header h5 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .chat-body { 
+    flex: 1; 
+    overflow-y: auto; 
+    padding: 1.25rem;
+    background-color: var(--body-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .chat-body p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  .chat-footer { 
+    padding: 1rem;
+    background-color: var(--card-bg);
+    border-top: 1px solid var(--sidebar-border);
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .chat-input { 
+    flex: 1;
+    padding: 0.65rem 1rem;
+    border-radius: 50px;
+    border: 2px solid var(--sidebar-border);
+    background-color: var(--body-bg);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: var(--transition);
+  }
+
+  .chat-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+  }
+
+  .chat-input::placeholder {
+    color: var(--text-secondary);
+  }
+
+  .chat-send-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+  }
+
+  .chat-send-btn:hover {
+    transform: scale(1.05);
+  }
+
+  /* ========== RESPONSIVE ========== */
   @media (max-width: 992px) {
-    .welcome-content, .newsletter-content { grid-template-columns: 1fr; }
-    .hero-title { font-size: 2.5rem; }
+    .welcome-content, .newsletter-content { 
+      grid-template-columns: 1fr; 
+    }
+    .hero-title { 
+      font-size: 2.75rem; 
+    }
+    .welcome-image {
+      order: -1;
+    }
   }
+
   @media (max-width: 768px) {
-    .hero { height: auto; min-height: 500px; padding: 4rem 0; }
-    .hero-cta { flex-direction: column; }
-    .hero-cta .btn { width: 100%; max-width: 300px; }
-    .search-input-group { flex-direction: column; }
-    .search-input, .search-select { width: 100%; min-width: auto; }
+    section {
+      padding: 3.5rem 0;
+    }
+    .hero { 
+      height: auto; 
+      min-height: 500px; 
+      padding: 6rem 0 4rem;
+    }
+    .hero-title { 
+      font-size: 2.25rem; 
+    }
+    .hero-subtitle { 
+      font-size: 1rem; 
+    }
+    .hero-cta { 
+      flex-direction: column; 
+      align-items: center;
+    }
+    .hero-cta .btn { 
+      width: 100%; 
+      max-width: 280px;
+    }
+    .search-input-group { 
+      flex-direction: column; 
+    }
+    .search-input, .search-select { 
+      width: 100%; 
+      min-width: auto; 
+    }
+    .properties-grid {
+      grid-template-columns: 1fr;
+    }
+    .chat-window {
+      width: calc(100vw - 48px);
+      right: -12px;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .hero-title {
+      font-size: 1.85rem;
+    }
+    .process-flow {
+      grid-template-columns: 1fr;
+    }
+    .features-grid {
+      grid-template-columns: 1fr;
+    }
+    .stats-grid {
+      grid-template-columns: 1fr 1fr;
+    }
   }
 </style>
 {% endblock %}
@@ -264,24 +1194,26 @@
 <section class="hero">
   <div class="hero-overlay"></div>
   <div class="container hero-content">
-    <h1 class="hero-title animate-fade-in">HomeHub: Connect, Manage, Thrive</h1>
+    <h1 class="hero-title animate-fade-in">
+      HomeHub: <span class="text-gradient-hero">Connect, Manage, Thrive</span>
+    </h1>
     <p class="hero-subtitle animate-fade-in-delay">
       Your all-in-one property management solution for landlords, tenants,
       service providers, and admins.
     </p>
     <div class="hero-cta animate-fade-in-delay-2">
-      <a href="{{ url_for('auth.signup') }}" class="btn btn-primary btn-lg pulse-animation" aria-label="Register for HomeHub">
-        <i class="fas fa-rocket"></i> Get Started
+      <a href="{{ url_for('auth.signup') }}" class="btn btn-primary-custom btn-lg pulse-animation" aria-label="Register for HomeHub">
+        <i class="fas fa-rocket me-2"></i>Get Started
       </a>
-      <a href="#properties" class="btn btn-secondary btn-lg" aria-label="Explore Properties">
-        <i class="fas fa-search"></i> Explore Properties
+      <a href="#properties" class="btn btn-secondary-custom btn-lg" aria-label="Explore Properties">
+        <i class="fas fa-search me-2"></i>Explore Properties
       </a>
-      <a href="{{ url_for('main.how_it_works_general') }}" class="btn btn-outline btn-lg" aria-label="Learn More">
-        <i class="fas fa-info-circle"></i> Learn More
+      <a href="{{ url_for('main.how_it_works_general') }}" class="btn btn-outline-custom btn-lg" aria-label="Learn More">
+        <i class="fas fa-info-circle me-2"></i>Learn More
       </a>
     </div>
     <div class="scroll-indicator">
-      <i class="fas fa-chevron-down bounce-animation"></i>
+      <i class="fas fa-chevron-down fa-lg"></i>
     </div>
   </div>
 </section>
@@ -292,7 +1224,7 @@
     <div class="welcome-content">
       <div class="welcome-text">
         <h2 class="section-title">Welcome to HomeHub</h2>
-        <p class="section-subtitle">
+        <p class="section-subtitle mt-4">
           HomeHub connects landlords, tenants, service providers, and admins for
           efficient property management. Simplify property management with
           HomeHub.
@@ -332,10 +1264,10 @@
 <section class="search-section">
   <div class="container">
     <div class="search-container">
-      <h3>Find Your Perfect Property</h3>
+      <h3><i class="fas fa-search me-2" style="color: var(--primary-color);"></i>Find Your Perfect Property</h3>
       <form action="{{ url_for('tenant.properties') }}" method="GET" class="search-form">
         <div class="search-input-group">
-          <input type="text" name="query" placeholder="Search properties by city, location, or type" aria-label="Search properties" class="search-input" />
+          <input type="text" name="query" placeholder="Search by city, location, or type" aria-label="Search properties" class="search-input" />
           <select name="property_type" class="search-select">
             <option value="">All Types</option>
             <option value="apartment">Apartment</option>
@@ -350,15 +1282,15 @@
             <option value="25000-50000">KES 25,000 - 50,000</option>
             <option value="50000+">Over KES 50,000</option>
           </select>
-          <button type="submit" class="btn btn-primary search-btn"><i class="fas fa-search"></i> Search</button>
+          <button type="submit" class="btn btn-primary-custom"><i class="fas fa-search me-1"></i> Search</button>
         </div>
       </form>
-      <div class="popular-searches mt-3">
-        <span>Popular searches:</span>
+      <div class="popular-searches">
+        <span>Popular:</span>
         <a href="{{ url_for('tenant.properties', query='Nairobi') }}" class="ms-2">Nairobi</a>
-        <a href="{{ url_for('tenant.properties', query='Mombasa') }}" class="ms-2">Mombasa</a>
-        <a href="{{ url_for('tenant.properties', query='Kisumu') }}" class="ms-2">Kisumu</a>
-        <a href="{{ url_for('tenant.properties', query='apartments') }}" class="ms-2">Apartments</a>
+        <a href="{{ url_for('tenant.properties', query='Mombasa') }}" class="ms-1">Mombasa</a>
+        <a href="{{ url_for('tenant.properties', query='Kisumu') }}" class="ms-1">Kisumu</a>
+        <a href="{{ url_for('tenant.properties', query='apartments') }}" class="ms-1">Apartments</a>
       </div>
     </div>
   </div>
@@ -377,28 +1309,28 @@
         <div class="step-icon"><i class="fas fa-user-tie"></i></div>
         <h3>Landlords</h3>
         <p>List your property in Nairobi and manage tenants easily with our intuitive dashboard.</p>
-        <a href="{{ url_for('main.how_it_works_landlord') }}" class="btn-link">Learn More <i class="fas fa-arrow-right"></i></a>
+        <a href="{{ url_for('main.how_it_works_landlord') }}" class="btn-link">Learn More <i class="fas fa-arrow-right ms-1"></i></a>
       </div>
       <div class="process-step">
         <div class="step-number">2</div>
         <div class="step-icon"><i class="fas fa-home"></i></div>
         <h3>Tenants</h3>
         <p>Find your dream home in Mombasa with secure payments via M-Pesa and digital lease signing.</p>
-        <a href="{{ url_for('main.how_it_works_tenant') }}" class="btn-link">Learn More <i class="fas fa-arrow-right"></i></a>
+        <a href="{{ url_for('main.how_it_works_tenant') }}" class="btn-link">Learn More <i class="fas fa-arrow-right ms-1"></i></a>
       </div>
       <div class="process-step">
         <div class="step-number">3</div>
         <div class="step-icon"><i class="fas fa-tools"></i></div>
         <h3>Service Providers</h3>
         <p>Bid on maintenance jobs in Kisumu and grow your business with our platform.</p>
-        <a href="{{ url_for('main.how_it_works_provider') }}" class="btn-link">Learn More <i class="fas fa-arrow-right"></i></a>
+        <a href="{{ url_for('main.how_it_works_provider') }}" class="btn-link">Learn More <i class="fas fa-arrow-right ms-1"></i></a>
       </div>
       <div class="process-step">
         <div class="step-number">4</div>
         <div class="step-icon"><i class="fas fa-user-shield"></i></div>
         <h3>Admins</h3>
         <p>Moderate users and resolve disputes efficiently with our comprehensive admin tools.</p>
-        <a href="{{ url_for('main.how_it_works_admin') }}" class="btn-link">Learn More <i class="fas fa-arrow-right"></i></a>
+        <a href="{{ url_for('main.how_it_works_admin') }}" class="btn-link">Learn More <i class="fas fa-arrow-right ms-1"></i></a>
       </div>
     </div>
   </div>
@@ -416,37 +1348,37 @@
         <div class="feature-icon"><i class="fas fa-money-check-alt"></i></div>
         <h3>Secure M-Pesa Payments</h3>
         <p>Pay rent or services securely via M-Pesa with instant confirmation and digital receipts.</p>
-        <a href="#" class="feature-link">Learn More</a>
+        <a href="#" class="feature-link">Learn More <i class="fas fa-arrow-right ms-1"></i></a>
       </div>
       <div class="feature-card">
         <div class="feature-icon"><i class="fas fa-file-contract"></i></div>
         <h3>Lease Management</h3>
         <p>Create, sign, and manage leases digitally with automated reminders and renewal notifications.</p>
-        <a href="#" class="feature-link">Learn More</a>
+        <a href="#" class="feature-link">Learn More <i class="fas fa-arrow-right ms-1"></i></a>
       </div>
       <div class="feature-card">
         <div class="feature-icon"><i class="fas fa-hammer"></i></div>
         <h3>Maintenance Requests</h3>
         <p>Submit and bid on maintenance jobs with photo uploads and progress tracking.</p>
-        <a href="#" class="feature-link">Learn More</a>
+        <a href="#" class="feature-link">Learn More <i class="fas fa-arrow-right ms-1"></i></a>
       </div>
       <div class="feature-card">
         <div class="feature-icon"><i class="fas fa-comments"></i></div>
         <h3>In-App Messaging</h3>
         <p>Communicate directly with landlords, tenants, and service providers within the platform.</p>
-        <a href="#" class="feature-link">Learn More</a>
+        <a href="#" class="feature-link">Learn More <i class="fas fa-arrow-right ms-1"></i></a>
       </div>
       <div class="feature-card">
         <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
         <h3>Analytics Dashboard</h3>
         <p>Track property performance, occupancy rates, and financial metrics with detailed reports.</p>
-        <a href="#" class="feature-link">Learn More</a>
+        <a href="#" class="feature-link">Learn More <i class="fas fa-arrow-right ms-1"></i></a>
       </div>
       <div class="feature-card">
         <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
         <h3>Booking System</h3>
         <p>Schedule property viewings and manage appointments with automated reminders.</p>
-        <a href="#" class="feature-link">Learn More</a>
+        <a href="#" class="feature-link">Learn More <i class="fas fa-arrow-right ms-1"></i></a>
       </div>
     </div>
   </div>
@@ -457,7 +1389,7 @@
   <div class="container">
     <div class="section-header text-center">
       <h2 class="section-title">
-        {% if query %} Search Results for "{{ query }}" {% else %} Featured Properties {% endif %}
+        {% if query %}Search Results for "{{ query }}"{% else %}Featured Properties{% endif %}
       </h2>
       <div class="property-filters">
         <button class="filter-btn active" data-filter="all">All</button>
@@ -468,43 +1400,48 @@
     </div>
 
     <div id="properties" class="properties-grid">
-      {% if houses and houses|length > 0 %} {% for property in houses %}
-      <div class="property-card" data-property-type="{{ property.category }}" onclick="viewProperty('{{ property.id }}')">
-        <div class="property-image-container position-relative">
-          {% if property.image_urls %}
-          <img src="{{ url_for('static', filename='images/' ~ property.image_urls) }}" alt="{{ property.title }}" class="property-image w-100" style="height: 200px; object-fit: cover;" />
-          {% if property.featured %}<span class="property-badge featured">Featured</span>{% endif %}
-          <span class="property-badge price">KES {{ property.price }}/mo</span>
-          {% else %}
-          <div class="property-no-image d-flex align-items-center justify-content-center bg-secondary" style="height: 200px;">
-            <div class="text-center"><i class="fas fa-image fa-2x"></i><p>No image</p></div>
-          </div>
-          {% endif %}
-        </div>
-        <div class="property-details p-3">
-          <h3 class="property-title h5">{{ property.title }}</h3>
-          <div class="property-location"><i class="fas fa-map-marker-alt"></i> {{ property.location }}</div>
-          <div class="property-features mb-2">
-            {% if property.bedrooms %}<span class="me-2"><i class="fas fa-bed"></i> {{ property.bedrooms }} Bed</span>{% endif %}
-            {% if property.bathrooms %}<span class="me-2"><i class="fas fa-bath"></i> {{ property.bathrooms }} Bath</span>{% endif %}
-          </div>
-          <p class="property-description small">{{ property.description[:100] }}{% if property.description|length > 100 %}...{% endif %}</p>
-          <div class="property-actions d-flex gap-2">
-            <a href="{{ url_for('house.view_property', property_id=property.id) }}" class="btn btn-sm btn-outline">View</a>
-            {% if not is_guest %}
-            <a href="{{ url_for('tenant.bookings', house_id=property.id) }}" class="btn btn-sm btn-primary">Book</a>
+      {% if houses and houses|length > 0 %} 
+        {% for property in houses %}
+        <div class="property-card" data-property-type="{{ property.category }}" onclick="viewProperty('{{ property.id }}')">
+          <div class="property-image-container">
+            {% if property.image_urls %}
+            <img src="{{ url_for('static', filename='images/' ~ property.image_urls) }}" alt="{{ property.title }}" class="property-image" />
+            {% if property.featured %}<span class="property-badge featured">Featured</span>{% endif %}
+            <span class="property-badge price">KES {{ property.price }}/mo</span>
             {% else %}
-            <a href="{{ url_for('auth.signup') }}" class="btn btn-sm btn-primary">Sign Up</a>
+            <div class="property-no-image d-flex align-items-center justify-content-center" style="height: 200px;">
+              <div class="text-center">
+                <i class="fas fa-image fa-2x"></i>
+                <p class="mt-2 mb-0">No image</p>
+              </div>
+            </div>
             {% endif %}
           </div>
+          <div class="property-details">
+            <h3 class="property-title">{{ property.title }}</h3>
+            <div class="property-location"><i class="fas fa-map-marker-alt"></i> {{ property.location }}</div>
+            <div class="property-features">
+              {% if property.bedrooms %}<span class="me-3"><i class="fas fa-bed"></i> {{ property.bedrooms }} Bed</span>{% endif %}
+              {% if property.bathrooms %}<span><i class="fas fa-bath"></i> {{ property.bathrooms }} Bath</span>{% endif %}
+            </div>
+            <p class="property-description">{{ property.description[:100] }}{% if property.description|length > 100 %}...{% endif %}</p>
+            <div class="property-actions d-flex gap-2">
+              <a href="{{ url_for('house.view_property', property_id=property.id) }}" class="btn btn-outline-custom">View</a>
+              {% if not is_guest %}
+              <a href="{{ url_for('tenant.bookings', house_id=property.id) }}" class="btn btn-primary-custom">Book</a>
+              {% else %}
+              <a href="{{ url_for('auth.signup') }}" class="btn btn-primary-custom">Sign Up</a>
+              {% endif %}
+            </div>
+          </div>
         </div>
-      </div>
-      {% endfor %} {% else %}
-      <div class="no-properties text-center py-5">
-        <i class="fas fa-home fa-3x text-muted"></i>
-        <h3 class="mt-3">No Properties Available</h3>
-        <p>Check back later.</p>
-      </div>
+        {% endfor %} 
+      {% else %}
+        <div class="no-properties text-center py-5">
+          <i class="fas fa-home fa-3x" style="color: var(--text-secondary); opacity: 0.5;"></i>
+          <h3 class="mt-3" style="color: var(--text-primary);">No Properties Available</h3>
+          <p>Check back later for new listings.</p>
+        </div>
       {% endif %}
     </div>
   </div>
@@ -518,27 +1455,48 @@
       <p class="section-subtitle">Don't just take our word for it</p>
     </div>
     <div class="testimonials-slider">
-      <div class="testimonial-card">
-        <div class="testimonial-content">
-          <div class="testimonial-text">
-            <i class="fas fa-quote-left"></i>
-            <p>"HomeHub made managing my Nairobi rentals seamless! I've saved countless hours on tenant management and rent collection."</p>
+      <div class="testimonials-track" id="testimonialsTrack">
+        <div class="testimonial-card">
+          <div class="testimonial-content">
+            <div class="testimonial-text">
+              <i class="fas fa-quote-left"></i>
+              <p>"HomeHub made managing my Nairobi rentals seamless! I've saved countless hours on tenant management and rent collection."</p>
+            </div>
+            <div class="testimonial-author d-flex align-items-center">
+              <img src="{{ url_for('static', filename='images/testimonial-jane.jpg') }}" alt="Jane" class="author-image" />
+              <div>
+                <h4>Jane W.</h4>
+                <p>Landlord in Nairobi</p>
+                <div class="testimonial-rating">
+                  <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="testimonial-author d-flex align-items-center">
-            <img src="{{ url_for('static', filename='images/testimonial-jane.jpg') }}" alt="Jane" class="author-image" />
-            <div>
-              <h4>Jane W.</h4>
-              <p class="text-muted">Landlord in Nairobi</p>
-              <div class="testimonial-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+        </div>
+        <div class="testimonial-card">
+          <div class="testimonial-content">
+            <div class="testimonial-text">
+              <i class="fas fa-quote-left"></i>
+              <p>"Finding an apartment in Mombasa was so easy. The booking process was smooth and the landlord responded quickly!"</p>
+            </div>
+            <div class="testimonial-author d-flex align-items-center">
+              <img src="{{ url_for('static', filename='images/testimonial-john.jpg') }}" alt="John" class="author-image" />
+              <div>
+                <h4>John M.</h4>
+                <p>Tenant in Mombasa</p>
+                <div class="testimonial-rating">
+                  <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <!-- Add more testimonial cards as needed -->
     </div>
     <div class="testimonial-nav text-center mt-4">
-      <button class="btn btn-sm btn-outline-light testimonial-prev"><i class="fas fa-chevron-left"></i></button>
-      <button class="btn btn-sm btn-outline-light testimonial-next"><i class="fas fa-chevron-right"></i></button>
+      <button class="btn testimonial-prev me-2" onclick="slideTestimonial(-1)"><i class="fas fa-chevron-left"></i></button>
+      <button class="btn testimonial-next" onclick="slideTestimonial(1)"><i class="fas fa-chevron-right"></i></button>
     </div>
   </div>
 </section>
@@ -585,9 +1543,9 @@
     <div class="map-container position-relative">
       <div id="map" class="property-map"></div>
       <div class="map-controls position-absolute" style="top: 1rem; right: 1rem; z-index: 1000;">
-        <button class="map-control-btn mb-2" data-location="nairobi"><i class="fas fa-map-marker-alt"></i> Nairobi</button>
-        <button class="map-control-btn mb-2" data-location="mombasa"><i class="fas fa-map-marker-alt"></i> Mombasa</button>
-        <button class="map-control-btn" data-location="kisumu"><i class="fas fa-map-marker-alt"></i> Kisumu</button>
+        <button class="map-control-btn d-block mb-2" data-location="nairobi"><i class="fas fa-map-marker-alt me-1"></i> Nairobi</button>
+        <button class="map-control-btn d-block mb-2" data-location="mombasa"><i class="fas fa-map-marker-alt me-1"></i> Mombasa</button>
+        <button class="map-control-btn d-block" data-location="kisumu"><i class="fas fa-map-marker-alt me-1"></i> Kisumu</button>
       </div>
     </div>
   </div>
@@ -600,23 +1558,43 @@
       <h2 class="section-title">Frequently Asked Questions</h2>
       <p class="section-subtitle">Find answers to common questions</p>
     </div>
-    <div class="faq-container">
-      <div class="faq-category">
-        <h3>For Landlords</h3>
-        <div class="faq-item">
-          <button class="faq-question">How do I list a property? <i class="fas fa-chevron-down ms-auto"></i></button>
-          <div class="faq-answer"><p>Navigate to your dashboard and click "Add Property". Fill in the details and submit.</p></div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-question">How does rent collection work? <i class="fas fa-chevron-down ms-auto"></i></button>
-          <div class="faq-answer"><p>We integrate with M-Pesa for automated collections. You get instant notifications.</p></div>
-        </div>
-      </div>
-      <div class="faq-category">
-        <h3>For Tenants</h3>
-        <div class="faq-item">
-          <button class="faq-question">Is payment secure? <i class="fas fa-chevron-down ms-auto"></i></button>
-          <div class="faq-answer"><p>Yes, we use secure channels for all transactions.</p></div>
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-10">
+        <div class="row g-4">
+          <div class="col-12 col-md-6">
+            <div class="faq-category">
+              <h3><i class="fas fa-user-tie me-2" style="color: var(--primary-color);"></i>For Landlords</h3>
+              <div class="faq-item">
+                <button class="faq-question">How do I list a property? <i class="fas fa-chevron-down ms-auto"></i></button>
+                <div class="faq-answer"><p>Navigate to your dashboard and click "Add Property". Fill in the details and submit for review.</p></div>
+              </div>
+              <div class="faq-item">
+                <button class="faq-question">How does rent collection work? <i class="fas fa-chevron-down ms-auto"></i></button>
+                <div class="faq-answer"><p>We integrate with M-Pesa for automated collections. You get instant notifications when payments are received.</p></div>
+              </div>
+              <div class="faq-item">
+                <button class="faq-question">Can I manage multiple properties? <i class="fas fa-chevron-down ms-auto"></i></button>
+                <div class="faq-answer"><p>Yes! You can list and manage unlimited properties from your landlord dashboard.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="faq-category">
+              <h3><i class="fas fa-user me-2" style="color: var(--primary-color);"></i>For Tenants</h3>
+              <div class="faq-item">
+                <button class="faq-question">Is payment secure? <i class="fas fa-chevron-down ms-auto"></i></button>
+                <div class="faq-answer"><p>Yes, we use secure M-Pesa integration for all transactions. Your financial information is always protected.</p></div>
+              </div>
+              <div class="faq-item">
+                <button class="faq-question">How do I submit a maintenance request? <i class="fas fa-chevron-down ms-auto"></i></button>
+                <div class="faq-answer"><p>Go to your dashboard, click on "Maintenance Requests", describe the issue, and attach photos if needed.</p></div>
+              </div>
+              <div class="faq-item">
+                <button class="faq-question">Can I view properties before booking? <i class="fas fa-chevron-down ms-auto"></i></button>
+                <div class="faq-answer"><p>Absolutely! You can schedule viewing appointments directly through the platform.</p></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -633,9 +1611,15 @@
       </div>
       <div class="newsletter-form-container">
         <form action="{{ url_for('main.subscribe') }}" method="POST" class="newsletter-form">
-          <div class="mb-3"><input type="text" name="name" placeholder="Your Name" required class="form-control" /></div>
-          <div class="mb-3"><input type="email" name="email" placeholder="Your Email" required class="form-control" /></div>
-          <button type="submit" class="btn btn-primary w-100"><i class="fas fa-paper-plane"></i> Subscribe</button>
+          <div class="mb-3">
+            <input type="text" name="name" placeholder="Your Name" required class="form-control" />
+          </div>
+          <div class="mb-3">
+            <input type="email" name="email" placeholder="Your Email" required class="form-control" />
+          </div>
+          <button type="submit" class="btn btn-primary-custom w-100">
+            <i class="fas fa-paper-plane me-2"></i>Subscribe
+          </button>
         </form>
       </div>
     </div>
@@ -648,25 +1632,38 @@
     <h2>Share HomeHub</h2>
     <p>Help others discover the easiest way to manage properties</p>
     <div class="social-buttons d-flex justify-content-center flex-wrap gap-2 mt-3">
-      <a href="#" class="btn btn-sm btn-outline-light"><i class="fab fa-twitter"></i> Twitter</a>
-      <a href="#" class="btn btn-sm btn-outline-light"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-      <a href="#" class="btn btn-sm btn-outline-light"><i class="fab fa-facebook-f"></i> Facebook</a>
-      <a href="#" class="btn btn-sm btn-outline-light"><i class="fab fa-linkedin-in"></i> LinkedIn</a>
+      <a href="#" class="btn"><i class="fab fa-twitter me-2"></i>Twitter</a>
+      <a href="#" class="btn"><i class="fab fa-whatsapp me-2"></i>WhatsApp</a>
+      <a href="#" class="btn"><i class="fab fa-facebook-f me-2"></i>Facebook</a>
+      <a href="#" class="btn"><i class="fab fa-linkedin-in me-2"></i>LinkedIn</a>
     </div>
   </div>
 </section>
 
 <!-- Chat Widget -->
 <div class="chat-widget">
-  <button class="chat-toggle" onclick="toggleChat()"><i class="fas fa-comments"></i></button>
+  <button class="chat-toggle" onclick="toggleChat()" aria-label="Open chat support">
+    <i class="fas fa-comments"></i>
+  </button>
   <div class="chat-window" id="chat-window">
     <div class="chat-header">
-      <h5 class="mb-0">Support</h5>
-      <button class="btn-close btn-close-white" onclick="toggleChat()"></button>
+      <div class="d-flex align-items-center gap-2">
+        <i class="fas fa-headset"></i>
+        <h5>Live Support</h5>
+      </div>
+      <button class="btn-close btn-close-white" onclick="toggleChat()" aria-label="Close chat"></button>
     </div>
-    <div class="chat-body"><p class="text-center text-muted small mt-2">Welcome to HomeHub Support!</p></div>
+    <div class="chat-body">
+      <div>
+        <i class="fas fa-comments fa-2x mb-2" style="color: var(--primary-color); opacity: 0.5;"></i>
+        <p>Welcome to HomeHub Support!<br>How can we help you today?</p>
+      </div>
+    </div>
     <div class="chat-footer">
       <input type="text" class="chat-input" placeholder="Type a message..." />
+      <button class="chat-send-btn" aria-label="Send message">
+        <i class="fas fa-paper-plane"></i>
+      </button>
     </div>
   </div>
 </div>
@@ -693,25 +1690,57 @@
   // FAQ Accordion
   document.querySelectorAll('.faq-question').forEach(button => {
     button.addEventListener('click', () => {
-      const answer = button.nextElementSibling;
-      answer.classList.toggle('active');
+      // Close other answers in the same category
+      const parentCategory = button.closest('.faq-category');
+      parentCategory.querySelectorAll('.faq-question').forEach(otherBtn => {
+        if (otherBtn !== button) {
+          otherBtn.classList.remove('active');
+          otherBtn.nextElementSibling.classList.remove('active');
+        }
+      });
+      
       button.classList.toggle('active');
+      button.nextElementSibling.classList.toggle('active');
     });
   });
 
   // Property filters
   const filterBtns = document.querySelectorAll('.filter-btn');
   const propertyCards = document.querySelectorAll('.property-card');
+  
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       filterBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const filter = btn.getAttribute('data-filter');
+      
       propertyCards.forEach(card => {
-        card.style.display = (filter === 'all' || card.getAttribute('data-property-type') === filter) ? 'block' : 'none';
+        const type = card.getAttribute('data-property-type');
+        if (filter === 'all') {
+          card.style.display = 'block';
+        } else if (filter === 'featured') {
+          card.style.display = card.querySelector('.property-badge.featured') ? 'block' : 'none';
+        } else {
+          card.style.display = (type === filter) ? 'block' : 'none';
+        }
       });
     });
   });
+
+  // Testimonial Slider
+  let currentSlide = 0;
+  const track = document.getElementById('testimonialsTrack');
+  const totalSlides = track ? track.children.length : 0;
+
+  function slideTestimonial(direction) {
+    currentSlide += direction;
+    if (currentSlide < 0) currentSlide = totalSlides - 1;
+    if (currentSlide >= totalSlides) currentSlide = 0;
+    track.style.transform = `translateX(-${currentSlide * 100}%)`;
+  }
+
+  // Auto-slide testimonials
+  setInterval(() => slideTestimonial(1), 5000);
 
   // Animated counter
   const statNumbers = document.querySelectorAll('.stat-number');
@@ -720,7 +1749,8 @@
     const step = (timestamp) => {
       if (!startTimestamp) startTimestamp = timestamp;
       const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-      element.textContent = Math.floor(progress * (end - start) + start).toLocaleString();
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      element.textContent = Math.floor(eased * (end - start) + start).toLocaleString();
       if (progress < 1) window.requestAnimationFrame(step);
     };
     window.requestAnimationFrame(step);
@@ -736,6 +1766,7 @@
       }
     });
   }, { threshold: 0.5 });
+  
   statNumbers.forEach(stat => observer.observe(stat));
 
   // Initialize Map
@@ -750,9 +1781,22 @@
     kisumu: { coords: [-0.0917, 34.768], name: "Kisumu" }
   };
 
+  // Custom marker icon
+  const customIcon = L.divIcon({
+    html: '<div style="background: linear-gradient(135deg, #6366f1, #8b5cf6); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.5);"><i class="fas fa-map-marker-alt"></i></div>',
+    className: 'custom-marker',
+    iconSize: [30, 30],
+    iconAnchor: [15, 15]
+  });
+
   Object.keys(cities).forEach(key => {
     const city = cities[key];
-    L.marker(city.coords).addTo(map).bindPopup(`<b>${city.name}</b>`);
+    L.marker(city.coords, { icon: customIcon }).addTo(map).bindPopup(`
+      <div style="text-align: center; padding: 5px;">
+        <strong style="font-size: 14px;">${city.name}</strong>
+        <br><small style="color: #666;">Click to explore properties</small>
+      </div>
+    `);
   });
 
   document.querySelectorAll(".map-control-btn").forEach(btn => {
@@ -761,5 +1805,10 @@
       if (cities[loc]) map.setView(cities[loc].coords, 12);
     });
   });
+
+  // Fix map rendering issue (common with hidden/overlapping elements)
+  setTimeout(() => {
+    map.invalidateSize();
+  }, 500);
 </script>
 {% endblock %}
