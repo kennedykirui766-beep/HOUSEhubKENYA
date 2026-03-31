@@ -1,552 +1,521 @@
-{% extends "base.html" %}
-
-{% block title %}Landlord Dashboard - HomeHub{% endblock %}
-
-{% block styles %}
-<style>
-  /* Dashboard Specific Styles - Themed Blue + Dark Navy */
-  :root {
-    --primary-color: #3B82F6;      /* Blue */
-    --primary-hover: #2563EB;
-    --accent-color: #F59E0B;       /* Amber for warnings */
-    --bg-dark: #0F172A;            /* Dark Navy */
-    --bg-card: #1E293B;            /* Card background */
-    --text-light: #E2E8F0;         /* Soft white */
-    --text-muted: #94a3b8;
-    --border-radius: 8px;
-    --success-color: #10B981;
-    --danger-color: #EF4444;
-  }
-
-  /* Dashboard Container */
-  .dashboard-container {
-    background-color: transparent; /* Transparent to show base background */
-    padding: 0;
-  }
-
-  .dashboard-header {
-    margin-bottom: 2rem;
-  }
-
-  .dashboard-title {
-    font-size: 1.8rem;
-    color: var(--text-light);
-  }
-
-  .dashboard-subtitle {
-    color: var(--text-muted);
-  }
-
-  /* Stats Cards */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-  }
-
-  .stat-card {
-    background-color: var(--bg-card);
-    border-radius: var(--border-radius);
-    padding: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    border: 1px solid rgba(255,255,255,0.05);
-    transition: transform 0.3s, border-color 0.3s;
-  }
-
-  .stat-card:hover {
-    transform: translateY(-3px);
-    border-color: var(--primary-color);
-  }
-
-  .stat-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    background-color: rgba(59, 130, 246, 0.1);
-    color: var(--primary-color);
-  }
-
-  .stat-card.revenue .stat-icon { color: var(--success-color); background-color: rgba(16, 185, 129, 0.1); }
-  .stat-card.maintenance .stat-icon { color: var(--accent-color); background-color: rgba(245, 158, 11, 0.1); }
-
-  .stat-content h3 {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    margin-bottom: 0.25rem;
-  }
-
-  .stat-value {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--text-light);
-  }
-
-  /* Content Cards */
-  .content-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-  }
-
-  .content-card {
-    background-color: var(--bg-card);
-    border-radius: var(--border-radius);
-    padding: 1.5rem;
-    border: 1px solid rgba(255,255,255,0.05);
-  }
-
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-  }
-
-  .card-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--text-light);
-    margin: 0;
-  }
-
-  .card-action {
-    font-size: 0.9rem;
-    color: var(--primary-color);
-    font-weight: 500;
-  }
-
-  /* Property List Items */
-  .property-item {
-    padding: 1rem;
-    border-radius: var(--border-radius);
-    background-color: rgba(255,255,255,0.03);
-    margin-bottom: 1rem;
-    border: 1px solid rgba(255,255,255,0.05);
-  }
-
-  .property-title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-light);
-    margin-bottom: 0.25rem;
-  }
-
-  .property-address {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-bottom: 0.5rem;
-  }
-
-  .property-details {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 0.75rem;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-  }
-  
-  .property-details i { color: var(--primary-color); }
-
-  .property-status {
-    display: inline-block;
-    padding: 0.2rem 0.6rem;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-
-  .status-occupied { background-color: rgba(16, 185, 129, 0.15); color: var(--success-color); }
-  .status-vacant { background-color: rgba(239, 68, 68, 0.15); color: var(--danger-color); }
-
-  /* Tables */
-  .table-container { overflow-x: auto; }
-  
-  table { width: 100%; border-collapse: collapse; }
-  
-  th, td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    color: var(--text-muted);
-  }
-  
-  th { color: var(--text-light); font-weight: 600; background-color: rgba(0,0,0,0.2); }
-
-  /* Map */
-  .map-container {
-    height: 350px;
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    margin-bottom: 2rem;
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-  #map { height: 100%; width: 100%; }
-
-  /* Dashboard Top Bar (Internal) */
-  .top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    background-color: var(--bg-card);
-    padding: 1rem 1.5rem;
-    border-radius: var(--border-radius);
-    border: 1px solid rgba(255,255,255,0.05);
-  }
-
-  .user-profile { display: flex; align-items: center; gap: 10px; }
-  .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color); }
-  .user-info h4 { font-size: 0.95rem; color: var(--text-light); margin: 0; }
-  .user-info p { font-size: 0.8rem; color: var(--text-muted); margin: 0; }
-
-  .notification-icon {
-    position: relative;
-    font-size: 1.2rem;
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: color 0.2s;
-  }
-  .notification-icon:hover { color: var(--text-light); }
-  
-  .notification-badge {
-    position: absolute;
-    top: -5px; right: -5px;
-    background-color: var(--danger-color);
-    color: white;
-    font-size: 0.7rem;
-    width: 18px; height: 18px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-  }
-
-  /* Chat Widget Overrides for Dark Theme */
-  .chat-box { background-color: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); }
-  .chat-header { background-color: var(--primary-color); }
-  .chat-body { background-color: var(--bg-dark); }
-  .chat-message.received .chat-bubble { background-color: var(--bg-card); color: var(--text-light); box-shadow: none; }
-  .chat-message.sent .chat-bubble { background-color: var(--primary-color); color: white; }
-  .chat-input { background-color: var(--bg-card); border-color: rgba(255,255,255,0.1); color: var(--text-light); }
-  
-  /* Responsive */
-  @media (max-width: 768px) {
-    .content-grid { grid-template-columns: 1fr; }
-    .top-bar { flex-direction: column; gap: 1rem; text-align: center; }
-  }
-</style>
-{% endblock %}
-
-{% block content %}
-<!-- Top Bar / Welcome Section -->
-<div class="top-bar">
-  <div class="top-bar-left">
-    <h4 class="mb-0 text-light">Welcome back, {{ current_user.name }}!</h4>
-  </div>
-
-  <div class="top-bar-right d-flex align-items-center gap-3">
-    <div class="notification-icon">
-      <i class="fas fa-bell"></i>
-      {% if notifications %}
-      <span class="notification-badge">{{ notifications|length }}</span>
-      {% endif %}
-    </div>
-
-    <div class="user-profile">
-      <img src="{{ current_user.profile_image if current_user.profile_image else url_for('static', filename='images/default-avatar.png') }}" alt="User Avatar" class="user-avatar" />
-      <div class="user-info d-none d-md-block">
-        <h4>{{ current_user.name }}</h4>
-        <p>Landlord</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Dashboard Container -->
-<div class="dashboard-container">
-  <div class="dashboard-header">
-    <h1 class="dashboard-title">Dashboard Overview</h1>
-    <p class="dashboard-subtitle">Here's what's happening with your properties today.</p>
-  </div>
-
-  <!-- Stats Cards -->
-  <div class="stats-grid">
-    <div class="stat-card properties">
-      <div class="stat-icon"><i class="fas fa-building"></i></div>
-      <div class="stat-content">
-        <h3>Total Properties</h3>
-        <div class="stat-value">{{ stats.total_properties }}</div>
-      </div>
-    </div>
-
-    <div class="stat-card occupancy">
-      <div class="stat-icon"><i class="fas fa-percentage"></i></div>
-      <div class="stat-content">
-        <h3>Occupancy Rate</h3>
-        <div class="stat-value">{{ stats.occupancy_rate }}%</div>
-      </div>
-    </div>
-
-    <div class="stat-card revenue">
-      <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
-      <div class="stat-content">
-        <h3>Monthly Revenue</h3>
-        <div class="stat-value">KES {{ stats.monthly_revenue }}</div>
-      </div>
-    </div>
-
-    <div class="stat-card maintenance">
-      <div class="stat-icon"><i class="fas fa-tools"></i></div>
-      <div class="stat-content">
-        <h3>Pending Requests</h3>
-        <div class="stat-value">{{ maintenance_requests|length }}</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Map Section -->
-  <div class="map-container">
-    <div id="map"></div>
-  </div>
-
-  <!-- Content Grid -->
-  <div class="content-grid">
-    <!-- Properties Card -->
-    <div class="content-card">
-      <div class="card-header">
-        <h3 class="card-title">Your Properties</h3>
-        <a href="{{ url_for('landlord.properties') }}" class="card-action">View All</a>
-      </div>
-      <div class="card-body">
-        {% if houses %} {% for property in houses[:3] %}
-        <div class="property-item">
-          <div class="d-flex justify-content-between align-items-start">
-            <div>
-              <h4 class="property-title">{{ property.title }}</h4>
-              <p class="property-address">{{ property.address }}</p>
-            </div>
-            <span class="property-status {% if property.tenant %}status-occupied{% else %}status-vacant{% endif %}">
-              {% if property.tenant %}Occupied{% else %}Vacant{% endif %}
-            </span>
-          </div>
-
-          <div class="property-details">
-            <span><i class="fas fa-bed"></i> {{ property.bedrooms }} bed</span>
-            <span><i class="fas fa-bath"></i> {{ property.bathrooms }} bath</span>
-          </div>
-
-          <div class="property-actions d-flex gap-2">
-            <a href="{{ url_for('landlord.edit_property', property_id=property.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-            <button onclick="confirmDelete({{ property.id }})" class="btn btn-sm btn-outline-danger">Delete</button>
-          </div>
-        </div>
-        {% endfor %} {% else %}
-        <p class="text-center text-muted py-4">No properties found.</p>
-        <a href="{{ url_for('landlord.add_property') }}" class="btn btn-primary btn-block">Add Property</a>
-        {% endif %}
-      </div>
-    </div>
-
-    <!-- Recent Payments Card -->
-    <div class="content-card">
-      <div class="card-header">
-        <h3 class="card-title">Recent Payments</h3>
-        <a href="{{ url_for('landlord.payments') }}" class="card-action">View All</a>
-      </div>
-      <div class="card-body">
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Tenant</th>
-                <th>Amount</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for payment in recent_payments %}
-              <tr>
-                <td>{{ payment.tenant_name }}</td>
-                <td>KES {{ payment.amount }}</td>
-                <td><span class="property-status status-occupied">{{ payment.status }}</span></td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tenants Card -->
-    <div class="content-card">
-      <div class="card-header">
-        <h3 class="card-title">Recent Tenants</h3>
-        <a href="{{ url_for('landlord.tenants') }}" class="card-action">View All</a>
-      </div>
-      <div class="card-body">
-        {% if tenants %} {% for tenant in tenants[:3] %}
-        <div class="property-item">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h4 class="property-title">{{ tenant.name }}</h4>
-              <p class="property-address">{{ tenant.property.address }}</p>
-            </div>
-            <a href="{{ url_for('landlord.send_message', tenant_id=tenant.id) }}" class="btn btn-sm btn-primary">Message</a>
-          </div>
-        </div>
-        {% endfor %} {% else %}
-        <p class="text-center text-muted py-4">No tenants found.</p>
-        {% endif %}
-      </div>
-    </div>
-
-    <!-- Maintenance Requests Card -->
-    <div class="content-card">
-      <div class="card-header">
-        <h3 class="card-title">Maintenance Requests</h3>
-        <a href="{{ url_for('landlord.maintenance') }}" class="card-action">View All</a>
-      </div>
-      <div class="card-body">
-        {% if maintenance_requests %} {% for request in maintenance_requests[:3] %}
-        <div class="property-item">
-          <div class="d-flex justify-content-between align-items-start">
-            <div>
-              <h4 class="property-title">{{ request.title }}</h4>
-              <p class="property-address">{{ request.property.address }}</p>
-            </div>
-            <span class="property-status status-occupied">{{ request.status }}</span>
-          </div>
-        </div>
-        {% endfor %} {% else %}
-        <p class="text-center text-muted py-4">No pending requests.</p>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Chat Widget -->
-<div class="chat-widget">
-  <div class="chat-toggle" onclick="toggleChat()">
-    <i class="fas fa-comments"></i>
-  </div>
-  <div class="chat-box" id="chatBox">
-    <div class="chat-header">
-      <h4>Support Chat</h4>
-      <button class="chat-close" onclick="toggleChat()"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="chat-body" id="chatBody">
-      <div class="chat-message received">
-        <div class="chat-bubble">Hello! How can I help you today?</div>
-      </div>
-    </div>
-    <div class="chat-footer">
-      <input type="text" class="chat-input" id="chatInput" placeholder="Type a message..." />
-      <button class="chat-send btn btn-primary" onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
-    </div>
-  </div>
-</div>
-{% endblock %}
-
-{% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- Google Maps Script - Note: Replace key in production -->
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCCGkhU-aZlUelsOQypH5jTjkf5lIRBL7Y&callback=initMap" async defer></script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Map
-    window.initMap = function() {
-        const mapDiv = document.getElementById('map');
-        if(!mapDiv) return;
-        
-        const map = new google.maps.Map(mapDiv, {
-          zoom: 12,
-          center: { lat: -1.286389, lng: 36.817223 }, // Default Nairobi
-          styles: [ /* Dark Map Styles */
-            {elementType: 'geometry', stylers: [{color: '#1E293B'}]}, // Card BG
-            {elementType: 'labels.text.stroke', stylers: [{color: '#1E293B'}]},
-            {elementType: 'labels.text.fill', stylers: [{color: '#94a3b8'}]},
-            {featureType: 'road', elementType: 'geometry', stylers: [{color: '#334155'}]},
-            {featureType: 'water', elementType: 'geometry', stylers: [{color: '#0F172A'}]},
-            {featureType: 'poi', elementType: 'geometry', stylers: [{color: '#1E293B'}]},
-            {featureType: 'poi.park', elementType: 'geometry', stylers: [{color: '#1E293B'}]}
-          ]
-        });
-
-        // Add markers
-        {% for property in houses %}
-          {% if property.lat and property.lng %}
-            new google.maps.Marker({
-              position: { lat: {{ property.lat }}, lng: {{ property.lng }} },
-              map: map,
-              title: "{{ property.title }}"
-            });
-          {% endif %}
-        {% endfor %}
-    };
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HomeHub{% endblock %}</title>
     
-    // Trigger initMap if script loaded already
-    if (window.google && window.google.maps) {
-        window.initMap();
-    }
-  });
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* 
+           THEME VARIABLES 
+           Default (Light Mode): White backgrounds, Green accents.
+           Dark Mode: Dark backgrounds, Green accents.
+        */
 
-  // Chat Functions
-  function toggleChat() {
-    const chatBox = document.getElementById('chatBox');
-    chatBox.classList.toggle('active');
-  }
+        :root {
+            --primary-color: #28A745;      /* Green */
+            --primary-hover: #218838;      /* Darker Green */
+            --bg-color: #FFFFFF;           /* White */
+            --secondary-bg: #F8F9FA;       /* Light Grey */
+            --text-color: #212529;         /* Dark Text */
+            --text-muted: #6C757D;         /* Muted Grey */
+            --border-color: #E9ECEF;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.1);
+            --danger-color: #DC3545;
+            --success-color: #28A745;
+            --warning-color: #FFC107;
+        }
 
-  function sendChatMessage() {
-    const chatInput = document.getElementById('chatInput');
-    const chatBody = document.getElementById('chatBody');
-    const message = chatInput.value.trim();
+        [data-theme="dark"] {
+            --primary-color: #28A745;      /* Green stays */
+            --primary-hover: #34C759;      /* Brighter Green for dark mode */
+            --bg-color: #121212;           /* Dark Navy/Grey */
+            --secondary-bg: #1E1E1E;       /* Card Background */
+            --text-color: #E0E0E0;         /* Light Text */
+            --text-muted: #A0A0A0;         /* Muted Light Grey */
+            --border-color: #333333;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.2);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.3);
+        }
 
-    if (message) {
-      const userMessage = document.createElement('div');
-      userMessage.className = 'chat-message sent';
-      userMessage.innerHTML = `<div class="chat-bubble">${message}</div>`;
-      chatBody.appendChild(userMessage);
-      chatInput.value = '';
-      chatBody.scrollTop = chatBody.scrollHeight;
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
 
-      setTimeout(() => {
-        const botMessage = document.createElement('div');
-        botMessage.className = 'chat-message received';
-        botMessage.innerHTML = `<div class="chat-bubble">Thank you. Our team will get back to you shortly.</div>`;
-        chatBody.appendChild(botMessage);
-        chatBody.scrollTop = chatBody.scrollHeight;
-      }, 1000);
-    }
-  }
-  
-  document.getElementById('chatInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') sendChatMessage();
-  });
+        a { color: var(--primary-color); text-decoration: none; transition: 0.3s; }
+        a:hover { color: var(--primary-hover); }
 
-  // Confirm Delete
-  function confirmDelete(propertyId) {
-    if (confirm('Are you sure you want to delete this property?')) {
-      fetch(`/landlord/delete_property/${propertyId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) location.reload();
-        else alert('Error: ' + data.error);
-      });
-    }
-  }
-</script>
-{% endblock %}
+        /* --- Layout Components --- */
+        .sidebar {
+            position: fixed; top: 0; left: 0; width: 280px; height: 100vh;
+            background-color: var(--secondary-bg);
+            box-shadow: var(--shadow-md);
+            transform: translateX(-100%); transition: transform 0.3s ease-in-out;
+            z-index: 1050; display: flex; flex-direction: column;
+            border-right: 1px solid var(--border-color);
+        }
+        .sidebar.active { transform: translateX(0); }
+        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
+        .sidebar-brand { font-size: 1.5rem; font-weight: bold; color: var(--primary-color); display: flex; align-items: center; gap: 10px; }
+        .close-btn { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+        
+        .profile-section { padding: 1.5rem; text-align: center; border-bottom: 1px solid var(--border-color); background: rgba(0,0,0,0.02); }
+        .profile-avatar { width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--primary-color); object-fit: cover; margin-bottom: 0.5rem; }
+        .profile-name { font-weight: 600; font-size: 1.1rem; margin: 0; }
+        .profile-role { font-size: 0.85rem; color: var(--primary-color); text-transform: uppercase; letter-spacing: 1px; }
+
+        .nav-menu { flex-grow: 1; overflow-y: auto; padding: 1rem 0; }
+        .nav-item { list-style: none; }
+        .nav-link { display: flex; align-items: center; padding: 0.8rem 1.5rem; color: var(--text-muted); font-weight: 500; transition: all 0.2s; }
+        .nav-link i { width: 24px; margin-right: 12px; font-size: 1.1rem; }
+        .nav-link:hover, .nav-link.active { background-color: rgba(40, 167, 69, 0.1); color: var(--primary-color); border-left: 4px solid var(--primary-color); }
+        .sidebar-divider { height: 1px; background-color: var(--border-color); margin: 1rem 1.5rem; }
+        .nav-link.text-danger { color: var(--danger-color) !important; }
+        .nav-link.text-danger:hover { background-color: rgba(220, 53, 69, 0.1); border-left-color: var(--danger-color); }
+
+        .main-wrapper { margin-left: 0; transition: margin-left 0.3s; min-height: 100vh; display: flex; flex-direction: column; }
+        
+        .top-nav { 
+            background-color: var(--secondary-bg); 
+            padding: 0.8rem 1.5rem; 
+            display: flex; align-items: center; 
+            box-shadow: var(--shadow-sm); 
+            position: sticky; top: 0; z-index: 1000; 
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .hamburger-btn { background: none; border: none; color: var(--text-color); font-size: 1.5rem; cursor: pointer; padding: 0.5rem; transition: color 0.2s; }
+        .hamburger-btn:hover { color: var(--primary-color); }
+        
+        /* Theme Toggle Button */
+        .theme-toggle-btn {
+            background: none; border: 1px solid var(--border-color); 
+            border-radius: 20px; padding: 0.3rem 0.8rem;
+            color: var(--text-color); cursor: pointer;
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 0.9rem; transition: all 0.3s;
+        }
+        .theme-toggle-btn:hover {
+            background-color: var(--primary-color);
+            color: white; border-color: var(--primary-color);
+        }
+        .theme-toggle-btn i { font-size: 1rem; }
+
+        .content-area { flex: 1; padding: 2rem; background-color: var(--bg-color); }
+
+        /* --- Shared Components --- */
+        .alert { border: none; border-radius: 8px; background-color: var(--secondary-bg); color: var(--text-color); border: 1px solid var(--border-color); }
+        .alert-success { border-left: 4px solid var(--success-color); }
+        .alert-danger { border-left: 4px solid var(--danger-color); }
+
+        /* --- Dashboard Components --- */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; background-color: var(--secondary-bg); padding: 1rem 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); }
+        .user-profile { display: flex; align-items: center; gap: 10px; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color); }
+        .user-info h4 { font-size: 0.95rem; color: var(--text-color); margin: 0; }
+        .user-info p { font-size: 0.8rem; color: var(--text-muted); margin: 0; }
+        .notification-icon { position: relative; font-size: 1.2rem; color: var(--text-muted); cursor: pointer; transition: color 0.2s; }
+        .notification-icon:hover { color: var(--primary-color); }
+        .notification-badge { position: absolute; top: -5px; right: -5px; background-color: var(--danger-color); color: white; font-size: 0.7rem; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background-color: var(--secondary-bg); border-radius: 8px; padding: 1.5rem; display: flex; align-items: center; gap: 1rem; border: 1px solid var(--border-color); transition: transform 0.3s, border-color 0.3s; }
+        .stat-card:hover { transform: translateY(-3px); border-color: var(--primary-color); }
+        .stat-icon { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; background-color: rgba(40, 167, 69, 0.1); color: var(--primary-color); }
+        .stat-card.revenue .stat-icon { color: var(--success-color); background-color: rgba(40, 167, 69, 0.1); }
+        .stat-card.maintenance .stat-icon { color: var(--warning-color); background-color: rgba(255, 193, 7, 0.1); }
+        .stat-content h3 { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); margin-bottom: 0.25rem; }
+        .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--text-color); }
+
+        .content-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .content-card { background-color: var(--secondary-bg); border-radius: 8px; padding: 1.5rem; border: 1px solid var(--border-color); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); }
+        .card-title { font-size: 1.1rem; font-weight: 600; color: var(--text-color); margin: 0; }
+        .card-action { font-size: 0.9rem; color: var(--primary-color); font-weight: 500; }
+
+        .property-item { padding: 1rem; border-radius: 8px; background-color: var(--bg-color); margin-bottom: 1rem; border: 1px solid var(--border-color); }
+        .property-title { font-size: 1rem; font-weight: 600; color: var(--text-color); margin-bottom: 0.25rem; }
+        .property-address { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+        .property-details { display: flex; gap: 1rem; margin-bottom: 0.75rem; font-size: 0.85rem; color: var(--text-muted); }
+        .property-details i { color: var(--primary-color); }
+        .property-status { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .status-occupied { background-color: rgba(40, 167, 69, 0.15); color: var(--success-color); }
+        .status-vacant { background-color: rgba(220, 53, 69, 0.15); color: var(--danger-color); }
+
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); color: var(--text-muted); }
+        th { color: var(--text-color); font-weight: 600; background-color: rgba(0,0,0,0.02); }
+
+        .map-container { height: 350px; border-radius: 8px; overflow: hidden; margin-bottom: 2rem; border: 1px solid var(--border-color); }
+        #map { height: 100%; width: 100%; }
+
+        /* Chat Widget */
+        .chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 999; }
+        .chat-toggle { width: 60px; height: 60px; border-radius: 50%; background-color: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; box-shadow: var(--shadow-md); transition: 0.3s; }
+        .chat-toggle:hover { background-color: var(--primary-hover); transform: scale(1.05); }
+        .chat-box { position: absolute; bottom: 80px; right: 0; width: 350px; height: 450px; background-color: var(--secondary-bg); border-radius: 8px; box-shadow: var(--shadow-md); display: none; flex-direction: column; overflow: hidden; border: 1px solid var(--border-color); }
+        .chat-box.active { display: flex; }
+        .chat-header { background-color: var(--primary-color); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .chat-header h4 { margin: 0; font-size: 1rem; }
+        .chat-close { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
+        .chat-body { flex: 1; overflow-y: auto; padding: 15px; background-color: var(--bg-color); }
+        .chat-message { margin-bottom: 15px; display: flex; }
+        .chat-message.sent { justify-content: flex-end; }
+        .chat-bubble { max-width: 80%; padding: 10px 15px; border-radius: 8px; word-wrap: break-word; font-size: 0.9rem; }
+        .chat-message.sent .chat-bubble { background-color: var(--primary-color); color: white; }
+        .chat-message.received .chat-bubble { background-color: var(--secondary-bg); color: var(--text-color); border: 1px solid var(--border-color); }
+        .chat-footer { padding: 15px; border-top: 1px solid var(--border-color); display: flex; gap: 10px; }
+        .chat-input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--text-color); font-size: 0.9rem; }
+        
+        /* Footer */
+        footer { background-color: var(--secondary-bg); border-top: 1px solid var(--border-color); padding: 4rem 0 2rem; margin-top: auto; }
+        .footer-logo { height: 50px; margin-bottom: 1rem; }
+        .footer-section h5 { color: var(--primary-color); font-weight: 700; margin-bottom: 1.5rem; }
+        .footer-links li { margin-bottom: 0.8rem; list-style: none; }
+        .footer-links a { color: var(--text-muted); }
+        .footer-links a:hover { color: var(--primary-color); }
+        .footer-social a { display: inline-block; width: 40px; height: 40px; line-height: 40px; text-align: center; background: var(--bg-color); border-radius: 50%; color: var(--text-color); margin-right: 0.5rem; transition: 0.3s; border: 1px solid var(--border-color); }
+        .footer-social a:hover { background: var(--primary-color); color: white; }
+        .footer-bottom { border-top: 1px solid var(--border-color); padding-top: 2rem; margin-top: 3rem; text-align: center; color: var(--text-muted); font-size: 0.9rem; }
+
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1040; display: none; }
+        .overlay.active { display: block; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content-grid { grid-template-columns: 1fr; }
+            .top-bar { flex-direction: column; gap: 1rem; text-align: center; }
+            .chat-box { width: 90vw; right: 5vw; }
+        }
+    </style>
+    
+    {% block styles %}{% endblock %}
+</head>
+<body>
+
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand"><i class="fas fa-home"></i> HomeHub</div>
+            <button class="close-btn d-lg-none" onclick="closeSidebar()"><i class="fas fa-times"></i></button>
+        </div>
+
+        {% if current_user.is_authenticated %}
+        <div class="profile-section">
+            <img src="{{ current_user.profile_image if current_user.profile_image else url_for('static', filename='images/default-avatar.png') }}" alt="Avatar" class="profile-avatar">
+            <h5 class="profile-name">{{ current_user.name if current_user.name else current_user.email }}</h5>
+            <span class="profile-role">
+                {% if current_user.role.lower() == 'landlord' %} 🏠 Landlord
+                {% elif current_user.role.lower() == 'tenant' %} 🏡 Tenant
+                {% elif current_user.role.lower() == 'admin' %} ⚙️ Admin
+                {% elif current_user.role.lower() == 'service' %} 🔧 Service Provider
+                {% endif %}
+            </span>
+        </div>
+        {% endif %}
+
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="{{ url_for('main.index') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-home"></i> <span>Home</span></a></li>
+
+            {% if current_user.is_authenticated %} 
+                {% if current_user.role.lower() == 'landlord' %}
+                <li class="nav-item"><a href="{{ url_for('landlord.dashboard') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('landlord.properties') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-building"></i> <span>Properties</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('landlord.add_property') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-plus-circle"></i> <span>Add Property</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('landlord.tenants') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-users"></i> <span>Tenants</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('landlord.payments') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-money-bill-wave"></i> <span>Payments</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('landlord.maintenance') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-tools"></i> <span>Maintenance</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('landlord.reports') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-chart-bar"></i> <span>Reports</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('landlord.messages') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-envelope"></i> <span>Messages</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('landlord.settings') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('landlord.profile') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-user"></i> <span>My Profile</span></a></li>
+
+                {% elif current_user.role.lower() == 'tenant' %}
+                <li class="nav-item"><a href="{{ url_for('tenant.dashboard') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('house.hotels') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-search"></i> <span>Browse Properties</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('tenant.all_bookings') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-calendar-check"></i> <span>My Bookings</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('tenant.pay_rent') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-money-bill-wave"></i> <span>Pay Rent</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('tenant.submit_request') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-tools"></i> <span>Maintenance Requests</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('tenant.documents') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-file-alt"></i> <span>Documents</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('tenant.messages') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-envelope"></i> <span>Messages</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('tenant.profile') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-user"></i> <span>My Profile</span></a></li>
+
+                {% elif current_user.role.lower() == 'admin' %}
+                <li class="nav-item"><a href="{{ url_for('admin.dashboard') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('admin.manage_users') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-users-cog"></i> <span>Manage Users</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('admin.system_settings') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-cogs"></i> <span>System Settings</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('admin.view_reports') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-chart-line"></i> <span>Reports</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('admin.audit_logs') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-history"></i> <span>Audit Logs</span></a></li>
+
+                {% elif current_user.role.lower() == 'service' %}
+                <li class="nav-item"><a href="{{ url_for('service_provider.dashboard') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('service_provider.requests') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-clipboard-list"></i> <span>Service Requests</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('service_provider.schedule') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-calendar-alt"></i> <span>Schedule</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('service_provider.earnings') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-money-bill-wave"></i> <span>Earnings</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('service_provider.profile') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-user"></i> <span>My Profile</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('service_provider.reviews') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-star"></i> <span>Reviews</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('service_provider.settings') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
+                {% endif %}
+
+                <li class="nav-item mt-3"><div class="sidebar-divider"></div></li>
+                <li class="nav-item"><a href="{{ url_for('main.about') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-info-circle"></i> <span>About Us</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('main.contact') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-envelope"></i> <span>Contact</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('main.help') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-question-circle"></i> <span>Help & Support</span></a></li>
+                <li class="nav-item"><div class="sidebar-divider"></div></li>
+                <li class="nav-item"><a href="{{ url_for('auth.logout') }}" class="nav-link text-danger" onclick="closeSidebar()"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+
+            {% else %}
+                <li class="nav-item"><a href="{{ url_for('auth.login') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-sign-in-alt"></i> <span>Login</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('auth.signup') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-user-plus"></i> <span>Sign Up</span></a></li>
+                <li class="nav-item"><div class="sidebar-divider"></div></li>
+                <li class="nav-item"><a href="{{ url_for('main.about') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-info-circle"></i> <span>About Us</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('main.contact') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-envelope"></i> <span>Contact</span></a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <div class="main-wrapper">
+        <header class="top-nav">
+            <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            
+            <div class="ms-3 d-flex align-items-center">
+                <span class="d-none d-sm-inline" style="font-weight: 600; color: var(--primary-color);">HomeHub</span>
+            </div>
+
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <!-- Theme Toggle Button -->
+                <button class="theme-toggle-btn" id="theme-toggle" onclick="toggleTheme()">
+                    <i class="fas fa-sun" id="theme-icon"></i>
+                    <span id="theme-text">Light</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="content-area">
+            {% with messages = get_flashed_messages(with_categories=true) %} 
+                {% if messages %} 
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-{% if category == 'error' %}exclamation-circle{% else %}check-circle{% endif %} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %} 
+                {% endif %} 
+            {% endwith %} 
+            
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer>
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 col-md-4 mb-4">
+                        <h5>HomeHub</h5>
+                        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="HomeHub Logo" class="footer-logo" onerror="this.style.display='none'"/>
+                        <p class="text-muted mt-3">Your trusted platform for property management.</p>
+                    </div>
+                    <div class="col-6 col-md-2 mb-4">
+                        <h5>Quick Links</h5>
+                        <ul class="list-unstyled footer-links">
+                            <li><a href="{{ url_for('main.index') }}">Home</a></li>
+                            <li><a href="{{ url_for('main.about') }}">About Us</a></li>
+                            <li><a href="{{ url_for('main.contact') }}">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-6 col-md-3 mb-4">
+                        <h5>Contact Us</h5>
+                        <ul class="list-unstyled text-muted">
+                            <li><i class="fas fa-envelope me-2"></i> support@homehub.com</li>
+                            <li class="mt-2"><i class="fas fa-phone me-2"></i> +1-800-555-1234</li>
+                        </ul>
+                    </div>
+                    <div class="col-12 col-md-3 mb-4">
+                        <h5>Stay Updated</h5>
+                        <a href="{{ url_for('main.subscribe') }}" class="btn btn-sm btn-outline-success">Subscribe</a>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    &copy; <span id="currentYear"></span> HomeHub. All rights reserved.
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Maps -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCCGkhU-aZlUelsOQypH5jTjkf5lIRBL7Y&callback=initMap" async defer></script>
+
+    <script>
+        // --- 1. Theme Toggle Logic ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const themeText = document.getElementById('theme-text');
+        
+        // Check for saved theme in localStorage
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        updateThemeButton(currentTheme);
+
+        function toggleTheme() {
+            const theme = document.documentElement.getAttribute('data-theme');
+            let newTheme = 'light';
+            
+            if (theme === 'light') {
+                newTheme = 'dark';
+            }
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeButton(newTheme);
+            
+            // Re-initialize map if it exists to update map styles
+            if (typeof initMap === 'function') {
+                initMap();
+            }
+        }
+
+        function updateThemeButton(theme) {
+            if (theme === 'dark') {
+                themeIcon.className = 'fas fa-sun'; // Show sun because it's dark mode
+                themeText.textContent = 'Light';
+            } else {
+                themeIcon.className = 'fas fa-moon'; // Show moon because it's light mode
+                themeText.textContent = 'Dark';
+            }
+        }
+
+        // --- 2. Layout Logic ---
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        // --- 3. Chat Widget Logic ---
+        function toggleChat() {
+            const chatBox = document.getElementById('chatBox');
+            if(chatBox) chatBox.classList.toggle('active');
+        }
+
+        function sendChatMessage() {
+            const chatInput = document.getElementById('chatInput');
+            const chatBody = document.getElementById('chatBody');
+            if (!chatInput || !chatBody) return;
+            
+            const message = chatInput.value.trim();
+            if (message) {
+                const userMessage = document.createElement('div');
+                userMessage.className = 'chat-message sent';
+                userMessage.innerHTML = `<div class="chat-bubble">${message}</div>`;
+                chatBody.appendChild(userMessage);
+                chatInput.value = '';
+                chatBody.scrollTop = chatBody.scrollHeight;
+
+                setTimeout(() => {
+                    const botMessage = document.createElement('div');
+                    botMessage.className = 'chat-message received';
+                    botMessage.innerHTML = `<div class="chat-bubble">Thank you. Our team will get back to you shortly.</div>`;
+                    chatBody.appendChild(botMessage);
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                }, 1000);
+            }
+        }
+        
+        // --- 4. Dashboard Logic (Conditional) ---
+        function confirmDelete(propertyId) {
+            if (confirm('Are you sure you want to delete this property?')) {
+                fetch(`/landlord/delete_property/${propertyId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) location.reload();
+                    else alert('Error: ' + data.error);
+                });
+            }
+        }
+
+        // Google Maps Initialization
+        function initMap() {
+            const mapDiv = document.getElementById('map');
+            if(!mapDiv) return;
+
+            // Determine theme for map styles
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            
+            // Styles: Light standard or Dark mode
+            const mapStyles = isDark ? [
+                {elementType: 'geometry', stylers: [{color: '#1E1E1E'}]},
+                {elementType: 'labels.text.stroke', stylers: [{color: '#1E1E1E'}]},
+                {elementType: 'labels.text.fill', stylers: [{color: '#A0A0A0'}]},
+                {featureType: 'road', elementType: 'geometry', stylers: [{color: '#2C2C2C'}]},
+                {featureType: 'water', elementType: 'geometry', stylers: [{color: '#121212'}]},
+                {featureType: 'poi', elementType: 'geometry', stylers: [{color: '#1E1E1E'}]}
+            ] : [];
+
+            const map = new google.maps.Map(mapDiv, {
+                zoom: 12,
+                center: { lat: -1.286389, lng: 36.817223 }, 
+                styles: mapStyles
+            });
+
+            {% if houses %}
+                {% for property in houses %}
+                    {% if property.lat and property.lng %}
+                        new google.maps.Marker({
+                            position: { lat: {{ property.lat }}, lng: {{ property.lng }} },
+                            map: map,
+                            title: "{{ property.title }}",
+                            icon: {
+                                path: google.maps.SymbolPath.CIRCLE,
+                                scale: 8,
+                                fillColor: "#28A745", // Green Marker
+                                fillOpacity: 1,
+                                strokeColor: "white",
+                                strokeWeight: 2
+                            }
+                        });
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        }
+        
+        // Chat Input Enter Key
+        const chatInput = document.getElementById('chatInput');
+        if(chatInput) {
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') sendChatMessage();
+            });
+        }
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>
