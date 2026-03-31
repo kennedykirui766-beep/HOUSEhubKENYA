@@ -106,6 +106,10 @@
             line-height: 1.6;
         }
 
+        body.sidebar-open {
+            overflow: hidden;
+        }
+
         a {
             transition: var(--transition);
         }
@@ -146,16 +150,19 @@
             right: 0;
             z-index: 1040;
             transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .navbar-left-controls {
+        .navbar-left {
             display: flex;
             align-items: center;
             gap: 0.25rem;
+            flex-shrink: 0;
         }
 
-        .hamburger-btn,
-        .dark-mode-toggle {
+        .hamburger-btn {
             width: 40px;
             height: 40px;
             display: flex;
@@ -170,26 +177,9 @@
             transition: var(--transition);
         }
 
-        .hamburger-btn:hover,
-        .dark-mode-toggle:hover {
+        .hamburger-btn:hover {
             background-color: var(--sidebar-hover);
             color: var(--primary-color);
-        }
-
-        .dark-mode-toggle:hover {
-            transform: rotate(15deg);
-        }
-
-        .dark-mode-toggle .fa-sun {
-            display: none;
-        }
-
-        [data-bs-theme="dark"] .dark-mode-toggle .fa-moon {
-            display: none;
-        }
-
-        [data-bs-theme="dark"] .dark-mode-toggle .fa-sun {
-            display: inline-block;
         }
 
         .navbar-brand-center {
@@ -222,7 +212,73 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        .dark-mode-toggle {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 1.15rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .dark-mode-toggle:hover {
+            background-color: var(--sidebar-hover);
+            color: var(--primary-color);
+            transform: rotate(15deg);
+        }
+
+        .dark-mode-toggle .fa-sun {
+            display: none;
+        }
+
+        [data-bs-theme="dark"] .dark-mode-toggle .fa-moon {
+            display: none;
+        }
+
+        [data-bs-theme="dark"] .dark-mode-toggle .fa-sun {
+            display: inline-block;
+        }
+
+        .navbar-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .navbar-profile-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-color);
+        }
+
+        .navbar-profile-placeholder {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        .navbar-profile-name {
+            font-size: 0.875rem;
+            font-weight: 500;
         }
 
         /* ========== SIDEBAR OVERLAY ========== */
@@ -232,12 +288,13 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(2px);
             z-index: 1045;
             opacity: 0;
             visibility: hidden;
-            transition: var(--transition);
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            cursor: pointer;
         }
 
         .sidebar-overlay.active {
@@ -252,12 +309,13 @@
             left: calc(-1 * var(--sidebar-width) - 20px);
             width: var(--sidebar-width);
             height: 100vh;
+            height: 100dvh;
             background-color: var(--sidebar-bg);
             border-right: 1px solid var(--border-color);
             z-index: 1050;
             overflow-y: auto;
             overflow-x: hidden;
-            transition: var(--transition);
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
         }
@@ -286,6 +344,7 @@
             padding: 1rem 1.25rem;
             border-bottom: 1px solid var(--border-color);
             min-height: var(--navbar-height);
+            flex-shrink: 0;
         }
 
         .sidebar-close-btn {
@@ -313,6 +372,7 @@
             padding: 1.5rem 1.25rem;
             text-align: center;
             border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
         }
 
         .user-avatar {
@@ -376,6 +436,7 @@
         .sidebar-nav {
             flex: 1;
             padding: 0.75rem 0;
+            overflow-y: auto;
         }
 
         .sidebar-nav .nav-item {
@@ -392,8 +453,9 @@
             border-radius: var(--radius-md);
             font-size: 0.875rem;
             font-weight: 450;
-            transition: var(--transition);
+            transition: background-color 0.2s ease, color 0.2s ease;
             position: relative;
+            cursor: pointer;
         }
 
         .sidebar-nav .nav-link i {
@@ -401,7 +463,7 @@
             text-align: center;
             font-size: 0.9rem;
             opacity: 0.65;
-            transition: var(--transition);
+            transition: opacity 0.2s ease;
         }
 
         .sidebar-nav .nav-link:hover {
@@ -624,7 +686,7 @@
         }
 
         .custom-table tbody tr {
-            transition: var(--transition);
+            transition: background-color 0.2s ease;
         }
 
         .custom-table tbody tr:hover {
@@ -649,7 +711,7 @@
             border-radius: var(--radius-lg);
             border: 1px solid var(--border-color);
             overflow: hidden;
-            transition: var(--transition);
+            transition: box-shadow 0.3s ease;
         }
 
         .content-card:hover {
@@ -687,7 +749,7 @@
             display: inline-flex;
             align-items: center;
             gap: 0.25rem;
-            transition: var(--transition);
+            transition: color 0.2s ease, gap 0.2s ease;
         }
 
         .content-card-action:hover {
@@ -706,7 +768,7 @@
             background-color: var(--sidebar-hover);
             margin-bottom: 0.75rem;
             border: 1px solid transparent;
-            transition: var(--transition);
+            transition: background-color 0.2s ease, border-color 0.2s ease;
         }
 
         .list-item:hover {
@@ -768,7 +830,7 @@
             align-items: center;
             gap: 1.25rem;
             border: 1px solid var(--border-color);
-            transition: var(--transition);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
         }
 
         .stat-card:hover {
@@ -786,7 +848,7 @@
             justify-content: center;
             font-size: 1.35rem;
             flex-shrink: 0;
-            transition: var(--transition);
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .stat-icon.primary {
@@ -887,7 +949,7 @@
             color: var(--text-secondary);
             font-size: 1rem;
             cursor: pointer;
-            transition: var(--transition);
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
 
         .notification-icon:hover {
@@ -959,11 +1021,12 @@
             padding: 0.5rem 1.25rem;
             border-radius: var(--radius-sm);
             font-weight: 500;
-            transition: var(--transition);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
             font-size: 0.875rem;
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
+            cursor: pointer;
         }
 
         .btn-primary-custom:hover {
@@ -979,11 +1042,12 @@
             border-radius: var(--radius-sm);
             font-weight: 500;
             background: transparent;
-            transition: var(--transition);
+            transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
             font-size: 0.875rem;
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
+            cursor: pointer;
         }
 
         .btn-outline-custom:hover {
@@ -999,11 +1063,12 @@
             border-radius: var(--radius-sm);
             font-weight: 500;
             background: transparent;
-            transition: var(--transition);
+            transition: background-color 0.2s ease, color 0.2s ease;
             font-size: 0.875rem;
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
+            cursor: pointer;
         }
 
         .btn-danger-custom:hover {
@@ -1030,7 +1095,7 @@
             cursor: pointer;
             box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
             font-size: 1.2rem;
-            transition: var(--transition);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1091,7 +1156,7 @@
             font-size: 1rem;
             cursor: pointer;
             opacity: 0.8;
-            transition: opacity 0.2s;
+            transition: opacity 0.2s ease;
         }
 
         .chat-close:hover {
@@ -1156,7 +1221,7 @@
             background-color: var(--body-bg);
             color: var(--text-primary);
             font-size: 0.875rem;
-            transition: var(--transition);
+            transition: border-color 0.2s ease;
             font-family: inherit;
         }
 
@@ -1180,7 +1245,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: var(--transition);
+            transition: transform 0.2s ease;
             flex-shrink: 0;
             font-size: 0.85rem;
         }
@@ -1245,7 +1310,7 @@
             color: var(--footer-text);
             text-decoration: none;
             font-size: 0.9rem;
-            transition: var(--transition);
+            transition: color 0.2s ease, padding-left 0.2s ease;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
@@ -1280,7 +1345,7 @@
             border-radius: var(--radius-md);
             color: var(--footer-text);
             font-size: 1rem;
-            transition: var(--transition);
+            transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
         }
 
         .footer-social a:hover {
@@ -1418,14 +1483,10 @@
 </head>
 <body>
     <!-- ========== NAVBAR ========== -->
-    <nav class="navbar-custom d-flex align-items-center">
-        <div class="navbar-left-controls">
+    <nav class="navbar-custom">
+        <div class="navbar-left">
             <button class="hamburger-btn" id="openSidebar" aria-label="Open menu">
                 <i class="fas fa-bars"></i>
-            </button>
-            <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode">
-                <i class="fas fa-moon"></i>
-                <i class="fas fa-sun"></i>
             </button>
         </div>
 
@@ -1439,20 +1500,23 @@
         <div class="navbar-right">
             {% if current_user.is_authenticated %}
             <a href="{{ url_for('landlord.profile') if current_user.role.lower() == 'landlord' else url_for('tenant.profile') if current_user.role.lower() == 'tenant' else url_for('service_provider.profile') if current_user.role.lower() == 'service' else '#' }}" 
-               class="d-none d-md-flex align-items-center gap-2 text-decoration-none" style="color: var(--text-primary);">
+               class="navbar-profile d-none d-md-flex">
                 {% if current_user.profile_image %}
                 <img src="{{ current_user.profile_image }}" 
                      alt="Profile" 
-                     class="rounded-circle"
-                     style="width: 34px; height: 34px; object-fit: cover; border: 2px solid var(--primary-color);">
+                     class="navbar-profile-avatar">
                 {% else %}
-                <div style="width: 34px; height: 34px; background: var(--gradient-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem;">
+                <div class="navbar-profile-placeholder">
                     <i class="fas fa-user"></i>
                 </div>
                 {% endif %}
-                <span class="d-none d-lg-inline" style="font-size: 0.875rem; font-weight: 500;">{{ current_user.name.split()[0] }}</span>
+                <span class="navbar-profile-name d-none d-lg-inline">{{ current_user.name.split()[0] }}</span>
             </a>
             {% endif %}
+            <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode">
+                <i class="fas fa-moon"></i>
+                <i class="fas fa-sun"></i>
+            </button>
         </div>
     </nav>
 
@@ -1493,51 +1557,51 @@
             <div class="sidebar-section-title">Menu</div>
             <ul class="list-unstyled">
                 {% if current_user.role.lower() == 'landlord' %}
-                <li class="nav-item"><a href="{{ url_for('landlord.dashboard') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('landlord.properties') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-building"></i> <span>Properties</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('landlord.add_property') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-plus-circle"></i> <span>Add Property</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('landlord.tenants') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-users"></i> <span>Tenants</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('landlord.payments') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-money-bill-wave"></i> <span>Payments</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('landlord.maintenance') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-tools"></i> <span>Maintenance</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('landlord.reports') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-chart-bar"></i> <span>Reports</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('landlord.messages') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-envelope"></i> <span>Messages</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('landlord.settings') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('landlord.profile') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-user"></i> <span>My Profile</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('landlord.dashboard') }}" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('landlord.properties') }}" class="nav-link"><i class="fas fa-building"></i> <span>Properties</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('landlord.add_property') }}" class="nav-link"><i class="fas fa-plus-circle"></i> <span>Add Property</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('landlord.tenants') }}" class="nav-link"><i class="fas fa-users"></i> <span>Tenants</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('landlord.payments') }}" class="nav-link"><i class="fas fa-money-bill-wave"></i> <span>Payments</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('landlord.maintenance') }}" class="nav-link"><i class="fas fa-tools"></i> <span>Maintenance</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('landlord.reports') }}" class="nav-link"><i class="fas fa-chart-bar"></i> <span>Reports</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('landlord.messages') }}" class="nav-link"><i class="fas fa-envelope"></i> <span>Messages</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('landlord.settings') }}" class="nav-link"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('landlord.profile') }}" class="nav-link"><i class="fas fa-user"></i> <span>My Profile</span></a></li>
 
                 {% elif current_user.role.lower() == 'tenant' %}
-                <li class="nav-item"><a href="{{ url_for('tenant.dashboard') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('house.hotels') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-search"></i> <span>Browse Properties</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('tenant.all_bookings') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-calendar-check"></i> <span>My Bookings</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('tenant.pay_rent') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-money-bill-wave"></i> <span>Pay Rent</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('tenant.submit_request') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-tools"></i> <span>Maintenance Requests</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('tenant.documents') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-file-alt"></i> <span>Documents</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('tenant.messages') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-envelope"></i> <span>Messages</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('tenant.profile') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-user"></i> <span>My Profile</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('tenant.dashboard') }}" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('house.hotels') }}" class="nav-link"><i class="fas fa-search"></i> <span>Browse Properties</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('tenant.all_bookings') }}" class="nav-link"><i class="fas fa-calendar-check"></i> <span>My Bookings</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('tenant.pay_rent') }}" class="nav-link"><i class="fas fa-money-bill-wave"></i> <span>Pay Rent</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('tenant.submit_request') }}" class="nav-link"><i class="fas fa-tools"></i> <span>Maintenance Requests</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('tenant.documents') }}" class="nav-link"><i class="fas fa-file-alt"></i> <span>Documents</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('tenant.messages') }}" class="nav-link"><i class="fas fa-envelope"></i> <span>Messages</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('tenant.profile') }}" class="nav-link"><i class="fas fa-user"></i> <span>My Profile</span></a></li>
 
                 {% elif current_user.role.lower() == 'admin' %}
-                <li class="nav-item"><a href="{{ url_for('admin.dashboard') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('admin.manage_users') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-users-cog"></i> <span>Manage Users</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('admin.system_settings') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-cogs"></i> <span>System Settings</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('admin.view_reports') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-chart-line"></i> <span>Reports</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('admin.audit_logs') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-history"></i> <span>Audit Logs</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('admin.dashboard') }}" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('admin.manage_users') }}" class="nav-link"><i class="fas fa-users-cog"></i> <span>Manage Users</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('admin.system_settings') }}" class="nav-link"><i class="fas fa-cogs"></i> <span>System Settings</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('admin.view_reports') }}" class="nav-link"><i class="fas fa-chart-line"></i> <span>Reports</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('admin.audit_logs') }}" class="nav-link"><i class="fas fa-history"></i> <span>Audit Logs</span></a></li>
 
                 {% elif current_user.role.lower() == 'service' %}
-                <li class="nav-item"><a href="{{ url_for('service_provider.dashboard') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('service_provider.requests') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-clipboard-list"></i> <span>Service Requests</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('service_provider.schedule') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-calendar-alt"></i> <span>Schedule</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('service_provider.earnings') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-money-bill-wave"></i> <span>Earnings</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('service_provider.profile') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-user"></i> <span>My Profile</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('service_provider.reviews') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-star"></i> <span>Reviews</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('service_provider.settings') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('service_provider.dashboard') }}" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('service_provider.requests') }}" class="nav-link"><i class="fas fa-clipboard-list"></i> <span>Service Requests</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('service_provider.schedule') }}" class="nav-link"><i class="fas fa-calendar-alt"></i> <span>Schedule</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('service_provider.earnings') }}" class="nav-link"><i class="fas fa-money-bill-wave"></i> <span>Earnings</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('service_provider.profile') }}" class="nav-link"><i class="fas fa-user"></i> <span>My Profile</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('service_provider.reviews') }}" class="nav-link"><i class="fas fa-star"></i> <span>Reviews</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('service_provider.settings') }}" class="nav-link"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
                 {% endif %}
 
                 <li class="nav-item mt-2"><div class="sidebar-divider"></div></li>
                 <div class="sidebar-section-title">General</div>
-                <li class="nav-item"><a href="{{ url_for('main.about') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-info-circle"></i> <span>About Us</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('main.contact') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-envelope"></i> <span>Contact</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('main.help') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-question-circle"></i> <span>Help & Support</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('main.about') }}" class="nav-link"><i class="fas fa-info-circle"></i> <span>About Us</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('main.contact') }}" class="nav-link"><i class="fas fa-envelope"></i> <span>Contact</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('main.help') }}" class="nav-link"><i class="fas fa-question-circle"></i> <span>Help & Support</span></a></li>
                 <li class="nav-item"><div class="sidebar-divider"></div></li>
-                <li class="nav-item"><a href="{{ url_for('auth.logout') }}" class="nav-link text-danger" onclick="closeSidebar()"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('auth.logout') }}" class="nav-link text-danger"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
             </ul>
         </nav>
 
@@ -1545,12 +1609,12 @@
         <nav class="sidebar-nav">
             <div class="sidebar-section-title">Account</div>
             <ul class="list-unstyled">
-                <li class="nav-item"><a href="{{ url_for('auth.login') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-sign-in-alt"></i> <span>Login</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('auth.signup') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-user-plus"></i> <span>Sign Up</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('auth.login') }}" class="nav-link"><i class="fas fa-sign-in-alt"></i> <span>Login</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('auth.signup') }}" class="nav-link"><i class="fas fa-user-plus"></i> <span>Sign Up</span></a></li>
                 <li class="nav-item mt-2"><div class="sidebar-divider"></div></li>
                 <div class="sidebar-section-title">General</div>
-                <li class="nav-item"><a href="{{ url_for('main.about') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-info-circle"></i> <span>About Us</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('main.contact') }}" class="nav-link" onclick="closeSidebar()"><i class="fas fa-envelope"></i> <span>Contact</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('main.about') }}" class="nav-link"><i class="fas fa-info-circle"></i> <span>About Us</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('main.contact') }}" class="nav-link"><i class="fas fa-envelope"></i> <span>Contact</span></a></li>
             </ul>
         </nav>
         {% endif %}
@@ -1633,7 +1697,7 @@
                     <div class="col-12 col-lg-3 footer-section">
                         <h5>Stay Updated</h5>
                         <p style="margin-bottom: 1rem;">Subscribe to our newsletter for the latest updates and features.</p>
-                        <a href="{{ url_for('main.subscribe') }}" class="btn w-100" style="background: var(--gradient-primary); color: white; border: none; border-radius: var(--radius-md); padding: 0.65rem 1.25rem; font-weight: 500; transition: var(--transition);">
+                        <a href="{{ url_for('main.subscribe') }}" class="btn w-100" style="background: var(--gradient-primary); color: white; border: none; border-radius: var(--radius-md); padding: 0.65rem 1.25rem; font-weight: 500;">
                             <i class="fas fa-paper-plane me-2"></i>Subscribe Now
                         </a>
                     </div>
@@ -1658,21 +1722,27 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+        // ========== SIDEBAR MANAGEMENT ==========
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
         const openSidebarBtn = document.getElementById('openSidebar');
         const closeSidebarBtn = document.getElementById('closeSidebar');
+        let isSidebarOpen = false;
 
         function openSidebar() {
+            if (isSidebarOpen) return;
+            isSidebarOpen = true;
             sidebar.classList.add('active');
             sidebarOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
+            document.body.classList.add('sidebar-open');
         }
 
         function closeSidebar() {
+            if (!isSidebarOpen) return;
+            isSidebarOpen = false;
             sidebar.classList.remove('active');
             sidebarOverlay.classList.remove('active');
-            document.body.style.overflow = '';
+            document.body.classList.remove('sidebar-open');
         }
 
         openSidebarBtn.addEventListener('click', openSidebar);
@@ -1683,6 +1753,18 @@
             if (e.key === 'Escape') closeSidebar();
         });
 
+        // Close sidebar when clicking on nav links
+        document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Only close if it's a real navigation (not a # link)
+                const href = this.getAttribute('href');
+                if (href && href !== '#') {
+                    closeSidebar();
+                }
+            });
+        });
+
+        // ========== DARK MODE TOGGLE ==========
         const darkModeToggle = document.getElementById('darkModeToggle');
         const htmlElement = document.documentElement;
 
@@ -1696,8 +1778,10 @@
             localStorage.setItem('theme', newTheme);
         });
 
+        // ========== SET CURRENT YEAR ==========
         document.getElementById('currentYear').textContent = new Date().getFullYear();
 
+        // ========== HIGHLIGHT ACTIVE NAV LINK ==========
         document.addEventListener('DOMContentLoaded', function() {
             const currentPath = window.location.pathname;
             const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
