@@ -35,6 +35,16 @@
     border-radius: 2px;
   }
 
+  /* Center the underline when inside a text-center container */
+  .text-center .section-title {
+    display: block;
+  }
+
+  .text-center .section-title::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
   .section-subtitle {
     color: var(--text-secondary);
     font-size: 1.05rem;
@@ -389,6 +399,7 @@
     transition: var(--transition);
     text-align: center;
     position: relative;
+    min-width: 0;
   }
 
   .process-step:hover { 
@@ -484,6 +495,7 @@
     padding: 2rem; 
     border: 1px solid var(--border-color);
     transition: var(--transition);
+    min-width: 0;
   }
 
   .feature-card:hover { 
@@ -591,6 +603,7 @@
     border: 1px solid var(--border-color);
     transition: var(--transition);
     cursor: pointer;
+    min-width: 0;
   }
 
   .property-card:hover { 
@@ -622,6 +635,7 @@
     font-size: 0.8rem; 
     font-weight: 600;
     z-index: 2;
+    white-space: nowrap;
   }
 
   .property-badge.featured { 
@@ -647,12 +661,16 @@
     font-weight: 600;
     font-size: 1.05rem;
     margin-bottom: 0.5rem;
+    word-break: break-word;
   }
 
   .property-location { 
     color: var(--text-secondary);
     font-size: 0.875rem;
     margin-bottom: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .property-location i { 
@@ -746,6 +764,7 @@
     object-fit: cover; 
     margin-right: 1rem; 
     border: 2px solid var(--primary-color);
+    flex-shrink: 0;
   }
 
   .testimonial-author h4 {
@@ -784,6 +803,7 @@
   .stats-section { 
     background: var(--gradient-primary);
     color: white;
+    overflow: hidden;
   }
 
   .stats-section .section-title {
@@ -812,6 +832,8 @@
     padding: 2rem 1.5rem;
     border: 1px solid rgba(255, 255, 255, 0.15);
     transition: var(--transition);
+    min-width: 0;
+    overflow: hidden;
   }
 
   .stat-card:hover {
@@ -830,6 +852,7 @@
     color: white;
     border-radius: var(--radius-md);
     font-size: 1.25rem;
+    flex-shrink: 0;
   }
   
   .stat-number { 
@@ -837,6 +860,8 @@
     font-weight: 800; 
     color: white;
     line-height: 1;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   .stat-label {
@@ -844,6 +869,8 @@
     font-size: 0.85rem;
     font-weight: 500;
     margin-top: 0.5rem;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   /* ========== MAP SECTION ========== */
@@ -875,6 +902,7 @@
     font-weight: 500;
     box-shadow: var(--shadow-sm);
     font-family: inherit;
+    white-space: nowrap;
   }
 
   .map-control-btn:hover { 
@@ -930,6 +958,7 @@
     color: var(--text-primary);
     transition: var(--transition);
     font-family: inherit;
+    gap: 0.5rem;
   }
 
   .faq-question:hover, 
@@ -941,6 +970,7 @@
   .faq-question i {
     transition: transform 0.3s ease;
     font-size: 0.75rem;
+    flex-shrink: 0;
   }
 
   .faq-question.active i {
@@ -1161,6 +1191,7 @@
     font-size: 0.875rem;
     transition: var(--transition);
     font-family: inherit;
+    min-width: 0;
   }
 
   .chat-input:focus {
@@ -1262,6 +1293,29 @@
     }
     .stats-grid {
       grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    .stat-card {
+      padding: 1.5rem 1rem;
+    }
+    .stat-number {
+      font-size: 1.75rem;
+    }
+    .stat-icon {
+      width: 46px;
+      height: 46px;
+      font-size: 1.1rem;
+    }
+    .testimonial-content {
+      padding: 1.75rem;
+    }
+    .map-controls {
+      top: 0.5rem !important;
+      right: 0.5rem !important;
+    }
+    .map-control-btn {
+      padding: 0.45rem 0.75rem;
+      font-size: 0.78rem;
     }
     .chat-window {
       width: calc(100vw - 48px);
@@ -1273,15 +1327,105 @@
     .hero-title {
       font-size: 1.85rem;
     }
+    .section-header {
+      margin-bottom: 2rem;
+    }
+    .section-title {
+      font-size: 1.35rem;
+    }
+    .section-subtitle {
+      font-size: 0.925rem;
+    }
+    /* Stats — the key fix area */
+    .stats-section {
+      padding: 3rem 0;
+    }
     .stats-grid {
       grid-template-columns: 1fr 1fr;
-      gap: 1rem;
+      gap: 0.75rem;
+      margin-top: 2rem;
     }
     .stat-card {
-      padding: 1.5rem 1rem;
+      padding: 1.25rem 0.6rem;
+      border-radius: var(--radius-md);
     }
     .stat-number {
-      font-size: 1.75rem;
+      font-size: 1.35rem;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      margin-top: 0.35rem;
+    }
+    .stat-icon {
+      width: 38px;
+      height: 38px;
+      font-size: 0.95rem;
+      margin-bottom: 0.75rem;
+    }
+    .popular-searches {
+      font-size: 0.82rem;
+    }
+    .popular-searches a {
+      font-size: 0.78rem;
+      padding: 0.25rem 0.75rem;
+      margin-left: 0.2rem;
+    }
+    .property-filters {
+      gap: 0.35rem;
+    }
+    .filter-btn {
+      padding: 0.4rem 1rem;
+      font-size: 0.8rem;
+    }
+  }
+
+  /* Extra-small devices (≤380px) — phones in portrait with narrow viewports */
+  @media (max-width: 380px) {
+    .hero-title {
+      font-size: 1.55rem;
+    }
+    .stats-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+    }
+    .stat-card {
+      padding: 1rem 0.4rem;
+    }
+    .stat-number {
+      font-size: 1.15rem;
+    }
+    .stat-label {
+      font-size: 0.65rem;
+    }
+    .stat-icon {
+      width: 32px;
+      height: 32px;
+      font-size: 0.85rem;
+      margin-bottom: 0.6rem;
+    }
+    .section-title {
+      font-size: 1.2rem;
+    }
+    .faq-question {
+      font-size: 0.82rem;
+      padding: 0.85rem 1rem;
+    }
+    .faq-answer p {
+      font-size: 0.82rem;
+      padding: 0.85rem 1rem;
+    }
+    .testimonial-content {
+      padding: 1.25rem;
+    }
+    .testimonial-text p {
+      font-size: 0.9rem;
+    }
+    .social-buttons .btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+    }
+    .newsletter-form-container {
+      padding: 1.25rem;
     }
   }
 </style>
@@ -1595,7 +1739,7 @@
   </div>
 </section>
 
-<!-- Stats Section -->
+<!-- Stats Section — "Why Choose HomeHub?" -->
 <section class="stats-section" aria-label="Platform statistics">
   <div class="container">
     <div class="section-header text-center">
@@ -1604,22 +1748,22 @@
     </div>
     <div class="stats-grid text-center">
       <div class="stat-card">
-        <div class="stat-icon mx-auto"><i class="fas fa-building"></i></div>
+        <div class="stat-icon"><i class="fas fa-building"></i></div>
         <div class="stat-number" data-target="10000">0</div>
         <div class="stat-label">Properties Listed</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon mx-auto"><i class="fas fa-users"></i></div>
+        <div class="stat-icon"><i class="fas fa-users"></i></div>
         <div class="stat-number" data-target="50000">0</div>
         <div class="stat-label">Happy Users</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon mx-auto"><i class="fas fa-money-bill-wave"></i></div>
+        <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
         <div class="stat-number" data-target="1000">0</div>
         <div class="stat-label">Payments Daily</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon mx-auto"><i class="fas fa-tools"></i></div>
+        <div class="stat-icon"><i class="fas fa-tools"></i></div>
         <div class="stat-number" data-target="500">0</div>
         <div class="stat-label">Service Providers</div>
       </div>
@@ -1824,14 +1968,20 @@
 
   setInterval(() => slideTestimonial(1), 5000);
 
-  // Animated counter
+  // Animated counter with "+" suffix for large numbers
   const animateValue = (el, end, duration) => {
     let start = null;
     const step = (ts) => {
       if (!start) start = ts;
       const progress = Math.min((ts - start) / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
-      el.textContent = Math.floor(eased * end).toLocaleString();
+      const current = Math.floor(eased * end);
+      // Use "K" abbreviation for numbers >= 1000 to prevent overflow on small screens
+      if (end >= 1000) {
+        el.textContent = (current / 1000).toFixed(current >= 10000 ? 0 : 1).replace(/\.0$/, '') + 'K+';
+      } else {
+        el.textContent = current.toLocaleString() + '+';
+      }
       if (progress < 1) requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
@@ -1878,6 +2028,16 @@
     });
   });
 
+  // Fix map rendering when section becomes visible
   setTimeout(() => map.invalidateSize(), 500);
+  const mapObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        setTimeout(() => map.invalidateSize(), 200);
+      }
+    });
+  }, { threshold: 0.1 });
+  const mapEl = document.getElementById('map');
+  if (mapEl) mapObserver.observe(mapEl);
 </script>
 {% endblock %}
