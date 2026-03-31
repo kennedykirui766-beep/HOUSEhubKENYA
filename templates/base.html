@@ -1788,9 +1788,21 @@
             
             navLinks.forEach(link => {
                 const href = link.getAttribute('href');
-                if (href && currentPath.includes(href.replace(/^\//, '').split('/')[0]) && href !== '#' && href !== '/') {
-                    link.classList.add('active');
-                }
+                document.addEventListener('DOMContentLoaded', function() {
+                    const currentPath = window.location.pathname;
+                    const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
+
+                    navLinks.forEach(link => {
+                        const href = link.getAttribute('href');
+
+                        // Exact match OR starts with (for sub-pages)
+                        if (href && href !== '#' && href !== '/') {
+                            if (currentPath === href || currentPath.startsWith(href + '/')) {
+                                link.classList.add('active');
+                            }
+                        }
+                    });
+                });
             });
         });
     </script>
