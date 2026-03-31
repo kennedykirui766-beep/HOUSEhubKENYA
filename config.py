@@ -18,9 +18,9 @@ class Config:
 
     # Neon requires SSL
     SQLALCHEMY_ENGINE_OPTIONS = {
-        "connect_args": {"sslmode": "require"}
+        "pool_pre_ping": True,
+        "pool_recycle": 300,
     }
-
     # Upload folders
     UPLOAD_FOLDER = os.environ.get(
         "UPLOAD_FOLDER",
