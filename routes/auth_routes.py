@@ -77,7 +77,7 @@ def login():
             flash("An error occurred during login. Try again.", "danger")
             return render_template("login.html")
 
-    return render_template("Login.html")
+    return render_template("login.html")
 
 
 # ------------------- SIGNUP -------------------
