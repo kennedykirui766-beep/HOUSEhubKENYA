@@ -288,3 +288,8 @@ def verify_2fa_code(user, code):
         return False
     totp = pyotp.TOTP(user.two_factor_secret)
     return totp.verify(code)
+
+
+@auth_bp.route('/social-login/<provider>')
+def social_login(provider):
+    return f"Social login with {provider} coming soon"
