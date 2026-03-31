@@ -101,7 +101,7 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--body-bg);
             color: var(--text-primary);
-            transition: background-color 0.3s ease, color 0.3s ease;
+            transition: var(--transition);
             overflow-x: hidden;
             line-height: 1.6;
         }
@@ -111,7 +111,7 @@
         }
 
         a {
-            transition: color 0.2s ease;
+            transition: var(--transition);
         }
 
         img {
@@ -149,7 +149,7 @@
             left: 0;
             right: 0;
             z-index: 1040;
-            transition: background-color 0.3s ease, border-color 0.3s ease;
+            transition: var(--transition);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -174,7 +174,7 @@
             color: var(--text-primary);
             font-size: 1.15rem;
             cursor: pointer;
-            transition: background-color 0.2s ease, color 0.2s ease;
+            transition: var(--transition);
         }
 
         .hamburger-btn:hover {
@@ -227,7 +227,7 @@
             color: var(--text-primary);
             font-size: 1.15rem;
             cursor: pointer;
-            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+            transition: var(--transition);
         }
 
         .dark-mode-toggle:hover {
@@ -288,7 +288,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(2px);
             z-index: 1045;
             opacity: 0;
             visibility: hidden;
@@ -314,7 +315,7 @@
             z-index: 1050;
             overflow-y: auto;
             overflow-x: hidden;
-            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
         }
@@ -358,7 +359,7 @@
             color: var(--sidebar-text);
             font-size: 0.95rem;
             cursor: pointer;
-            transition: background-color 0.2s ease, color 0.2s ease;
+            transition: var(--transition);
         }
 
         .sidebar-close-btn:hover {
@@ -452,7 +453,7 @@
             border-radius: var(--radius-md);
             font-size: 0.875rem;
             font-weight: 450;
-            background-color: transparent;
+            transition: background-color 0.2s ease, color 0.2s ease;
             position: relative;
             cursor: pointer;
         }
@@ -461,24 +462,22 @@
             width: 20px;
             text-align: center;
             font-size: 0.9rem;
-            opacity: 0.6;
+            opacity: 0.65;
             transition: opacity 0.2s ease;
         }
 
-        /* Hover state - purple/light background ONLY on hover */
         .sidebar-nav .nav-link:hover {
-            background-color: var(--primary-light);
-            color: var(--primary-color);
+            background-color: var(--sidebar-hover);
+            color: var(--sidebar-active-text);
         }
 
         .sidebar-nav .nav-link:hover i {
             opacity: 1;
         }
 
-        /* Active state - for current page */
         .sidebar-nav .nav-link.active {
-            background-color: var(--primary-light);
-            color: var(--primary-color);
+            background-color: var(--sidebar-active);
+            color: var(--sidebar-active-text);
             font-weight: 600;
         }
 
@@ -498,18 +497,12 @@
             border-radius: 0 4px 4px 0;
         }
 
-        /* Logout link - red color */
         .sidebar-nav .nav-link.text-danger {
             color: #ef4444;
         }
 
         .sidebar-nav .nav-link.text-danger:hover {
             background-color: rgba(239, 68, 68, 0.1);
-            color: #dc2626;
-        }
-
-        .sidebar-nav .nav-link.text-danger i {
-            opacity: 0.8;
         }
 
         [data-bs-theme="dark"] .sidebar-nav .nav-link.text-danger {
@@ -517,8 +510,7 @@
         }
 
         [data-bs-theme="dark"] .sidebar-nav .nav-link.text-danger:hover {
-            background-color: rgba(248, 113, 113, 0.15);
-            color: #fca5a5;
+            background-color: rgba(248, 113, 113, 0.1);
         }
 
         .sidebar-divider {
@@ -622,22 +614,33 @@
             background: currentColor;
         }
 
-        .status-success, .status-occupied, .status-paid, .status-completed, .status-active {
+        .status-success,
+        .status-occupied,
+        .status-paid,
+        .status-completed,
+        .status-active {
             background-color: var(--success-light);
             color: var(--success-color);
         }
 
-        .status-danger, .status-vacant, .status-overdue, .status-cancelled, .status-inactive {
+        .status-danger,
+        .status-vacant,
+        .status-overdue,
+        .status-cancelled,
+        .status-inactive {
             background-color: var(--danger-light);
             color: var(--danger-color);
         }
 
-        .status-warning, .status-pending, .status-partial {
+        .status-warning,
+        .status-pending,
+        .status-partial {
             background-color: var(--warning-light);
             color: var(--warning-color);
         }
 
-        .status-info, .status-processing {
+        .status-info,
+        .status-processing {
             background-color: var(--info-light);
             color: var(--info-color);
         }
@@ -666,8 +669,13 @@
             white-space: nowrap;
         }
 
-        .custom-table thead th:first-child { border-radius: var(--radius-md) 0 0 0; }
-        .custom-table thead th:last-child { border-radius: 0 var(--radius-md) 0 0; }
+        .custom-table thead th:first-child {
+            border-radius: var(--radius-md) 0 0 0;
+        }
+
+        .custom-table thead th:last-child {
+            border-radius: 0 var(--radius-md) 0 0;
+        }
 
         .custom-table tbody td {
             padding: 0.85rem 1rem;
@@ -685,9 +693,17 @@
             background-color: var(--sidebar-hover);
         }
 
-        .custom-table tbody tr:last-child td { border-bottom: none; }
-        .custom-table tbody tr:last-child td:first-child { border-radius: 0 0 0 var(--radius-md); }
-        .custom-table tbody tr:last-child td:last-child { border-radius: 0 0 var(--radius-md) 0; }
+        .custom-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .custom-table tbody tr:last-child td:first-child {
+            border-radius: 0 0 0 var(--radius-md);
+        }
+
+        .custom-table tbody tr:last-child td:last-child {
+            border-radius: 0 0 var(--radius-md) 0;
+        }
 
         /* ========== CARD STYLES ========== */
         .content-card {
@@ -733,6 +749,7 @@
             display: inline-flex;
             align-items: center;
             gap: 0.25rem;
+            transition: color 0.2s ease, gap 0.2s ease;
         }
 
         .content-card-action:hover {
@@ -759,7 +776,9 @@
             background-color: var(--card-bg);
         }
 
-        .list-item:last-child { margin-bottom: 0; }
+        .list-item:last-child {
+            margin-bottom: 0;
+        }
 
         .list-item-title {
             font-size: 0.95rem;
@@ -832,17 +851,45 @@
             transition: background 0.3s ease, color 0.3s ease;
         }
 
-        .stat-icon.primary { background-color: var(--primary-light); color: var(--primary-color); }
-        .stat-card:hover .stat-icon.primary { background: var(--gradient-primary); color: white; }
+        .stat-icon.primary {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
 
-        .stat-icon.success { background-color: var(--success-light); color: var(--success-color); }
-        .stat-card:hover .stat-icon.success { background: var(--gradient-success); color: white; }
+        .stat-card:hover .stat-icon.primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
 
-        .stat-icon.danger { background-color: var(--danger-light); color: var(--danger-color); }
-        .stat-card:hover .stat-icon.danger { background: var(--gradient-danger); color: white; }
+        .stat-icon.success {
+            background-color: var(--success-light);
+            color: var(--success-color);
+        }
 
-        .stat-icon.warning { background-color: var(--warning-light); color: var(--warning-color); }
-        .stat-icon.info { background-color: var(--info-light); color: var(--info-color); }
+        .stat-card:hover .stat-icon.success {
+            background: var(--gradient-success);
+            color: white;
+        }
+
+        .stat-icon.danger {
+            background-color: var(--danger-light);
+            color: var(--danger-color);
+        }
+
+        .stat-card:hover .stat-icon.danger {
+            background: var(--gradient-danger);
+            color: white;
+        }
+
+        .stat-icon.warning {
+            background-color: var(--warning-light);
+            color: var(--warning-color);
+        }
+
+        .stat-icon.info {
+            background-color: var(--info-light);
+            color: var(--info-color);
+        }
 
         .stat-content h3 {
             font-size: 0.8rem;
@@ -872,8 +919,17 @@
             margin-bottom: 2rem;
         }
 
-        .top-bar-left h4 { color: var(--text-primary); font-weight: 600; margin: 0; }
-        .top-bar-left p { color: var(--text-secondary); font-size: 0.85rem; margin: 0.25rem 0 0; }
+        .top-bar-left h4 {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .top-bar-left p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin: 0.25rem 0 0;
+        }
 
         .top-bar-right {
             display: flex;
@@ -918,7 +974,11 @@
             border: 2px solid var(--card-bg);
         }
 
-        .top-bar-profile { display: flex; align-items: center; gap: 0.75rem; }
+        .top-bar-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
 
         .top-bar-avatar {
             width: 40px;
@@ -940,8 +1000,18 @@
             font-size: 0.85rem;
         }
 
-        .top-bar-info h4 { font-size: 0.9rem; color: var(--text-primary); font-weight: 600; margin: 0; }
-        .top-bar-info p { font-size: 0.75rem; color: var(--text-secondary); margin: 0; }
+        .top-bar-info h4 {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .top-bar-info p {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
 
         /* ========== BUTTON STYLES ========== */
         .btn-primary-custom {
@@ -957,7 +1027,6 @@
             align-items: center;
             gap: 0.35rem;
             cursor: pointer;
-            text-decoration: none;
         }
 
         .btn-primary-custom:hover {
@@ -979,7 +1048,6 @@
             align-items: center;
             gap: 0.35rem;
             cursor: pointer;
-            text-decoration: none;
         }
 
         .btn-outline-custom:hover {
@@ -1027,13 +1095,16 @@
             cursor: pointer;
             box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
             font-size: 1.2rem;
-            transition: transform 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .chat-toggle:hover { transform: scale(1.1); }
+        .chat-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.5);
+        }
 
         .chat-box {
             position: absolute;
@@ -1050,7 +1121,10 @@
             overflow: hidden;
         }
 
-        .chat-box.active { display: flex; animation: fadeInUp 0.3s ease-out; }
+        .chat-box.active {
+            display: flex;
+            animation: fadeInUp 0.3s ease-out;
+        }
 
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
@@ -1066,10 +1140,28 @@
             align-items: center;
         }
 
-        .chat-box-header h4 { margin: 0; font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
+        .chat-box-header h4 {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-        .chat-close { background: none; border: none; color: white; font-size: 1rem; cursor: pointer; opacity: 0.8; }
-        .chat-close:hover { opacity: 1; }
+        .chat-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s ease;
+        }
+
+        .chat-close:hover {
+            opacity: 1;
+        }
 
         .chat-box-body {
             flex: 1;
@@ -1081,16 +1173,45 @@
             gap: 1rem;
         }
 
-        .chat-message { max-width: 85%; }
-        .chat-message.received { align-self: flex-start; }
-        .chat-message.sent { align-self: flex-end; }
+        .chat-message {
+            max-width: 85%;
+        }
 
-        .chat-bubble { padding: 0.75rem 1rem; border-radius: var(--radius-md); font-size: 0.875rem; line-height: 1.5; }
+        .chat-message.received {
+            align-self: flex-start;
+        }
 
-        .chat-message.received .chat-bubble { background-color: var(--card-bg); color: var(--text-primary); border: 1px solid var(--border-color); border-bottom-left-radius: 4px; }
-        .chat-message.sent .chat-bubble { background: var(--gradient-primary); color: white; border-bottom-right-radius: 4px; }
+        .chat-message.sent {
+            align-self: flex-end;
+        }
 
-        .chat-box-footer { padding: 0.875rem; background-color: var(--card-bg); border-top: 1px solid var(--border-color); display: flex; gap: 0.5rem; }
+        .chat-bubble {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .chat-message.received .chat-bubble {
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-message.sent .chat-bubble {
+            background: var(--gradient-primary);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-box-footer {
+            padding: 0.875rem;
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 0.5rem;
+        }
 
         .chat-input {
             flex: 1;
@@ -1104,8 +1225,14 @@
             font-family: inherit;
         }
 
-        .chat-input:focus { outline: none; border-color: var(--primary-color); }
-        .chat-input::placeholder { color: var(--text-muted); }
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-muted);
+        }
 
         .chat-send {
             width: 38px;
@@ -1123,81 +1250,232 @@
             font-size: 0.85rem;
         }
 
-        .chat-send:hover { transform: scale(1.05); }
+        .chat-send:hover {
+            transform: scale(1.05);
+        }
 
         /* ========== FOOTER ========== */
-        .footer { background-color: var(--footer-bg); color: var(--footer-text); padding: 3rem 0 0; margin-top: auto; }
-        .footer-content { max-width: 1200px; }
-        .footer-section { margin-bottom: 2rem; }
+        .footer {
+            background-color: var(--footer-bg);
+            color: var(--footer-text);
+            padding: 3rem 0 0;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+        }
+
+        .footer-section {
+            margin-bottom: 2rem;
+        }
 
         .footer-section h5 {
-            color: #ffffff; font-weight: 600; font-size: 1.05rem;
-            margin-bottom: 1.25rem; position: relative; padding-bottom: 0.75rem;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 1.05rem;
+            margin-bottom: 1.25rem;
+            position: relative;
+            padding-bottom: 0.75rem;
         }
 
         .footer-section h5::after {
-            content: ''; position: absolute; bottom: 0; left: 0;
-            width: 40px; height: 2px; background: var(--gradient-primary); border-radius: 2px;
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background: var(--gradient-primary);
+            border-radius: 2px;
         }
 
-        .footer-section p { font-size: 0.9rem; line-height: 1.7; color: var(--footer-text); }
+        .footer-section p {
+            font-size: 0.9rem;
+            line-height: 1.7;
+            color: var(--footer-text);
+        }
 
-        .footer-section .list-unstyled { list-style: none; padding: 0; margin: 0; }
-        .footer-section .list-unstyled li { margin-bottom: 0.5rem; }
+        .footer-section .list-unstyled {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-section .list-unstyled li {
+            margin-bottom: 0.5rem;
+        }
 
         .footer-section .list-unstyled a {
-            color: var(--footer-text); text-decoration: none; font-size: 0.9rem;
+            color: var(--footer-text);
+            text-decoration: none;
+            font-size: 0.9rem;
             transition: color 0.2s ease, padding-left 0.2s ease;
-            display: inline-flex; align-items: center; gap: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .footer-section .list-unstyled a:hover { color: #818cf8; padding-left: 4px; }
-        .footer-section a { color: #818cf8; text-decoration: none; }
-        .footer-section a:hover { color: #a5b4fc; }
+        .footer-section .list-unstyled a:hover {
+            color: #818cf8;
+            padding-left: 4px;
+        }
 
-        .footer-social { display: flex; gap: 0.75rem; }
+        .footer-section a {
+            color: #818cf8;
+            text-decoration: none;
+        }
+
+        .footer-section a:hover {
+            color: #a5b4fc;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 0.75rem;
+        }
 
         .footer-social a {
-            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-            background-color: rgba(255, 255, 255, 0.1); border-radius: var(--radius-md);
-            color: var(--footer-text); font-size: 1rem;
-            transition: transform 0.2s ease, background 0.2s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            color: var(--footer-text);
+            font-size: 1rem;
+            transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .footer-social a:hover { background: var(--gradient-primary); color: white; transform: translateY(-2px); }
+        .footer-social a:hover {
+            background: var(--gradient-primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
 
-        .footer-hr { border: none; height: 1px; background-color: rgba(255, 255, 255, 0.1); margin: 1.5rem 0; }
+        .footer-hr {
+            border: none;
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.1);
+            margin: 1.5rem 0;
+        }
 
-        .footer-bottom { padding: 1.25rem 0; text-align: center; }
-        .footer-bottom p { font-size: 0.85rem; color: var(--footer-text); margin: 0; }
-        .footer-bottom a { color: var(--footer-text); text-decoration: none; }
-        .footer-bottom a:hover { color: #818cf8; }
+        .footer-bottom {
+            padding: 1.25rem 0;
+            text-align: center;
+        }
+
+        .footer-bottom p {
+            font-size: 0.85rem;
+            color: var(--footer-text);
+            margin: 0;
+        }
+
+        .footer-bottom a {
+            color: var(--footer-text);
+            text-decoration: none;
+        }
+
+        .footer-bottom a:hover {
+            color: #818cf8;
+        }
 
         /* ========== UTILITY CLASSES ========== */
-        .text-gradient { background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .alert { animation: fadeInUp 0.3s ease-out; }
+        .text-gradient {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ========== ANIMATIONS ========== */
+        .alert {
+            animation: fadeInUp 0.3s ease-out;
+        }
 
         /* ========== RESPONSIVE ========== */
         @media (max-width: 767.98px) {
-            .navbar-brand-center { font-size: 1.1rem; }
-            .navbar-brand-center .brand-icon { width: 28px; height: 28px; font-size: 0.75rem; }
-            .sidebar { width: calc(var(--sidebar-width) - 20px); left: calc(-1 * var(--sidebar-width)); }
-            main { padding: 1rem; }
-            .footer { padding: 2rem 0 0; }
-            .footer-section { margin-bottom: 1.5rem; }
-            .top-bar { flex-direction: column; gap: 1rem; text-align: center; padding: 1.25rem; }
-            .top-bar-right { justify-content: center; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-            .stat-card { padding: 1.25rem; gap: 1rem; }
-            .stat-value { font-size: 1.5rem; }
-            .stat-icon { width: 48px; height: 48px; font-size: 1.15rem; }
-            .chat-box { width: calc(100vw - 48px); right: -12px; }
+            .navbar-brand-center {
+                font-size: 1.1rem;
+            }
+
+            .navbar-brand-center .brand-icon {
+                width: 28px;
+                height: 28px;
+                font-size: 0.75rem;
+            }
+
+            .sidebar {
+                width: calc(var(--sidebar-width) - 20px);
+                left: calc(-1 * var(--sidebar-width));
+            }
+
+            main {
+                padding: 1rem;
+            }
+
+            .footer {
+                padding: 2rem 0 0;
+            }
+
+            .footer-section {
+                margin-bottom: 1.5rem;
+            }
+
+            .top-bar {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+                padding: 1.25rem;
+            }
+
+            .top-bar-right {
+                justify-content: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .stat-card {
+                padding: 1.25rem;
+                gap: 1rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .stat-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 1.15rem;
+            }
+
+            .chat-box {
+                width: calc(100vw - 48px);
+                right: -12px;
+            }
         }
 
         @media (max-width: 400px) {
-            .navbar-custom { padding: 0 0.5rem; }
-            .hamburger-btn, .dark-mode-toggle { width: 36px; height: 36px; font-size: 1rem; }
-            .stats-grid { grid-template-columns: 1fr; }
+            .navbar-custom {
+                padding: 0 0.5rem;
+            }
+
+            .hamburger-btn,
+            .dark-mode-toggle {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 
@@ -1213,7 +1491,9 @@
         </div>
 
         <a href="{{ url_for('main.index') }}" class="navbar-brand-center">
-            <span class="brand-icon"><i class="fas fa-home"></i></span>
+            <span class="brand-icon">
+                <i class="fas fa-home"></i>
+            </span>
             HomeHub
         </a>
 
@@ -1222,9 +1502,13 @@
             <a href="{{ url_for('landlord.profile') if current_user.role.lower() == 'landlord' else url_for('tenant.profile') if current_user.role.lower() == 'tenant' else url_for('service_provider.profile') if current_user.role.lower() == 'service' else '#' }}" 
                class="navbar-profile d-none d-md-flex">
                 {% if current_user.profile_image %}
-                <img src="{{ current_user.profile_image }}" alt="Profile" class="navbar-profile-avatar">
+                <img src="{{ current_user.profile_image }}" 
+                     alt="Profile" 
+                     class="navbar-profile-avatar">
                 {% else %}
-                <div class="navbar-profile-placeholder"><i class="fas fa-user"></i></div>
+                <div class="navbar-profile-placeholder">
+                    <i class="fas fa-user"></i>
+                </div>
                 {% endif %}
                 <span class="navbar-profile-name d-none d-lg-inline">{{ current_user.name.split()[0] }}</span>
             </a>
@@ -1243,10 +1527,14 @@
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <a href="{{ url_for('main.index') }}" class="d-flex align-items-center gap-2 text-decoration-none" style="color: var(--text-primary);">
-                <span class="brand-icon" style="width: 28px; height: 28px; font-size: 0.7rem;"><i class="fas fa-home"></i></span>
+                <span class="brand-icon" style="width: 28px; height: 28px; font-size: 0.7rem;">
+                    <i class="fas fa-home"></i>
+                </span>
                 <span style="font-weight: 700; font-size: 1.1rem;">HomeHub</span>
             </a>
-            <button class="sidebar-close-btn" id="closeSidebar" aria-label="Close menu"><i class="fas fa-times"></i></button>
+            <button class="sidebar-close-btn" id="closeSidebar" aria-label="Close menu">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
 
         {% if current_user.is_authenticated %}
@@ -1254,7 +1542,9 @@
             {% if current_user.profile_image %}
             <img src="{{ current_user.profile_image }}" alt="{{ current_user.name }}" class="user-avatar">
             {% else %}
-            <div class="user-avatar-placeholder"><i class="fas fa-user"></i></div>
+            <div class="user-avatar-placeholder">
+                <i class="fas fa-user"></i>
+            </div>
             {% endif %}
             <div class="user-name">{{ current_user.name }}</div>
             <span class="user-role-badge role-{{ current_user.role.lower() }}">
@@ -1277,6 +1567,7 @@
                 <li class="nav-item"><a href="{{ url_for('landlord.messages') }}" class="nav-link"><i class="fas fa-envelope"></i> <span>Messages</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('landlord.settings') }}" class="nav-link"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('landlord.profile') }}" class="nav-link"><i class="fas fa-user"></i> <span>My Profile</span></a></li>
+
                 {% elif current_user.role.lower() == 'tenant' %}
                 <li class="nav-item"><a href="{{ url_for('tenant.dashboard') }}" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('house.hotels') }}" class="nav-link"><i class="fas fa-search"></i> <span>Browse Properties</span></a></li>
@@ -1286,12 +1577,14 @@
                 <li class="nav-item"><a href="{{ url_for('tenant.documents') }}" class="nav-link"><i class="fas fa-file-alt"></i> <span>Documents</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('tenant.messages') }}" class="nav-link"><i class="fas fa-envelope"></i> <span>Messages</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('tenant.profile') }}" class="nav-link"><i class="fas fa-user"></i> <span>My Profile</span></a></li>
+
                 {% elif current_user.role.lower() == 'admin' %}
                 <li class="nav-item"><a href="{{ url_for('admin.dashboard') }}" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('admin.manage_users') }}" class="nav-link"><i class="fas fa-users-cog"></i> <span>Manage Users</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('admin.system_settings') }}" class="nav-link"><i class="fas fa-cogs"></i> <span>System Settings</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('admin.view_reports') }}" class="nav-link"><i class="fas fa-chart-line"></i> <span>Reports</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('admin.audit_logs') }}" class="nav-link"><i class="fas fa-history"></i> <span>Audit Logs</span></a></li>
+
                 {% elif current_user.role.lower() == 'service' %}
                 <li class="nav-item"><a href="{{ url_for('service_provider.dashboard') }}" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('service_provider.requests') }}" class="nav-link"><i class="fas fa-clipboard-list"></i> <span>Service Requests</span></a></li>
@@ -1301,6 +1594,7 @@
                 <li class="nav-item"><a href="{{ url_for('service_provider.reviews') }}" class="nav-link"><i class="fas fa-star"></i> <span>Reviews</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('service_provider.settings') }}" class="nav-link"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
                 {% endif %}
+
                 <li class="nav-item mt-2"><div class="sidebar-divider"></div></li>
                 <div class="sidebar-section-title">General</div>
                 <li class="nav-item"><a href="{{ url_for('main.about') }}" class="nav-link"><i class="fas fa-info-circle"></i> <span>About Us</span></a></li>
@@ -1310,6 +1604,7 @@
                 <li class="nav-item"><a href="{{ url_for('auth.logout') }}" class="nav-link text-danger"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
             </ul>
         </nav>
+
         {% else %}
         <nav class="sidebar-nav">
             <div class="sidebar-section-title">Account</div>
@@ -1341,6 +1636,7 @@
                     {% endfor %} 
                 {% endif %} 
             {% endwith %} 
+            
             {% block content %}{% endblock %}
         </main>
 
@@ -1352,6 +1648,7 @@
                         <img src="{{ url_for('static', filename='images/logo.png') }}" alt="HomeHub Logo" style="height: 40px; margin-bottom: 1rem;">
                         <p>Your trusted platform for seamless property management, connecting landlords, tenants, and service providers.</p>
                     </div>
+
                     <div class="col-12 col-sm-6 col-lg-2 footer-section">
                         <h5>Quick Links</h5>
                         <ul class="list-unstyled">
@@ -1377,11 +1674,18 @@
                             <li><a href="{{ url_for('main.accessibility') }}">Accessibility</a></li>
                         </ul>
                     </div>
+
                     <div class="col-12 col-sm-6 col-lg-3 footer-section">
                         <h5>Contact Us</h5>
                         <ul class="list-unstyled">
-                            <li class="d-flex align-items-center gap-2 mb-3"><i class="fas fa-envelope" style="color: #818cf8;"></i><a href="mailto:support@homehub.com">support@homehub.com</a></li>
-                            <li class="d-flex align-items-center gap-2 mb-4"><i class="fas fa-phone" style="color: #818cf8;"></i><span>+1-800-555-1234</span></li>
+                            <li class="d-flex align-items-center gap-2 mb-3">
+                                <i class="fas fa-envelope" style="color: #818cf8;"></i>
+                                <a href="mailto:support@homehub.com">support@homehub.com</a>
+                            </li>
+                            <li class="d-flex align-items-center gap-2 mb-4">
+                                <i class="fas fa-phone" style="color: #818cf8;"></i>
+                                <span>+1-800-555-1234</span>
+                            </li>
                         </ul>
                         <div class="footer-social">
                             <a href="https://twitter.com/homehub" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
@@ -1389,6 +1693,7 @@
                             <a href="https://instagram.com/homehub" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                         </div>
                     </div>
+
                     <div class="col-12 col-lg-3 footer-section">
                         <h5>Stay Updated</h5>
                         <p style="margin-bottom: 1rem;">Subscribe to our newsletter for the latest updates and features.</p>
@@ -1397,9 +1702,18 @@
                         </a>
                     </div>
                 </div>
+
                 <hr class="footer-hr">
+
                 <div class="footer-bottom">
-                    <p>&copy; <span id="currentYear"></span> HomeHub. All rights reserved.<span class="d-none d-md-inline"> | </span><br class="d-md-none"><a href="{{ url_for('main.terms') }}">Terms of Service</a><span class="mx-1">·</span><a href="{{ url_for('main.privacy') }}">Privacy Policy</a></p>
+                    <p>
+                        &copy; <span id="currentYear"></span> HomeHub. All rights reserved.
+                        <span class="d-none d-md-inline">|</span>
+                        <br class="d-md-none">
+                        <a href="{{ url_for('main.terms') }}">Terms of Service</a>
+                        <span class="mx-1">·</span>
+                        <a href="{{ url_for('main.privacy') }}">Privacy Policy</a>
+                    </p>
                 </div>
             </div>
         </footer>
@@ -1441,7 +1755,8 @@
 
         // Close sidebar when clicking on nav links
         document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
-            link.addEventListener('click', function() {
+            link.addEventListener('click', function(e) {
+                // Only close if it's a real navigation (not a # link)
                 const href = this.getAttribute('href');
                 if (href && href !== '#') {
                     closeSidebar();
