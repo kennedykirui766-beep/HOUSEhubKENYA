@@ -6,6 +6,9 @@ from werkzeug.utils import secure_filename
 from datetime import datetime
 from extensions import db, csrf
 from models.models import User, House, Booking, Payment, MaintenanceRequest, ServiceProvider
+import cloudinary.uploader
+import json
+
 
 # Logging setup
 logging.basicConfig(level=logging.DEBUG)
@@ -46,8 +49,7 @@ def properties():
 
 
 # ---------------- Add Property ----------------
-from datetime import datetime
-import json
+
 
 @landlord_bp.route("/properties/add", methods=["GET", "POST"])
 @login_required
@@ -70,7 +72,6 @@ def add_property():
             postal_code = request.form.get("postal_code")
             country = request.form.get("country")
 
-            # Combine location string
             location = f"{address_line1}, {city}, {country}"
 
             # ---- Pricing ----
@@ -104,20 +105,23 @@ def add_property():
             accessibility_features = request.form.getlist("accessibility_features")
             accessibility_features = ",".join(accessibility_features)
 
-            # ---- Images Upload (Cloudinary or Local) ----
+            # ---- Images Upload (Cloudinary) ----
             image_files = request.files.getlist("images")
             image_urls = []
 
+            import cloudinary.uploader
+
             for image in image_files:
                 if image and image.filename:
-                    # 👉 Replace with your Cloudinary upload
-                    # result = cloudinary.uploader.upload(image)
-                    # image_urls.append(result["secure_url"])
-
-                    # TEMP (local save example)
-                    filepath = f"static/uploads/{image.filename}"
-                    image.save(filepath)
-                    image_urls.append("/" + filepath)
+                    try:
+                        result = cloudinary.uploader.upload(
+                            image,
+                            folder="homehub/properties",
+                            resource_type="image"
+                        )
+                        image_urls.append(result.get("secure_url"))
+                    except Exception as upload_error:
+                        print("Cloudinary upload failed:", upload_error)
 
             image_urls_json = json.dumps(image_urls)
 
@@ -156,7 +160,6 @@ def add_property():
                 accessibility_features=accessibility_features,
 
                 image_urls=image_urls_json,
-
                 owner_id=current_user.id,
             )
 
