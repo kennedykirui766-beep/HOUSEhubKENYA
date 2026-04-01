@@ -172,7 +172,7 @@ def add_property():
             db.session.rollback()
             return {"message": str(e)}, 500
 
-    return render_template("landlord/properties.html", stats={})
+    return render_template("landlord/add_property.html", stats={})
 
 # ---------------- Manage Tenants ----------------
 @landlord_bp.route("/tenants")
