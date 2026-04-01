@@ -1643,20 +1643,10 @@
         <div class="property-card" data-property-type="{{ property.category }}" onclick="viewProperty('{{ property.id }}')">
           <div class="property-image-container">
             {% if property.image_list and property.image_list|length > 0 %}
-              
               <img src="{{ property.image_list[0] }}" 
                   alt="{{ property.title }}" 
                   class="property-image" 
                   loading="lazy" />
-
-              {% if property.featured %}
-                <span class="property-badge featured">Featured</span>
-              {% endif %}
-
-              <span class="property-badge price">
-                KES {{ property.price }}/mo
-              </span>
-
             {% else %}
               <div class="property-no-image d-flex align-items-center justify-content-center" style="height: 200px;">
                 <div class="text-center">
