@@ -686,7 +686,7 @@
         <div class="prop-card-image">
           {% if property.image_urls %}
             {% set first_image = property.image_urls.split(',')[0].strip() %}
-            <img src="{{ url_for('static', filename='images/' ~ first_image) }}" alt="{{ property.title }}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\'prop-card-image-placeholder\'><i class=\'fas fa-image\'></i><span>Image not found</span></div>'" />
+            <img src="{{ images[0] }}" alt="{{ property.title }}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\'prop-card-image-placeholder\'><i class=\'fas fa-image\'></i><span>Image not found</span></div>'" />
           {% else %}
             <div class="prop-card-image-placeholder">
               <i class="fas fa-building"></i>
