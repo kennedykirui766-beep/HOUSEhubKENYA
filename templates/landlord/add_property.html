@@ -2011,7 +2011,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const result = await response.json();
 
       if (response.ok) {
-        showFeedback(result.message || 'Draft saved successfully!', 'success');
+                          showFeedback(result.message || 'Property added successfully!', 'success');
+
+                          // 🔥 Redirect after success
+                          if (result.redirect) {
+                            setTimeout(() => {
+                              window.location.href = result.redirect;
+                            }, 1500); // small delay for UX
+                          }
+                        }
       } else {
         showFeedback(result.message || 'Error saving draft.', 'danger');
       }
