@@ -290,6 +290,32 @@ def edit_property(property_id):
     return render_template("landlord/edit_property.html", house=house, stats={})
 
 
+@landlord_bp.route('/delete-property/<int:property_id>', methods=['POST'])
+@login_required
+def delete_property(property_id):
+    # Ensure only landlords can delete
+    if current_user.role != "landlord":
+        flash("Access denied.", "danger")
+        return redirect(url_for("main.index"))
+
+    # Get property
+    property = House.query.get_or_404(property_id)
+
+    # Ensure landlord owns the property
+    if property.owner_id != current_user.id:
+        flash("You are not allowed to delete this property.", "danger")
+        return redirect(url_for("landlord.properties"))
+
+    try:
+        db.session.delete(property)
+        db.session.commit()
+        flash("Property deleted successfully.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash("Error deleting property.", "danger")
+
+    return redirect(url_for("landlord.properties"))
+
 
 # ---------------- Settings ----------------
 @landlord_bp.route("/settings", methods=["GET", "POST"])
