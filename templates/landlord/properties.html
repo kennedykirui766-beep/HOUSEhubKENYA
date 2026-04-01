@@ -1067,11 +1067,6 @@
   function confirmDelete(propertyId, propertyTitle) {
     if (!confirm('Are you sure you want to delete "' + propertyTitle + '"? This action cannot be undone.')) return;
 
-    // Get CSRF token from page if available
-    var csrfInput = document.querySelector('input[name="csrf_token"]');
-    var headers = { 'Content-Type': 'application/json' };
-    if (csrfInput) headers['X-CSRFToken'] = csrfInput.value;
-
     fetch('/landlord/delete_property/' + propertyId, {
       method: 'POST',
       headers: headers
