@@ -37,6 +37,8 @@ def dashboard():
 
 
 # ---------------- Manage Properties ----------------
+import json
+
 @landlord_bp.route("/properties")
 @login_required
 def properties():
@@ -45,7 +47,19 @@ def properties():
         return redirect(url_for("main.index"))
 
     properties = House.query.filter_by(owner_id=current_user.id).all()
-    return render_template("landlord/properties.html", properties=properties, stats={})
+
+    # ✅ Convert JSON string → list
+    for p in properties:
+        try:
+            p.image_list = json.loads(p.image_urls) if p.image_urls else []
+        except Exception:
+            p.image_list = []
+
+    return render_template(
+        "landlord/properties.html",
+        properties=properties,
+        stats={}
+    )
 
 
 # ---------------- Add Property ----------------
