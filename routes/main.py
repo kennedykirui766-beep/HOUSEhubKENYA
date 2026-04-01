@@ -3,10 +3,20 @@ from models.models import House
 
 main_bp = Blueprint('main', __name__)
 
+import json
+
 @main_bp.route('/')
 @main_bp.route('/index')
 def index():
     houses = House.query.all()
+
+    # ✅ Convert JSON string → list for each house
+    for h in houses:
+        try:
+            h.image_list = json.loads(h.image_urls) if h.image_urls else []
+        except Exception:
+            h.image_list = []
+
     return render_template('index.html', houses=houses)
 
 @main_bp.route('/about')
