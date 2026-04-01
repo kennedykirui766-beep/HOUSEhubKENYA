@@ -22,46 +22,427 @@
     font-size: 0.95rem;
   }
 
-  /* ---------- Progress Bar ---------- */
-  .ap-progress-wrap {
-    margin-bottom: 1.75rem;
-  }
-
-  .ap-progress {
-    height: 10px;
-    border-radius: 99px;
-    background-color: var(--border-color);
-    overflow: hidden;
-  }
-
-  .ap-progress-bar {
-    height: 100%;
-    border-radius: 99px;
-    background: var(--gradient-primary);
-    transition: width 0.4s ease;
-    min-width: 0;
-  }
-
-  .ap-progress-label {
+  /* ========== STICKY TRACKER ========== */
+  .ap-sticky-tracker {
+    position: sticky;
+    top: var(--navbar-height);
+    z-index: 50;
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.7rem 1rem;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-top: 0.5rem;
+    justify-content: space-between;
+    gap: 0.75rem;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: none;
   }
 
-  .ap-progress-step {
-    font-size: 0.75rem;
-    font-weight: 500;
+  .ap-sticky-tracker.visible {
+    transform: translateY(0);
+    box-shadow: var(--shadow-md);
+  }
+
+  .ap-tracker-steps {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 1;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .ap-tracker-step {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.7rem;
+    border-radius: var(--radius-full);
+    background: var(--body-bg);
+    border: 2px solid var(--border-color);
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .ap-tracker-step:hover {
+    border-color: var(--primary-color);
+  }
+
+  .ap-tracker-step.done {
+    border-color: var(--success-color);
+    background: var(--success-light);
+  }
+
+  .ap-tracker-step.done .ap-tracker-label {
+    color: var(--success-color);
+  }
+
+  .ap-tracker-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.5rem;
+    flex-shrink: 0;
+    background: var(--border-color);
     color: var(--text-muted);
     transition: var(--transition);
+  }
+
+  .ap-tracker-step.done .ap-tracker-icon {
+    background: var(--success-color);
+    color: white;
+  }
+
+  .ap-tracker-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.02em;
+  }
+
+  .ap-tracker-pct {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    background: var(--primary-light);
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
     white-space: nowrap;
   }
 
-  .ap-progress-step.active {
+  .ap-preview-toggle {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--border-color);
+    background: var(--body-bg);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: var(--transition);
+    flex-shrink: 0;
+    font-family: inherit;
+  }
+
+  .ap-preview-toggle:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: var(--primary-light);
+  }
+
+  .ap-preview-toggle.active {
+    background: var(--gradient-primary);
+    color: white;
+    border-color: transparent;
+  }
+
+  /* ========== PREVIEW DRAWER ========== */
+  .ap-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 200;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+
+  .ap-drawer-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .ap-preview-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 420px;
+    max-width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    background-color: var(--card-bg);
+    z-index: 201;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: -8px 0 30px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+  }
+
+  .ap-preview-drawer.active {
+    transform: translateX(0);
+  }
+
+  .ap-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+  }
+
+  .ap-drawer-header h4 {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .ap-drawer-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: var(--body-bg);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    transition: var(--transition);
+  }
+
+  .ap-drawer-close:hover {
+    background: var(--danger-light);
+    color: var(--danger-color);
+  }
+
+  .ap-drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ap-drawer-footer {
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--body-bg);
+    flex-shrink: 0;
+  }
+
+  /* Drawer content styles */
+  .ap-dw-gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .ap-dw-thumb {
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+    background-color: var(--body-bg);
+  }
+
+  .ap-dw-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ap-dw-thumb-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 0.65rem;
+    text-align: center;
+    padding: 0.25rem;
+  }
+
+  .ap-dw-title {
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ap-dw-location {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .ap-dw-price-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .ap-dw-price {
+    font-size: 1.2rem;
+    font-weight: 700;
     color: var(--primary-color);
   }
 
-  /* ---------- Form Sections ---------- */
+  .ap-dw-deposit {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  .ap-dw-specs {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .ap-dw-spec {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+  }
+
+  .ap-dw-spec i {
+    color: var(--primary-color);
+    font-size: 0.7rem;
+  }
+
+  .ap-dw-section {
+    margin-bottom: 1rem;
+  }
+
+  .ap-dw-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .ap-dw-section-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .ap-dw-section-title i {
+    color: var(--primary-color);
+    font-size: 0.65rem;
+  }
+
+  .ap-dw-desc {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .ap-dw-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.8rem;
+  }
+
+  .ap-dw-item:last-child {
+    border-bottom: none;
+  }
+
+  .ap-dw-item-label {
+    color: var(--text-secondary);
+  }
+
+  .ap-dw-item-value {
+    color: var(--text-primary);
+    font-weight: 500;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 60%;
+  }
+
+  .ap-dw-item-value.empty {
+    color: var(--text-muted);
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .ap-dw-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+
+  .ap-dw-tag {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: var(--radius-full);
+    background: var(--primary-light);
+    color: var(--primary-color);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .ap-dw-img-count {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .ap-dw-img-count.has-images {
+    color: var(--success-color);
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  .ap-dw-complete {
+    text-align: center;
+    padding: 1rem;
+    color: var(--success-color);
+    font-size: 0.82rem;
+    font-weight: 500;
+    display: none;
+  }
+
+  .ap-dw-complete.visible {
+    display: block;
+  }
+
+  /* ========== FORM SECTIONS ========== */
   .ap-section {
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -110,7 +491,7 @@
     margin: 0;
   }
 
-  /* ---------- Form Fields ---------- */
+  /* ========== FORM FIELDS ========== */
   .ap-field {
     margin-bottom: 1.15rem;
   }
@@ -194,7 +575,6 @@
     display: block;
   }
 
-  /* ---------- Address Grid ---------- */
   .ap-address-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -205,7 +585,12 @@
     grid-column: 1 / -1;
   }
 
-  /* ---------- Checkbox / Radio Groups ---------- */
+  .ap-spec-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.15rem;
+  }
+
   .ap-check-group {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -288,6 +673,8 @@
     color: var(--text-muted);
     font-size: 0.72rem;
     opacity: 0.7;
+    display: block;
+    margin-top: 0.3rem;
   }
 
   .ap-upload-area input[type="file"] {
@@ -298,16 +685,15 @@
   }
 
   .ap-image-previews {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
     gap: 0.6rem;
     margin-top: 0.75rem;
   }
 
   .ap-thumb {
     position: relative;
-    width: 80px;
-    height: 80px;
+    aspect-ratio: 1;
     border-radius: var(--radius-sm);
     overflow: hidden;
     border: 2px solid var(--border-color);
@@ -320,12 +706,29 @@
     object-fit: cover;
   }
 
-  .ap-thumb-remove {
+  .ap-thumb-num {
     position: absolute;
-    top: 2px;
-    right: 2px;
+    top: 4px;
+    left: 4px;
     width: 20px;
     height: 20px;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    color: white;
+    font-size: 0.55rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+
+  .ap-thumb-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     background: rgba(220, 53, 69, 0.9);
     color: white;
@@ -336,7 +739,7 @@
     justify-content: center;
     cursor: pointer;
     transition: var(--transition);
-    line-height: 1;
+    z-index: 2;
   }
 
   .ap-thumb-remove:hover {
@@ -355,14 +758,6 @@
     display: block;
   }
 
-  /* ---------- Spec Grid ---------- */
-  .ap-spec-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.15rem;
-  }
-
-  /* ---------- Char Count ---------- */
   .ap-char-count {
     text-align: right;
     font-size: 0.72rem;
@@ -370,13 +765,8 @@
     margin-top: 0.25rem;
   }
 
-  .ap-char-count.warning {
-    color: #f59e0b;
-  }
-
-  .ap-char-count.danger {
-    color: #dc3545;
-  }
+  .ap-char-count.warning { color: #f59e0b; }
+  .ap-char-count.danger { color: #dc3545; }
 
   /* ---------- Form Actions ---------- */
   .ap-actions {
@@ -468,11 +858,8 @@
     flex-shrink: 0;
   }
 
-  @keyframes apSpin {
-    to { transform: rotate(360deg); }
-  }
+  @keyframes apSpin { to { transform: rotate(360deg); } }
 
-  /* ---------- Feedback Alert ---------- */
   .ap-feedback {
     border-radius: var(--radius-md);
     padding: 0.85rem 1rem;
@@ -484,9 +871,7 @@
     border: none;
   }
 
-  .ap-feedback.visible {
-    display: flex;
-  }
+  .ap-feedback.visible { display: flex; }
 
   .ap-feedback.alert-success {
     background-color: rgba(40, 167, 69, 0.07);
@@ -506,14 +891,42 @@
     border: 1px solid rgba(99, 102, 241, 0.12);
   }
 
-  /* ---------- Sidebar ---------- */
+  /* ---------- Flash Alert ---------- */
+  .ap-flash {
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1rem;
+    margin-bottom: 1.25rem;
+    border: none;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    line-height: 1.5;
+  }
+
+  .ap-flash i { margin-top: 0.15rem; flex-shrink: 0; }
+
+  .ap-flash.alert-danger {
+    background-color: rgba(220, 53, 69, 0.07);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.12);
+  }
+
+  .ap-flash.alert-success {
+    background-color: rgba(40, 167, 69, 0.07);
+    color: #28a745;
+    border: 1px solid rgba(40, 167, 69, 0.12);
+  }
+
+  .ap-flash .btn-close { padding: 0; margin-left: auto; flex-shrink: 0; }
+
+  /* ---------- Tips ---------- */
   .ap-tips-card {
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
     margin-bottom: 1.25rem;
-    transition: var(--transition);
   }
 
   .ap-tips-card h5 {
@@ -526,9 +939,7 @@
     gap: 0.5rem;
   }
 
-  .ap-tips-card h5 i {
-    color: var(--primary-color);
-  }
+  .ap-tips-card h5 i { color: var(--primary-color); }
 
   .ap-tips-list {
     list-style: none;
@@ -547,10 +958,7 @@
     line-height: 1.5;
   }
 
-  .ap-tips-list li:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-  }
+  .ap-tips-list li:last-child { border-bottom: none; padding-bottom: 0; }
 
   .ap-tips-list li i {
     color: var(--primary-color);
@@ -571,168 +979,15 @@
     transition: var(--transition);
   }
 
-  .ap-tips-toggle:hover {
-    color: var(--secondary-color);
-  }
+  .ap-tips-toggle:hover { color: var(--secondary-color); }
 
   .ap-tips-body {
     overflow: hidden;
     transition: max-height 0.3s ease;
   }
 
-  .ap-tips-body.collapsed {
-    max-height: 0 !important;
-  }
+  .ap-tips-body.collapsed { max-height: 0 !important; }
 
-  /* ---------- Preview Card ---------- */
-  .ap-preview-card {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    position: sticky;
-    top: calc(var(--navbar-height) + 1rem);
-  }
-
-  .ap-preview-images {
-    height: 160px;
-    background-color: var(--body-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-bottom: 1px solid var(--border-color);
-    overflow: hidden;
-    position: relative;
-  }
-
-  .ap-preview-images i {
-    font-size: 2rem;
-    color: var(--text-muted);
-    opacity: 0.4;
-  }
-
-  .ap-preview-images img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    position: absolute;
-    inset: 0;
-  }
-
-  .ap-preview-body {
-    padding: 1.25rem;
-  }
-
-  .ap-preview-title {
-    color: var(--text-primary);
-    font-weight: 600;
-    font-size: 1rem;
-    margin-bottom: 0.35rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .ap-preview-location {
-    color: var(--text-muted);
-    font-size: 0.8rem;
-    margin-bottom: 0.85rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .ap-preview-location i {
-    color: var(--primary-color);
-    margin-right: 0.25rem;
-  }
-
-  .ap-preview-price {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-bottom: 0.85rem;
-  }
-
-  .ap-preview-specs {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    padding-top: 0.85rem;
-    border-top: 1px solid var(--border-color);
-  }
-
-  .ap-preview-spec {
-    font-size: 0.78rem;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-  }
-
-  .ap-preview-spec i {
-    color: var(--primary-color);
-    font-size: 0.72rem;
-  }
-
-  .ap-preview-desc {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin-top: 0.75rem;
-    line-height: 1.55;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .ap-preview-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-    margin-top: 0.75rem;
-  }
-
-  .ap-preview-tag {
-    font-size: 0.68rem;
-    padding: 0.2rem 0.55rem;
-    border-radius: var(--radius-full);
-    background-color: var(--primary-light);
-    color: var(--primary-color);
-    font-weight: 500;
-    white-space: nowrap;
-  }
-
-  .ap-preview-badge {
-    position: absolute;
-    top: 0.75rem;
-    left: 0.75rem;
-    padding: 0.25rem 0.65rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.7rem;
-    font-weight: 600;
-    z-index: 2;
-    background: var(--gradient-primary);
-    color: white;
-  }
-
-  .ap-help-link {
-    color: var(--text-muted);
-    text-decoration: none;
-    font-size: 0.82rem;
-    font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    transition: var(--transition);
-    margin-top: 1rem;
-  }
-
-  .ap-help-link:hover {
-    color: var(--primary-color);
-  }
-
-  /* ---------- Access Badge ---------- */
   .ap-access-badge {
     position: fixed;
     bottom: 1.25rem;
@@ -750,107 +1005,37 @@
     gap: 0.35rem;
   }
 
-  /* ---------- Flash Alert Override ---------- */
-  .ap-flash {
-    border-radius: var(--radius-md);
-    padding: 0.85rem 1rem;
-    margin-bottom: 1.25rem;
-    border: none;
-    font-size: 0.85rem;
-    display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-    line-height: 1.5;
-  }
-
-  .ap-flash i {
-    margin-top: 0.15rem;
-    flex-shrink: 0;
-  }
-
-  .ap-flash.alert-danger {
-    background-color: rgba(220, 53, 69, 0.07);
-    color: #dc3545;
-    border: 1px solid rgba(220, 53, 69, 0.12);
-  }
-
-  .ap-flash.alert-success {
-    background-color: rgba(40, 167, 69, 0.07);
-    color: #28a745;
-    border: 1px solid rgba(40, 167, 69, 0.12);
-  }
-
-  .ap-flash .btn-close {
-    padding: 0;
-    margin-left: auto;
-    flex-shrink: 0;
-  }
-
   /* ========== RESPONSIVE ========== */
-  @media (max-width: 1199px) {
-    .ap-spec-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-
   @media (max-width: 991px) {
-    .add-property-page {
-      padding: 1.5rem 0 3rem;
-    }
-    .ap-header h1 {
-      font-size: 1.45rem;
-    }
-    .ap-preview-card {
-      position: static;
-    }
-    .ap-access-badge {
-      display: none;
-    }
+    .add-property-page { padding: 1.5rem 0 3rem; }
+    .ap-header h1 { font-size: 1.45rem; }
+    .ap-preview-drawer { width: 360px; }
+    .ap-access-badge { display: none; }
   }
 
   @media (max-width: 767px) {
-    .ap-section {
-      padding: 1.25rem;
-    }
-    .ap-address-grid {
-      grid-template-columns: 1fr;
-    }
-    .ap-spec-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-    .ap-check-group {
-      grid-template-columns: 1fr 1fr;
-    }
-    .ap-actions {
-      flex-direction: column;
-    }
+    .ap-section { padding: 1.25rem; }
+    .ap-address-grid { grid-template-columns: 1fr; }
+    .ap-spec-grid { grid-template-columns: 1fr 1fr; }
+    .ap-check-group { grid-template-columns: 1fr 1fr; }
+    .ap-actions { flex-direction: column; }
     .ap-actions .btn-ap-submit,
     .ap-actions .btn-ap-draft,
-    .ap-actions .btn-ap-cancel {
-      width: 100%;
-      justify-content: center;
-    }
-    .ap-progress-label {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
+    .ap-actions .btn-ap-cancel { width: 100%; justify-content: center; }
+    .ap-preview-drawer { width: 100%; }
+    .ap-dw-gallery { grid-template-columns: repeat(3, 1fr); }
   }
 
   @media (max-width: 480px) {
-    .ap-check-group {
-      grid-template-columns: 1fr;
-    }
-    .ap-spec-grid {
-      grid-template-columns: 1fr;
-    }
-    .ap-section-icon {
-      width: 34px;
-      height: 34px;
-      font-size: 0.85rem;
-    }
-    .ap-section-title {
-      font-size: 0.95rem;
-    }
+    .ap-check-group { grid-template-columns: 1fr; }
+    .ap-spec-grid { grid-template-columns: 1fr; }
+    .ap-section-icon { width: 34px; height: 34px; font-size: 0.85rem; }
+    .ap-section-title { font-size: 0.95rem; }
+    .ap-dw-gallery { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 380px) {
+    .ap-dw-gallery { grid-template-columns: repeat(2, 1fr); gap: 0.4rem; }
   }
 </style>
 {% endblock %}
@@ -873,33 +1058,49 @@
     {% endwith %}
 
     <!-- Header -->
-    <header class="ap-header mb-4">
+    <header class="ap-header mb-4" id="apHeader">
       <h1>List Your Property on HomeHub</h1>
       <p>Fill out the details below to attract tenants quickly.</p>
     </header>
 
-    <!-- Progress -->
-    <div class="ap-progress-wrap">
-      <div class="ap-progress">
-        <div class="ap-progress-bar" id="progressBar" style="width: 0%"></div>
+    <!-- Sticky Progress Tracker -->
+    <div class="ap-sticky-tracker" id="stickyTracker">
+      <div class="ap-tracker-steps" id="trackerSteps">
+        <button type="button" class="ap-tracker-step" data-step="1" onclick="scrollToStep(1)">
+          <span class="ap-tracker-icon"><i class="fas fa-check"></i></span>
+          <span class="ap-tracker-label">Details</span>
+        </button>
+        <button type="button" class="ap-tracker-step" data-step="2" onclick="scrollToStep(2)">
+          <span class="ap-tracker-icon"><i class="fas fa-check"></i></span>
+          <span class="ap-tracker-label">Location</span>
+        </button>
+        <button type="button" class="ap-tracker-step" data-step="3" onclick="scrollToStep(3)">
+          <span class="ap-tracker-icon"><i class="fas fa-check"></i></span>
+          <span class="ap-tracker-label">Pricing</span>
+        </button>
+        <button type="button" class="ap-tracker-step" data-step="4" onclick="scrollToStep(4)">
+          <span class="ap-tracker-icon"><i class="fas fa-check"></i></span>
+          <span class="ap-tracker-label">Images</span>
+        </button>
+        <button type="button" class="ap-tracker-step" data-step="5" onclick="scrollToStep(5)">
+          <span class="ap-tracker-icon"><i class="fas fa-check"></i></span>
+          <span class="ap-tracker-label">Submit</span>
+        </button>
       </div>
-      <div class="ap-progress-label">
-        <span class="ap-progress-step active" data-step="1"><i class="fas fa-file-alt me-1"></i>Details</span>
-        <span class="ap-progress-step" data-step="2"><i class="fas fa-map-marker-alt me-1"></i>Location</span>
-        <span class="ap-progress-step" data-step="3"><i class="fas fa-tag me-1"></i>Pricing</span>
-        <span class="ap-progress-step" data-step="4"><i class="fas fa-camera me-1"></i>Images</span>
-        <span class="ap-progress-step" data-step="5"><i class="fas fa-check-circle me-1"></i>Submit</span>
-      </div>
+      <div class="ap-tracker-pct" id="trackerPct">0%</div>
+      <button type="button" class="ap-preview-toggle" id="previewToggle" onclick="toggleDrawer()" aria-label="Toggle listing preview">
+        <i class="fas fa-eye"></i>
+      </button>
     </div>
 
     <div class="row g-4">
-      <!-- ===== MAIN FORM COLUMN ===== -->
+      <!-- ===== MAIN FORM ===== -->
       <div class="col-lg-8">
         <form id="addPropertyForm" enctype="multipart/form-data" method="POST" action="{{ url_for('landlord.add_property') }}" novalidate>
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
-          <!-- SECTION 1: Property Details -->
-          <div class="ap-section" data-progress-group="1">
+          <!-- STEP 1: Details -->
+          <div class="ap-section" data-form-step="1" id="formStep1">
             <div class="ap-section-header">
               <div class="ap-section-icon"><i class="fas fa-building"></i></div>
               <div>
@@ -933,8 +1134,8 @@
             </div>
           </div>
 
-          <!-- SECTION 2: Location -->
-          <div class="ap-section" data-progress-group="2">
+          <!-- STEP 2: Location -->
+          <div class="ap-section" data-form-step="2" id="formStep2">
             <div class="ap-section-header">
               <div class="ap-section-icon"><i class="fas fa-map-marker-alt"></i></div>
               <div>
@@ -981,13 +1182,13 @@
             </div>
           </div>
 
-          <!-- SECTION 3: Pricing & Terms -->
-          <div class="ap-section" data-progress-group="3">
+          <!-- STEP 3: Pricing -->
+          <div class="ap-section" data-form-step="3" id="formStep3">
             <div class="ap-section-header">
               <div class="ap-section-icon"><i class="fas fa-tag"></i></div>
               <div>
-                <h3 class="ap-section-title">Pricing &amp; Terms</h3>
-                <p class="ap-section-subtitle">Rent, lease terms, and deposit</p>
+                <h3 class="ap-section-title">Pricing &amp; Specifications</h3>
+                <p class="ap-section-subtitle">Rent, specs, and lease terms</p>
               </div>
             </div>
             <div class="row g-3">
@@ -1025,36 +1226,6 @@
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- SECTION 4: Images -->
-          <div class="ap-section" data-progress-group="4">
-            <div class="ap-section-header">
-              <div class="ap-section-icon"><i class="fas fa-camera"></i></div>
-              <div>
-                <h3 class="ap-section-title">Property Images</h3>
-                <p class="ap-section-subtitle">Upload up to 5 photos to showcase your property</p>
-              </div>
-            </div>
-            <div class="ap-upload-area" id="uploadArea">
-              <i class="fas fa-cloud-upload-alt"></i>
-              <p>Drag &amp; drop images here or click to browse</p>
-              <small>JPG or PNG, max 5MB each, up to 5 images</small>
-              <input type="file" id="propertyImages" name="images" accept="image/jpeg,image/png" multiple />
-            </div>
-            <div class="ap-upload-error" id="uploadError"></div>
-            <div class="ap-image-previews" id="imagePreview"></div>
-          </div>
-
-          <!-- SECTION 5: Specifications -->
-          <div class="ap-section" data-progress-group="3">
-            <div class="ap-section-header">
-              <div class="ap-section-icon"><i class="fas fa-ruler-combined"></i></div>
-              <div>
-                <h3 class="ap-section-title">Specifications</h3>
-                <p class="ap-section-subtitle">Room count and size details</p>
-              </div>
-            </div>
             <div class="ap-spec-grid">
               <div class="ap-field">
                 <label for="bedrooms">Bedrooms <span style="color:#dc3545">*</span></label>
@@ -1073,13 +1244,32 @@
             </div>
           </div>
 
-          <!-- SECTION 6: Features & Amenities -->
-          <div class="ap-section" data-progress-group="3">
+          <!-- STEP 4: Images -->
+          <div class="ap-section" data-form-step="4" id="formStep4">
+            <div class="ap-section-header">
+              <div class="ap-section-icon"><i class="fas fa-camera"></i></div>
+              <div>
+                <h3 class="ap-section-title">Property Images</h3>
+                <p class="ap-section-subtitle">Upload photos to showcase your property</p>
+              </div>
+            </div>
+            <div class="ap-upload-area" id="uploadArea">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <p>Drag &amp; drop images here or click to browse</p>
+              <small>JPG or PNG, max 5MB each, up to 10 images</small>
+              <input type="file" id="propertyImages" name="images" accept="image/jpeg,image/png" multiple />
+            </div>
+            <div class="ap-upload-error" id="uploadError"></div>
+            <div class="ap-image-previews" id="imagePreview"></div>
+          </div>
+
+          <!-- STEP 5: Submit -->
+          <div class="ap-section" data-form-step="5" id="formStep5">
             <div class="ap-section-header">
               <div class="ap-section-icon"><i class="fas fa-star"></i></div>
               <div>
-                <h3 class="ap-section-title">Features &amp; Amenities</h3>
-                <p class="ap-section-subtitle">Select what's included with the property</p>
+                <h3 class="ap-section-title">Features &amp; Policies</h3>
+                <p class="ap-section-subtitle">Optional extras before submitting</p>
               </div>
             </div>
 
@@ -1121,17 +1311,8 @@
                 <label class="ap-check-item"><input type="checkbox" name="amenities" value="Gym" /> <i class="fas fa-dumbbell me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Gym</label>
                 <label class="ap-check-item"><input type="checkbox" name="amenities" value="Swimming Pool" /> <i class="fas fa-swimming-pool me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Pool</label>
                 <label class="ap-check-item"><input type="checkbox" name="amenities" value="Garden" /> <i class="fas fa-leaf me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Garden</label>
-              </div>
-            </div>
-          </div>
-
-          <!-- SECTION 7: Policies -->
-          <div class="ap-section" data-progress-group="3">
-            <div class="ap-section-header">
-              <div class="ap-section-icon"><i class="fas fa-shield-alt"></i></div>
-              <div>
-                <h3 class="ap-section-title">Policies &amp; Accessibility</h3>
-                <p class="ap-section-subtitle">Rules and accessibility features</p>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Security" /> <i class="fas fa-shield-alt me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Security</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Elevator" /> <i class="fas fa-arrows-alt-v me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Elevator</label>
               </div>
             </div>
 
@@ -1171,21 +1352,6 @@
             </div>
           </div>
 
-          <!-- 2FA field (hidden by default) -->
-          <div class="ap-section" id="twoFactorGroup" style="display: none;">
-            <div class="ap-section-header">
-              <div class="ap-section-icon"><i class="fas fa-shield-alt"></i></div>
-              <div>
-                <h3 class="ap-section-title">Verification</h3>
-                <p class="ap-section-subtitle">Two-factor authentication required</p>
-              </div>
-            </div>
-            <div class="ap-field">
-              <label for="two_factor_code">Enter 6-digit code</label>
-              <input type="text" class="ap-input" id="two_factor_code" name="two_factor_code" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" style="text-align:center;font-size:1.2rem;letter-spacing:0.3em;" />
-            </div>
-          </div>
-
           <!-- Form Actions -->
           <div class="ap-actions">
             <button type="submit" class="btn-ap-submit" id="submitProperty">
@@ -1194,12 +1360,10 @@
               <div class="ap-spinner" id="submitSpinner"></div>
             </button>
             <button type="button" class="btn-ap-draft" id="saveDraft">
-              <i class="fas fa-save"></i>
-              Save as Draft
+              <i class="fas fa-save"></i> Save as Draft
             </button>
             <a href="{{ url_for('landlord.dashboard') }}" class="btn-ap-cancel">
-              <i class="fas fa-times"></i>
-              Cancel
+              <i class="fas fa-times"></i> Cancel
             </a>
           </div>
 
@@ -1207,10 +1371,8 @@
         </form>
       </div>
 
-      <!-- ===== SIDEBAR COLUMN ===== -->
+      <!-- ===== SIDEBAR ===== -->
       <div class="col-lg-4">
-
-        <!-- Tips -->
         <aside class="ap-tips-card" aria-label="Listing tips">
           <h5><i class="fas fa-lightbulb"></i> Tips for a Great Listing</h5>
           <div class="ap-tips-body" id="tipsBody">
@@ -1224,29 +1386,6 @@
           </div>
           <button type="button" class="ap-tips-toggle" id="toggleTips" aria-expanded="true">Hide Tips</button>
         </aside>
-
-        <!-- Live Preview -->
-        <div class="ap-preview-card" aria-label="Property preview">
-          <div class="ap-preview-images" id="previewImageWrap">
-            <i class="fas fa-image"></i>
-            <span class="ap-preview-badge">Preview</span>
-          </div>
-          <div class="ap-preview-body">
-            <div class="ap-preview-title" id="previewTitle">Property Name</div>
-            <div class="ap-preview-location" id="previewLocation"><i class="fas fa-map-marker-alt"></i> City, Country</div>
-            <div class="ap-preview-price" id="previewPrice">KES 0/mo</div>
-            <div class="ap-preview-specs">
-              <div class="ap-preview-spec"><i class="fas fa-bed"></i> <span id="previewBeds">0 Beds</span></div>
-              <div class="ap-preview-spec"><i class="fas fa-bath"></i> <span id="previewBaths">0 Baths</span></div>
-              <div class="ap-preview-spec"><i class="fas fa-ruler-combined"></i> <span id="previewSqft">-- sq ft</span></div>
-              <div class="ap-preview-spec"><i class="fas fa-home"></i> <span id="previewType">--</span></div>
-            </div>
-            <div class="ap-preview-desc" id="previewDesc">Property description will appear here as you type...</div>
-            <div class="ap-preview-tags" id="previewTags"></div>
-          </div>
-        </div>
-
-        <a href="{{ url_for('auth.support') }}" class="ap-help-link"><i class="fas fa-question-circle"></i> Need Help?</a>
       </div>
     </div>
   </div>
@@ -1254,6 +1393,23 @@
   <!-- Landlord Access Badge -->
   <div class="ap-access-badge" aria-label="Landlord access indicator">
     <i class="fas fa-user-shield"></i> Landlord Access
+  </div>
+</div>
+
+<!-- Preview Drawer -->
+<div class="ap-drawer-overlay" id="drawerOverlay" onclick="toggleDrawer()"></div>
+<div class="ap-preview-drawer" id="previewDrawer">
+  <div class="ap-drawer-header">
+    <h4><i class="fas fa-eye"></i> Listing Preview</h4>
+    <button class="ap-drawer-close" onclick="toggleDrawer()" aria-label="Close preview"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="ap-drawer-body" id="drawerBody">
+    <!-- Filled dynamically by JS -->
+  </div>
+  <div class="ap-drawer-footer">
+    <div class="ap-dw-complete" id="drawerComplete">
+      <i class="fas fa-check-circle me-1"></i> All required fields completed — ready to submit
+    </div>
   </div>
 </div>
 {% endblock %}
@@ -1269,11 +1425,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const saveDraftButton = document.getElementById('saveDraft');
   const toggleTipsButton = document.getElementById('toggleTips');
   const tipsBody = document.getElementById('tipsBody');
-  const progressBar = document.getElementById('progressBar');
-  const progressSteps = document.querySelectorAll('.ap-progress-step');
+  const drawerBody = document.getElementById('drawerBody');
+  const drawerComplete = document.getElementById('drawerComplete');
 
-  // References
   const el = (id) => document.getElementById(id);
+
   const inputs = {
     name: el('propertyName'),
     type: el('propertyType'),
@@ -1290,7 +1446,7 @@ document.addEventListener('DOMContentLoaded', () => {
     availabilityDate: el('availabilityDate'),
     images: el('propertyImages'),
     bedrooms: el('bedrooms'),
-    bathrooms: el('bathrooms'),
+    bathrooms: el('bathroom'),
     squareFootage: el('squareFootage'),
     parking: el('parkingAvailability'),
     furnished: document.querySelectorAll('input[name="furnished_status"]'),
@@ -1302,22 +1458,24 @@ document.addEventListener('DOMContentLoaded', () => {
     accessibility: document.querySelectorAll('input[name="accessibility_features"]')
   };
 
-  // ---- Check item visual toggle ----
+  // ---- Sticky tracker visibility ----
+  const stickyTracker = document.getElementById('stickyTracker');
+  const apHeader = document.getElementById('apHeader');
+
+  const headerObserver = new IntersectionObserver(([entry]) => {
+    stickyTracker.classList.toggle('visible', !entry.isIntersecting);
+  }, { threshold: 0, rootMargin: '-1px 0px 0px 0px' });
+  if (apHeader) headerObserver.observe(apHeader);
+
+  // ---- Check item toggle ----
   document.querySelectorAll('.ap-check-item input').forEach(inp => {
     inp.addEventListener('change', () => {
-      const item = inp.closest('.ap-check-item');
-      // For radio groups, deselect siblings
       if (inp.type === 'radio') {
-        const name = inp.name;
-        document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
-          r.closest('.ap-check-item').classList.remove('selected');
-        });
+        document.querySelectorAll(`input[name="${inp.name}"]`).forEach(r => r.closest('.ap-check-item').classList.remove('selected'));
       }
-      item.classList.toggle('selected', inp.checked);
-      updatePreview();
-      updateProgress();
+      inp.closest('.ap-check-item').classList.toggle('selected', inp.checked);
+      updateTracker();
     });
-    // Initialize selected state
     if (inp.checked) inp.closest('.ap-check-item').classList.add('selected');
   });
 
@@ -1328,16 +1486,14 @@ document.addEventListener('DOMContentLoaded', () => {
     charCount.textContent = `${len} / 500 characters`;
     charCount.className = 'ap-char-count' + (len > 450 ? (len > 500 ? ' danger' : ' warning') : '');
     inputs.description.classList.toggle('is-invalid', len > 500);
-    updatePreview();
-    updateProgress();
+    updateTracker();
   });
 
-  // ---- Image upload ----
+  // ---- Image upload (up to 10) ----
   const uploadArea = el('uploadArea');
   const imagePreview = el('imagePreview');
   const uploadError = el('uploadError');
 
-  // Drag & drop visual
   ['dragover', 'dragenter'].forEach(evt => {
     uploadArea.addEventListener(evt, (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
   });
@@ -1350,7 +1506,6 @@ document.addEventListener('DOMContentLoaded', () => {
     inputs.images.files = dt.files;
     handleImages();
   });
-
   inputs.images.addEventListener('change', handleImages);
 
   function handleImages() {
@@ -1358,8 +1513,8 @@ document.addEventListener('DOMContentLoaded', () => {
     uploadError.classList.remove('visible');
     uploadError.textContent = '';
     const files = inputs.images.files;
-    if (files.length > 5) {
-      uploadError.textContent = 'Maximum 5 images allowed.';
+    if (files.length > 10) {
+      uploadError.textContent = 'Maximum 10 images allowed.';
       uploadError.classList.add('visible');
       return;
     }
@@ -1380,6 +1535,9 @@ document.addEventListener('DOMContentLoaded', () => {
       wrap.className = 'ap-thumb';
       const img = document.createElement('img');
       img.src = URL.createObjectURL(file);
+      const num = document.createElement('span');
+      num.className = 'ap-thumb-num';
+      num.textContent = idx + 1;
       const removeBtn = document.createElement('button');
       removeBtn.type = 'button';
       removeBtn.className = 'ap-thumb-remove';
@@ -1391,89 +1549,68 @@ document.addEventListener('DOMContentLoaded', () => {
         handleImages();
       });
       wrap.appendChild(img);
+      wrap.appendChild(num);
       wrap.appendChild(removeBtn);
       imagePreview.appendChild(wrap);
     });
-    updatePreview();
-    updateProgress();
+    updateTracker();
   }
 
-  // ---- Real-time preview ----
-  function updatePreview() {
-    el('previewTitle').textContent = inputs.name.value || 'Property Name';
+  // ---- Step tracking & scrolling ----
+  const stepConfig = {
+    1: { fields: [inputs.name, inputs.type, inputs.description], section: 'formStep1' },
+    2: { fields: [inputs.addressLine1, inputs.city, inputs.stateProvince, inputs.country], section: 'formStep2' },
+    3: { fields: [inputs.rent, inputs.leaseTerm, inputs.availabilityDate, inputs.bedrooms, inputs.bathrooms], section: 'formStep3' },
+    4: { fields: [inputs.images], section: 'formStep4' },
+    5: { fields: [inputs.parking, ...inputs.furnished, ...inputs.utilities, ...inputs.amenities, inputs.pets, inputs.petRestrictions, inputs.smoking, ...inputs.accessibility], section: 'formStep5' }
+  };
 
-    const locParts = [inputs.city.value, inputs.country.value].filter(Boolean);
-    el('previewLocation').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${locParts.join(', ') || 'City, Country'}`;
+  function isFilled(f) {
+    if (f instanceof NodeList) return Array.from(f).some(i => i.checked || i.value);
+    if (f instanceof HTMLInputElement && f.type === 'file') return f.files.length > 0;
+    return f.value && f.value.trim() !== '' && !(f.tagName === 'SELECT' && f.value === '');
+  }
 
-    el('previewPrice').textContent = inputs.rent.value ? `KES ${Number(inputs.rent.value).toLocaleString()}/mo` : 'KES 0/mo';
+  function updateTracker() {
+    let filledCount = 0;
+    const total = Object.keys(stepConfig).length;
+    stepConfig[5].fields = [inputs.parking, ...inputs.furnished, ...inputs.utilities, ...inputs.amenities, inputs.pets, inputs.petRestrictions, inputs.smoking, ...inputs.accessibility];
 
-    el('previewBeds').textContent = inputs.bedrooms.value ? `${inputs.bedrooms.value} Bed${inputs.bedrooms.value > 1 ? 's' : ''}` : '0 Beds';
-    el('previewBaths').textContent = inputs.bathrooms.value ? `${inputs.bathrooms.value} Bath${inputs.bathrooms.value > 1 ? 's' : ''}` : '0 Baths';
-    el('previewSqft').textContent = inputs.squareFootage.value ? `${Number(inputs.squareFootage.value).toLocaleString()} sq ft` : '-- sq ft';
-    el('previewType').textContent = inputs.type.value || '--';
-
-    el('previewDesc').textContent = inputs.description.value || 'Property description will appear here as you type...';
-
-    // Preview image
-    const previewWrap = el('previewImageWrap');
-    const existingImg = previewWrap.querySelector('img');
-    if (existingImg) existingImg.remove();
-    if (inputs.images.files.length > 0) {
-      const img = document.createElement('img');
-      img.src = URL.createObjectURL(inputs.images.files[0]);
-      previewWrap.appendChild(img);
+    for (const [step, config] of Object.entries(stepConfig)) {
+      const done = config.fields.every(isFilled);
+      const stepEl = document.querySelector(`.ap-tracker-step[data-step="${step}"]`);
+      if (stepEl) {
+        stepEl.classList.toggle('done', done);
+      }
+      if (done) filledCount++;
     }
 
-    // Tags
-    const tags = [];
-    Array.from(inputs.utilities).filter(u => u.checked).forEach(u => tags.push(u.value));
-    Array.from(inputs.amenities).filter(a => a.checked).forEach(a => tags.push(a.value));
-    const furnished = Array.from(inputs.furnished).find(f => f.checked);
-    if (furnished && furnished.value !== 'Unfurnished') tags.push(furnished.value);
-    if (inputs.parking.value !== 'None') tags.push(inputs.parking.value);
+    const pct = Math.round((filledCount / total) * 100);
+    document.getElementById('trackerPct').textContent = pct + '%';
 
-    el('previewTags').innerHTML = tags.map(t => `<span class="ap-preview-tag">${t}</span>`).join('');
+    // Update preview drawer
+    buildPreview();
   }
 
-  // ---- Progress tracking ----
-  function updateProgress() {
-    // Check required fields per group
-    const groups = {
-      1: [inputs.name, inputs.type, inputs.description],
-      2: [inputs.addressLine1, inputs.city, inputs.stateProvince, inputs.country],
-      3: [inputs.rent, inputs.leaseTerm, inputs.availabilityDate, inputs.bedrooms, inputs.bathrooms],
-      4: [inputs.images]
-    };
-    let filledGroups = 0;
-    let totalGroups = Object.keys(groups).length;
-
-    for (const [step, fields] of Object.entries(groups)) {
-      const allFilled = fields.every(f => {
-        if (f instanceof FileList) return f.files.length > 0;
-        return f.value && f.value.trim() !== '';
-      });
-      if (allFilled) filledGroups++;
-      const stepEl = document.querySelector(`.ap-progress-step[data-step="${step}"]`);
-      if (stepEl) stepEl.classList.toggle('active', allFilled);
+  function scrollToStep(step) {
+    const config = stepConfig[step];
+    if (!config) return;
+    const sectionEl = document.getElementById(config.section);
+    if (sectionEl) {
+      const y = sectionEl.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top: y, behavior: 'smooth' });
     }
-
-    const pct = Math.round((filledGroups / totalGroups) * 100);
-    progressBar.style.width = pct + '%';
-
-    // Update the last step
-    const submitStep = document.querySelector('.ap-progress-step[data-step="5"]');
-    if (submitStep) submitStep.classList.toggle('active', filledGroups === totalGroups);
   }
 
-  // Listen on all text/select inputs for progress
+  // Listen on all inputs for tracker
   [inputs.name, inputs.type, inputs.description, inputs.addressLine1, inputs.addressLine2,
    inputs.city, inputs.stateProvince, inputs.postalCode, inputs.country, inputs.rent,
    inputs.deposit, inputs.leaseTerm, inputs.availabilityDate, inputs.bedrooms, inputs.bathrooms,
    inputs.squareFootage, inputs.parking, inputs.petRestrictions
   ].forEach(inp => {
     if (!inp) return;
-    inp.addEventListener('input', () => { updatePreview(); updateProgress(); });
-    inp.addEventListener('change', () => { updatePreview(); updateProgress(); });
+    inp.addEventListener('input', updateTracker);
+    inp.addEventListener('change', updateTracker);
   });
 
   // ---- Toggle tips ----
@@ -1483,15 +1620,171 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleTipsButton.setAttribute('aria-expanded', !isHidden);
   });
 
-  // ---- Set min date to today ----
-  const today = new Date().toISOString().split('T')[0];
-  inputs.availabilityDate.setAttribute('min', today);
+  // ---- Min date ----
+  inputs.availabilityDate.setAttribute('min', new Date().toISOString().split('T')[0]);
+
+  // ---- Build preview drawer content ----
+  function buildPreview() {
+    let html = '';
+
+    // Image gallery
+    const files = inputs.images.files;
+    html += '<div class="ap-dw-section">';
+    html += '<div class="ap-dw-section-title"><i class="fas fa-camera"></i> Images</div>';
+    if (files.length > 0) {
+      html += '<div class="ap-dw-gallery">';
+      Array.from(files).forEach((file, idx) => {
+        html += `<div class="ap-dw-thumb"><img src="${URL.createObjectURL(file)}" alt="Photo ${idx + 1}" /></div>`;
+      });
+      html += '</div>';
+      html += `<div class="ap-dw-img-count has-images"><i class="fas fa-check-circle me-1"></i> ${files.length} image${files.length !== 1 ? 's' : ''} uploaded</div>`;
+    } else {
+      html += '<div class="ap-dw-img-count">No images uploaded yet</div>';
+    }
+    html += '</div>';
+
+    // Title & location
+    const title = inputs.name.value || 'Property Name';
+    const city = inputs.city.value || '';
+    const country = inputs.country.value || '';
+    const locStr = [city, country].filter(Boolean).join(', ') || 'Not set';
+    html += `<div class="ap-dw-section">`;
+    html += '<div class="ap-dw-section-title"><i class="fas fa-info-circle"></i> Overview</div>';
+    html += `<div class="ap-dw-item"><span class="ap-dw-item-label">Title</span><span class="ap-dw-item-value ${!inputs.name.value ? 'empty' : ''}">${title}</span></div>`;
+    html += `<div class="ap-dw-item"><span class="ap-dw-item-label">Location</span><span class="ap-dw-item-value ${!city && !country ? 'empty' : ''}">${locStr}</span></div>`;
+    html += '</div>';
+
+    // Pricing
+    const rent = inputs.rent.value;
+    const deposit = inputs.deposit.value;
+    const lease = inputs.leaseTerm.value;
+    const avail = inputs.availabilityDate.value;
+    html += '<div class="ap-dw-section">';
+    html += '<div class="ap-dw-section-title"><i class="fas fa-money-bill-wave"></i> Pricing</div>';
+    html += `<div class="ap-dw-item"><span class="ap-dw-item-label">Rent</span><span class="ap-dw-item-value ${!rent ? 'empty' : ''}">${rent ? 'KES ' + Number(rent).toLocaleString() + '/mo' : 'Not set'}</span></div>`;
+    html += `<div class="ap-dw-item"><span class="ap-dw-item-label">Deposit</span><span class="ap-dw-item-value ${!deposit ? 'empty' : ''}">${deposit ? 'KES ' + Number(deposit).toLocaleString() : 'Not set'}</span></div>`;
+    html += `<div class="ap-dw-item"><span class="ap-dw-item-label">Lease Term</span><span class="ap-dw-item-value ${!lease ? 'empty' : ''}">${lease || 'Not set'}</span></div>`;
+    html += `<div class="ap-dw-item"><span class="ap-dw-item-label">Available</span><span class="ap-dw-item-value ${!avail ? 'empty' : ''}">${avail ? new Date(avail + 'T00:00:00').toLocaleDateString('en-KE', { month: 'short', year: 'numeric', day: 'numeric' }) : 'Not set'}</span></div>`;
+    html += '</div>';
+
+    // Specs
+    const beds = inputs.bedrooms.value;
+    const baths = inputs.bathrooms.value;
+    const sqft = inputs.squareFootage.value;
+    const ptype = inputs.type.value;
+    html += '<div class="ap-dw-section">';
+    html += '<div class="ap-dw-section-title"><i class="fas fa-ruler-combined"></i> Specifications</div>';
+    html += `<div class="ap-dw-item"><span class="ap-dw-item-label">Property Type</span><span class="ap-dw-item-value ${!ptype ? 'empty' : ''}">${ptype || 'Not set'}</span></div>`;
+    html += `<div class="ap-dw-item"><span class="ap-dw-item-label">Bedrooms</span><span class="ap-dw-item-value ${beds !== null && beds !== '' ? '' : 'empty'}">${beds !== null && beds !== '' ? beds + (beds > 1 ? ' Beds' : ' Bedroom') : 'Not set'}</span></div>`;
+    html += `<div class="ap-dw-item"><span class="ap-dw-item-label">Bathrooms</span><span class="ap-dw-item-value ${baths !== null && baths !== '' ? '' : 'empty'}">${baths !== null && baths !== '' ? baths + (baths > 1 ? ' Baths' : ' Bathroom') : 'Not set'}</span></div>`;
+    html += `<div class="ap-dw-item full"><span class="ap-dw-item-label">Size</span><span class="ap-dw-item-value ${!sqft ? 'empty' : ''}">${sqft ? sqft + ' sq ft' : 'Not set'}</span></div>`;
+    html += '</div>';
+
+    // Description
+    if (inputs.description.value) {
+      html += '<div class="ap-dw-section">';
+      html += '<div class="ap-dw-section-title"><i class="fas fa-align-left"></i> Description</div>';
+      html += `<div class="ap-dw-desc">${inputs.description.value}</div>`;
+      html += '</div>';
+    }
+
+    // Address
+    const addrFields = [
+      ['addressLine1', 'Street Address'], ['addressLine2', 'Address Line 2'],
+      ['city', 'City'], ['stateProvince', 'County / Province'],
+      ['postalCode', 'Postal Code'], ['country', 'Country']
+    ];
+    const addrData = addrFields.map(([key, label]) => ({
+      label,
+      value: inputs[key] && inputs[key].value ? inputs[key].value : null
+    }));
+    html += '<div class="ap-dw-section">';
+    html += '<div class="ap-dw-section-title"><i class="fas fa-map-marker-alt"></i> Full Address</div>';
+    addrData.forEach(({ label, value }) => {
+      html += `<div class="ap-dw-item"><span class="ap-dw-item-label">${label}</span><span class="ap-dw-item-value ${!value ? 'empty' : ''}">${value || 'Not set'}</span></div>`;
+    });
+    html += '</div>';
+
+    // Features
+    const tags = [];
+    if (inputs.parking.value && inputs.parking.value !== 'None') tags.push(inputs.parking.value);
+    const furnished = Array.from(inputs.furnished).find(f => f.checked);
+    if (furnished && furnished.value !== 'Unfurnished') tags.push(furnished.value);
+    Array.from(inputs.utilities).filter(u => u.checked).forEach(u => tags.push(u.value));
+    Array.from(inputs.amenities).filter(a => a.checked).forEach(a => tags.push(a.value));
+
+    if (tags.length) {
+      html += '<div class="ap-dw-section">';
+      html += '<div class="ap-dw-section-title"><i class="fas fa-star"></i> Features</div>';
+      html += '<div class="ap-dw-tags">';
+      tags.forEach(t => { html += `<span class="ap-dw-tag">${t}</span>`; });
+      html += '</div></div>';
+    }
+
+    // Policies
+    const policies = [];
+    const petVal = Array.from(inputs.pets).find(p => p.checked);
+    const smokeVal = Array.from(inputs.smoking).find(s => s.checked);
+    const accFeatures = Array.from(inputs.accessibility).filter(a => a.checked);
+
+    if (petVal || smokeVal || accFeatures.length) {
+      html += '<div class="ap-dw-section">';
+      html += '<div class="ap-dw-section-title"><i class="fas fa-shield-alt"></i> Policies</div>';
+      if (petVal) policies.push((petVal.value === 'Yes' ? 'Pets allowed' : 'No pets'));
+      if (inputs.petRestrictions.value) policies.push('Restrictions: ' + inputs.petRestrictions.value);
+      if (smokeVal) policies.push(smokeVal.value);
+      accFeatures.forEach(f => policies.push(f.value));
+      policies.forEach(p => {
+        html += `<div class="ap-dw-item"><span class="ap-dw-item-label" style="flex-shrink:0;min-width:0;">${p}</span></div>`;
+      });
+      html += '</div>';
+    }
+
+    // Images count in drawer
+    if (files.length > 0) {
+      html += '<div class="ap-dw-section">';
+      html += '<div class="ap-dw-section-title"><i class="fas fa-images"></i> Images</div>';
+      html += `<div class="ap-dw-img-count has-images"><i class="fas fa-check-circle me-1"></i> ${files.length} image${files.length !== 1 ? 's' : ''} uploaded</div>`;
+      html += '</div>';
+    }
+
+    // Completion message
+    const requiredStepsDone = [1, 2, 3, 4].every(s => {
+      return stepConfig[s].fields.every(isFilled);
+    });
+
+    if (requiredStepsDone) {
+      drawerComplete.classList.add('visible');
+    } else {
+      drawerComplete.classList.remove('visible');
+    }
+
+    drawerBody.innerHTML = html;
+  }
+
+  // ---- Drawer toggle ----
+  function toggleDrawer() {
+    const drawer = document.getElementById('previewDrawer');
+    const overlay = document.getElementById('drawerOverlay');
+    const toggleBtn = document.getElementById('previewToggle');
+    const isOpen = drawer.classList.contains('active');
+
+    if (isOpen) {
+      drawer.classList.remove('active');
+      overlay.classList.remove('active');
+      toggleBtn.classList.remove('active');
+    } else {
+      buildPreview();
+      drawer.classList.add('active');
+      overlay.classList.add('active');
+      toggleBtn.classList.add('active');
+    }
+  }
 
   // ---- Form submission ----
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    // Validate required fields
     const requiredFields = form.querySelectorAll('[required]');
     let valid = true;
     requiredFields.forEach(f => {
@@ -1510,7 +1803,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!valid) {
       showFeedback('Please fill in all required fields correctly.', 'danger');
-      // Scroll to first invalid
       const firstInvalid = form.querySelector('.is-invalid');
       if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
@@ -1539,13 +1831,11 @@ document.addEventListener('DOMContentLoaded', () => {
         showFeedback(result.message || 'Property added successfully!', 'success');
         form.reset();
         imagePreview.innerHTML = '';
-        updatePreview();
-        updateProgress();
-        // Reset check items visual
         document.querySelectorAll('.ap-check-item.selected').forEach(i => i.classList.remove('selected'));
         document.querySelectorAll('.ap-check-item input[checked]').forEach(i => i.closest('.ap-check-item').classList.add('selected'));
         charCount.textContent = '0 / 500 characters';
         charCount.className = 'ap-char-count';
+        toggleDrawer();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         showFeedback(result.message || 'Error adding property. Please try again.', 'danger');
@@ -1563,11 +1853,9 @@ document.addEventListener('DOMContentLoaded', () => {
   saveDraftButton.addEventListener('click', async () => {
     saveDraftButton.disabled = true;
     showFeedback('Saving draft...', 'info');
-
     const formData = new FormData(form);
     formData.append('user_id', {{ current_user.id }});
     const csrfToken = form.querySelector('input[name="csrf_token"]').value;
-
     try {
       const response = await fetch('/landlord/save_draft', {
         method: 'POST',
@@ -1575,16 +1863,14 @@ document.addEventListener('DOMContentLoaded', () => {
         body: formData,
         credentials: 'include'
       });
-
       const result = await response.json();
-
       if (response.ok) {
         showFeedback(result.message || 'Draft saved successfully!', 'success');
       } else {
         showFeedback(result.message || 'Error saving draft.', 'danger');
       }
     } catch (error) {
-      showFeedback(`Error: ${error.message}`, 'danger');
+      showFeedback('Error: ' + error.message, 'danger');
     } finally {
       saveDraftButton.disabled = false;
     }
@@ -1598,8 +1884,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Initial state
-  updatePreview();
-  updateProgress();
+  updateTracker();
 });
 </script>
 {% endblock %}
