@@ -684,35 +684,29 @@
 
         <!-- Image -->
         <div class="prop-card-image">
-        {% if property.image_urls %}
-            {% set images = property.image_urls | from_json %}
-            {% if images and images|length > 0 %}
-            <img src="{{ images[0] }}" 
-                alt="{{ property.title }}" 
-                loading="lazy"
-                onerror="this.parentElement.innerHTML='<div class=\'prop-card-image-placeholder\'><i class=\'fas fa-image\'></i><span>Image not found</span></div>'" />
+            {% if property.image_list and property.image_list|length > 0 %}
+                <img src="{{ property.image_list[0] }}"
+                    alt="{{ property.title }}"
+                    loading="lazy"
+                    onerror="this.parentElement.innerHTML='<div class=\'prop-card-image-placeholder\'><i class=\'fas fa-image\'></i><span>Image not found</span></div>'" />
             {% else %}
-            <div class="prop-card-image-placeholder">
+                <div class="prop-card-image-placeholder">
                 <i class="fas fa-building"></i>
                 <span>No image uploaded</span>
-            </div>
+                </div>
             {% endif %}
-        {% else %}
-            <div class="prop-card-image-placeholder">
-            <i class="fas fa-building"></i>
-            <span>No image uploaded</span>
+
+            <span class="prop-status-badge {{ 'available' if property.available else 'unavailable' }}">
+                <i class="fas fa-circle" style="font-size:0.45rem;vertical-align:middle;margin-right:0.25rem;"></i>
+                {{ 'Available' if property.available else 'Occupied' }}
+            </span>
+
+            {% if property.rent_amount %}
+                <span class="prop-price-badge">
+                KES {{ "{:,.0f}".format(property.rent_amount) }}/mo
+                </span>
+            {% endif %}
             </div>
-        {% endif %}
-
-        <span class="prop-status-badge {{ 'available' if property.available else 'unavailable' }}">
-            <i class="fas fa-circle" style="font-size:0.45rem;vertical-align:middle;margin-right:0.25rem;"></i>
-            {{ 'Available' if property.available else 'Occupied' }}
-        </span>
-
-        {% if property.rent_amount %}
-        <span class="prop-price-badge">KES {{ "{:,.0f}".format(property.rent_amount) }}/mo</span>
-        {% endif %}
-        </div>
 
         <!-- Body -->
         <div class="prop-card-body">
