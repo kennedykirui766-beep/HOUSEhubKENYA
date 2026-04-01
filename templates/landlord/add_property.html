@@ -1440,7 +1440,6 @@
 
           <!-- Submit Section -->
           <div id="section-submit">
-            <!-- Form Actions -->
             <div class="ap-actions">
               <button type="submit" class="btn-ap-submit" id="submitProperty">
                 <i class="fas fa-plus-circle"></i>
@@ -1465,7 +1464,6 @@
       <!-- ===== SIDEBAR COLUMN ===== -->
       <div class="col-lg-4">
 
-        <!-- Tips -->
         <aside class="ap-tips-card" aria-label="Listing tips">
           <h5><i class="fas fa-lightbulb"></i> Tips for a Great Listing</h5>
           <div class="ap-tips-body" id="tipsBody">
@@ -1480,18 +1478,12 @@
           <button type="button" class="ap-tips-toggle" id="toggleTips" aria-expanded="true">Hide Tips</button>
         </aside>
 
-        <!-- Comprehensive Live Preview -->
         <div class="ap-preview-card" aria-label="Property preview">
-
-          <!-- Image Gallery -->
           <div class="ap-preview-gallery" id="previewGallery">
             <i class="fas fa-image"></i>
             <span class="ap-preview-gallery-badge">Preview</span>
           </div>
-
           <div class="ap-preview-body">
-
-            <!-- Title & Type -->
             <div class="ap-pv-section">
               <div class="ap-pv-title-row">
                 <h4 class="ap-preview-title" id="previewTitle">Property Name</h4>
@@ -1499,14 +1491,10 @@
               </div>
               <p class="ap-preview-desc" id="previewDesc">Property description will appear here as you type...</p>
             </div>
-
-            <!-- Location -->
             <div class="ap-pv-section">
               <div class="ap-pv-section-title"><i class="fas fa-map-marker-alt"></i> Location</div>
               <p class="ap-preview-location" id="previewLocation"><i class="fas fa-map-marker-alt"></i> City, Country</p>
             </div>
-
-            <!-- Pricing -->
             <div class="ap-pv-section">
               <div class="ap-pv-section-title"><i class="fas fa-tag"></i> Pricing</div>
               <div class="ap-pv-price-main" id="previewPrice">KES 0/mo</div>
@@ -1516,8 +1504,6 @@
                 <span id="previewAvail"><i class="fas fa-calendar"></i> Available: --</span>
               </div>
             </div>
-
-            <!-- Specifications -->
             <div class="ap-pv-section">
               <div class="ap-pv-section-title"><i class="fas fa-ruler-combined"></i> Specifications</div>
               <div class="ap-preview-specs">
@@ -1526,16 +1512,12 @@
                 <div class="ap-preview-spec"><i class="fas fa-ruler-combined"></i> <span id="previewSqft">-- sq ft</span></div>
               </div>
             </div>
-
-            <!-- Features & Amenities -->
             <div class="ap-pv-section">
               <div class="ap-pv-section-title"><i class="fas fa-star"></i> Features</div>
               <div class="ap-preview-tags" id="previewFeatures">
                 <span class="ap-pv-empty">No features selected</span>
               </div>
             </div>
-
-            <!-- Policies -->
             <div class="ap-pv-section">
               <div class="ap-pv-section-title"><i class="fas fa-shield-alt"></i> Policies</div>
               <div id="previewPolicies">
@@ -1544,7 +1526,6 @@
                 <div class="ap-pv-policy-row"><i class="fas fa-wheelchair"></i> <span id="previewAccess">Accessibility: None</span></div>
               </div>
             </div>
-
           </div>
         </div>
 
@@ -1553,7 +1534,6 @@
     </div>
   </div>
 
-  <!-- Landlord Access Badge -->
   <div class="ap-access-badge" aria-label="Landlord access indicator">
     <i class="fas fa-user-shield"></i> Landlord Access
   </div>
@@ -1574,14 +1554,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const MAX_IMAGES = 10;
 
-  // =============================================
-  // Global file store — the single source of truth
-  // Browser file input replaces on each select,
-  // so we maintain our own array to accumulate.
-  // =============================================
+  // Global file store — single source of truth for image accumulation
   let allFiles = [];
 
-  // References
   const el = (id) => document.getElementById(id);
   const inputs = {
     name: el('propertyName'),
@@ -1644,7 +1619,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const uploadError = el('uploadError');
   const imageCountNum = el('imageCountNum');
 
-  // Drag & drop visual feedback
   ['dragover', 'dragenter'].forEach(evt => {
     uploadArea.addEventListener(evt, (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
   });
@@ -1652,21 +1626,19 @@ document.addEventListener('DOMContentLoaded', () => {
     uploadArea.addEventListener(evt, (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); });
   });
 
-  // Drag & drop: merge new files into allFiles
   uploadArea.addEventListener('drop', (e) => {
     const newFiles = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
     allFiles = [...allFiles, ...newFiles].slice(0, MAX_IMAGES);
     updateFileInput();
   });
 
-  // File input change: merge new selections into allFiles
   inputs.images.addEventListener('change', (e) => {
     const newFiles = Array.from(e.target.files);
     allFiles = [...allFiles, ...newFiles].slice(0, MAX_IMAGES);
     updateFileInput();
   });
 
-  // Sync allFiles back into the native file input, then render
+  // Sync allFiles into the native input so traditional form submit picks them up
   function updateFileInput() {
     const dt = new DataTransfer();
     allFiles.forEach(file => dt.items.add(file));
@@ -1688,7 +1660,6 @@ document.addEventListener('DOMContentLoaded', () => {
       uploadError.classList.add('visible');
     }
 
-    // Validate each file
     for (const file of allFiles) {
       if (!['image/jpeg', 'image/png'].includes(file.type)) {
         uploadError.textContent = `"${file.name}" is not a valid format. Use JPG or PNG.`;
@@ -1702,7 +1673,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Render thumbnails from allFiles
     allFiles.forEach((file, idx) => {
       const wrap = document.createElement('div');
       wrap.className = 'ap-thumb';
@@ -1729,9 +1699,8 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSteps();
   }
 
-  // ---- Real-time comprehensive preview ----
+  // ---- Real-time preview ----
   function updatePreview() {
-    // Title & Type
     el('previewTitle').textContent = inputs.name.value || 'Property Name';
     const typeBadge = el('previewTypeBadge');
     if (inputs.type.value) {
@@ -1741,14 +1710,11 @@ document.addEventListener('DOMContentLoaded', () => {
       typeBadge.classList.remove('visible');
     }
 
-    // Description
     el('previewDesc').textContent = inputs.description.value || 'Property description will appear here as you type...';
 
-    // Location
     const shortLoc = [inputs.city.value, inputs.country.value].filter(Boolean).join(', ');
     el('previewLocation').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${shortLoc || 'City, Country'}`;
 
-    // Pricing
     el('previewPrice').textContent = inputs.rent.value ? `KES ${Number(inputs.rent.value).toLocaleString()}/mo` : 'KES 0/mo';
     el('previewDeposit').innerHTML = `<i class="fas fa-lock"></i> Deposit: ${inputs.deposit.value ? 'KES ' + Number(inputs.deposit.value).toLocaleString() : '--'}`;
 
@@ -1765,12 +1731,11 @@ document.addEventListener('DOMContentLoaded', () => {
       el('previewAvail').innerHTML = `<i class="fas fa-calendar"></i> Available: --`;
     }
 
-    // Specs
     el('previewBeds').textContent = inputs.bedrooms.value ? `${inputs.bedrooms.value} Bed${inputs.bedrooms.value > 1 ? 's' : ''}` : '0 Beds';
     el('previewBaths').textContent = inputs.bathrooms.value ? `${inputs.bathrooms.value} Bath${inputs.bathrooms.value > 1 ? 's' : ''}` : '0 Baths';
     el('previewSqft').textContent = inputs.squareFootage.value ? `${Number(inputs.squareFootage.value).toLocaleString()} sq ft` : '-- sq ft';
 
-    // Preview gallery — reads from allFiles
+    // Gallery from allFiles
     const gallery = el('previewGallery');
     gallery.querySelectorAll('img').forEach(img => img.remove());
     const existingCountBadge = gallery.querySelector('.ap-preview-gallery-count');
@@ -1795,7 +1760,7 @@ document.addEventListener('DOMContentLoaded', () => {
       gallery.classList.remove('has-images');
     }
 
-    // Features tags
+    // Feature tags
     const tags = [];
     const furnished = Array.from(inputs.furnished).find(f => f.checked);
     if (furnished && furnished.value !== 'Unfurnished') tags.push(furnished.value);
@@ -1819,7 +1784,7 @@ document.addEventListener('DOMContentLoaded', () => {
     el('previewAccess').textContent = `Accessibility: ${accessVals.length > 0 ? accessVals.join(', ') : 'None'}`;
   }
 
-  // ---- Sticky Steps Bar Update ----
+  // ---- Steps bar ----
   function updateSteps() {
     const detailsFilled = inputs.name.value.trim() &&
                           inputs.type.value &&
@@ -1836,7 +1801,6 @@ document.addEventListener('DOMContentLoaded', () => {
                           inputs.leaseTerm.value &&
                           inputs.availabilityDate.value;
 
-    // Check images from allFiles, not the input
     const imagesFilled = allFiles.length > 0;
 
     const states = [detailsFilled, locationFilled, pricingFilled, imagesFilled];
@@ -1870,7 +1834,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ---- Steps bar click-to-scroll ----
+  // ---- Steps click-to-scroll ----
   document.querySelectorAll('.ap-step').forEach(step => {
     step.addEventListener('click', (e) => {
       e.preventDefault();
@@ -1887,7 +1851,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Listen on all text/select inputs for preview + steps
+  // Listen on all text/select inputs
   [inputs.name, inputs.type, inputs.description, inputs.addressLine1, inputs.addressLine2,
    inputs.city, inputs.stateProvince, inputs.postalCode, inputs.country, inputs.rent,
    inputs.deposit, inputs.leaseTerm, inputs.availabilityDate, inputs.bedrooms, inputs.bathrooms,
@@ -1905,14 +1869,16 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleTipsButton.setAttribute('aria-expanded', !isHidden);
   });
 
-  // ---- Set min date to today ----
+  // ---- Min date ----
   const today = new Date().toISOString().split('T')[0];
   inputs.availabilityDate.setAttribute('min', today);
 
-  // ---- Form submission ----
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-
+  // =============================================
+  // FORM SUBMIT — traditional POST, lets Flask
+  // handle the redirect natively
+  // =============================================
+  form.addEventListener('submit', (event) => {
+    // Client-side validation only — if invalid, stop the native submit
     const requiredFields = form.querySelectorAll('[required]');
     let valid = true;
     requiredFields.forEach(f => {
@@ -1930,73 +1896,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (!valid) {
+      event.preventDefault(); // Block submit
       showFeedback('Please fill in all required fields correctly.', 'danger');
       const firstInvalid = form.querySelector('.is-invalid');
       if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
+    // Valid — sync allFiles into the input one final time, then let the
+    // browser do its normal POST. Flask receives the multipart form data,
+    // processes it, and returns the redirect.
+    updateFileInput();
+
+    // Show loading state while the browser navigates away
     submitButton.disabled = true;
     submitBtnText.textContent = 'Listing...';
     submitSpinner.style.display = 'block';
-    showFeedback('Adding property...', 'info');
 
-    const formData = new FormData(form);
-
-    // Remove the default images entry and re-add from allFiles
-    formData.delete('images');
-    allFiles.forEach(file => formData.append('images', file));
-
-    formData.append('user_id', {{ current_user.id }});
-    const csrfToken = form.querySelector('input[name="csrf_token"]').value;
-
-    try {
-      const response = await fetch('{{ url_for("landlord.add_property") }}', {
-        method: 'POST',
-        headers: { 'X-CSRFToken': csrfToken },
-        body: formData,
-        credentials: 'include'
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        showFeedback(result.message || 'Property added successfully!', 'success');
-        form.reset();
-        allFiles = [];
-        imagePreview.innerHTML = '';
-        updatePreview();
-        updateSteps();
-        document.querySelectorAll('.ap-check-item.selected').forEach(i => i.classList.remove('selected'));
-        document.querySelectorAll('.ap-check-item input[checked]').forEach(i => i.closest('.ap-check-item').classList.add('selected'));
-        charCount.textContent = '0 / 500 characters';
-        charCount.className = 'ap-char-count';
-        imageCountNum.textContent = '0';
-        imageCountNum.className = 'count-num';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        showFeedback(result.message || 'Error adding property. Please try again.', 'danger');
-      }
-    } catch (error) {
-      showFeedback('Network error. Please check your connection and try again.', 'danger');
-    } finally {
-      submitButton.disabled = false;
-      submitBtnText.textContent = 'List Property';
-      submitSpinner.style.display = 'none';
-    }
+    // NO event.preventDefault() here — the browser submits natively.
+    // Flask's redirect(response) will take over.
   });
 
-  // ---- Save draft ----
+  // ---- Save draft (still async — separate endpoint, no redirect needed) ----
   saveDraftButton.addEventListener('click', async () => {
     saveDraftButton.disabled = true;
     showFeedback('Saving draft...', 'info');
 
+    // Sync files before sending
+    updateFileInput();
+
     const formData = new FormData(form);
-
-    // Same: use allFiles instead of the raw input
-    formData.delete('images');
-    allFiles.forEach(file => formData.append('images', file));
-
     formData.append('user_id', {{ current_user.id }});
     const csrfToken = form.querySelector('input[name="csrf_token"]').value;
 
@@ -2011,15 +1940,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const result = await response.json();
 
       if (response.ok) {
-                          showFeedback(result.message || 'Property added successfully!', 'success');
-
-                          // 🔥 Redirect after success
-                          if (result.redirect) {
-                            setTimeout(() => {
-                              window.location.href = result.redirect;
-                            }, 1500); // small delay for UX
-                          }
-                        }
+        showFeedback(result.message || 'Draft saved successfully!', 'success');
       } else {
         showFeedback(result.message || 'Error saving draft.', 'danger');
       }

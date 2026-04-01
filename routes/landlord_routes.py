@@ -166,7 +166,8 @@ def add_property():
             db.session.add(house)
             db.session.commit()
 
-            return {"message": "Property added successfully!"}, 200
+            flash("Property added successfully!", "success")
+            return redirect(url_for("landlord.properties"))
 
         except Exception as e:
             db.session.rollback()
