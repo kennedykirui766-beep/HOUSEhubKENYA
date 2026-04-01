@@ -1574,6 +1574,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const MAX_IMAGES = 10;
 
+  // =============================================
+  // Global file store — the single source of truth
+  // Browser file input replaces on each select,
+  // so we maintain our own array to accumulate.
+  // =============================================
+  let allFiles = [];
+
   // References
   const el = (id) => document.getElementById(id);
   const inputs = {
@@ -1637,39 +1644,52 @@ document.addEventListener('DOMContentLoaded', () => {
   const uploadError = el('uploadError');
   const imageCountNum = el('imageCountNum');
 
+  // Drag & drop visual feedback
   ['dragover', 'dragenter'].forEach(evt => {
     uploadArea.addEventListener(evt, (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
   });
   ['dragleave', 'drop'].forEach(evt => {
     uploadArea.addEventListener(evt, (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); });
   });
+
+  // Drag & drop: merge new files into allFiles
   uploadArea.addEventListener('drop', (e) => {
-    const existingFiles = Array.from(inputs.images.files);
     const newFiles = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-    const combined = [...existingFiles, ...newFiles].slice(0, MAX_IMAGES);
-    const dt = new DataTransfer();
-    combined.forEach(f => dt.items.add(f));
-    inputs.images.files = dt.files;
-    handleImages();
+    allFiles = [...allFiles, ...newFiles].slice(0, MAX_IMAGES);
+    updateFileInput();
   });
 
-  inputs.images.addEventListener('change', handleImages);
+  // File input change: merge new selections into allFiles
+  inputs.images.addEventListener('change', (e) => {
+    const newFiles = Array.from(e.target.files);
+    allFiles = [...allFiles, ...newFiles].slice(0, MAX_IMAGES);
+    updateFileInput();
+  });
+
+  // Sync allFiles back into the native file input, then render
+  function updateFileInput() {
+    const dt = new DataTransfer();
+    allFiles.forEach(file => dt.items.add(file));
+    inputs.images.files = dt.files;
+    handleImages();
+  }
 
   function handleImages() {
     imagePreview.innerHTML = '';
     uploadError.classList.remove('visible');
     uploadError.textContent = '';
-    const files = inputs.images.files;
 
-    imageCountNum.textContent = files.length;
-    imageCountNum.className = 'count-num' + (files.length > 0 ? ' has-images' : '');
+    const count = allFiles.length;
+    imageCountNum.textContent = count;
+    imageCountNum.className = 'count-num' + (count > 0 ? ' has-images' : '');
 
-    if (files.length > MAX_IMAGES) {
-      uploadError.textContent = `Maximum ${MAX_IMAGES} images allowed. You selected ${files.length}.`;
+    if (count > MAX_IMAGES) {
+      uploadError.textContent = `Maximum ${MAX_IMAGES} images allowed. You have ${count}.`;
       uploadError.classList.add('visible');
     }
 
-    for (const file of files) {
+    // Validate each file
+    for (const file of allFiles) {
       if (!['image/jpeg', 'image/png'].includes(file.type)) {
         uploadError.textContent = `"${file.name}" is not a valid format. Use JPG or PNG.`;
         uploadError.classList.add('visible');
@@ -1682,7 +1702,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    Array.from(files).forEach((file, idx) => {
+    // Render thumbnails from allFiles
+    allFiles.forEach((file, idx) => {
       const wrap = document.createElement('div');
       wrap.className = 'ap-thumb';
       const img = document.createElement('img');
@@ -1695,16 +1716,15 @@ document.addEventListener('DOMContentLoaded', () => {
       removeBtn.className = 'ap-thumb-remove';
       removeBtn.innerHTML = '<i class="fas fa-times"></i>';
       removeBtn.addEventListener('click', () => {
-        const dt = new DataTransfer();
-        Array.from(inputs.images.files).forEach((f, i) => { if (i !== idx) dt.items.add(f); });
-        inputs.images.files = dt.files;
-        handleImages();
+        allFiles = allFiles.filter((_, i) => i !== idx);
+        updateFileInput();
       });
       wrap.appendChild(img);
       wrap.appendChild(badge);
       wrap.appendChild(removeBtn);
       imagePreview.appendChild(wrap);
     });
+
     updatePreview();
     updateSteps();
   }
@@ -1724,15 +1744,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Description
     el('previewDesc').textContent = inputs.description.value || 'Property description will appear here as you type...';
 
-    // Location - full address
-    const addrParts = [
-      inputs.addressLine1.value,
-      inputs.addressLine2.value,
-      inputs.city.value,
-      inputs.stateProvince.value,
-      inputs.postalCode.value,
-      inputs.country.value
-    ].filter(Boolean);
+    // Location
     const shortLoc = [inputs.city.value, inputs.country.value].filter(Boolean).join(', ');
     el('previewLocation').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${shortLoc || 'City, Country'}`;
 
@@ -1758,27 +1770,25 @@ document.addEventListener('DOMContentLoaded', () => {
     el('previewBaths').textContent = inputs.bathrooms.value ? `${inputs.bathrooms.value} Bath${inputs.bathrooms.value > 1 ? 's' : ''}` : '0 Baths';
     el('previewSqft').textContent = inputs.squareFootage.value ? `${Number(inputs.squareFootage.value).toLocaleString()} sq ft` : '-- sq ft';
 
-    // Preview gallery
+    // Preview gallery — reads from allFiles
     const gallery = el('previewGallery');
-    // Remove old images
     gallery.querySelectorAll('img').forEach(img => img.remove());
-    const existingBadge = gallery.querySelector('.ap-preview-gallery-count');
-    if (existingBadge) existingBadge.remove();
+    const existingCountBadge = gallery.querySelector('.ap-preview-gallery-count');
+    if (existingCountBadge) existingCountBadge.remove();
 
-    const files = inputs.images.files;
-    if (files.length > 0) {
+    if (allFiles.length > 0) {
       gallery.classList.add('has-images');
-      const showCount = Math.min(files.length, 4);
+      const showCount = Math.min(allFiles.length, 4);
       for (let i = 0; i < showCount; i++) {
         const img = document.createElement('img');
         img.className = 'ap-pv-gallery-img';
-        img.src = URL.createObjectURL(files[i]);
+        img.src = URL.createObjectURL(allFiles[i]);
         gallery.appendChild(img);
       }
-      if (files.length > 1) {
+      if (allFiles.length > 1) {
         const countBadge = document.createElement('span');
         countBadge.className = 'ap-preview-gallery-count';
-        countBadge.textContent = `+${files.length - 1} more`;
+        countBadge.textContent = `+${allFiles.length - 1} more`;
         gallery.appendChild(countBadge);
       }
     } else {
@@ -1811,31 +1821,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ---- Sticky Steps Bar Update ----
   function updateSteps() {
-    // Group 1: Details = name, type, description, bedrooms, bathrooms
     const detailsFilled = inputs.name.value.trim() &&
                           inputs.type.value &&
                           inputs.description.value.trim() &&
                           inputs.bedrooms.value &&
                           inputs.bathrooms.value;
 
-    // Group 2: Location = address, city, state, country
     const locationFilled = inputs.addressLine1.value.trim() &&
                            inputs.city.value.trim() &&
                            inputs.stateProvince.value.trim() &&
                            inputs.country.value;
 
-    // Group 3: Pricing = rent, lease term, availability date
     const pricingFilled = inputs.rent.value &&
                           inputs.leaseTerm.value &&
                           inputs.availabilityDate.value;
 
-    // Group 4: Images
-    const imagesFilled = inputs.images.files.length > 0;
+    // Check images from allFiles, not the input
+    const imagesFilled = allFiles.length > 0;
 
     const states = [detailsFilled, locationFilled, pricingFilled, imagesFilled];
     const allFilled = states.every(Boolean);
 
-    // Update step indicators
     for (let i = 0; i < 4; i++) {
       const stepEl = document.querySelectorAll('.ap-step')[i];
       const indicator = el(`stepIndicator${i + 1}`);
@@ -1848,13 +1854,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Connectors
     for (let i = 0; i < 4; i++) {
       const conn = el(`stepConn${i + 1}`);
       if (conn) conn.classList.toggle('completed', states[i]);
     }
 
-    // Step 5: Submit (completed when all others are done)
     const submitStep = document.querySelectorAll('.ap-step')[4];
     const submitIndicator = el('stepIndicator5');
     if (allFilled) {
@@ -1938,6 +1942,11 @@ document.addEventListener('DOMContentLoaded', () => {
     showFeedback('Adding property...', 'info');
 
     const formData = new FormData(form);
+
+    // Remove the default images entry and re-add from allFiles
+    formData.delete('images');
+    allFiles.forEach(file => formData.append('images', file));
+
     formData.append('user_id', {{ current_user.id }});
     const csrfToken = form.querySelector('input[name="csrf_token"]').value;
 
@@ -1954,6 +1963,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (response.ok) {
         showFeedback(result.message || 'Property added successfully!', 'success');
         form.reset();
+        allFiles = [];
         imagePreview.innerHTML = '';
         updatePreview();
         updateSteps();
@@ -1982,6 +1992,11 @@ document.addEventListener('DOMContentLoaded', () => {
     showFeedback('Saving draft...', 'info');
 
     const formData = new FormData(form);
+
+    // Same: use allFiles instead of the raw input
+    formData.delete('images');
+    allFiles.forEach(file => formData.append('images', file));
+
     formData.append('user_id', {{ current_user.id }});
     const csrfToken = form.querySelector('input[name="csrf_token"]').value;
 
