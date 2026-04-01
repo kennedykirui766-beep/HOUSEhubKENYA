@@ -1,0 +1,1104 @@
+{% extends "base.html" %}
+
+{% block title %}My Properties - HomeHub{% endblock %}
+
+{% block styles %}
+<style>
+  /* ========== PROPERTIES PAGE ========== */
+  .props-page {
+    padding: 2rem 0 4rem;
+    background-color: var(--body-bg);
+  }
+
+  .props-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .props-header-left h1 {
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 1.75rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .props-header-left p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+  }
+
+  .props-count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: var(--primary-light);
+    color: var(--primary-color);
+    padding: 0.25rem 0.7rem;
+    border-radius: var(--radius-full);
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+
+  .btn-add-property {
+    background: var(--gradient-primary);
+    border: none;
+    color: white;
+    padding: 0.65rem 1.35rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    font-family: inherit;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .btn-add-property:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
+    color: white;
+  }
+
+  /* ========== TOOLBAR ========== */
+  .props-toolbar {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .props-search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .props-search-wrap i {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    pointer-events: none;
+  }
+
+  .props-search {
+    width: 100%;
+    padding: 0.6rem 0.85rem 0.6rem 2.4rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--body-bg);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    transition: var(--transition);
+    font-family: inherit;
+    min-width: 0;
+  }
+
+  .props-search:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px var(--primary-light);
+  }
+
+  .props-search::placeholder {
+    color: var(--text-muted);
+  }
+
+  .props-filter-select {
+    padding: 0.6rem 0.85rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--body-bg);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    transition: var(--transition);
+    font-family: inherit;
+    min-width: 0;
+    cursor: pointer;
+  }
+
+  .props-filter-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px var(--primary-light);
+  }
+
+  .props-filter-select option {
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+  }
+
+  .props-results-info {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    width: 100%;
+    text-align: center;
+    margin-top: 0.25rem;
+  }
+
+  /* ========== PROPERTY GRID ========== */
+  .props-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+
+  /* ========== PROPERTY CARD ========== */
+  .prop-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: var(--transition);
+    min-width: 0;
+  }
+
+  .prop-card:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: color-mix(in srgb, var(--primary-color) 30%, transparent);
+  }
+
+  .prop-card-image {
+    height: 200px;
+    background-color: var(--body-bg);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .prop-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  .prop-card:hover .prop-card-image img {
+    transform: scale(1.04);
+  }
+
+  .prop-card-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    gap: 0.5rem;
+  }
+
+  .prop-card-image-placeholder i {
+    font-size: 2.5rem;
+    opacity: 0.3;
+  }
+
+  .prop-card-image-placeholder span {
+    font-size: 0.78rem;
+    opacity: 0.5;
+  }
+
+  .prop-status-badge {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: var(--radius-full);
+    font-size: 0.72rem;
+    font-weight: 600;
+    z-index: 2;
+  }
+
+  .prop-status-badge.available {
+    background: var(--success-light);
+    color: var(--success-color);
+  }
+
+  .prop-status-badge.unavailable {
+    background: var(--danger-light);
+    color: var(--danger-color);
+  }
+
+  .prop-price-badge {
+    position: absolute;
+    bottom: 0.75rem;
+    right: 0.75rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 700;
+    background: var(--gradient-primary);
+    color: white;
+    z-index: 2;
+  }
+
+  .prop-card-body {
+    padding: 1.25rem;
+  }
+
+  .prop-card-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin-bottom: 0.35rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .prop-card-location {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    margin-bottom: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .prop-card-location i {
+    color: var(--primary-color);
+    margin-right: 0.25rem;
+  }
+
+  .prop-card-specs {
+    display: flex;
+    gap: 1rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--border-color);
+    margin-bottom: 0.85rem;
+    flex-wrap: wrap;
+  }
+
+  .prop-spec {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+  }
+
+  .prop-spec i {
+    color: var(--primary-color);
+    font-size: 0.75rem;
+  }
+
+  .prop-card-desc {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .prop-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-bottom: 1rem;
+  }
+
+  .prop-tag {
+    font-size: 0.68rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: var(--radius-full);
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .prop-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  /* ========== DETAIL PANEL ========== */
+  .prop-detail-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+    border-top: 0px solid transparent;
+  }
+
+  .prop-detail-panel.open {
+    max-height: 2000px;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .prop-detail-inner {
+    padding: 1.25rem;
+  }
+
+  .prop-detail-section {
+    margin-bottom: 1.25rem;
+  }
+
+  .prop-detail-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .prop-detail-section-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 0.65rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .prop-detail-section-title i {
+    color: var(--primary-color);
+    font-size: 0.72rem;
+  }
+
+  .prop-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .prop-detail-item {
+    background-color: var(--body-bg);
+    padding: 0.6rem 0.85rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+  }
+
+  .prop-detail-item.full {
+    grid-column: 1 / -1;
+  }
+
+  .prop-detail-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.2rem;
+  }
+
+  .prop-detail-value {
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    font-weight: 500;
+    word-break: break-word;
+  }
+
+  .prop-detail-value.empty {
+    color: var(--text-muted);
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .prop-detail-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .prop-detail-tag {
+    font-size: 0.72rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: var(--radius-full);
+    background: var(--body-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .prop-detail-tag i {
+    color: var(--primary-color);
+    margin-right: 0.2rem;
+    font-size: 0.65rem;
+  }
+
+  /* ========== BUTTONS ========== */
+  .btn-prop-outline {
+    border: 1.5px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    background: transparent;
+    transition: var(--transition);
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .btn-prop-outline:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: var(--primary-light);
+  }
+
+  .btn-prop-outline.active {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: var(--primary-light);
+  }
+
+  .btn-prop-primary {
+    background: var(--gradient-primary);
+    border: none;
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    transition: var(--transition);
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .btn-prop-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    color: white;
+  }
+
+  .btn-prop-danger {
+    background: transparent;
+    border: 1.5px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    transition: var(--transition);
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .btn-prop-danger:hover {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+  }
+
+  /* ========== EMPTY STATE ========== */
+  .props-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-secondary);
+  }
+
+  .props-empty-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin: 0 auto 1.25rem;
+  }
+
+  .props-empty h3 {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 1.15rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .props-empty p {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+  }
+
+  .props-no-results {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--text-muted);
+    display: none;
+  }
+
+  .props-no-results.visible {
+    display: block;
+  }
+
+  .props-no-results i {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+    display: block;
+    opacity: 0.4;
+  }
+
+  /* ========== RESPONSIVE ========== */
+  @media (max-width: 991px) {
+    .props-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .props-page {
+      padding: 1.5rem 0 3rem;
+    }
+    .props-header-left h1 {
+      font-size: 1.4rem;
+    }
+    .props-grid {
+      grid-template-columns: 1fr;
+    }
+    .props-toolbar {
+      flex-direction: column;
+    }
+    .props-search-wrap {
+      width: 100%;
+    }
+    .props-filter-select {
+      width: 100%;
+    }
+    .prop-detail-grid {
+      grid-template-columns: 1fr;
+    }
+    .prop-card-actions {
+      width: 100%;
+    }
+    .prop-card-actions .btn-prop-outline,
+    .prop-card-actions .btn-prop-danger {
+      flex: 1;
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .prop-card-image {
+      height: 180px;
+    }
+    .prop-card-specs {
+      gap: 0.6rem;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .props-header-left h1 {
+      font-size: 1.25rem;
+    }
+    .prop-card-body {
+      padding: 1rem;
+    }
+    .prop-detail-inner {
+      padding: 1rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="props-page">
+  <div class="container">
+
+    <!-- Header -->
+    <div class="props-header">
+      <div class="props-header-left">
+        <h1>My Properties <span class="props-count-badge" id="propsCount">{{ properties|length }}</span></h1>
+        <p>Manage all your listed properties in one place.</p>
+      </div>
+      <a href="{{ url_for('landlord.add_property') }}" class="btn-add-property">
+        <i class="fas fa-plus-circle"></i> Add Property
+      </a>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="props-toolbar">
+      <div class="props-search-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" class="props-search" id="propsSearch" placeholder="Search by title, location, or type..." />
+      </div>
+      <select class="props-filter-select" id="filterType">
+        <option value="">All Types</option>
+        <option value="Apartment">Apartment</option>
+        <option value="House">House</option>
+        <option value="Studio">Studio</option>
+        <option value="Condo">Condo</option>
+        <option value="Townhouse">Townhouse</option>
+        <option value="Commercial">Commercial</option>
+      </select>
+      <select class="props-filter-select" id="filterStatus">
+        <option value="">All Status</option>
+        <option value="available">Available</option>
+        <option value="unavailable">Occupied</option>
+      </select>
+      <div class="props-results-info" id="resultsInfo"></div>
+    </div>
+
+    <!-- No results message -->
+    <div class="props-no-results" id="noResults">
+      <i class="fas fa-search"></i>
+      <p>No properties match your search. Try different keywords.</p>
+    </div>
+
+    <!-- Properties Grid -->
+    {% if properties %}
+    <div class="props-grid" id="propsGrid">
+
+      {% for property in properties %}
+      <div class="prop-card"
+           data-title="{{ property.title|lower if property.title else '' }}"
+           data-location="{{ property.location|lower if property.location else '' }} {{ property.city|lower if property.city else '' }}"
+           data-type="{{ property.property_type|lower if property.property_type else '' }}"
+           data-category="{{ property.category|lower if property.category else '' }}"
+           data-status="{{ 'available' if property.available else 'unavailable' }}"
+           data-id="{{ property.id }}">
+
+        <!-- Image -->
+        <div class="prop-card-image">
+          {% if property.image_urls %}
+            {% set first_image = property.image_urls.split(',')[0].strip() %}
+            <img src="{{ url_for('static', filename='images/' ~ first_image) }}" alt="{{ property.title }}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\'prop-card-image-placeholder\'><i class=\'fas fa-image\'></i><span>Image not found</span></div>'" />
+          {% else %}
+            <div class="prop-card-image-placeholder">
+              <i class="fas fa-building"></i>
+              <span>No image uploaded</span>
+            </div>
+          {% endif %}
+          <span class="prop-status-badge {{ 'available' if property.available else 'unavailable' }}">
+            <i class="fas fa-circle" style="font-size:0.45rem;vertical-align:middle;margin-right:0.25rem;"></i>
+            {{ 'Available' if property.available else 'Occupied' }}
+          </span>
+          {% if property.rent_amount %}
+          <span class="prop-price-badge">KES {{ "{:,.0f}".format(property.rent_amount) }}/mo</span>
+          {% endif %}
+        </div>
+
+        <!-- Body -->
+        <div class="prop-card-body">
+          <h3 class="prop-card-title" title="{{ property.title }}">{{ property.title }}</h3>
+          <p class="prop-card-location">
+            <i class="fas fa-map-marker-alt"></i>
+            {{ property.city or property.location or 'Location not set' }}{% if property.state_province %}, {{ property.state_province }}{% endif %}{% if property.country %}, {{ property.country }}{% endif %}
+          </p>
+
+          <!-- Specs -->
+          <div class="prop-card-specs">
+            {% if property.bedrooms is not none %}
+            <span class="prop-spec"><i class="fas fa-bed"></i> {{ property.bedrooms }} Bed{{ 's' if property.bedrooms != 1 else '' }}</span>
+            {% endif %}
+            {% if property.bathrooms is not none %}
+            <span class="prop-spec"><i class="fas fa-bath"></i> {{ property.bathrooms }} Bath{{ 's' if property.bathrooms != 1 else '' }}</span>
+            {% endif %}
+            {% if property.property_type %}
+            <span class="prop-spec"><i class="fas fa-home"></i> {{ property.property_type }}</span>
+            {% endif %}
+            {% if property.category %}
+            <span class="prop-spec"><i class="fas fa-tag"></i> {{ property.category }}</span>
+            {% endif %}
+          </div>
+
+          <!-- Description snippet -->
+          {% if property.description %}
+          <p class="prop-card-desc">{{ property.description }}</p>
+          {% endif %}
+
+          <!-- Quick tags -->
+          <div class="prop-card-tags">
+            {% if property.furnished_status and property.furnished_status != 'Unfurnished' %}
+            <span class="prop-tag"><i class="fas fa-couch"></i> {{ property.furnished_status }}</span>
+            {% endif %}
+            {% if property.parking_availability and property.parking_availability != 'None' %}
+            <span class="prop-tag"><i class="fas fa-car"></i> {{ property.parking_availability }}</span>
+            {% endif %}
+            {% if property.pets_allowed == 'Yes' %}
+            <span class="prop-tag"><i class="fas fa-paw"></i> Pets OK</span>
+            {% endif %}
+            {% if property.security_deposit %}
+            <span class="prop-tag"><i class="fas fa-shield-alt"></i> Dep: KES {{ "{:,.0f}".format(property.security_deposit) }}</span>
+            {% endif %}
+          </div>
+
+          <!-- Actions -->
+          <div class="prop-card-actions">
+            <button type="button" class="btn-prop-outline" onclick="toggleDetail({{ property.id }})" data-detail-btn="{{ property.id }}">
+              <i class="fas fa-eye"></i> Details
+            </button>
+            <a href="{{ url_for('landlord.edit_property', property_id=property.id) }}" class="btn-prop-outline">
+              <i class="fas fa-edit"></i> Edit
+            </a>
+            <button type="button" class="btn-prop-danger" onclick="confirmDelete({{ property.id }}, '{{ property.title|replace("'", "\\'") }}')">
+              <i class="fas fa-trash"></i> Delete
+            </button>
+          </div>
+        </div>
+
+        <!-- ===== DETAIL PANEL ===== -->
+        <div class="prop-detail-panel" id="detailPanel-{{ property.id }}">
+          <div class="prop-detail-inner">
+
+            <!-- Description -->
+            {% if property.description %}
+            <div class="prop-detail-section">
+              <div class="prop-detail-section-title"><i class="fas fa-align-left"></i> Description</div>
+              <p style="color:var(--text-secondary);font-size:0.85rem;line-height:1.65;margin:0;">{{ property.description }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Location -->
+            <div class="prop-detail-section">
+              <div class="prop-detail-section-title"><i class="fas fa-map-marker-alt"></i> Full Address</div>
+              <div class="prop-detail-grid">
+                {% for field, label in [(property.address_line1, 'Street Address'), (property.address_line2, 'Address Line 2'), (property.city, 'City'), (property.state_province, 'County / Province'), (property.postal_code, 'Postal Code'), (property.country, 'Country')] %}
+                <div class="prop-detail-item full">
+                  <div class="prop-detail-label">{{ label }}</div>
+                  <div class="prop-detail-value {% if not field %}empty{% endif %}">{{ field if field else 'Not specified' }}</div>
+                </div>
+                {% endfor %}
+                {% if property.lat and property.lng %}
+                <div class="prop-detail-item">
+                  <div class="prop-detail-label">Latitude</div>
+                  <div class="prop-detail-value">{{ property.lat }}</div>
+                </div>
+                <div class="prop-detail-item">
+                  <div class="prop-detail-label">Longitude</div>
+                  <div class="prop-detail-value">{{ property.lng }}</div>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Pricing & Terms -->
+            <div class="prop-detail-section">
+              <div class="prop-detail-section-title"><i class="fas fa-money-bill-wave"></i> Pricing &amp; Terms</div>
+              <div class="prop-detail-grid">
+                <div class="prop-detail-item">
+                  <div class="prop-detail-label">Rent Amount</div>
+                  <div class="prop-detail-value {% if not property.rent_amount %}empty{% endif %}">{{ 'KES ' + "{:,.0f}".format(property.rent_amount) + '/mo' if property.rent_amount else 'Not set' }}</div>
+                </div>
+                <div class="prop-detail-item">
+                  <div class="prop-detail-label">Security Deposit</div>
+                  <div class="prop-detail-value {% if not property.security_deposit %}empty{% endif %}">{{ 'KES ' + "{:,.0f}".format(property.security_deposit) if property.security_deposit else 'Not set' }}</div>
+                </div>
+                <div class="prop-detail-item">
+                  <div class="prop-detail-label">Lease Term</div>
+                  <div class="prop-detail-value {% if not property.lease_term %}empty{% endif %}">{{ property.lease_term if property.lease_term else 'Not set' }}</div>
+                </div>
+                <div class="prop-detail-item">
+                  <div class="prop-detail-label">Availability Date</div>
+                  <div class="prop-detail-value {% if not property.availability_date %}empty{% endif %}">{{ property.availability_date.strftime('%b %d, %Y') if property.availability_date else 'Not set' }}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Specifications -->
+            <div class="prop-detail-section">
+              <div class="prop-detail-section-title"><i class="fas fa-ruler-combined"></i> Specifications</div>
+              <div class="prop-detail-grid">
+                <div class="prop-detail-item">
+                  <div class="prop-detail-label">Property Type</div>
+                  <div class="prop-detail-value {% if not property.property_type %}empty{% endif %}">{{ property.property_type if property.property_type else 'Not set' }}</div>
+                </div>
+                <div class="prop-detail-item">
+                  <div class="prop-detail-label">Category</div>
+                  <div class="prop-detail-value {% if not property.category %}empty{% endif %}">{{ property.category if property.category else 'Not set' }}</div>
+                </div>
+                <div class="prop-detail-item">
+                  <div class="prop-detail-label">Bedrooms</div>
+                  <div class="prop-detail-value {% if property.bedrooms is none %}empty{% endif %}">{{ property.bedrooms if property.bedrooms is not none else 'Not set' }}</div>
+                </div>
+                <div class="prop-detail-item">
+                  <div class="prop-detail-label">Bathrooms</div>
+                  <div class="prop-detail-value {% if property.bathrooms is none %}empty{% endif %}">{{ property.bathrooms if property.bathrooms is not none else 'Not set' }}</div>
+                </div>
+                {% if property.size %}
+                <div class="prop-detail-item full">
+                  <div class="prop-detail-label">Size</div>
+                  <div class="prop-detail-value">{{ property.size }}</div>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Utilities -->
+            {% if property.utilities %}
+            <div class="prop-detail-section">
+              <div class="prop-detail-section-title"><i class="fas fa-bolt"></i> Utilities Included</div>
+              <div class="prop-detail-tags">
+                {% for util in property.utilities.replace('|', ',').split(',') %}
+                  {% set util_trimmed = util.strip() %}
+                  {% if util_trimmed %}
+                  <span class="prop-detail-tag"><i class="fas fa-check-circle"></i> {{ util_trimmed }}</span>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- Amenities -->
+            {% if property.amenities %}
+            <div class="prop-detail-section">
+              <div class="prop-detail-section-title"><i class="fas fa-star"></i> Amenities</div>
+              <div class="prop-detail-tags">
+                {% for amenity in property.amenities.replace('|', ',').split(',') %}
+                  {% set amenity_trimmed = amenity.strip() %}
+                  {% if amenity_trimmed %}
+                  <span class="prop-detail-tag"><i class="fas fa-check-circle"></i> {{ amenity_trimmed }}</span>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- Policies -->
+            <div class="prop-detail-section">
+              <div class="prop-detail-section-title"><i class="fas fa-shield-alt"></i> Policies</div>
+              <div class="prop-detail-grid">
+                <div class="prop-detail-item">
+                  <div class="prop-detail-label">Pets Allowed</div>
+                  <div class="prop-detail-value">{{ property.pets_allowed if property.pets_allowed else 'Not specified' }}</div>
+                </div>
+                {% if property.pet_restrictions %}
+                <div class="prop-detail-item">
+                  <div class="prop-detail-label">Pet Restrictions</div>
+                  <div class="prop-detail-value">{{ property.pet_restrictions }}</div>
+                </div>
+                {% endif %}
+                <div class="prop-detail-item">
+                  <div class="prop-detail-label">Parking</div>
+                  <div class="prop-detail-value {% if not property.parking_availability or property.parking_availability == 'None' %}empty{% endif %}">{{ property.parking_availability if property.parking_availability and property.parking_availability != 'None' else 'None' }}</div>
+                </div>
+                <div class="prop-detail-item">
+                  <div class="prop-detail-label">Furnished</div>
+                  <div class="prop-detail-value {% if not property.furnished_status %}empty{% endif %}">{{ property.furnished_status if property.furnished_status else 'Not specified' }}</div>
+                </div>
+                <div class="prop-detail-item">
+                  <div class="prop-detail-label">Smoking Policy</div>
+                  <div class="prop-detail-value {% if not property.smoking_policy %}empty{% endif %}">{{ property.smoking_policy if property.smoking_policy else 'Not specified' }}</div>
+                </div>
+                <div class="prop-detail-item">
+                  <div class="prop-detail-label">Status</div>
+                  <div class="prop-detail-value">
+                    {% if property.available %}
+                    <span style="color:var(--success-color);"><i class="fas fa-check-circle me-1"></i>Available</span>
+                    {% else %}
+                    <span style="color:var(--danger-color);"><i class="fas fa-times-circle me-1"></i>Occupied</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Accessibility -->
+            {% if property.accessibility_features %}
+            <div class="prop-detail-section">
+              <div class="prop-detail-section-title"><i class="fas fa-wheelchair"></i> Accessibility Features</div>
+              <div class="prop-detail-tags">
+                {% for feat in property.accessibility_features.replace('|', ',').split(',') %}
+                  {% set feat_trimmed = feat.strip() %}
+                  {% if feat_trimmed %}
+                  <span class="prop-detail-tag"><i class="fas fa-check-circle"></i> {{ feat_trimmed }}</span>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+
+          </div>
+        </div>
+
+      </div>
+      {% endfor %}
+
+    </div>
+    {% else %}
+
+    <!-- Empty State -->
+    <div class="props-empty">
+      <div class="props-empty-icon">
+        <i class="fas fa-building"></i>
+      </div>
+      <h3>No Properties Yet</h3>
+      <p>You haven't added any properties. Start by listing your first property to attract tenants.</p>
+      <a href="{{ url_for('landlord.add_property') }}" class="btn-add-property">
+        <i class="fas fa-plus-circle"></i> Add Your First Property
+      </a>
+    </div>
+
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // ---- Toggle detail panel ----
+  function toggleDetail(id) {
+    var panel = document.getElementById('detailPanel-' + id);
+    var btn = document.querySelector('[data-detail-btn="' + id + '"]');
+    var isOpen = panel.classList.contains('open');
+
+    // Close all other panels first
+    document.querySelectorAll('.prop-detail-panel.open').forEach(function(p) {
+      p.classList.remove('open');
+    });
+    document.querySelectorAll('.btn-prop-outline.active[data-detail-btn]').forEach(function(b) {
+      b.classList.remove('active');
+      var icon = b.querySelector('i');
+      if (icon) icon.className = 'fas fa-eye';
+    });
+
+    if (!isOpen) {
+      panel.classList.add('open');
+      if (btn) {
+        btn.classList.add('active');
+        var icon = btn.querySelector('i');
+        if (icon) icon.className = 'fas fa-eye-slash';
+      }
+      // Smooth scroll to card
+      setTimeout(function() {
+        var card = panel.closest('.prop-card');
+        if (card) {
+          var rect = card.getBoundingClientRect();
+          var offset = rect.top + window.scrollY - 80;
+          if (offset < window.scrollY) {
+            window.scrollTo({ top: offset, behavior: 'smooth' });
+          }
+        }
+      }, 100);
+    }
+  }
+
+  // ---- Search & Filter ----
+  var searchInput = document.getElementById('propsSearch');
+  var filterType = document.getElementById('filterType');
+  var filterStatus = document.getElementById('filterStatus');
+  var resultsInfo = document.getElementById('resultsInfo');
+  var noResults = document.getElementById('noResults');
+  var propsGrid = document.getElementById('propsGrid');
+
+  function applyFilters() {
+    var query = searchInput.value.toLowerCase().trim();
+    var typeVal = filterType.value.toLowerCase();
+    var statusVal = filterStatus.value.toLowerCase();
+
+    var cards = propsGrid ? propsGrid.querySelectorAll('.prop-card') : [];
+    var visibleCount = 0;
+
+    cards.forEach(function(card) {
+      var title = (card.dataset.title || '').toLowerCase();
+      var location = (card.dataset.location || '').toLowerCase();
+      var type = (card.dataset.type || '').toLowerCase();
+      var category = (card.dataset.category || '').toLowerCase();
+      var status = (card.dataset.status || '').toLowerCase();
+
+      var textMatch = !query || title.indexOf(query) !== -1 || location.indexOf(query) !== -1 || type.indexOf(query) !== -1 || category.indexOf(query) !== -1;
+      var typeMatch = !typeVal || type === typeVal;
+      var statusMatch = !statusVal || status === statusVal;
+
+      if (textMatch && typeMatch && statusMatch) {
+        card.style.display = '';
+        visibleCount++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    // Update results info
+    var total = cards.length;
+    if (resultsInfo) {
+      if (query || typeVal || statusVal) {
+        resultsInfo.textContent = 'Showing ' + visibleCount + ' of ' + total + ' properties';
+      } else {
+        resultsInfo.textContent = '';
+      }
+    }
+
+    // Show/hide no results message
+    if (noResults) {
+      if (visibleCount === 0 && total > 0) {
+        noResults.classList.add('visible');
+      } else {
+        noResults.classList.remove('visible');
+      }
+    }
+  }
+
+  searchInput.addEventListener('input', applyFilters);
+  filterType.addEventListener('change', applyFilters);
+  filterStatus.addEventListener('change', applyFilters);
+
+  // ---- Delete Property ----
+  function confirmDelete(propertyId, propertyTitle) {
+    if (!confirm('Are you sure you want to delete "' + propertyTitle + '"? This action cannot be undone.')) return;
+
+    // Get CSRF token from page if available
+    var csrfInput = document.querySelector('input[name="csrf_token"]');
+    var headers = { 'Content-Type': 'application/json' };
+    if (csrfInput) headers['X-CSRFToken'] = csrfInput.value;
+
+    fetch('/landlord/delete_property/' + propertyId, {
+      method: 'POST',
+      headers: headers
+    })
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+      if (data.success) {
+        // Animate removal
+        var card = document.querySelector('.prop-card[data-id="' + propertyId + '"]');
+        if (card) {
+          card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.95)';
+          setTimeout(function() {
+            card.remove();
+            // Update count badge
+            var remaining = document.querySelectorAll('.prop-card').length;
+            var countBadge = document.getElementById('propsCount');
+            if (countBadge) countBadge.textContent = remaining;
+            // Show empty state if no more
+            if (remaining === 0) {
+              window.location.reload();
+            }
+            applyFilters();
+          }, 300);
+        }
+      } else {
+        alert('Error: ' + (data.error || 'Failed to delete property.'));
+      }
+    })
+    .catch(function() {
+      alert('An error occurred. Please try again.');
+    });
+  }
+</script>
+{% endblock %}
