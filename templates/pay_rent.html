@@ -1,0 +1,74 @@
+{% extends 'base.html' %} {% block title %}Pay Rent{% endblock %} {% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-lg">
+        <div class="card-header bg-success text-white">
+          <h2 class="mb-0">Pay Rent</h2>
+        </div>
+
+        <div class="card-body">
+          <div class="alert alert-info">
+            <strong>Note:</strong> Rent payment is temporarily disabled. Contact your landlord for payment instructions.
+          </div>
+
+          <form method="POST">
+            {{ csrf_token() }}
+            <div class="mb-3">
+              <label for="amount" class="form-label">Rent Amount (KES)</label>
+              <input
+                type="number"
+                class="form-control"
+                id="amount"
+                name="amount"
+                placeholder="Enter amount"
+                step="0.01"
+                min="0"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="paymentMethod" class="form-label">Payment Method</label>
+              <select class="form-control" id="paymentMethod" name="payment_method" required>
+                <option value="">-- Select Method --</option>
+                <option value="Mobile Money">Mobile Money (M-Pesa)</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Card">Debit/Credit Card</option>
+                <option value="Cash">Cash to Landlord</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="month" class="form-label">Payment For Month</label>
+              <input
+                type="month"
+                class="form-control"
+                id="month"
+                name="payment_month"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="notes" class="form-label">Additional Notes (Optional)</label>
+              <textarea
+                class="form-control"
+                id="notes"
+                name="notes"
+                rows="3"
+                placeholder="Add any notes here..."
+              ></textarea>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-success" disabled>Pay Now (Coming Soon)</button>
+              <a href="{{ url_for('tenant.dashboard') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

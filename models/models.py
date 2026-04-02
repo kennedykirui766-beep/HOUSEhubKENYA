@@ -1,21 +1,37 @@
 from extensions import db
 from flask_login import UserMixin
+from sqlalchemy import event, func, select
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+import secrets
+import string
+
+
+def generate_public_id(length=10):
+    charset = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(charset) for _ in range(length))
 
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
+    public_id = db.Column(db.String(32), unique=True, nullable=False, index=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     phone_number = db.Column(db.String(20), unique=True, nullable=True)
     password_hash = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(20), nullable=False, default='tenant')
+    
+    # Legacy 2FA (TOTP/QR based)
     two_factor_enabled = db.Column(db.Boolean, default=False)
     two_factor_secret = db.Column(db.String(32), nullable=True)
+    
+    # NEW: Preferred 2FA method when multiple are enabled
+    preferred_2fa_method = db.Column(db.String(20), nullable=True)  # 'email', 'sms', 'totp'
+    
     mpesa_details = db.Column(db.String(50), nullable=True)
     profile_picture = db.Column(db.String(255), nullable=True)
     language = db.Column(db.String(10), default='en')
+    dashboard_order = db.Column(db.Text, nullable=True)
 
     # Relationships
     houses = db.relationship('House', backref='owner', lazy=True)
@@ -62,6 +78,25 @@ class User(db.Model, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+
+@event.listens_for(User, 'before_insert')
+def assign_public_id(mapper, connection, target):
+    if target.public_id:
+        return
+
+    # Keep 10 as minimum, then add one character per additional 100M users.
+    user_count = connection.execute(select(func.count(User.id))).scalar() or 0
+    public_id_length = 10 + (user_count // 100000000)
+
+    while True:
+        candidate = generate_public_id(public_id_length)
+        exists = connection.execute(
+            select(User.id).where(User.public_id == candidate)
+        ).first()
+        if not exists:
+            target.public_id = candidate
+            break
 
 
 class House(db.Model):
@@ -245,3 +280,72 @@ class SupportTicket(db.Model):
 
     # Relationship
     user = db.relationship('User', back_populates='support_tickets')
+
+
+# ========== 2FA MODELS (NEW) ==========
+
+class TwoFactorCode(db.Model):
+    """
+    Stores temporary verification codes for email/SMS 2FA.
+    Codes expire after OTP_TIMEOUT_SECONDS.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
+    code = db.Column(db.String(6), nullable=False)  # 6-digit OTP
+    method = db.Column(db.String(20), nullable=False)  # 'email' or 'sms'
+    is_used = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    expires_at = db.Column(db.DateTime, nullable=False, index=True)
+    
+    user = db.relationship('User', backref='two_factor_codes')
+    
+    def is_expired(self):
+        return datetime.utcnow() > self.expires_at
+    
+    def is_valid(self):
+        return not self.is_used and not self.is_expired()
+
+
+class TwoFactorVerification(db.Model):
+    """
+    Tracks which 2FA methods are enabled for each user.
+    User can have multiple methods enabled (email, SMS, TOTP).
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, unique=True, index=True)
+    email_enabled = db.Column(db.Boolean, default=False)
+    sms_enabled = db.Column(db.Boolean, default=False)
+    totp_enabled = db.Column(db.Boolean, default=False)  # Existing QR code method
+    
+    # Track verified phone number for SMS (if different from user.phone_number)
+    verified_phone = db.Column(db.String(20), nullable=True)
+    phone_verified = db.Column(db.Boolean, default=False)
+    
+    # Backup codes (comma-separated, generated when 2FA enabled)
+    backup_codes = db.Column(db.Text, nullable=True)
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    user = db.relationship('User', backref='two_factor_verification', uselist=False)
+    
+    def get_backup_codes(self):
+        """Return list of unused backup codes"""
+        if not self.backup_codes:
+            return []
+        codes = self.backup_codes.split(',')
+        return [c.strip() for c in codes if c.strip()]
+    
+    def use_backup_code(self, code):
+        """Use a backup code and remove it from the list"""
+        codes = self.get_backup_codes()
+        if code in codes:
+            codes.remove(code)
+            self.backup_codes = ','.join(codes)
+            return True
+        return False
+    
+    def is_any_method_enabled(self):
+        """Check if any 2FA method is enabled"""
+        return self.email_enabled or self.sms_enabled or self.totp_enabled
