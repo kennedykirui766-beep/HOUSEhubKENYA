@@ -967,6 +967,43 @@
 
 {% block scripts %}
 <script>
+  // ---- Helper: Get CSRF Token ----
+  // Attempts to retrieve the token from Cookie, Meta Tag, or Server-side render
+  function getCsrfToken() {
+    // 1. Try to get from Cookie (Standard for Flask-WTF)
+    function getCookie(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+          var cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    var token = getCookie('csrf_token');
+
+    // 2. Fallback: Try Meta Tag (if base.html has it)
+    if (!token) {
+      var meta = document.querySelector('meta[name="csrf-token"]');
+      if (meta) {
+        token = meta.getAttribute('content');
+      }
+    }
+
+    // 3. Fallback: Server-side injection (using tojson to handle quotes)
+    if (!token) {
+      token = {{ csrf_token() | tojson | safe }};
+    }
+
+    return token;
+  }
+
   // ---- Toggle detail panel ----
   function toggleDetail(id) {
     var panel = document.getElementById('detailPanel-' + id);
@@ -990,7 +1027,7 @@
         var icon = btn.querySelector('i');
         if (icon) icon.className = 'fas fa-eye-slash';
       }
-      // Smooth scroll
+      // Smooth scroll to card
       setTimeout(function() {
         var card = panel.closest('.prop-card');
         if (card) {
@@ -1004,7 +1041,7 @@
     }
   }
 
-  // ---- Search & Filter (unchanged) ----
+  // ---- Search & Filter ----
   var searchInput = document.getElementById('propsSearch');
   var filterType = document.getElementById('filterType');
   var filterStatus = document.getElementById('filterStatus');
@@ -1039,15 +1076,23 @@
       }
     });
 
+    // Update results info
     var total = cards.length;
     if (resultsInfo) {
-      resultsInfo.textContent = (query || typeVal || statusVal) 
-        ? 'Showing ' + visibleCount + ' of ' + total + ' properties' 
-        : '';
+      if (query || typeVal || statusVal) {
+        resultsInfo.textContent = 'Showing ' + visibleCount + ' of ' + total + ' properties';
+      } else {
+        resultsInfo.textContent = '';
+      }
     }
 
+    // Show/hide no results message
     if (noResults) {
-      noResults.classList.toggle('visible', visibleCount === 0 && total > 0);
+      if (visibleCount === 0 && total > 0) {
+        noResults.classList.add('visible');
+      } else {
+        noResults.classList.remove('visible');
+      }
     }
   }
 
@@ -1055,68 +1100,55 @@
   filterType.addEventListener('change', applyFilters);
   filterStatus.addEventListener('change', applyFilters);
 
-  // ---- Delete Property (Fixed CSRF) ----
-  // ---- Delete Property (Fixed & Reliable CSRF) ----
-function confirmDelete(propertyId, propertyTitle) {
-    if (!confirm('Are you sure you want to delete "' + propertyTitle + '"?\n\nThis action cannot be undone.')) {
-        return;
-    }
+  // ---- Delete Property ----
+  function confirmDelete(propertyId, propertyTitle) {
+    if (!confirm('Are you sure you want to delete "' + propertyTitle + '"? This action cannot be undone.')) return;
 
-    // Get CSRF token from meta tag (this is the standard & reliable method)
-    const metaToken = document.querySelector('meta[name="csrf-token"]');
-    const csrfToken = metaToken ? metaToken.getAttribute('content') : '';
+    var csrfToken = getCsrfToken();
 
     if (!csrfToken) {
-        alert("CSRF token missing. Please refresh the page and try again.");
+        alert('Security Error: Unable to locate CSRF token. Please refresh the page.');
         return;
     }
 
-    fetch(`/landlord/delete_property/${propertyId}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken
-        },
-        body: JSON.stringify({})   // empty body is okay for delete
+    var headers = {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken
+    };
+
+    fetch('/landlord/delete_property/' + propertyId, {
+      method: 'POST',
+      headers: headers
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            // Remove card with animation
-            const card = document.querySelector(`.prop-card[data-id="${propertyId}"]`);
-            if (card) {
-                card.style.transition = 'all 0.4s ease';
-                card.style.opacity = '0';
-                card.style.transform = 'scale(0.95)';
-
-                setTimeout(() => {
-                    card.remove();
-
-                    // Update property count
-                    const remaining = document.querySelectorAll('.prop-card').length;
-                    const countBadge = document.getElementById('propsCount');
-                    if (countBadge) countBadge.textContent = remaining;
-
-                    if (remaining === 0) {
-                        window.location.reload();
-                    } else {
-                        applyFilters();
-                    }
-                }, 400);
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+      if (data.success) {
+        // Animate removal
+        var card = document.querySelector('.prop-card[data-id="' + propertyId + '"]');
+        if (card) {
+          card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.95)';
+          setTimeout(function() {
+            card.remove();
+            // Update count badge
+            var remaining = document.querySelectorAll('.prop-card').length;
+            var countBadge = document.getElementById('propsCount');
+            if (countBadge) countBadge.textContent = remaining;
+            // Show empty state if no more
+            if (remaining === 0) {
+              window.location.reload();
             }
-        } else {
-            alert('Failed to delete: ' + (data.error || 'Unknown error'));
+            applyFilters();
+          }, 300);
         }
+      } else {
+        alert('Error: ' + (data.error || 'Failed to delete property.'));
+      }
     })
-    .catch(error => {
-        console.error('Delete error:', error);
-        alert('An error occurred while deleting. Please try again.');
+    .catch(function() {
+      alert('An error occurred. Please try again.');
     });
-}
+  }
 </script>
 {% endblock %}
