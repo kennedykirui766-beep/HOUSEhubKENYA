@@ -290,6 +290,9 @@ def edit_property(property_id):
     return render_template("landlord/edit_property.html", house=house, stats={})
 
 
+from extensions import csrf
+
+@csrf.exempt
 @landlord_bp.route('/delete_property/<int:property_id>', methods=['POST'])
 @login_required
 def delete_property(property_id):
