@@ -154,6 +154,12 @@ def create_app():
     @app.route('/favicon.ico')
     def favicon():
         return app.send_static_file('images/Screenshot_2025-10-07_003020.png')
+    
+    @app.teardown_appcontext
+    def shutdown_session(exception=None):
+        if exception:
+            db.session.rollback()
+        db.session.remove()
 
     @app.route("/subscribe", methods=["POST"])
     def subscribe():

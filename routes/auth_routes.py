@@ -73,6 +73,7 @@ def login():
                 return redirect(url_for("portal"))
 
         except Exception as e:
+            db.session.rollback()
             logger.error(f"Login error: {str(e)}", exc_info=True)
             flash("An error occurred during login. Try again.", "danger")
             return render_template("login.html")
