@@ -1231,6 +1231,7 @@
   var modalPropertyName = document.getElementById('modalPropertyName');
   var btnConfirmDelete = document.getElementById('btnConfirmDelete');
   var propertyToDeleteId = null;
+  var propertyCardElement = null;
 
   function openDeleteModal(id, title) {
     propertyToDeleteId = id;
@@ -1281,7 +1282,8 @@
         closeDeleteModal();
         
         // Animate removal
-        var card = document.querySelector('.prop-card[data-id="' + propertyToDeleteId + '"]');
+        var card = document.querySelector('.prop-card[data-id="' + propertyToDeleteId + '"]') 
+         || document.querySelector('[data-id="' + propertyToDeleteId + '"]');
         if (card) {
           card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
           card.style.opacity = '0';
