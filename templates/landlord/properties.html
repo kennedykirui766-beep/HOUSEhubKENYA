@@ -755,7 +755,7 @@
 
           <!-- Delete Form with CSRF Protection -->
           <form id="delete-form-{{ property.id }}" action="{{ url_for('landlord.delete_property', property_id=property.id) }}" method="POST" style="display: none;">
-            {{ csrf_token() }}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           </form>
 
           <!-- Actions -->
