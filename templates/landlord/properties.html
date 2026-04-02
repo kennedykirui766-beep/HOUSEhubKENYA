@@ -753,6 +753,11 @@
             {% endif %}
           </div>
 
+          <!-- Delete Form with CSRF Protection -->
+          <form id="delete-form-{{ property.id }}" action="{{ url_for('landlord.delete_property', property_id=property.id) }}" method="POST" style="display: none;">
+            {{ csrf_token() }}
+          </form>
+
           <!-- Actions -->
           <div class="prop-card-actions">
             <button type="button" class="btn-prop-outline" onclick="toggleDetail({{ property.id }})" data-detail-btn="{{ property.id }}">
@@ -1067,39 +1072,13 @@
   function confirmDelete(propertyId, propertyTitle) {
     if (!confirm('Are you sure you want to delete "' + propertyTitle + '"? This action cannot be undone.')) return;
 
-    fetch('/landlord/delete_property/' + propertyId, {
-      method: 'POST',
-      headers: headers
-    })
-    .then(function(response) { return response.json(); })
-    .then(function(data) {
-      if (data.success) {
-        // Animate removal
-        var card = document.querySelector('.prop-card[data-id="' + propertyId + '"]');
-        if (card) {
-          card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-          card.style.opacity = '0';
-          card.style.transform = 'scale(0.95)';
-          setTimeout(function() {
-            card.remove();
-            // Update count badge
-            var remaining = document.querySelectorAll('.prop-card').length;
-            var countBadge = document.getElementById('propsCount');
-            if (countBadge) countBadge.textContent = remaining;
-            // Show empty state if no more
-            if (remaining === 0) {
-              window.location.reload();
-            }
-            applyFilters();
-          }, 300);
-        }
-      } else {
-        alert('Error: ' + (data.error || 'Failed to delete property.'));
-      }
-    })
-    .catch(function() {
-      alert('An error occurred. Please try again.');
-    });
+    // Find the hidden form and submit it
+    var form = document.getElementById('delete-form-' + propertyId);
+    if (form) {
+      form.submit();
+    } else {
+      console.error('Delete form not found for ID: ' + propertyId);
+    }
   }
 </script>
 {% endblock %}
