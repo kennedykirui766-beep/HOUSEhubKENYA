@@ -1,0 +1,78 @@
+{% extends 'base.html' %} {% block title %}My Documents{% endblock %} {% block content %}
+<div class="container mt-5">
+  <h1 class="mb-4">My Documents</h1>
+
+  {% if documents %}
+  <div class="table-responsive">
+    <table class="table table-striped table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>Document Type</th>
+          <th>Uploaded Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for doc in documents %}
+        <tr>
+          <td>{{ doc.document_type or 'N/A' }}</td>
+          <td>{{ doc.upload_date.strftime('%B %d, %Y') if doc.upload_date else 'N/A' }}</td>
+          <td>
+            <span class="badge bg-success">Verified</span>
+          </td>
+          <td>
+            <a href="#" class="btn btn-sm btn-primary">View</a>
+            <a href="#" class="btn btn-sm btn-danger">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="alert alert-info">
+    <p>No documents uploaded yet.</p>
+  </div>
+  {% endif %}
+
+  <hr />
+  <h3 class="mt-4">Upload New Document</h3>
+  <div class="card">
+    <div class="card-body">
+      <form method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label for="documentFile" class="form-label">Select Document</label>
+          <input
+            type="file"
+            class="form-control"
+            id="documentFile"
+            name="document"
+            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="documentType" class="form-label">Document Type</label>
+          <select
+            class="form-control"
+            id="documentType"
+            name="document_type"
+            required
+          >
+            <option value="">-- Select Type --</option>
+            <option value="ID">National ID</option>
+            <option value="Passport">Passport</option>
+            <option value="Employment Letter">Employment Letter</option>
+            <option value="Bank Statement">Bank Statement</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Upload Document</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

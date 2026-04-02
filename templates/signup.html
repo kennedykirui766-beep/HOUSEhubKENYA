@@ -1,1605 +1,427 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 
-{% block title %}HomeHub | Add Property{% endblock %}
+{% block title %}HomeHub | Sign Up{% endblock %}
 
 {% block styles %}
 <style>
-  /* ========== ADD PROPERTY PAGE ========== */
-  .add-property-page {
-    padding: 2rem 0 4rem;
+  /* ========== SIGNUP PAGE ========== */
+  .signup-page {
+    padding: 3rem 0;
     background-color: var(--body-bg);
-  }
-
-  .ap-header h1 {
-    color: var(--text-primary);
-    font-weight: 700;
-    font-size: 1.75rem;
-    margin-bottom: 0.35rem;
-  }
-
-  .ap-header p {
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-  }
-
-  /* ---------- Progress Bar ---------- */
-  .ap-progress-wrap {
-    margin-bottom: 1.75rem;
-  }
-
-  .ap-progress {
-    height: 10px;
-    border-radius: 99px;
-    background-color: var(--border-color);
-    overflow: hidden;
-  }
-
-  .ap-progress-bar {
-    height: 100%;
-    border-radius: 99px;
-    background: var(--gradient-primary);
-    transition: width 0.4s ease;
-    min-width: 0;
-  }
-
-  .ap-progress-label {
+    min-height: 100vh;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-top: 0.5rem;
   }
 
-  .ap-progress-step {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    transition: var(--transition);
-    white-space: nowrap;
+  .signup-container {
+    max-width: 500px;
+    margin: 0 auto;
   }
 
-  .ap-progress-step.active {
-    color: var(--primary-color);
-  }
-
-  /* ---------- Form Sections ---------- */
-  .ap-section {
+  .signup-card {
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    padding: 1.75rem;
-    margin-bottom: 1.25rem;
-    transition: var(--transition);
+    padding: 2.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   }
 
-  .ap-section:hover {
-    border-color: color-mix(in srgb, var(--primary-color) 40%, transparent);
+  .signup-header {
+    text-align: center;
+    margin-bottom: 2rem;
   }
 
-  .ap-section-header {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    margin-bottom: 1.35rem;
-    padding-bottom: 0.85rem;
-    border-bottom: 1px solid var(--border-color);
-  }
-
-  .ap-section-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radius-md);
-    background: var(--primary-light);
-    color: var(--primary-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    flex-shrink: 0;
-  }
-
-  .ap-section-title {
+  .signup-header h1 {
     color: var(--text-primary);
-    font-weight: 600;
-    font-size: 1.05rem;
-    margin: 0;
+    font-weight: 700;
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
   }
 
-  .ap-section-subtitle {
+  .signup-header p {
     color: var(--text-muted);
-    font-size: 0.78rem;
-    margin: 0;
+    font-size: 0.95rem;
   }
 
-  /* ---------- Form Fields ---------- */
-  .ap-field {
-    margin-bottom: 1.15rem;
+  .signup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
   }
 
-  .ap-field:last-child {
-    margin-bottom: 0;
+  .form-field {
+    display: flex;
+    flex-direction: column;
   }
 
-  .ap-field label {
-    display: block;
+  .form-field label {
+    color: var(--text-primary);
     font-weight: 500;
-    font-size: 0.85rem;
-    color: var(--text-primary);
-    margin-bottom: 0.35rem;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
   }
 
-  .ap-field .ap-hint {
+  .form-field small {
     color: var(--text-muted);
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     margin-top: 0.3rem;
   }
 
-  .ap-input,
-  .ap-select,
-  .ap-textarea {
-    width: 100%;
-    padding: 0.7rem 1rem;
+  .form-field input,
+  .form-field select,
+  .form-field textarea {
+    padding: 0.75rem 1rem;
     border: 2px solid var(--border-color);
     border-radius: var(--radius-md);
     background-color: var(--body-bg);
     color: var(--text-primary);
     font-size: 0.9rem;
-    transition: var(--transition);
     font-family: inherit;
-    min-width: 0;
+    transition: var(--transition);
   }
 
-  .ap-input:focus,
-  .ap-select:focus,
-  .ap-textarea:focus {
+  .form-field input:focus,
+  .form-field select:focus,
+  .form-field textarea:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 4px var(--primary-light);
   }
 
-  .ap-input::placeholder,
-  .ap-textarea::placeholder {
+  .form-field input::placeholder {
     color: var(--text-muted);
   }
 
-  .ap-select option {
+  .form-field select option {
     background-color: var(--card-bg);
     color: var(--text-primary);
   }
 
-  .ap-textarea {
-    resize: vertical;
-    min-height: 100px;
+  .password-hint {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    line-height: 1.5;
   }
 
-  .ap-textarea.is-invalid,
-  .ap-input.is-invalid,
-  .ap-select.is-invalid {
-    border-color: #dc3545;
-  }
-
-  .ap-textarea.is-invalid:focus,
-  .ap-input.is-invalid:focus,
-  .ap-select.is-invalid:focus {
-    box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
-  }
-
-  .invalid-feedback {
-    color: #dc3545;
-    font-size: 0.78rem;
-    margin-top: 0.3rem;
-    display: none;
-  }
-
-  .is-invalid ~ .invalid-feedback {
-    display: block;
-  }
-
-  /* ---------- Address Grid ---------- */
-  .ap-address-grid {
+  .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.15rem;
+    gap: 1rem;
   }
 
-  .ap-address-grid .ap-full {
-    grid-column: 1 / -1;
-  }
-
-  /* ---------- Checkbox / Radio Groups ---------- */
-  .ap-check-group {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 0.6rem;
-  }
-
-  .ap-check-item {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    padding: 0.55rem 0.75rem;
-    border: 2px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: var(--transition);
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    background-color: var(--body-bg);
-    min-width: 0;
-  }
-
-  .ap-check-item:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-  }
-
-  .ap-check-item input {
-    accent-color: var(--primary-color);
-    flex-shrink: 0;
-    width: 16px;
-    height: 16px;
-  }
-
-  .ap-check-item.selected {
-    border-color: var(--primary-color);
-    background-color: var(--primary-light);
-    color: var(--primary-color);
-    font-weight: 500;
-  }
-
-  /* ---------- Image Upload ---------- */
-  .ap-upload-area {
-    border: 2px dashed var(--border-color);
-    border-radius: var(--radius-md);
-    padding: 2rem;
-    text-align: center;
-    cursor: pointer;
-    transition: var(--transition);
-    background-color: var(--body-bg);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .ap-upload-area:hover,
-  .ap-upload-area.dragover {
-    border-color: var(--primary-color);
-    background-color: var(--primary-light);
-  }
-
-  .ap-upload-area i {
-    font-size: 2rem;
-    color: var(--text-muted);
-    margin-bottom: 0.5rem;
-    display: block;
-    transition: var(--transition);
-  }
-
-  .ap-upload-area:hover i,
-  .ap-upload-area.dragover i {
-    color: var(--primary-color);
-  }
-
-  .ap-upload-area p {
-    color: var(--text-muted);
-    font-size: 0.85rem;
+  .form-row .form-field {
     margin: 0;
   }
 
-  .ap-upload-area small {
-    color: var(--text-muted);
-    font-size: 0.72rem;
-    opacity: 0.7;
-  }
-
-  .ap-upload-area input[type="file"] {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    cursor: pointer;
-  }
-
-  .ap-image-previews {
+  .form-checkbox {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    margin-top: 0.75rem;
-  }
-
-  .ap-thumb {
-    position: relative;
-    width: 80px;
-    height: 80px;
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    border: 2px solid var(--border-color);
-    flex-shrink: 0;
-  }
-
-  .ap-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .ap-thumb-remove {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: rgba(220, 53, 69, 0.9);
-    color: white;
-    border: none;
-    font-size: 0.6rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: var(--transition);
-    line-height: 1;
-  }
-
-  .ap-thumb-remove:hover {
-    background: #dc3545;
-    transform: scale(1.1);
-  }
-
-  .ap-upload-error {
-    color: #dc3545;
-    font-size: 0.78rem;
-    margin-top: 0.5rem;
-    display: none;
-  }
-
-  .ap-upload-error.visible {
-    display: block;
-  }
-
-  /* ---------- Spec Grid ---------- */
-  .ap-spec-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.15rem;
-  }
-
-  /* ---------- Char Count ---------- */
-  .ap-char-count {
-    text-align: right;
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    margin-top: 0.25rem;
-  }
-
-  .ap-char-count.warning {
-    color: #f59e0b;
-  }
-
-  .ap-char-count.danger {
-    color: #dc3545;
-  }
-
-  /* ---------- Form Actions ---------- */
-  .ap-actions {
-    display: flex;
+    align-items: flex-start;
     gap: 0.75rem;
-    flex-wrap: wrap;
-    padding-top: 0.5rem;
+    margin-top: 1rem;
   }
 
-  .btn-ap-submit {
+  .form-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-top: 0.25rem;
+    flex-shrink: 0;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+  }
+
+  .form-checkbox label {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    line-height: 1.5;
+  }
+
+  .form-checkbox a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .form-checkbox a:hover {
+    text-decoration: underline;
+  }
+
+  .btn-signup {
     background: var(--gradient-primary);
     border: none;
     color: white;
-    padding: 0.75rem 2rem;
+    padding: 0.85rem 1.5rem;
     border-radius: var(--radius-md);
     font-weight: 600;
     font-size: 0.95rem;
     transition: var(--transition);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
     cursor: pointer;
     font-family: inherit;
+    width: 100%;
+    margin-top: 0.5rem;
   }
 
-  .btn-ap-submit:hover {
+  .btn-signup:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
     color: white;
   }
 
-  .btn-ap-submit:disabled {
+  .btn-signup:disabled {
     opacity: 0.55;
     cursor: not-allowed;
     transform: none;
-    box-shadow: none;
   }
 
-  .btn-ap-draft {
-    background-color: var(--body-bg);
-    border: 2px solid var(--border-color);
-    color: var(--text-primary);
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--radius-md);
-    font-weight: 500;
-    font-size: 0.95rem;
-    transition: var(--transition);
-    cursor: pointer;
-    font-family: inherit;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .btn-ap-draft:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-  }
-
-  .btn-ap-cancel {
-    background: transparent;
-    border: 2px solid var(--border-color);
-    color: var(--text-secondary);
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--radius-md);
-    font-weight: 500;
-    font-size: 0.95rem;
-    transition: var(--transition);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .btn-ap-cancel:hover {
-    border-color: #dc3545;
-    color: #dc3545;
-    text-decoration: none;
-  }
-
-  .ap-spinner {
-    display: none;
-    width: 16px;
-    height: 16px;
-    border: 2.5px solid rgba(255,255,255,0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: apSpin 0.6s linear infinite;
-    flex-shrink: 0;
-  }
-
-  @keyframes apSpin {
-    to { transform: rotate(360deg); }
-  }
-
-  /* ---------- Feedback Alert ---------- */
-  .ap-feedback {
-    border-radius: var(--radius-md);
-    padding: 0.85rem 1rem;
-    margin-top: 1rem;
-    font-size: 0.85rem;
-    display: none;
-    align-items: center;
-    gap: 0.5rem;
-    border: none;
-  }
-
-  .ap-feedback.visible {
-    display: flex;
-  }
-
-  .ap-feedback.alert-success {
-    background-color: rgba(40, 167, 69, 0.07);
-    color: #28a745;
-    border: 1px solid rgba(40, 167, 69, 0.12);
-  }
-
-  .ap-feedback.alert-danger {
-    background-color: rgba(220, 53, 69, 0.07);
-    color: #dc3545;
-    border: 1px solid rgba(220, 53, 69, 0.12);
-  }
-
-  .ap-feedback.alert-info {
-    background-color: rgba(99, 102, 241, 0.07);
-    color: var(--primary-color);
-    border: 1px solid rgba(99, 102, 241, 0.12);
-  }
-
-  /* ---------- Sidebar ---------- */
-  .ap-tips-card {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    margin-bottom: 1.25rem;
-    transition: var(--transition);
-  }
-
-  .ap-tips-card h5 {
-    color: var(--text-primary);
-    font-weight: 600;
-    font-size: 1rem;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .ap-tips-card h5 i {
-    color: var(--primary-color);
-  }
-
-  .ap-tips-list {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 1rem;
-  }
-
-  .ap-tips-list li {
-    padding: 0.6rem 0;
-    border-bottom: 1px solid var(--border-color);
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: flex-start;
-    gap: 0.6rem;
-    line-height: 1.5;
-  }
-
-  .ap-tips-list li:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-  }
-
-  .ap-tips-list li i {
-    color: var(--primary-color);
-    margin-top: 0.15rem;
-    flex-shrink: 0;
-    font-size: 0.75rem;
-  }
-
-  .ap-tips-toggle {
-    background: none;
-    border: none;
-    color: var(--primary-color);
-    font-weight: 500;
-    font-size: 0.82rem;
-    cursor: pointer;
-    padding: 0;
-    font-family: inherit;
-    transition: var(--transition);
-  }
-
-  .ap-tips-toggle:hover {
-    color: var(--secondary-color);
-  }
-
-  .ap-tips-body {
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-  }
-
-  .ap-tips-body.collapsed {
-    max-height: 0 !important;
-  }
-
-  /* ---------- Preview Card ---------- */
-  .ap-preview-card {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    position: sticky;
-    top: calc(var(--navbar-height) + 1rem);
-  }
-
-  .ap-preview-images {
-    height: 160px;
-    background-color: var(--body-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-bottom: 1px solid var(--border-color);
-    overflow: hidden;
-    position: relative;
-  }
-
-  .ap-preview-images i {
-    font-size: 2rem;
-    color: var(--text-muted);
-    opacity: 0.4;
-  }
-
-  .ap-preview-images img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    position: absolute;
-    inset: 0;
-  }
-
-  .ap-preview-body {
-    padding: 1.25rem;
-  }
-
-  .ap-preview-title {
-    color: var(--text-primary);
-    font-weight: 600;
-    font-size: 1rem;
-    margin-bottom: 0.35rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .ap-preview-location {
-    color: var(--text-muted);
-    font-size: 0.8rem;
-    margin-bottom: 0.85rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .ap-preview-location i {
-    color: var(--primary-color);
-    margin-right: 0.25rem;
-  }
-
-  .ap-preview-price {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-bottom: 0.85rem;
-  }
-
-  .ap-preview-specs {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    padding-top: 0.85rem;
+  .signup-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
     border-top: 1px solid var(--border-color);
   }
 
-  .ap-preview-spec {
-    font-size: 0.78rem;
+  .signup-footer p {
     color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
+    font-size: 0.9rem;
+    margin: 0;
   }
 
-  .ap-preview-spec i {
+  .signup-footer a {
     color: var(--primary-color);
-    font-size: 0.72rem;
-  }
-
-  .ap-preview-desc {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin-top: 0.75rem;
-    line-height: 1.55;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .ap-preview-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-    margin-top: 0.75rem;
-  }
-
-  .ap-preview-tag {
-    font-size: 0.68rem;
-    padding: 0.2rem 0.55rem;
-    border-radius: var(--radius-full);
-    background-color: var(--primary-light);
-    color: var(--primary-color);
-    font-weight: 500;
-    white-space: nowrap;
-  }
-
-  .ap-preview-badge {
-    position: absolute;
-    top: 0.75rem;
-    left: 0.75rem;
-    padding: 0.25rem 0.65rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.7rem;
-    font-weight: 600;
-    z-index: 2;
-    background: var(--gradient-primary);
-    color: white;
-  }
-
-  .ap-help-link {
-    color: var(--text-muted);
     text-decoration: none;
-    font-size: 0.82rem;
     font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    transition: var(--transition);
-    margin-top: 1rem;
   }
 
-  .ap-help-link:hover {
-    color: var(--primary-color);
+  .signup-footer a:hover {
+    text-decoration: underline;
   }
 
-  /* ---------- Access Badge ---------- */
-  .ap-access-badge {
-    position: fixed;
-    bottom: 1.25rem;
-    right: 1.25rem;
-    padding: 0.4rem 0.85rem;
-    border-radius: var(--radius-full);
-    background: var(--gradient-primary);
-    color: white;
-    font-size: 0.72rem;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-  }
-
-  /* ---------- Flash Alert Override ---------- */
-  .ap-flash {
-    border-radius: var(--radius-md);
+  .alert {
     padding: 0.85rem 1rem;
-    margin-bottom: 1.25rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
     border: none;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 0.5rem;
-    line-height: 1.5;
   }
 
-  .ap-flash i {
-    margin-top: 0.15rem;
+  .alert i {
     flex-shrink: 0;
   }
 
-  .ap-flash.alert-danger {
-    background-color: rgba(220, 53, 69, 0.07);
+  .alert-danger {
+    background-color: rgba(220, 53, 69, 0.1);
     color: #dc3545;
-    border: 1px solid rgba(220, 53, 69, 0.12);
+    border: 1px solid rgba(220, 53, 69, 0.2);
   }
 
-  .ap-flash.alert-success {
-    background-color: rgba(40, 167, 69, 0.07);
+  .alert-success {
+    background-color: rgba(40, 167, 69, 0.1);
     color: #28a745;
-    border: 1px solid rgba(40, 167, 69, 0.12);
+    border: 1px solid rgba(40, 167, 69, 0.2);
   }
 
-  .ap-flash .btn-close {
-    padding: 0;
-    margin-left: auto;
-    flex-shrink: 0;
-  }
-
-  /* ========== RESPONSIVE ========== */
-  @media (max-width: 1199px) {
-    .ap-spec-grid {
-      grid-template-columns: repeat(3, 1fr);
+  @media (max-width: 640px) {
+    .signup-page {
+      padding: 1.5rem 0;
     }
-  }
-
-  @media (max-width: 991px) {
-    .add-property-page {
-      padding: 1.5rem 0 3rem;
+    .signup-card {
+      padding: 1.75rem;
+      margin: 0 1rem;
     }
-    .ap-header h1 {
+    .signup-header h1 {
       font-size: 1.45rem;
     }
-    .ap-preview-card {
-      position: static;
-    }
-    .ap-access-badge {
-      display: none;
-    }
-  }
-
-  @media (max-width: 767px) {
-    .ap-section {
-      padding: 1.25rem;
-    }
-    .ap-address-grid {
+    .form-row {
       grid-template-columns: 1fr;
-    }
-    .ap-spec-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-    .ap-check-group {
-      grid-template-columns: 1fr 1fr;
-    }
-    .ap-actions {
-      flex-direction: column;
-    }
-    .ap-actions .btn-ap-submit,
-    .ap-actions .btn-ap-draft,
-    .ap-actions .btn-ap-cancel {
-      width: 100%;
-      justify-content: center;
-    }
-    .ap-progress-label {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .ap-check-group {
-      grid-template-columns: 1fr;
-    }
-    .ap-spec-grid {
-      grid-template-columns: 1fr;
-    }
-    .ap-section-icon {
-      width: 34px;
-      height: 34px;
-      font-size: 0.85rem;
-    }
-    .ap-section-title {
-      font-size: 0.95rem;
     }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="add-property-page">
-  <div class="container">
+<div class="signup-page">
+  <div class="signup-container">
+    <div class="signup-card">
+      <!-- Header -->
+      <div class="signup-header">
+        <h1>Create Your Account</h1>
+        <p>Join HomeHub and start connecting today</p>
+      </div>
 
-    <!-- Flashed Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-        <div class="ap-flash alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
-          <i class="fas fa-{{ 'exclamation-circle' if category == 'error' else 'check-circle' }}"></i>
-          <span>{{ message }}</span>
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      <!-- Flashed Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+          <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }}" role="alert">
+            <i class="fas fa-{{ 'exclamation-circle' if category == 'error' else 'check-circle' }}"></i>
+            <span>{{ message }}</span>
+          </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <!-- Signup Form -->
+      <form method="POST" enctype="multipart/form-data" class="signup-form" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+        <!-- Full Name -->
+        <div class="form-field">
+          <label for="full_name">Full Name <span style="color: #dc3545;">*</span></label>
+          <input 
+            type="text" 
+            id="full_name" 
+            name="full_name" 
+            placeholder="e.g., John Kamau" 
+            required
+          />
         </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
 
-    <!-- Header -->
-    <header class="ap-header mb-4">
-      <h1>List Your Property on HomeHub</h1>
-      <p>Fill out the details below to attract tenants quickly.</p>
-    </header>
+        <!-- Email -->
+        <div class="form-field">
+          <label for="email">Email Address <span style="color: #dc3545;">*</span></label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            placeholder="e.g., john@example.com" 
+            required
+          />
+        </div>
 
-    <!-- Progress -->
-    <div class="ap-progress-wrap">
-      <div class="ap-progress">
-        <div class="ap-progress-bar" id="progressBar" style="width: 0%"></div>
-      </div>
-      <div class="ap-progress-label">
-        <span class="ap-progress-step active" data-step="1"><i class="fas fa-file-alt me-1"></i>Details</span>
-        <span class="ap-progress-step" data-step="2"><i class="fas fa-map-marker-alt me-1"></i>Location</span>
-        <span class="ap-progress-step" data-step="3"><i class="fas fa-tag me-1"></i>Pricing</span>
-        <span class="ap-progress-step" data-step="4"><i class="fas fa-camera me-1"></i>Images</span>
-        <span class="ap-progress-step" data-step="5"><i class="fas fa-check-circle me-1"></i>Submit</span>
-      </div>
-    </div>
+        <!-- Phone Number -->
+        <div class="form-field">
+          <label for="phone_number">Phone Number <span style="color: #dc3545;">*</span></label>
+          <input 
+            type="text" 
+            id="phone_number" 
+            name="phone_number" 
+            placeholder="9 digits (e.g., 712345678)" 
+            pattern="\d{9}"
+            required
+          />
+          <small>Enter 9 digits after +254 (Kenya format)</small>
+        </div>
 
-    <div class="row g-4">
-      <!-- ===== MAIN FORM COLUMN ===== -->
-      <div class="col-lg-8">
-        <form id="addPropertyForm" enctype="multipart/form-data" method="POST" action="{{ url_for('landlord.add_property') }}" novalidate>
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <!-- User Role -->
+        <div class="form-field">
+          <label for="role">I am a <span style="color: #dc3545;">*</span></label>
+          <select id="role" name="role" required>
+            <option value="">-- Select Role --</option>
+            <option value="tenant">Tenant</option>
+            <option value="landlord">Landlord</option>
+            <option value="service">Service Provider</option>
+          </select>
+        </div>
 
-          <!-- SECTION 1: Property Details -->
-          <div class="ap-section" data-progress-group="1">
-            <div class="ap-section-header">
-              <div class="ap-section-icon"><i class="fas fa-building"></i></div>
-              <div>
-                <h3 class="ap-section-title">Property Details</h3>
-                <p class="ap-section-subtitle">Basic information about your property</p>
-              </div>
-            </div>
-            <div class="ap-field">
-              <label for="propertyName">Property Name <span style="color:#dc3545">*</span></label>
-              <input type="text" class="ap-input" id="propertyName" name="title" required placeholder="e.g., Cozy Apartment in Westlands" />
-              <div class="invalid-feedback">Please enter a property name.</div>
-            </div>
-            <div class="ap-field">
-              <label for="propertyType">Property Type <span style="color:#dc3545">*</span></label>
-              <select class="ap-select" id="propertyType" name="property_type" required>
-                <option value="" disabled selected>Select property type</option>
-                <option value="Apartment">Apartment</option>
-                <option value="House">House</option>
-                <option value="Studio">Studio</option>
-                <option value="Condo">Condo</option>
-                <option value="Townhouse">Townhouse</option>
-                <option value="Commercial">Commercial</option>
-              </select>
-              <div class="invalid-feedback">Please select a property type.</div>
-            </div>
-            <div class="ap-field">
-              <label for="propertyDescription">Description <span style="color:#dc3545">*</span></label>
-              <textarea class="ap-textarea" id="propertyDescription" name="description" rows="4" required placeholder="e.g., Modern 2-bedroom apartment with balcony, natural light, and close to amenities" maxlength="500"></textarea>
-              <div class="ap-char-count" id="charCount">0 / 500 characters</div>
-              <div class="invalid-feedback">Please provide a description.</div>
+        <!-- Mpesa Details (conditional) -->
+        <div class="form-field" id="mpesa_field" style="display: none;">
+          <label for="mpesa_details">M-Pesa Number (Optional)</label>
+          <input 
+            type="text" 
+            id="mpesa_details" 
+            name="mpesa_details" 
+            placeholder="Your M-Pesa number"
+          />
+          <small>Required if you want to receive payments through M-Pesa</small>
+        </div>
+
+        <!-- Row: Password & Confirm Password -->
+        <div class="form-row">
+          <div class="form-field">
+            <label for="password">Password <span style="color: #dc3545;">*</span></label>
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              placeholder="Create a strong password" 
+              required
+            />
+            <div class="password-hint">
+              <strong>Requirements:</strong><br/>
+              • At least 8 characters<br/>
+              • At least one letter<br/>
+              • At least one number<br/>
+              • At least one special character (!@#$%^&* etc.)
             </div>
           </div>
 
-          <!-- SECTION 2: Location -->
-          <div class="ap-section" data-progress-group="2">
-            <div class="ap-section-header">
-              <div class="ap-section-icon"><i class="fas fa-map-marker-alt"></i></div>
-              <div>
-                <h3 class="ap-section-title">Location</h3>
-                <p class="ap-section-subtitle">Where is the property located?</p>
-              </div>
-            </div>
-            <div class="ap-address-grid">
-              <div class="ap-field ap-full">
-                <label for="addressLine1">Street Address <span style="color:#dc3545">*</span></label>
-                <input type="text" class="ap-input" id="addressLine1" name="address_line1" required placeholder="e.g., 123 Moi Avenue" />
-                <div class="invalid-feedback">Please enter a street address.</div>
-              </div>
-              <div class="ap-field ap-full">
-                <label for="addressLine2">Address Line 2</label>
-                <input type="text" class="ap-input" id="addressLine2" name="address_line2" placeholder="e.g., Apt 4B, Floor 3" />
-              </div>
-              <div class="ap-field">
-                <label for="city">City <span style="color:#dc3545">*</span></label>
-                <input type="text" class="ap-input" id="city" name="city" required placeholder="e.g., Nairobi" />
-                <div class="invalid-feedback">Please enter a city.</div>
-              </div>
-              <div class="ap-field">
-                <label for="stateProvince">County / Province <span style="color:#dc3545">*</span></label>
-                <input type="text" class="ap-input" id="stateProvince" name="state_province" required placeholder="e.g., Nairobi County" />
-                <div class="invalid-feedback">Please enter a county or province.</div>
-              </div>
-              <div class="ap-field">
-                <label for="postalCode">Postal Code</label>
-                <input type="text" class="ap-input" id="postalCode" name="postal_code" placeholder="e.g., 00100" />
-              </div>
-              <div class="ap-field">
-                <label for="country">Country <span style="color:#dc3545">*</span></label>
-                <select class="ap-select" id="country" name="country" required>
-                  <option value="" disabled selected>Select country</option>
-                  <option value="Kenya" selected>Kenya</option>
-                  <option value="Uganda">Uganda</option>
-                  <option value="Tanzania">Tanzania</option>
-                  <option value="Rwanda">Rwanda</option>
-                  <option value="Other">Other</option>
-                </select>
-                <div class="invalid-feedback">Please select a country.</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- SECTION 3: Pricing & Terms -->
-          <div class="ap-section" data-progress-group="3">
-            <div class="ap-section-header">
-              <div class="ap-section-icon"><i class="fas fa-tag"></i></div>
-              <div>
-                <h3 class="ap-section-title">Pricing &amp; Terms</h3>
-                <p class="ap-section-subtitle">Rent, lease terms, and deposit</p>
-              </div>
-            </div>
-            <div class="row g-3">
-              <div class="col-sm-6">
-                <div class="ap-field">
-                  <label for="rentAmount">Rent Amount (KES/month) <span style="color:#dc3545">*</span></label>
-                  <input type="number" class="ap-input" id="rentAmount" name="rent_amount" required min="0" step="100" placeholder="e.g., 50000" />
-                  <div class="invalid-feedback">Please enter a valid rent amount.</div>
-                </div>
-              </div>
-              <div class="col-sm-6">
-                <div class="ap-field">
-                  <label for="securityDeposit">Security Deposit (KES)</label>
-                  <input type="number" class="ap-input" id="securityDeposit" name="security_deposit" min="0" step="100" placeholder="e.g., 50000" />
-                </div>
-              </div>
-              <div class="col-sm-6">
-                <div class="ap-field">
-                  <label for="leaseTerm">Lease Term <span style="color:#dc3545">*</span></label>
-                  <select class="ap-select" id="leaseTerm" name="lease_term" required>
-                    <option value="" disabled selected>Select lease term</option>
-                    <option value="Monthly">Month-to-Month</option>
-                    <option value="6 months">6 Months</option>
-                    <option value="12 months">12 Months</option>
-                    <option value="24 months">24 Months</option>
-                  </select>
-                  <div class="invalid-feedback">Please select a lease term.</div>
-                </div>
-              </div>
-              <div class="col-sm-6">
-                <div class="ap-field">
-                  <label for="availabilityDate">Availability Date <span style="color:#dc3545">*</span></label>
-                  <input type="date" class="ap-input" id="availabilityDate" name="availability_date" required />
-                  <div class="invalid-feedback">Please select an availability date.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- SECTION 4: Images -->
-          <div class="ap-section" data-progress-group="4">
-            <div class="ap-section-header">
-              <div class="ap-section-icon"><i class="fas fa-camera"></i></div>
-              <div>
-                <h3 class="ap-section-title">Property Images</h3>
-                <p class="ap-section-subtitle">Upload up to 5 photos to showcase your property</p>
-              </div>
-            </div>
-            <div class="ap-upload-area" id="uploadArea">
-              <i class="fas fa-cloud-upload-alt"></i>
-              <p>Drag &amp; drop images here or click to browse</p>
-              <small>JPG or PNG, max 5MB each, up to 5 images</small>
-              <input type="file" id="propertyImages" name="images" accept="image/jpeg,image/png" multiple />
-            </div>
-            <div class="ap-upload-error" id="uploadError"></div>
-            <div class="ap-image-previews" id="imagePreview"></div>
-          </div>
-
-          <!-- SECTION 5: Specifications -->
-          <div class="ap-section" data-progress-group="3">
-            <div class="ap-section-header">
-              <div class="ap-section-icon"><i class="fas fa-ruler-combined"></i></div>
-              <div>
-                <h3 class="ap-section-title">Specifications</h3>
-                <p class="ap-section-subtitle">Room count and size details</p>
-              </div>
-            </div>
-            <div class="ap-spec-grid">
-              <div class="ap-field">
-                <label for="bedrooms">Bedrooms <span style="color:#dc3545">*</span></label>
-                <input type="number" class="ap-input" id="bedrooms" name="bedrooms" required min="0" placeholder="e.g., 2" />
-                <div class="invalid-feedback">Required.</div>
-              </div>
-              <div class="ap-field">
-                <label for="bathrooms">Bathrooms <span style="color:#dc3545">*</span></label>
-                <input type="number" class="ap-input" id="bathrooms" name="bathrooms" required min="0" step="0.5" placeholder="e.g., 1" />
-                <div class="invalid-feedback">Required.</div>
-              </div>
-              <div class="ap-field">
-                <label for="squareFootage">Size (sq ft)</label>
-                <input type="number" class="ap-input" id="squareFootage" name="square_footage" min="0" placeholder="e.g., 1000" />
-              </div>
-            </div>
-          </div>
-
-          <!-- SECTION 6: Features & Amenities -->
-          <div class="ap-section" data-progress-group="3">
-            <div class="ap-section-header">
-              <div class="ap-section-icon"><i class="fas fa-star"></i></div>
-              <div>
-                <h3 class="ap-section-title">Features &amp; Amenities</h3>
-                <p class="ap-section-subtitle">Select what's included with the property</p>
-              </div>
-            </div>
-
-            <div class="ap-field">
-              <label>Parking Availability</label>
-              <select class="ap-select" id="parkingAvailability" name="parking_availability">
-                <option value="None" selected>None</option>
-                <option value="Street Parking">Street Parking</option>
-                <option value="Garage">Garage</option>
-                <option value="Driveway">Driveway</option>
-              </select>
-            </div>
-
-            <div class="ap-field">
-              <label>Furnished Status</label>
-              <div class="ap-check-group">
-                <label class="ap-check-item"><input type="radio" name="furnished_status" value="Fully Furnished" /> Fully Furnished</label>
-                <label class="ap-check-item"><input type="radio" name="furnished_status" value="Partially Furnished" /> Partially</label>
-                <label class="ap-check-item"><input type="radio" name="furnished_status" value="Unfurnished" checked /> Unfurnished</label>
-              </div>
-            </div>
-
-            <div class="ap-field">
-              <label>Utilities Included</label>
-              <div class="ap-check-group">
-                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Water" /> <i class="fas fa-tint me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Water</label>
-                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Electricity" /> <i class="fas fa-bolt me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Electricity</label>
-                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Gas" /> <i class="fas fa-fire me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Gas</label>
-                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Internet" /> <i class="fas fa-wifi me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Internet</label>
-              </div>
-            </div>
-
-            <div class="ap-field">
-              <label>Amenities</label>
-              <div class="ap-check-group">
-                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Air Conditioning" /> <i class="fas fa-snowflake me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>AC</label>
-                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Washer/Dryer" /> <i class="fas fa-tshirt me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Washer/Dryer</label>
-                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Balcony" /> <i class="fas fa-door-open me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Balcony</label>
-                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Gym" /> <i class="fas fa-dumbbell me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Gym</label>
-                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Swimming Pool" /> <i class="fas fa-swimming-pool me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Pool</label>
-                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Garden" /> <i class="fas fa-leaf me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Garden</label>
-              </div>
-            </div>
-          </div>
-
-          <!-- SECTION 7: Policies -->
-          <div class="ap-section" data-progress-group="3">
-            <div class="ap-section-header">
-              <div class="ap-section-icon"><i class="fas fa-shield-alt"></i></div>
-              <div>
-                <h3 class="ap-section-title">Policies &amp; Accessibility</h3>
-                <p class="ap-section-subtitle">Rules and accessibility features</p>
-              </div>
-            </div>
-
-            <div class="row g-3">
-              <div class="col-sm-6">
-                <div class="ap-field">
-                  <label>Pets Allowed</label>
-                  <div class="ap-check-group" style="grid-template-columns: 1fr 1fr;">
-                    <label class="ap-check-item"><input type="radio" name="pets_allowed" value="Yes" /> Yes</label>
-                    <label class="ap-check-item"><input type="radio" name="pets_allowed" value="No" checked /> No</label>
-                  </div>
-                </div>
-              </div>
-              <div class="col-sm-6">
-                <div class="ap-field">
-                  <label>Pet Restrictions</label>
-                  <input type="text" class="ap-input" id="petRestrictions" name="pet_restrictions" placeholder="e.g., Small dogs only" />
-                </div>
-              </div>
-            </div>
-
-            <div class="ap-field">
-              <label>Smoking Policy</label>
-              <div class="ap-check-group" style="grid-template-columns: 1fr 1fr;">
-                <label class="ap-check-item"><input type="radio" name="smoking_policy" value="Smoking Allowed" /> Smoking Allowed</label>
-                <label class="ap-check-item"><input type="radio" name="smoking_policy" value="Non-Smoking" checked /> Non-Smoking</label>
-              </div>
-            </div>
-
-            <div class="ap-field">
-              <label>Accessibility Features</label>
-              <div class="ap-check-group">
-                <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Wheelchair Access" /> <i class="fas fa-wheelchair me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Wheelchair Access</label>
-                <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Elevator" /> <i class="fas fa-arrows-alt-v me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Elevator</label>
-                <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Grab Bars" /> <i class="fas fa-hand-paper me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Grab Bars</label>
-              </div>
-            </div>
-          </div>
-
-          <!-- 2FA field (hidden by default) -->
-          <div class="ap-section" id="twoFactorGroup" style="display: none;">
-            <div class="ap-section-header">
-              <div class="ap-section-icon"><i class="fas fa-shield-alt"></i></div>
-              <div>
-                <h3 class="ap-section-title">Verification</h3>
-                <p class="ap-section-subtitle">Two-factor authentication required</p>
-              </div>
-            </div>
-            <div class="ap-field">
-              <label for="two_factor_code">Enter 6-digit code</label>
-              <input type="text" class="ap-input" id="two_factor_code" name="two_factor_code" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" style="text-align:center;font-size:1.2rem;letter-spacing:0.3em;" />
-            </div>
-          </div>
-
-          <!-- Form Actions -->
-          <div class="ap-actions">
-            <button type="submit" class="btn-ap-submit" id="submitProperty">
-              <i class="fas fa-plus-circle"></i>
-              <span id="submitBtnText">List Property</span>
-              <div class="ap-spinner" id="submitSpinner"></div>
-            </button>
-            <button type="button" class="btn-ap-draft" id="saveDraft">
-              <i class="fas fa-save"></i>
-              Save as Draft
-            </button>
-            <a href="{{ url_for('landlord.dashboard') }}" class="btn-ap-cancel">
-              <i class="fas fa-times"></i>
-              Cancel
-            </a>
-          </div>
-
-          <div class="ap-feedback" id="addPropertyFeedback"></div>
-        </form>
-      </div>
-
-      <!-- ===== SIDEBAR COLUMN ===== -->
-      <div class="col-lg-4">
-
-        <!-- Tips -->
-        <aside class="ap-tips-card" aria-label="Listing tips">
-          <h5><i class="fas fa-lightbulb"></i> Tips for a Great Listing</h5>
-          <div class="ap-tips-body" id="tipsBody">
-            <ul class="ap-tips-list">
-              <li><i class="fas fa-circle"></i>Use high-quality, well-lit photos taken during the day.</li>
-              <li><i class="fas fa-circle"></i>Write a clear, detailed description highlighting unique features.</li>
-              <li><i class="fas fa-circle"></i>Research market rates and set competitive pricing.</li>
-              <li><i class="fas fa-circle"></i>Mention nearby amenities like schools, hospitals, and malls.</li>
-              <li><i class="fas fa-circle"></i>Be transparent about lease terms and policies upfront.</li>
-            </ul>
-          </div>
-          <button type="button" class="ap-tips-toggle" id="toggleTips" aria-expanded="true">Hide Tips</button>
-        </aside>
-
-        <!-- Live Preview -->
-        <div class="ap-preview-card" aria-label="Property preview">
-          <div class="ap-preview-images" id="previewImageWrap">
-            <i class="fas fa-image"></i>
-            <span class="ap-preview-badge">Preview</span>
-          </div>
-          <div class="ap-preview-body">
-            <div class="ap-preview-title" id="previewTitle">Property Name</div>
-            <div class="ap-preview-location" id="previewLocation"><i class="fas fa-map-marker-alt"></i> City, Country</div>
-            <div class="ap-preview-price" id="previewPrice">KES 0/mo</div>
-            <div class="ap-preview-specs">
-              <div class="ap-preview-spec"><i class="fas fa-bed"></i> <span id="previewBeds">0 Beds</span></div>
-              <div class="ap-preview-spec"><i class="fas fa-bath"></i> <span id="previewBaths">0 Baths</span></div>
-              <div class="ap-preview-spec"><i class="fas fa-ruler-combined"></i> <span id="previewSqft">-- sq ft</span></div>
-              <div class="ap-preview-spec"><i class="fas fa-home"></i> <span id="previewType">--</span></div>
-            </div>
-            <div class="ap-preview-desc" id="previewDesc">Property description will appear here as you type...</div>
-            <div class="ap-preview-tags" id="previewTags"></div>
+          <div class="form-field">
+            <label for="confirm_password">Confirm Password <span style="color: #dc3545;">*</span></label>
+            <input 
+              type="password" 
+              id="confirm_password" 
+              name="confirm_password" 
+              placeholder="Re-enter your password" 
+              required
+            />
           </div>
         </div>
 
-        <a href="{{ url_for('auth.support') }}" class="ap-help-link"><i class="fas fa-question-circle"></i> Need Help?</a>
+        <!-- Language Preference -->
+        <div class="form-field">
+          <label for="language">Preferred Language</label>
+          <select id="language" name="language">
+            <option value="en">English</option>
+            <option value="sw">Swahili</option>
+          </select>
+        </div>
+
+        <!-- Profile Picture (Optional) -->
+        <div class="form-field">
+          <label for="profile_picture">Profile Picture (Optional)</label>
+          <input 
+            type="file" 
+            id="profile_picture" 
+            name="profile_picture" 
+            accept="image/*"
+          />
+          <small>Allowed: PNG, JPG, JPEG, GIF (Max 5MB)</small>
+        </div>
+
+        <!-- Terms & Conditions -->
+        <div class="form-checkbox">
+          <input 
+            type="checkbox" 
+            id="terms" 
+            name="terms" 
+            value="on" 
+            required
+          />
+          <label for="terms">
+            I agree to the <a href="{{ url_for('main.terms') }}">Terms of Service</a> 
+            and <a href="{{ url_for('main.privacy') }}">Privacy Policy</a> <span style="color: #dc3545;">*</span>
+          </label>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn-signup">Create Account</button>
+      </form>
+
+      <!-- Footer -->
+      <div class="signup-footer">
+        <p>Already have an account? <a href="{{ url_for('auth.login') }}">Log in here</a></p>
       </div>
     </div>
-  </div>
-
-  <!-- Landlord Access Badge -->
-  <div class="ap-access-badge" aria-label="Landlord access indicator">
-    <i class="fas fa-user-shield"></i> Landlord Access
   </div>
 </div>
-{% endblock %}
 
-{% block scripts %}
+<!-- Show/Hide Mpesa Field based on Role -->
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('addPropertyForm');
-  const feedback = document.getElementById('addPropertyFeedback');
-  const submitButton = document.getElementById('submitProperty');
-  const submitBtnText = document.getElementById('submitBtnText');
-  const submitSpinner = document.getElementById('submitSpinner');
-  const saveDraftButton = document.getElementById('saveDraft');
-  const toggleTipsButton = document.getElementById('toggleTips');
-  const tipsBody = document.getElementById('tipsBody');
-  const progressBar = document.getElementById('progressBar');
-  const progressSteps = document.querySelectorAll('.ap-progress-step');
-
-  // References
-  const el = (id) => document.getElementById(id);
-  const inputs = {
-    name: el('propertyName'),
-    type: el('propertyType'),
-    description: el('propertyDescription'),
-    addressLine1: el('addressLine1'),
-    addressLine2: el('addressLine2'),
-    city: el('city'),
-    stateProvince: el('stateProvince'),
-    postalCode: el('postalCode'),
-    country: el('country'),
-    rent: el('rentAmount'),
-    deposit: el('securityDeposit'),
-    leaseTerm: el('leaseTerm'),
-    availabilityDate: el('availabilityDate'),
-    images: el('propertyImages'),
-    bedrooms: el('bedrooms'),
-    bathrooms: el('bathrooms'),
-    squareFootage: el('squareFootage'),
-    parking: el('parkingAvailability'),
-    furnished: document.querySelectorAll('input[name="furnished_status"]'),
-    utilities: document.querySelectorAll('input[name="utilities"]'),
-    amenities: document.querySelectorAll('input[name="amenities"]'),
-    pets: document.querySelectorAll('input[name="pets_allowed"]'),
-    petRestrictions: el('petRestrictions'),
-    smoking: document.querySelectorAll('input[name="smoking_policy"]'),
-    accessibility: document.querySelectorAll('input[name="accessibility_features"]')
-  };
-
-  // ---- Check item visual toggle ----
-  document.querySelectorAll('.ap-check-item input').forEach(inp => {
-    inp.addEventListener('change', () => {
-      const item = inp.closest('.ap-check-item');
-      // For radio groups, deselect siblings
-      if (inp.type === 'radio') {
-        const name = inp.name;
-        document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
-          r.closest('.ap-check-item').classList.remove('selected');
-        });
-      }
-      item.classList.toggle('selected', inp.checked);
-      updatePreview();
-      updateProgress();
-    });
-    // Initialize selected state
-    if (inp.checked) inp.closest('.ap-check-item').classList.add('selected');
-  });
-
-  // ---- Character count ----
-  const charCount = el('charCount');
-  inputs.description.addEventListener('input', () => {
-    const len = inputs.description.value.length;
-    charCount.textContent = `${len} / 500 characters`;
-    charCount.className = 'ap-char-count' + (len > 450 ? (len > 500 ? ' danger' : ' warning') : '');
-    inputs.description.classList.toggle('is-invalid', len > 500);
-    updatePreview();
-    updateProgress();
-  });
-
-  // ---- Image upload ----
-  const uploadArea = el('uploadArea');
-  const imagePreview = el('imagePreview');
-  const uploadError = el('uploadError');
-
-  // Drag & drop visual
-  ['dragover', 'dragenter'].forEach(evt => {
-    uploadArea.addEventListener(evt, (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
-  });
-  ['dragleave', 'drop'].forEach(evt => {
-    uploadArea.addEventListener(evt, (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); });
-  });
-  uploadArea.addEventListener('drop', (e) => {
-    const dt = new DataTransfer();
-    for (const f of e.dataTransfer.files) dt.items.add(f);
-    inputs.images.files = dt.files;
-    handleImages();
-  });
-
-  inputs.images.addEventListener('change', handleImages);
-
-  function handleImages() {
-    imagePreview.innerHTML = '';
-    uploadError.classList.remove('visible');
-    uploadError.textContent = '';
-    const files = inputs.images.files;
-    if (files.length > 5) {
-      uploadError.textContent = 'Maximum 5 images allowed.';
-      uploadError.classList.add('visible');
-      return;
-    }
-    for (const file of files) {
-      if (!['image/jpeg', 'image/png'].includes(file.type)) {
-        uploadError.textContent = `"${file.name}" is not a valid format. Use JPG or PNG.`;
-        uploadError.classList.add('visible');
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        uploadError.textContent = `"${file.name}" exceeds the 5MB limit.`;
-        uploadError.classList.add('visible');
-        return;
-      }
-    }
-    Array.from(files).forEach((file, idx) => {
-      const wrap = document.createElement('div');
-      wrap.className = 'ap-thumb';
-      const img = document.createElement('img');
-      img.src = URL.createObjectURL(file);
-      const removeBtn = document.createElement('button');
-      removeBtn.type = 'button';
-      removeBtn.className = 'ap-thumb-remove';
-      removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-      removeBtn.addEventListener('click', () => {
-        const dt = new DataTransfer();
-        Array.from(inputs.images.files).forEach((f, i) => { if (i !== idx) dt.items.add(f); });
-        inputs.images.files = dt.files;
-        handleImages();
-      });
-      wrap.appendChild(img);
-      wrap.appendChild(removeBtn);
-      imagePreview.appendChild(wrap);
-    });
-    updatePreview();
-    updateProgress();
+document.getElementById('role').addEventListener('change', function() {
+  const mpesaField = document.getElementById('mpesa_field');
+  const mpesaInput = document.getElementById('mpesa_details');
+  
+  if (this.value === 'landlord' || this.value === 'service') {
+    mpesaField.style.display = 'block';
+  } else {
+    mpesaField.style.display = 'none';
+    mpesaInput.value = '';
   }
-
-  // ---- Real-time preview ----
-  function updatePreview() {
-    el('previewTitle').textContent = inputs.name.value || 'Property Name';
-
-    const locParts = [inputs.city.value, inputs.country.value].filter(Boolean);
-    el('previewLocation').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${locParts.join(', ') || 'City, Country'}`;
-
-    el('previewPrice').textContent = inputs.rent.value ? `KES ${Number(inputs.rent.value).toLocaleString()}/mo` : 'KES 0/mo';
-
-    el('previewBeds').textContent = inputs.bedrooms.value ? `${inputs.bedrooms.value} Bed${inputs.bedrooms.value > 1 ? 's' : ''}` : '0 Beds';
-    el('previewBaths').textContent = inputs.bathrooms.value ? `${inputs.bathrooms.value} Bath${inputs.bathrooms.value > 1 ? 's' : ''}` : '0 Baths';
-    el('previewSqft').textContent = inputs.squareFootage.value ? `${Number(inputs.squareFootage.value).toLocaleString()} sq ft` : '-- sq ft';
-    el('previewType').textContent = inputs.type.value || '--';
-
-    el('previewDesc').textContent = inputs.description.value || 'Property description will appear here as you type...';
-
-    // Preview image
-    const previewWrap = el('previewImageWrap');
-    const existingImg = previewWrap.querySelector('img');
-    if (existingImg) existingImg.remove();
-    if (inputs.images.files.length > 0) {
-      const img = document.createElement('img');
-      img.src = URL.createObjectURL(inputs.images.files[0]);
-      previewWrap.appendChild(img);
-    }
-
-    // Tags
-    const tags = [];
-    Array.from(inputs.utilities).filter(u => u.checked).forEach(u => tags.push(u.value));
-    Array.from(inputs.amenities).filter(a => a.checked).forEach(a => tags.push(a.value));
-    const furnished = Array.from(inputs.furnished).find(f => f.checked);
-    if (furnished && furnished.value !== 'Unfurnished') tags.push(furnished.value);
-    if (inputs.parking.value !== 'None') tags.push(inputs.parking.value);
-
-    el('previewTags').innerHTML = tags.map(t => `<span class="ap-preview-tag">${t}</span>`).join('');
-  }
-
-  // ---- Progress tracking ----
-  function updateProgress() {
-    // Check required fields per group
-    const groups = {
-      1: [inputs.name, inputs.type, inputs.description],
-      2: [inputs.addressLine1, inputs.city, inputs.stateProvince, inputs.country],
-      3: [inputs.rent, inputs.leaseTerm, inputs.availabilityDate, inputs.bedrooms, inputs.bathrooms],
-      4: [inputs.images]
-    };
-    let filledGroups = 0;
-    let totalGroups = Object.keys(groups).length;
-
-    for (const [step, fields] of Object.entries(groups)) {
-      const allFilled = fields.every(f => {
-        if (f instanceof FileList) return f.files.length > 0;
-        return f.value && f.value.trim() !== '';
-      });
-      if (allFilled) filledGroups++;
-      const stepEl = document.querySelector(`.ap-progress-step[data-step="${step}"]`);
-      if (stepEl) stepEl.classList.toggle('active', allFilled);
-    }
-
-    const pct = Math.round((filledGroups / totalGroups) * 100);
-    progressBar.style.width = pct + '%';
-
-    // Update the last step
-    const submitStep = document.querySelector('.ap-progress-step[data-step="5"]');
-    if (submitStep) submitStep.classList.toggle('active', filledGroups === totalGroups);
-  }
-
-  // Listen on all text/select inputs for progress
-  [inputs.name, inputs.type, inputs.description, inputs.addressLine1, inputs.addressLine2,
-   inputs.city, inputs.stateProvince, inputs.postalCode, inputs.country, inputs.rent,
-   inputs.deposit, inputs.leaseTerm, inputs.availabilityDate, inputs.bedrooms, inputs.bathrooms,
-   inputs.squareFootage, inputs.parking, inputs.petRestrictions
-  ].forEach(inp => {
-    if (!inp) return;
-    inp.addEventListener('input', () => { updatePreview(); updateProgress(); });
-    inp.addEventListener('change', () => { updatePreview(); updateProgress(); });
-  });
-
-  // ---- Toggle tips ----
-  toggleTipsButton.addEventListener('click', () => {
-    const isHidden = tipsBody.classList.toggle('collapsed');
-    toggleTipsButton.textContent = isHidden ? 'Show Tips' : 'Hide Tips';
-    toggleTipsButton.setAttribute('aria-expanded', !isHidden);
-  });
-
-  // ---- Set min date to today ----
-  const today = new Date().toISOString().split('T')[0];
-  inputs.availabilityDate.setAttribute('min', today);
-
-  // ---- Form submission ----
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-
-    // Validate required fields
-    const requiredFields = form.querySelectorAll('[required]');
-    let valid = true;
-    requiredFields.forEach(f => {
-      if (!f.value || (f.tagName === 'SELECT' && f.value === '')) {
-        f.classList.add('is-invalid');
-        valid = false;
-      } else {
-        f.classList.remove('is-invalid');
-      }
-    });
-
-    if (inputs.description.value.length > 500) {
-      inputs.description.classList.add('is-invalid');
-      valid = false;
-    }
-
-    if (!valid) {
-      showFeedback('Please fill in all required fields correctly.', 'danger');
-      // Scroll to first invalid
-      const firstInvalid = form.querySelector('.is-invalid');
-      if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      return;
-    }
-
-    submitButton.disabled = true;
-    submitBtnText.textContent = 'Listing...';
-    submitSpinner.style.display = 'block';
-    showFeedback('Adding property...', 'info');
-
-    const formData = new FormData(form);
-    formData.append('user_id', {{ current_user.id }});
-    const csrfToken = form.querySelector('input[name="csrf_token"]').value;
-
-    try {
-      const response = await fetch('{{ url_for("landlord.add_property") }}', {
-        method: 'POST',
-        headers: { 'X-CSRFToken': csrfToken },
-        body: formData,
-        credentials: 'include'
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        showFeedback(result.message || 'Property added successfully!', 'success');
-        form.reset();
-        imagePreview.innerHTML = '';
-        updatePreview();
-        updateProgress();
-        // Reset check items visual
-        document.querySelectorAll('.ap-check-item.selected').forEach(i => i.classList.remove('selected'));
-        document.querySelectorAll('.ap-check-item input[checked]').forEach(i => i.closest('.ap-check-item').classList.add('selected'));
-        charCount.textContent = '0 / 500 characters';
-        charCount.className = 'ap-char-count';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        showFeedback(result.message || 'Error adding property. Please try again.', 'danger');
-      }
-    } catch (error) {
-      showFeedback('Network error. Please check your connection and try again.', 'danger');
-    } finally {
-      submitButton.disabled = false;
-      submitBtnText.textContent = 'List Property';
-      submitSpinner.style.display = 'none';
-    }
-  });
-
-  // ---- Save draft ----
-  saveDraftButton.addEventListener('click', async () => {
-    saveDraftButton.disabled = true;
-    showFeedback('Saving draft...', 'info');
-
-    const formData = new FormData(form);
-    formData.append('user_id', {{ current_user.id }});
-    const csrfToken = form.querySelector('input[name="csrf_token"]').value;
-
-    try {
-      const response = await fetch('/landlord/save_draft', {
-        method: 'POST',
-        headers: { 'X-CSRFToken': csrfToken },
-        body: formData,
-        credentials: 'include'
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        showFeedback(result.message || 'Draft saved successfully!', 'success');
-      } else {
-        showFeedback(result.message || 'Error saving draft.', 'danger');
-      }
-    } catch (error) {
-      showFeedback(`Error: ${error.message}`, 'danger');
-    } finally {
-      saveDraftButton.disabled = false;
-    }
-  });
-
-  // ---- Feedback helper ----
-  function showFeedback(msg, type) {
-    const iconMap = { success: 'check-circle', danger: 'exclamation-circle', info: 'spinner fa-spin' };
-    feedback.className = `ap-feedback alert-${type} visible`;
-    feedback.innerHTML = `<i class="fas fa-${iconMap[type] || 'info-circle'}"></i><span>${msg}</span>`;
-  }
-
-  // Initial state
-  updatePreview();
-  updateProgress();
 });
 </script>
 {% endblock %}

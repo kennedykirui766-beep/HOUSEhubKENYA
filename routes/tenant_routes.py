@@ -2,11 +2,13 @@ from asyncio import Event
 import base64
 from datetime import datetime
 from io import BytesIO
+import json
 import os
 from models.models import Document
-from flask import Blueprint, current_app, flash, render_template, request, redirect, url_for
+from flask import Blueprint, current_app, flash, jsonify, render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 import pyotp
+import qrcode as qr_code
 from models.models import Booking, MaintenanceRequest, Message, House, Notification, Payment, User
 from extensions import db
 from models.models import Event
@@ -64,6 +66,14 @@ def dashboard():
     # Payment chart data
     payment_labels = [p.date.strftime('%b %Y') for p in payments]
     payment_data = [p.amount for p in payments]
+    dashboard_order = []
+    if current_user.dashboard_order:
+        try:
+            parsed_order = json.loads(current_user.dashboard_order)
+            if isinstance(parsed_order, list):
+                dashboard_order = parsed_order
+        except (TypeError, json.JSONDecodeError):
+            dashboard_order = []
 
     return render_template(
         'tenant.html',
@@ -77,8 +87,33 @@ def dashboard():
         open_requests_count=open_requests_count,
         next_payment=next_payment,
         payment_labels=payment_labels,
-        payment_data=payment_data
+        payment_data=payment_data,
+        dashboard_order=dashboard_order
     )
+
+
+@tenant_bp.route('/save_dashboard_order', methods=['POST'])
+@login_required
+def save_dashboard_order():
+    if current_user.role != 'tenant':
+        return jsonify({'message': 'Access restricted to tenants.'}), 403
+
+    payload = request.get_json(silent=True) or {}
+    order = payload.get('order', [])
+
+    if not isinstance(order, list):
+        return jsonify({'message': 'Invalid payload format.'}), 400
+
+    cleaned_order = []
+    for card_id in order:
+        if isinstance(card_id, str):
+            value = card_id.strip()
+            if value:
+                cleaned_order.append(value[:100])
+
+    current_user.dashboard_order = json.dumps(cleaned_order)
+    db.session.commit()
+    return jsonify({'message': 'Dashboard order saved.', 'order': cleaned_order}), 200
 
 
 # Make a booking for a house
@@ -257,9 +292,9 @@ def twofa_setup():
     img = qr.make_image(fill='black', back_color='white')
     buffered = BytesIO()
     img.save(buffered)
-    qr_code = base64.b64encode(buffered.getvalue()).decode('utf-8')
+    qr_code_b64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
 
-    return render_template('2fa_setup.html', qr_code=qr_code, secret=secret)
+    return render_template('2fa_setup.html', qr_code=qr_code_b64, secret=secret)
 
 @tenant_bp.route('/move_out/<int:booking_id>', methods=['POST'])
 @login_required

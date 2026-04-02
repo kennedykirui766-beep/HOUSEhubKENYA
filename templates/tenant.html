@@ -809,7 +809,7 @@
 
         <div class="user-profile">
           <img
-            src="{{ url_for('static', filename='images/user-avatar.jpg') }}"
+            src="{{ url_for('static', filename='images/homehub.jpg') }}"
             alt="User Avatar"
             class="user-avatar"
           />
@@ -1401,19 +1401,56 @@
     });
 
     // Dashboard customization (SortableJS)
-    if (typeof Sortable !== 'undefined') {
-      new Sortable(document.querySelector('.content-grid'), {
+    const sortableGrid = document.querySelector('.content-grid');
+    const savedDashboardOrder = {{ dashboard_order | tojson if dashboard_order else '[]' }};
+    const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+    const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
+    const saveDashboardOrderUrl = '/tenant/save_dashboard_order';
+
+    if (sortableGrid) {
+      const sortableCards = Array.from(sortableGrid.querySelectorAll('.content-card'));
+
+      // Ensure each card has a stable ID for persistence.
+      sortableCards.forEach((card, index) => {
+        if (!card.dataset.id) {
+          card.dataset.id = `tenant-card-${index + 1}`;
+        }
+      });
+
+      // Apply saved order from backend.
+      if (Array.isArray(savedDashboardOrder) && savedDashboardOrder.length > 0) {
+        const cardMap = new Map(
+          Array.from(sortableGrid.querySelectorAll('.content-card')).map((card) => [card.dataset.id, card])
+        );
+
+        savedDashboardOrder.forEach((cardId) => {
+          const card = cardMap.get(cardId);
+          if (card) {
+            sortableGrid.appendChild(card);
+          }
+        });
+      }
+    }
+
+    if (typeof Sortable !== 'undefined' && sortableGrid) {
+      new Sortable(sortableGrid, {
         handle: '.card-header',
         animation: 150,
-        onEnd: async function(evt) {
-          const cards = Array.from(document.querySelectorAll('.content-card'));
-          const order = cards.map(card => card.dataset.id);
+        onEnd: async function() {
+          const order = Array.from(sortableGrid.querySelectorAll('.content-card')).map((card) => card.dataset.id);
           try {
-            await fetch('{{ url_for("tenant.save_dashboard_order") }}', {
+            const response = await fetch(saveDashboardOrderUrl, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ order })
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+              },
+              body: JSON.stringify({ order }),
+              credentials: 'include'
             });
+            if (!response.ok) {
+              console.error('Error saving dashboard order: server returned', response.status);
+            }
           } catch (error) {
             console.error('Error saving dashboard order:', error);
           }
