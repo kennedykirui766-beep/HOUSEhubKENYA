@@ -354,10 +354,10 @@ def messages():
 
 
 # ---------------- Profile ----------------
-from flask_wtf.csrf import exempt
+@csrf.exempt
 @landlord_bp.route("/profile", methods=["GET", "POST"])
 @login_required
-@exempt  # 🔥 This disables CSRF for this route
+  # 🔥 This disables CSRF for this route
 def profile():
     if current_user.role != "landlord":
         flash("Access denied.", "danger")
