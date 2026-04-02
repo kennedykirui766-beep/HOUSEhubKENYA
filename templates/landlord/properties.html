@@ -804,16 +804,16 @@
       <div class="props-results-info" id="resultsInfo"></div>
     </div>
 
-    <!-- No results message -->
+    <!-- No results message (for search) -->
     <div class="props-no-results" id="noResults">
       <i class="fas fa-search"></i>
       <p>No properties match your search. Try different keywords.</p>
     </div>
 
     <!-- Properties Grid -->
-    {% if properties %}
-    <div class="props-grid" id="propsGrid">
-
+    <!-- Grid is hidden via inline style if properties list is empty initially -->
+    <div class="props-grid" id="propsGrid" {% if not properties %}style="display:none"{% endif %}>
+      {% if properties %}
       {% for property in properties %}
       <div class="prop-card"
            data-title="{{ property.title|lower if property.title else '' }}"
@@ -1084,12 +1084,13 @@
 
       </div>
       {% endfor %}
+      {% endif %}
 
     </div>
-    {% else %}
 
     <!-- Empty State -->
-    <div class="props-empty">
+    <!-- Empty state is hidden via inline style if properties exist initially -->
+    <div class="props-empty" id="propsEmpty" {% if properties %}style="display:none"{% endif %}>
       <div class="props-empty-icon">
         <i class="fas fa-building"></i>
       </div>
@@ -1099,8 +1100,6 @@
         <i class="fas fa-plus-circle"></i> Add Your First Property
       </a>
     </div>
-
-    {% endif %}
 
   </div>
 </div>
@@ -1174,6 +1173,7 @@
   var resultsInfo = document.getElementById('resultsInfo');
   var noResults = document.getElementById('noResults');
   var propsGrid = document.getElementById('propsGrid');
+  var propsEmpty = document.getElementById('propsEmpty');
 
   function applyFilters() {
     var query = searchInput.value.toLowerCase().trim();
@@ -1292,10 +1292,17 @@
             var remaining = document.querySelectorAll('.prop-card').length;
             var countBadge = document.getElementById('propsCount');
             if (countBadge) countBadge.textContent = remaining;
-            // Show empty state if no more
+            
+            // Handle Empty State without reload
             if (remaining === 0) {
-              window.location.reload();
+                // Hide the grid
+                propsGrid.style.display = 'none';
+                // Show the empty state container
+                if(propsEmpty) propsEmpty.style.display = 'block';
+                // Hide "No results" if it was showing
+                if(noResults) noResults.classList.remove('visible');
             }
+            // Re-apply filters in case the deletion affects current view
             applyFilters();
           }, 300);
         }
