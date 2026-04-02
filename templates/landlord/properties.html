@@ -753,15 +753,6 @@
             {% endif %}
           </div>
 
-          <!-- Delete Form with CSRF Protection -->
-          <form id="delete-form-{{ property.id }}"
-                action="{{ url_for('landlord.delete_property', property_id=property.id) }}"
-                method="POST"
-                style="display: none;">
-                
-              {{ csrf_token() }}
-          </form>
-
           <!-- Actions -->
           <div class="prop-card-actions">
             <button type="button" class="btn-prop-outline" onclick="toggleDetail({{ property.id }})" data-detail-btn="{{ property.id }}">
@@ -999,7 +990,7 @@
         var icon = btn.querySelector('i');
         if (icon) icon.className = 'fas fa-eye-slash';
       }
-      // Smooth scroll to card
+      // Smooth scroll
       setTimeout(function() {
         var card = panel.closest('.prop-card');
         if (card) {
@@ -1013,7 +1004,7 @@
     }
   }
 
-  // ---- Search & Filter ----
+  // ---- Search & Filter (unchanged) ----
   var searchInput = document.getElementById('propsSearch');
   var filterType = document.getElementById('filterType');
   var filterStatus = document.getElementById('filterStatus');
@@ -1048,23 +1039,15 @@
       }
     });
 
-    // Update results info
     var total = cards.length;
     if (resultsInfo) {
-      if (query || typeVal || statusVal) {
-        resultsInfo.textContent = 'Showing ' + visibleCount + ' of ' + total + ' properties';
-      } else {
-        resultsInfo.textContent = '';
-      }
+      resultsInfo.textContent = (query || typeVal || statusVal) 
+        ? 'Showing ' + visibleCount + ' of ' + total + ' properties' 
+        : '';
     }
 
-    // Show/hide no results message
     if (noResults) {
-      if (visibleCount === 0 && total > 0) {
-        noResults.classList.add('visible');
-      } else {
-        noResults.classList.remove('visible');
-      }
+      noResults.classList.toggle('visible', visibleCount === 0 && total > 0);
     }
   }
 
@@ -1072,17 +1055,62 @@
   filterType.addEventListener('change', applyFilters);
   filterStatus.addEventListener('change', applyFilters);
 
-  // ---- Delete Property ----
+  // ---- Delete Property (Fixed CSRF) ----
   function confirmDelete(propertyId, propertyTitle) {
-    if (!confirm('Are you sure you want to delete "' + propertyTitle + '"? This action cannot be undone.')) return;
-
-    // Find the hidden form and submit it
-    var form = document.getElementById('delete-form-' + propertyId);
-    if (form) {
-      form.submit();
-    } else {
-      console.error('Delete form not found for ID: ' + propertyId);
+    if (!confirm('Are you sure you want to delete "' + propertyTitle + '"?\n\nThis action cannot be undone.')) {
+      return;
     }
+
+    // Get fresh CSRF token from meta tag (most reliable method)
+    const csrfToken = document.querySelector('meta[name="csrf-token"]') 
+                    ? document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    : '';
+
+    if (!csrfToken) {
+      alert("Security token missing. Please refresh the page.");
+      return;
+    }
+
+    fetch(`/landlord/delete_property/${propertyId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken
+      },
+      body: JSON.stringify({})   // empty body is fine for delete
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        const card = document.querySelector(`.prop-card[data-id="${propertyId}"]`);
+        if (card) {
+          card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.9)';
+          
+          setTimeout(() => {
+            card.remove();
+            
+            // Update count
+            const remaining = document.querySelectorAll('.prop-card').length;
+            const countBadge = document.getElementById('propsCount');
+            if (countBadge) countBadge.textContent = remaining;
+
+            if (remaining === 0) {
+              window.location.reload(); // show empty state
+            } else {
+              applyFilters();
+            }
+          }, 400);
+        }
+      } else {
+        alert('Delete failed: ' + (data.error || 'Unknown error'));
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert('Network error. Please check your connection and try again.');
+    });
   }
 </script>
 {% endblock %}
