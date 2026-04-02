@@ -758,8 +758,8 @@
                 action="{{ url_for('landlord.delete_property', property_id=property.id) }}"
                 method="POST"
                 style="display: none;">
-
-              <input type="hidden" name="csrf_token" value="{{ csrf_token()() }}">
+                
+              {{ csrf_token() }}
           </form>
 
           <!-- Actions -->
