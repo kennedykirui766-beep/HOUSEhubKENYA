@@ -967,43 +967,6 @@
 
 {% block scripts %}
 <script>
-  // ---- Helper: Get CSRF Token ----
-  // Attempts to retrieve the token from Cookie, Meta Tag, or Server-side render
-  function getCsrfToken() {
-    // 1. Try to get from Cookie (Standard for Flask-WTF)
-    function getCookie(name) {
-      var cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-          var cookie = cookies[i].trim();
-          if (cookie.substring(0, name.length + 1) === (name + '=')) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
-          }
-        }
-      }
-      return cookieValue;
-    }
-
-    var token = getCookie('csrf_token');
-
-    // 2. Fallback: Try Meta Tag (if base.html has it)
-    if (!token) {
-      var meta = document.querySelector('meta[name="csrf-token"]');
-      if (meta) {
-        token = meta.getAttribute('content');
-      }
-    }
-
-    // 3. Fallback: Server-side injection (using tojson to handle quotes)
-    if (!token) {
-      token = {{ csrf_token() | tojson | safe }};
-    }
-
-    return token;
-  }
-
   // ---- Toggle detail panel ----
   function toggleDetail(id) {
     var panel = document.getElementById('detailPanel-' + id);
@@ -1100,20 +1063,12 @@
   filterType.addEventListener('change', applyFilters);
   filterStatus.addEventListener('change', applyFilters);
 
-  // ---- Delete Property ----
+  // ---- Delete Property (No CSRF) ----
   function confirmDelete(propertyId, propertyTitle) {
     if (!confirm('Are you sure you want to delete "' + propertyTitle + '"? This action cannot be undone.')) return;
 
-    var csrfToken = getCsrfToken();
-
-    if (!csrfToken) {
-        alert('Security Error: Unable to locate CSRF token. Please refresh the page.');
-        return;
-    }
-
     var headers = {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrfToken
+        'Content-Type': 'application/json'
     };
 
     fetch('/landlord/delete_property/' + propertyId, {
