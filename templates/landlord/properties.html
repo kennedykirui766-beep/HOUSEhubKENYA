@@ -1056,61 +1056,67 @@
   filterStatus.addEventListener('change', applyFilters);
 
   // ---- Delete Property (Fixed CSRF) ----
-  function confirmDelete(propertyId, propertyTitle) {
+  // ---- Delete Property (Fixed & Reliable CSRF) ----
+function confirmDelete(propertyId, propertyTitle) {
     if (!confirm('Are you sure you want to delete "' + propertyTitle + '"?\n\nThis action cannot be undone.')) {
-      return;
+        return;
     }
 
-    // Get fresh CSRF token from meta tag (most reliable method)
-    const csrfToken = document.querySelector('meta[name="csrf-token"]') 
-                    ? document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    : '';
+    // Get CSRF token from meta tag (this is the standard & reliable method)
+    const metaToken = document.querySelector('meta[name="csrf-token"]');
+    const csrfToken = metaToken ? metaToken.getAttribute('content') : '';
 
     if (!csrfToken) {
-      alert("Security token missing. Please refresh the page.");
-      return;
+        alert("CSRF token missing. Please refresh the page and try again.");
+        return;
     }
 
     fetch(`/landlord/delete_property/${propertyId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrfToken
-      },
-      body: JSON.stringify({})   // empty body is fine for delete
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({})   // empty body is okay for delete
     })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        const card = document.querySelector(`.prop-card[data-id="${propertyId}"]`);
-        if (card) {
-          card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-          card.style.opacity = '0';
-          card.style.transform = 'scale(0.9)';
-          
-          setTimeout(() => {
-            card.remove();
-            
-            // Update count
-            const remaining = document.querySelectorAll('.prop-card').length;
-            const countBadge = document.getElementById('propsCount');
-            if (countBadge) countBadge.textContent = remaining;
-
-            if (remaining === 0) {
-              window.location.reload(); // show empty state
-            } else {
-              applyFilters();
-            }
-          }, 400);
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
         }
-      } else {
-        alert('Delete failed: ' + (data.error || 'Unknown error'));
-      }
+        return response.json();
     })
-    .catch(err => {
-      console.error(err);
-      alert('Network error. Please check your connection and try again.');
+    .then(data => {
+        if (data.success) {
+            // Remove card with animation
+            const card = document.querySelector(`.prop-card[data-id="${propertyId}"]`);
+            if (card) {
+                card.style.transition = 'all 0.4s ease';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.95)';
+
+                setTimeout(() => {
+                    card.remove();
+
+                    // Update property count
+                    const remaining = document.querySelectorAll('.prop-card').length;
+                    const countBadge = document.getElementById('propsCount');
+                    if (countBadge) countBadge.textContent = remaining;
+
+                    if (remaining === 0) {
+                        window.location.reload();
+                    } else {
+                        applyFilters();
+                    }
+                }, 400);
+            }
+        } else {
+            alert('Failed to delete: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Delete error:', error);
+        alert('An error occurred while deleting. Please try again.');
     });
-  }
+}
 </script>
 {% endblock %}
