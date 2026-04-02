@@ -151,6 +151,10 @@ def create_app():
             flash("Error loading houses. Please try again.", "danger")
             return render_template("index.html", houses=[])
 
+    @app.route('/favicon.ico')
+    def favicon():
+        return app.send_static_file('images/Screenshot_2025-10-07_003020.png')
+
     @app.route("/subscribe", methods=["POST"])
     def subscribe():
         email = request.form.get("email")
