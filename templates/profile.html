@@ -616,7 +616,7 @@ content %}
 
       <div class="profile-stats">
         <div class="profile-stat">
-          <div class="stat-value">{{ current_user.id }}</div>
+          <div class="stat-value">{{ current_user.public_id }}</div>
           <div class="stat-label">User ID</div>
         </div>
         <div class="profile-stat">
@@ -641,6 +641,7 @@ content %}
     </div>
 
     <form id="profileForm" method="POST" action="/update_profile">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
       <div class="form-row">
         <div class="form-group">
           <label for="name">Full Name</label>
@@ -709,7 +710,7 @@ content %}
       <div class="form-actions">
         <a
           href="{% if current_user.role == 'tenant' %}
-            {{ url_for('tenant.tenant_dashboard') }}
+          {{ url_for('tenant.dashboard') }}
         {% elif current_user.role == 'service' %}
             {{ url_for('service_provider.dashboard') }}
         {% elif current_user.role == 'landlord' %}

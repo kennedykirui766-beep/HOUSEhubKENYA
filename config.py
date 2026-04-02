@@ -21,6 +21,39 @@ class Config:
         "pool_pre_ping": True,
         "pool_recycle": 300,
     }
+    
+    # ========== EMAIL CONFIGURATION ==========
+    # Email provider: 'smtp', 'sendgrid', 'mailgun'
+    EMAIL_PROVIDER = os.environ.get('EMAIL_PROVIDER', 'smtp')
+    SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'noreply@homehub.app')
+    SENDER_NAME = os.environ.get('SENDER_NAME', 'HomeHub')
+    
+    # SMTP Configuration (used if EMAIL_PROVIDER='smtp')
+    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
+    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', True)
+    MAIL_USE_SSL = os.environ.get('MAIL_USE_SSL', False)
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', '')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')
+    
+    # SendGrid API Key (if EMAIL_PROVIDER='sendgrid')
+    SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY', '')
+    
+    # Mailgun Configuration (if EMAIL_PROVIDER='mailgun')
+    MAILGUN_DOMAIN = os.environ.get('MAILGUN_DOMAIN', '')
+    MAILGUN_API_KEY = os.environ.get('MAILGUN_API_KEY', '')
+    
+    # ========== SMS CONFIGURATION (TWILIO) ==========
+    TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')
+    TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN', '')
+    TWILIO_FROM_NUMBER = os.environ.get('TWILIO_FROM_NUMBER', '')
+    
+    # ========== 2FA SETTINGS ==========
+    OTP_CODE_LENGTH = 6  # 6-digit OTP
+    OTP_TIMEOUT_SECONDS = 300  # 5 minutes
+    MAX_OTP_ATTEMPTS = 5  # Max attempts before blocking
+    BACKUP_CODES_COUNT = 10  # Number of backup codes generated
+    
     # Upload folders
     UPLOAD_FOLDER = os.environ.get(
         "UPLOAD_FOLDER",
