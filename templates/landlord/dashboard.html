@@ -738,6 +738,140 @@
     transform: scale(1.08);
   }
 
+  /* ========== MODAL (POPUP) ========== */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    padding: 1rem;
+  }
+
+  .modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .modal-box {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    transform: translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-overlay.active .modal-box {
+    transform: translateY(0);
+  }
+
+  .modal-header {
+    padding: 1.25rem 1.5rem 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .modal-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .modal-icon.danger {
+    background-color: #fee2e2;
+    color: #ef4444;
+  }
+
+  .modal-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  .modal-body {
+    padding: 1rem 1.5rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  
+  .modal-body strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  .modal-footer {
+    padding: 0.75rem 1.5rem 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+
+  .btn-modal {
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+    border: none;
+  }
+
+  .btn-modal-cancel {
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+  }
+
+  .btn-modal-cancel:hover {
+    background-color: var(--body-bg);
+    color: var(--text-primary);
+    border-color: var(--text-muted);
+  }
+
+  .btn-modal-confirm {
+    background-color: #ef4444;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-modal-confirm:hover {
+    background-color: #dc2626;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  }
+  
+  .btn-modal-confirm:disabled {
+    background-color: #fca5a5;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
   /* ========== RESPONSIVE ========== */
   @media (max-width: 1199px) {
     .dash-stats {
@@ -803,6 +937,13 @@
     .dash-list-actions .btn-dash-outline,
     .dash-list-actions .btn-dash-danger {
       flex: 1;
+      justify-content: center;
+    }
+    .modal-footer {
+      flex-direction: column-reverse;
+    }
+    .btn-modal {
+      width: 100%;
       justify-content: center;
     }
   }
@@ -949,7 +1090,8 @@
     <div class="dash-card-body">
       {% if houses %}
         {% for property in houses[:3] %}
-        <div class="dash-list-item">
+        <!-- Added data-id for JS reference -->
+        <div class="dash-list-item" data-id="{{ property.id }}">
           <div class="dash-list-top">
             <div class="dash-list-info">
               <h4 class="dash-list-title">{{ property.title }}</h4>
@@ -969,7 +1111,8 @@
             <a href="{{ url_for('landlord.edit_property', property_id=property.id) }}" class="btn-dash-outline">
               <i class="fas fa-edit"></i> Edit
             </a>
-            <button onclick="confirmDelete({{ property.id }})" class="btn-dash-danger">
+            <!-- Updated onclick to call openDeleteModal -->
+            <button onclick="openDeleteModal({{ property.id }}, '{{ property.title|replace("'", "\\'") }}')" class="btn-dash-danger">
               <i class="fas fa-trash"></i> Delete
             </button>
           </div>
@@ -1121,6 +1264,28 @@
   </div>
 </div>
 
+<!-- DELETE CONFIRMATION MODAL -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-icon danger">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="modal-title">Delete Property?</h3>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete <strong id="modalPropertyName">property name</strong>?</p>
+            <p class="text-muted" style="font-size: 0.85rem; margin-top: 0.5rem;">This action cannot be undone. All associated data will be permanently removed.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-modal btn-modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+            <button class="btn-modal btn-modal-confirm" id="btnConfirmDelete">
+                <i class="fas fa-trash-alt"></i> Delete
+            </button>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
@@ -1203,30 +1368,75 @@
     if (e.key === 'Enter') sendChatMessage();
   });
 
-  // ---- Delete Property ----
-  function confirmDelete(propertyId) {
-    if (!confirm('Are you sure you want to delete this property? This action cannot be undone.')) return;
+  // ---- Delete Modal Logic ----
+  var deleteModal = document.getElementById('deleteModal');
+  var modalPropertyName = document.getElementById('modalPropertyName');
+  var btnConfirmDelete = document.getElementById('btnConfirmDelete');
+  var propertyToDeleteId = null;
 
-    const csrfToken = document.querySelector('input[name="csrf_token"]');
-    const headers = { 'Content-Type': 'application/json' };
+  function openDeleteModal(id, title) {
+    propertyToDeleteId = id;
+    modalPropertyName.textContent = title;
+    deleteModal.classList.add('active');
+  }
+
+  function closeDeleteModal() {
+    deleteModal.classList.remove('active');
+    propertyToDeleteId = null;
+  }
+
+  // Close modal if clicking outside
+  deleteModal.addEventListener('click', function(e) {
+    if (e.target === deleteModal) {
+      closeDeleteModal();
+    }
+  });
+
+  // Close on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && deleteModal.classList.contains('active')) {
+      closeDeleteModal();
+    }
+  });
+
+  // Confirm Delete Action
+  btnConfirmDelete.addEventListener('click', function() {
+    if (!propertyToDeleteId) return;
+
+    // Add loading state to button
+    var originalBtnText = btnConfirmDelete.innerHTML;
+    btnConfirmDelete.disabled = true;
+    btnConfirmDelete.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+
+    var headers = { 'Content-Type': 'application/json' };
+    var csrfToken = document.querySelector('input[name="csrf_token"]');
     if (csrfToken) headers['X-CSRFToken'] = csrfToken.value;
 
-    fetch('/landlord/delete_property/' + propertyId, {
+    fetch('/landlord/delete_property/' + propertyToDeleteId, {
       method: 'POST',
       headers: headers
     })
     .then(response => response.json())
     .then(data => {
       if (data.success) {
+        // Close modal
+        closeDeleteModal();
+        // Reload page to update stats and map
         window.location.reload();
       } else {
         alert('Error: ' + (data.error || 'Failed to delete property'));
+        // Reset button
+        btnConfirmDelete.disabled = false;
+        btnConfirmDelete.innerHTML = originalBtnText;
       }
     })
     .catch(() => {
       alert('An error occurred. Please try again.');
+      // Reset button
+      btnConfirmDelete.disabled = false;
+      btnConfirmDelete.innerHTML = originalBtnText;
     });
-  }
+  });
 </script>
 
 <!-- Google Maps (loaded after our script so callback works) -->
