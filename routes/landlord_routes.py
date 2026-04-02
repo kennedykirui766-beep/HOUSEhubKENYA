@@ -292,32 +292,31 @@ def edit_property(property_id):
 
 from extensions import csrf
 
+from flask import jsonify
+
 @csrf.exempt
 @landlord_bp.route('/delete_property/<int:property_id>', methods=['POST'])
 @login_required
 def delete_property(property_id):
     # Ensure only landlords can delete
     if current_user.role != "landlord":
-        flash("Access denied.", "danger")
-        return redirect(url_for("main.index"))
+        return jsonify(success=False, error="Access denied")
 
     # Get property
-    property = House.query.get_or_404(property_id)
+    house = House.query.get_or_404(property_id)
 
     # Ensure landlord owns the property
-    if property.owner_id != current_user.id:
-        flash("You are not allowed to delete this property.", "danger")
-        return redirect(url_for("landlord.properties"))
+    if house.owner_id != current_user.id:
+        return jsonify(success=False, error="Not allowed")
 
     try:
-        db.session.delete(property)
+        db.session.delete(house)
         db.session.commit()
-        flash("Property deleted successfully.", "success")
+        return jsonify(success=True)
     except Exception as e:
         db.session.rollback()
-        flash("Error deleting property.", "danger")
-
-    return redirect(url_for("landlord.properties"))
+        print("DELETE ERROR:", e)  # 👈 very important for debugging
+        return jsonify(success=False, error="Database error")
 
 
 # ---------------- Settings ----------------
