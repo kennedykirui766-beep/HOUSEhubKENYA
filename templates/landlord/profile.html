@@ -1,960 +1,425 @@
-{% extends 'base.html' %} {% block title %}Your Profile{% endblock %} {% block
-content %}
+{% extends "base.html" %}
 
+{% block title %}Profile Settings - HomeHub{% endblock %}
+
+{% block styles %}
 <style>
-  :root {
-    --primary: #4361ee;
-    --primary-dark: #3a0ca3;
-    --secondary: #7209b7;
-    --accent: #f72585;
-    --light: #f8f9fa;
-    --dark: #212529;
-    --success: #06ffa5;
-    --info: #00b4d8;
-    --warning: #ffbe0b;
-    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    --transition: all 0.3s ease;
-    --border-radius: 15px;
+  /* ========== PROFILE PAGE ========== */
+  .profile-page {
+    padding: 2rem 0 4rem;
+    background-color: var(--body-bg);
   }
 
-  body {
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      sans-serif;
-    background-color: #f8f9fa;
-    color: var(--dark);
-    line-height: 1.6;
-  }
-
-  .profile-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
-
-  /* Header Section */
   .profile-header {
-    background: linear-gradient(
-      135deg,
-      var(--primary) 0%,
-      var(--primary-dark) 100%
-    );
-    color: white;
-    padding: 3rem 2rem;
-    border-radius: 20px;
     margin-bottom: 2rem;
+  }
+
+  .profile-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+  }
+
+  .profile-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+
+  /* ========== LAYOUT GRID ========== */
+  .profile-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  /* ========== PROFILE CARD (Left) ========== */
+  .profile-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .profile-avatar-wrapper {
     position: relative;
-    overflow: hidden;
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 1.5rem;
   }
 
-  .profile-header::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')
-      no-repeat bottom;
-    background-size: cover;
-  }
-
-  .header-content {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-
-  .header-title {
-    font-size: 2.5rem;
-    font-weight: 800;
-    margin-bottom: 0.5rem;
-  }
-
-  .header-subtitle {
-    font-size: 1.1rem;
-    opacity: 0.9;
-    max-width: 600px;
-  }
-
-  .header-actions {
-    display: flex;
-    gap: 1rem;
-  }
-
-  .notification-icon {
-    position: relative;
-    font-size: 1.3rem;
-    color: white;
-    cursor: pointer;
-    background-color: rgba(255, 255, 255, 0.2);
-    width: 45px;
-    height: 45px;
+  .profile-avatar-img {
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--card-bg);
+    box-shadow: 0 0 0 2px var(--primary-color);
+  }
+
+  .profile-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: var(--transition);
+    font-size: 3rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: 4px solid var(--card-bg);
+    box-shadow: 0 0 0 2px var(--primary-color);
   }
 
-  .notification-icon:hover {
-    background-color: rgba(255, 255, 255, 0.3);
-    transform: translateY(-3px);
-  }
-
-  .notification-badge {
+  .avatar-edit-btn {
     position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: var(--accent);
+    bottom: 5px;
+    right: 5px;
+    background-color: var(--primary-color);
     color: white;
-    font-size: 0.7rem;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-  }
-
-  .user-profile {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    padding: 8px 15px;
-    border-radius: 30px;
-    transition: var(--transition);
-    background-color: rgba(255, 255, 255, 0.15);
-  }
-
-  .user-profile:hover {
-    background-color: rgba(255, 255, 255, 0.25);
-  }
-
-  .user-avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid white;
-  }
-
-  .user-info h4 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: white;
-  }
-
-  .user-info p {
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.8);
-  }
-
-  /* Profile Card */
-  .profile-card {
-    background: white;
-    border-radius: var(--border-radius);
-    padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: var(--shadow);
-    display: flex;
-    align-items: center;
-    gap: 3rem;
-    flex-wrap: wrap;
-  }
-
-  .profile-avatar-container {
-    position: relative;
-    flex-shrink: 0;
-  }
-
-  .profile-avatar {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 5px solid var(--primary);
-    box-shadow: var(--shadow);
-    transition: var(--transition);
-  }
-
-  .profile-avatar:hover {
-    transform: scale(1.03);
-  }
-
-  .avatar-upload {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: white;
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: var(--shadow);
+    border: 3px solid var(--card-bg);
     transition: var(--transition);
-    border: 3px solid white;
+    box-shadow: var(--shadow-sm);
   }
 
-  .avatar-upload:hover {
+  .avatar-edit-btn:hover {
+    background-color: var(--secondary-color);
     transform: scale(1.1);
-    box-shadow: 0 8px 20px rgba(67, 97, 238, 0.3);
   }
 
-  .avatar-upload i {
-    font-size: 1.2rem;
-  }
-
-  .profile-info {
-    flex: 1;
-  }
-
-  .profile-name {
-    font-size: 2rem;
+  .profile-name-display {
+    font-size: 1.25rem;
     font-weight: 700;
-    margin-bottom: 10px;
-    color: var(--dark);
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
   }
 
-  .profile-role {
+  .profile-role-badge {
     display: inline-block;
-    padding: 0.5rem 1.2rem;
-    background: linear-gradient(
-      135deg,
-      rgba(67, 97, 238, 0.1),
-      rgba(58, 12, 163, 0.1)
-    );
-    color: var(--primary);
-    border-radius: 30px;
-    font-size: 1rem;
+    background: var(--primary-light);
+    color: var(--primary-color);
+    font-size: 0.75rem;
     font-weight: 600;
-    margin-bottom: 15px;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1.5rem;
   }
 
   .profile-stats {
-    display: flex;
-    gap: 1.5rem;
-    margin-top: 25px;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    text-align: left;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1.5rem;
   }
 
-  .profile-stat {
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    border-radius: var(--border-radius);
-    padding: 1.2rem;
-    min-width: 120px;
-    text-align: center;
-    transition: var(--transition);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-  }
-
-  .profile-stat:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  }
-
-  .stat-value {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--primary);
-  }
-
-  .stat-label {
-    font-size: 0.9rem;
-    color: #6c757d;
-    font-weight: 600;
+  .p-stat-item h6 {
+    color: var(--text-muted);
+    font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
   }
 
-  /* Form Section */
-  .form-section {
-    background: white;
-    border-radius: var(--border-radius);
+  .p-stat-item p {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ========== EDIT CARD (Right) ========== */
+  .edit-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
     padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: var(--shadow);
-  }
-
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #e9ecef;
+    box-shadow: var(--shadow-sm);
   }
 
   .section-title {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     font-weight: 700;
-    color: var(--dark);
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 0.5rem;
   }
 
   .section-title i {
-    color: var(--primary);
-  }
-
-  .form-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
+    color: var(--primary-color);
   }
 
   .form-group {
-    display: flex;
-    flex-direction: column;
+    margin-bottom: 1.25rem;
   }
 
-  .form-group label {
-    font-weight: 600;
+  .form-label {
+    display: block;
     margin-bottom: 0.5rem;
-    color: var(--dark);
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 0.9rem;
   }
 
   .form-control {
+    width: 100%;
     padding: 0.75rem 1rem;
-    border: 2px solid #e9ecef;
-    border-radius: 10px;
-    font-size: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--body-bg);
+    color: var(--text-primary);
+    font-size: 0.95rem;
     transition: var(--transition);
+    font-family: inherit;
   }
 
   .form-control:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
-  }
-
-  textarea.form-control {
-    resize: vertical;
-    min-height: 120px;
-  }
-
-  /* Buttons */
-  .btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    border: none;
-    font-size: 1rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: white;
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(67, 97, 238, 0.3);
-  }
-
-  .btn-outline {
-    background: transparent;
-    color: var(--primary);
-    border: 2px solid var(--primary);
-  }
-
-  .btn-outline:hover {
-    background: var(--primary);
-    color: white;
-  }
-
-  .btn-success {
-    background: linear-gradient(135deg, var(--success), #00b4d8);
-    color: white;
-  }
-
-  .btn-success:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(6, 255, 165, 0.3);
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px var(--primary-light);
   }
 
   .form-actions {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
+    gap: 1rem;
     margin-top: 2rem;
     padding-top: 1.5rem;
-    border-top: 1px solid #e9ecef;
+    border-top: 1px solid var(--border-color);
   }
 
-  /* Alert Styles */
-  .alert {
-    padding: 1rem 1.5rem;
-    border-radius: var(--border-radius);
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  .btn-cancel {
+    padding: 0.7rem 1.5rem;
+    border-radius: var(--radius-md);
+    background: transparent;
+    border: 1.5px solid var(--border-color);
+    color: var(--text-secondary);
     font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition);
   }
 
-  .alert-success {
-    background: linear-gradient(
-      135deg,
-      rgba(6, 255, 165, 0.1),
-      rgba(0, 180, 216, 0.1)
-    );
-    color: var(--success);
-    border-left: 5px solid var(--success);
+  .btn-cancel:hover {
+    border-color: var(--text-muted);
+    color: var(--text-primary);
   }
 
-  .alert-danger {
-    background: linear-gradient(
-      135deg,
-      rgba(247, 37, 133, 0.1),
-      rgba(230, 57, 70, 0.1)
-    );
-    color: var(--accent);
-    border-left: 5px solid var(--accent);
-  }
-
-  .alert-info {
-    background: linear-gradient(
-      135deg,
-      rgba(0, 180, 216, 0.1),
-      rgba(0, 119, 182, 0.1)
-    );
-    color: var(--info);
-    border-left: 5px solid var(--info);
-  }
-
-  .alert-close {
-    margin-left: auto;
-    background: none;
+  .btn-save {
+    padding: 0.7rem 1.5rem;
+    border-radius: var(--radius-md);
+    background: var(--gradient-primary);
     border: none;
-    font-size: 1.2rem;
+    color: white;
+    font-weight: 600;
     cursor: pointer;
-    opacity: 0.7;
-  }
-
-  .alert-close:hover {
-    opacity: 1;
-  }
-
-  /* Password Section */
-  .password-section {
-    background: white;
-    border-radius: var(--border-radius);
-    padding: 2rem;
-    box-shadow: var(--shadow);
-  }
-
-  /* Notification Toast */
-  .notification-toast {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    min-width: 300px;
-    padding: 1rem 1.5rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    z-index: 2000;
-    display: flex;
+    transition: var(--transition);
+    display: inline-flex;
     align-items: center;
-    gap: 12px;
-    animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s;
-    animation-fill-mode: forwards;
+    gap: 0.5rem;
   }
 
-  @keyframes slideIn {
-    from {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
+  .btn-save:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
   }
 
-  @keyframes slideOut {
-    from {
-      transform: translateX(0);
-      opacity: 1;
-    }
-    to {
-      transform: translateX(100%);
-      opacity: 0;
-    }
+  /* Helper for Avatar Overlay */
+  .hidden-file-input {
+    display: none;
   }
 
-  .notification-success {
-    background: linear-gradient(
-      135deg,
-      rgba(6, 255, 165, 0.9),
-      rgba(0, 180, 216, 0.9)
-    );
-    color: white;
-  }
-
-  .notification-danger {
-    background: linear-gradient(
-      135deg,
-      rgba(247, 37, 133, 0.9),
-      rgba(230, 57, 70, 0.9)
-    );
-    color: white;
-  }
-
-  /* Responsive */
-  @media (max-width: 992px) {
-    .header-content {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1.5rem;
-    }
-
-    .profile-card {
-      flex-direction: column;
-      text-align: center;
-      gap: 2rem;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .profile-container {
-      padding: 1rem;
-    }
-
-    .header-title {
-      font-size: 2rem;
-    }
-
-    .form-row {
+  /* ========== RESPONSIVE ========== */
+  @media (max-width: 991px) {
+    .profile-grid {
       grid-template-columns: 1fr;
+      max-width: 600px;
+      margin: 0 auto;
     }
-
-    .profile-stats {
-      flex-direction: column;
-      align-items: center;
+    .profile-card {
+      order: -1; /* Move profile card to top on mobile */
     }
+  }
 
-    .profile-stat {
-      width: 100%;
-      max-width: 300px;
+  @media (max-width: 480px) {
+    .profile-avatar-wrapper {
+      width: 120px;
+      height: 120px;
     }
-
+    .profile-avatar-placeholder {
+      font-size: 2.5rem;
+    }
     .form-actions {
-      flex-direction: column;
-      gap: 1rem;
+      flex-direction: column-reverse;
+    }
+    .btn-cancel, .btn-save {
+      width: 100%;
+      justify-content: center;
     }
   }
 </style>
+{% endblock %}
 
-<div class="profile-container">
-  <!-- Profile Header -->
-  <div class="profile-header">
-    <div class="header-content">
-      <div>
-        <h1 class="header-title">Your Profile</h1>
-        <p class="header-subtitle">
-          Manage your account information and preferences
-        </p>
-      </div>
-      <div class="header-actions">
-        <div class="notification-icon">
-          <i class="fas fa-bell"></i>
-          <span class="notification-badge">3</span>
+{% block content %}
+<div class="profile-page">
+  <div class="container">
+    
+    <!-- Header -->
+    <div class="profile-header">
+      <h1 class="profile-title">Profile Settings</h1>
+      <p class="profile-subtitle">Manage your personal information and account preferences.</p>
+    </div>
+
+    <div class="profile-grid">
+      
+      <!-- Left Column: Profile Summary -->
+      <div class="profile-card">
+        <div class="profile-avatar-wrapper">
+          <!-- 
+             DISPLAY LOGIC:
+             If profile_image exists, we use cloudinary_url to generate the CDN link.
+             This handles cases where the DB stores the Public ID.
+             Transformations: 300x300, crop='thumb' (centers on face/content).
+          -->
+          {% if current_user.profile_image %}
+            <img src="{{ cloudinary_url(current_user.profile_image, width=300, height=300, crop='thumb', gravity='face', quality='auto') }}" 
+                 alt="Profile" 
+                 class="profile-avatar-img" 
+                 id="avatarPreview">
+          {% else %}
+            <!-- Generate Initials if no image -->
+            {% set initials = current_user.name.split()|map('first')|join('') %}
+            <div class="profile-avatar-placeholder" id="avatarPlaceholder">
+              {{ initials[:2].upper() }}
+            </div>
+          {% endif %}
+
+          <!-- Upload Button Overlay -->
+          <label for="profilePictureInput" class="avatar-edit-btn" title="Change Profile Picture">
+            <i class="fas fa-camera"></i>
+          </label>
         </div>
-        <div class="user-profile">
-          <img
-            src="https://randomuser.me/api/portraits/men/32.jpg"
-            alt="User Avatar"
-            class="user-avatar"
-          />
-          <div class="user-info">
-            <h4>{{ current_user.name }}</h4>
-            <p>{{ current_user.role }}</p>
+
+        <h2 class="profile-name-display">{{ current_user.name }}</h2>
+        <span class="profile-role-badge">{{ current_user.role }}</span>
+
+        <div class="profile-stats">
+          <div class="p-stat-item">
+            <h6>Email</h6>
+            <p>{{ current_user.email }}</p>
+          </div>
+          <div class="p-stat-item">
+            <h6>Phone</h6>
+            <p>{{ current_user.phone_number or 'Not Set' }}</p>
+          </div>
+          <div class="p-stat-item">
+            <h6>Status</h6>
+            <p style="color: var(--success-color);">Active</p>
+          </div>
+          <div class="p-stat-item">
+            <h6>ID</h6>
+            <p>{{ current_user.id }}</p>
           </div>
         </div>
       </div>
+
+      <!-- Right Column: Edit Form -->
+      <div class="edit-card">
+        <div class="section-title">
+          <i class="fas fa-user-edit"></i> Edit Information
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+          
+          <div class="form-group">
+            <label for="name" class="form-label">Full Name</label>
+            <input type="text" id="name" name="name" class="form-control" value="{{ current_user.name }}" required>
+          </div>
+
+          <div class="form-group">
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" id="email" name="email" class="form-control" value="{{ current_user.email }}" required>
+          </div>
+
+          <div class="form-group">
+            <label for="phone_number" class="form-label">Phone Number</label>
+            <input type="tel" id="phone_number" name="phone_number" class="form-control" value="{{ current_user.phone_number or '' }}" placeholder="e.g. +254 700 000 000">
+          </div>
+
+          <div class="form-actions">
+            <a href="{{ url_for('landlord.dashboard') }}" class="btn-cancel">Cancel</a>
+            <button type="submit" class="btn-save">
+              <i class="fas fa-save"></i> Save Changes
+            </button>
+          </div>
+          
+          <!-- Hidden file input for the overlay button -->
+          <input type="file" id="profilePictureInput" name="profile_picture" class="hidden-file-input" accept="image/*">
+        </form>
+      </div>
+
     </div>
-  </div>
-
-  <!-- Profile Card -->
-  <div class="profile-card">
-    <div class="profile-avatar-container">
-      <img
-        src="https://randomuser.me/api/portraits/men/32.jpg"
-        alt="Profile Picture"
-        class="profile-avatar"
-        id="profileAvatar"
-      />
-      <label for="avatarUpload" class="avatar-upload">
-        <i class="fas fa-camera"></i>
-      </label>
-      <input
-        type="file"
-        id="avatarUpload"
-        accept="image/*"
-        style="display: none"
-      />
-    </div>
-
-    <div class="profile-info">
-      <h2 class="profile-name">{{ current_user.name }}</h2>
-      <span class="profile-role">{{ current_user.role }}</span>
-
-      <div class="profile-stats">
-        <div class="profile-stat">
-          <div class="stat-value">{{ current_user.public_id }}</div>
-          <div class="stat-label">User ID</div>
-        </div>
-        <div class="profile-stat">
-          <div class="stat-value">{{ current_user.role }}</div>
-          <div class="stat-label">Role</div>
-        </div>
-        <div class="profile-stat">
-          <div class="stat-value">Active</div>
-          <div class="stat-label">Status</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Profile Form -->
-  <div class="form-section">
-    <div class="section-header">
-      <h3 class="section-title">
-        <i class="fas fa-user-edit"></i>
-        Edit Profile Information
-      </h3>
-    </div>
-
-    <form id="profileForm" method="POST" action="/update_profile">
-      <div class="form-row">
-        <div class="form-group">
-          <label for="name">Full Name</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            class="form-control"
-            value="{{ current_user.name }}"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="email">Email Address</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            class="form-control"
-            value="{{ current_user.email }}"
-            required
-          />
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="phone">Phone Number</label>
-          <input
-            type="tel"
-            id="phone"
-            name="phone"
-            class="form-control"
-            value="{{ current_user.phone_number or '' }}"
-            placeholder="Enter your phone number"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="location">Location</label>
-          <input
-            type="text"
-            id="location"
-            name="location"
-            class="form-control"
-            value="{{ current_user.location or '' }}"
-            placeholder="Enter your location"
-          />
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="bio">Bio</label>
-        <textarea
-          id="bio"
-          name="bio"
-          class="form-control"
-          rows="4"
-          placeholder="Tell us about yourself"
-        >
-{{ current_user.bio or '' }}</textarea
-        >
-      </div>
-
-      <div class="form-actions">
-        <a
-          href="{% if current_user.role == 'tenant' %}
-            {{ url_for('tenant.tenant_dashboard') }}
-        {% elif current_user.role == 'service' %}
-            {{ url_for('service_provider.dashboard') }}
-        {% elif current_user.role == 'landlord' %}
-            {{ url_for('landlord.dashboard') }}
-        {% elif current_user.role == 'admin' %}
-            {{ url_for('admin.dashboard') }}
-        {% else %}
-            {{ url_for('main.index') }}
-        {% endif %}"
-          class="btn btn-outline"
-        >
-          <i class="fas fa-arrow-left"></i> Back to Dashboard
-        </a>
-
-        <button type="submit" class="btn btn-primary">
-          <i class="fas fa-save"></i> Save Changes
-        </button>
-      </div>
-    </form>
-  </div>
-
-  <!-- Password Change Section -->
-  <div class="password-section">
-    <div class="section-header">
-      <h3 class="section-title">
-        <i class="fas fa-key"></i>
-        Change Password
-      </h3>
-    </div>
-    <form id="passwordForm" method="POST" action="/change_password">
-      <div class="form-row">
-        <div class="form-group">
-          <label for="current_password">Current Password</label>
-          <input
-            type="password"
-            id="current_password"
-            name="current_password"
-            class="form-control"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="new_password">New Password</label>
-          <input
-            type="password"
-            id="new_password"
-            name="new_password"
-            class="form-control"
-            required
-          />
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="confirm_password">Confirm New Password</label>
-        <input
-          type="password"
-          id="confirm_password"
-          name="confirm_password"
-          class="form-control"
-          required
-        />
-      </div>
-
-      <button type="submit" class="btn btn-success">
-        <i class="fas fa-key"></i> Update Password
-      </button>
-    </form>
   </div>
 </div>
+{% endblock %}
 
-{% endblock %} {% block extra_js %}
+{% block scripts %}
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Notification Toast Function
-    function showToast(message, type = "success") {
-      // Remove any existing toasts
-      const existingToast = document.querySelector(".notification-toast");
-      if (existingToast) {
-        existingToast.remove();
-      }
+  document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('profilePictureInput');
+    const avatarPreview = document.getElementById('avatarPreview');
+    const avatarPlaceholder = document.getElementById('avatarPlaceholder');
 
-      // Create new toast
-      const toast = document.createElement("div");
-      toast.className = `notification-toast notification-${type}`;
-
-      // Set icon based on type
-      let icon = "fa-check-circle";
-      if (type === "danger") icon = "fa-exclamation-circle";
-
-      toast.innerHTML = `
-        <i class="fas ${icon}"></i>
-        <span>${message}</span>
-      `;
-
-      // Add to DOM
-      document.body.appendChild(toast);
-
-      // Auto remove after animation completes
-      setTimeout(() => {
-        toast.remove();
-      }, 3000);
-    }
-
-    // Avatar Upload Preview
-    const avatarUpload = document.getElementById("avatarUpload");
-    const profileAvatar = document.getElementById("profileAvatar");
-
-    avatarUpload.addEventListener("change", function (e) {
+    // Handle Image Preview (Local Preview before upload)
+    fileInput.addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
-
-        reader.onload = function (event) {
-          profileAvatar.src = event.target.result;
-          showToast("Profile picture updated successfully", "success");
-        };
-
+        
+        reader.onload = function(event) {
+          // If there was a placeholder, replace it with an img tag
+          if (avatarPlaceholder) {
+            avatarPlaceholder.style.display = 'none';
+            // Check if img exists, if not create it
+            let img = document.getElementById('avatarPreview');
+            if (!img) {
+              img = document.createElement('img');
+              img.id = 'avatarPreview';
+              img.className = 'profile-avatar-img';
+              fileInput.parentElement.parentElement.insertBefore(img, fileInput.parentElement);
+            }
+            img.style.display = 'block';
+            img.src = event.target.result;
+          } else {
+            // Just update existing img
+            avatarPreview.src = event.target.result;
+          }
+        }
+        
         reader.readAsDataURL(file);
       }
     });
-
-    // Profile Form Submission
-    const profileForm = document.getElementById("profileForm");
-
-    profileForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-
-      // Show loading state
-      const submitButton = this.querySelector('button[type="submit"]');
-      const originalText = submitButton.innerHTML;
-      submitButton.innerHTML =
-        '<i class="fas fa-spinner fa-spin"></i> Saving...';
-      submitButton.disabled = true;
-
-      // Get form data
-      const formData = new FormData(this);
-
-      // Send form data using fetch
-      fetch(this.action, {
-        method: "POST",
-        body: formData,
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          // Reset button state
-          submitButton.innerHTML = originalText;
-          submitButton.disabled = false;
-
-          // Show success message
-          showToast("Profile updated successfully!", "success");
-        })
-        .catch((error) => {
-          // Reset button state
-          submitButton.innerHTML = originalText;
-          submitButton.disabled = false;
-
-          // Show error message
-          showToast("Error updating profile. Please try again.", "danger");
-          console.error("Error:", error);
-        });
-    });
-
-    // Password Form Submission
-    const passwordForm = document.getElementById("passwordForm");
-
-    passwordForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-
-      // Validate passwords match
-      const newPassword = document.getElementById("new_password").value;
-      const confirmPassword = document.getElementById("confirm_password").value;
-
-      if (newPassword !== confirmPassword) {
-        showToast("Passwords do not match", "danger");
-        return;
-      }
-
-      // Show loading state
-      const submitButton = this.querySelector('button[type="submit"]');
-      const originalText = submitButton.innerHTML;
-      submitButton.innerHTML =
-        '<i class="fas fa-spinner fa-spin"></i> Updating...';
-      submitButton.disabled = true;
-
-      // Get form data
-      const formData = new FormData(this);
-
-      // Send form data using fetch
-      fetch(this.action, {
-        method: "POST",
-        body: formData,
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          // Reset button state and form
-          submitButton.innerHTML = originalText;
-          submitButton.disabled = false;
-          this.reset();
-
-          // Show success message
-          showToast("Password updated successfully!", "success");
-        })
-        .catch((error) => {
-          // Reset button state
-          submitButton.innerHTML = originalText;
-          submitButton.disabled = false;
-
-          // Show error message
-          showToast("Error updating password. Please try again.", "danger");
-          console.error("Error:", error);
-        });
-    });
-
-    // Add animation to profile stats
-    const profileStats = document.querySelectorAll(".profile-stat");
-    profileStats.forEach((stat, index) => {
-      stat.style.animationDelay = `${index * 0.1}s`;
-      stat.classList.add("fade-in");
-    });
-
-    // Add fade-in animation
-    const style = document.createElement("style");
-    style.textContent = `
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      .fade-in {
-        animation: fadeIn 0.5s ease forwards;
-        opacity: 0;
-      }
-    `;
-    document.head.appendChild(style);
   });
 </script>
 {% endblock %}
