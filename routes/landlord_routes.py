@@ -5,7 +5,7 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from extensions import db, csrf
-from models.models import User, House, Booking, Payment, MaintenanceRequest, ServiceProvider
+from models.models import Message, User, House, Booking, Payment, MaintenanceRequest, ServiceProvider
 import cloudinary.uploader
 import json
 
@@ -336,6 +336,7 @@ def settings():
 
 
 # ---------------- Messages ----------------
+
 @landlord_bp.route("/messages")
 @login_required
 def messages():
@@ -343,8 +344,13 @@ def messages():
         flash("Access denied.", "danger")
         return redirect(url_for("main.index"))
 
-    # TODO: Load landlord messages
-    return render_template("landlord/messages.html", stats={})
+    # Fetch messages where landlord is involved
+    messages = Message.query.filter(
+        (Message.receiver_id == current_user.id) |
+        (Message.sender_id == current_user.id)
+    ).order_by(Message.timestamp.desc()).all()
+
+    return render_template("landlord/messages.html", messages=messages)
 
 
 # ---------------- Profile ----------------
