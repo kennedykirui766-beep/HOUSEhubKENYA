@@ -150,6 +150,12 @@ def create_app():
             logger.error(f"Error fetching houses: {str(e)}")
             flash("Error loading houses. Please try again.", "danger")
             return render_template("index.html", houses=[])
+        
+    from flask_wtf.csrf import generate_csrf
+
+    @app.context_processor
+    def inject_csrf_token():
+        return dict(csrf_token=generate_csrf())
 
     @app.route("/subscribe", methods=["POST"])
     def subscribe():
