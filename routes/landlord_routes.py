@@ -379,3 +379,42 @@ def profile():
         return redirect(url_for("landlord.profile"))
 
     return render_template("landlord/profile.html", stats={})
+
+
+@landlord_bp.route("/messages/compose", methods=["GET", "POST"])
+@login_required
+def compose_message():
+    try:
+        if request.method == "POST":
+            recipient_id = request.form.get("recipient_id")
+            subject = request.form.get("subject")
+            body = request.form.get("body")
+
+            # Validation
+            if not recipient_id or not subject or not body:
+                flash("All fields are required.", "danger")
+                return redirect(url_for("landlord.compose_message"))
+
+            # Create message
+            message = Message(
+                sender_id=current_user.id,
+                recipient_id=recipient_id,
+                subject=subject,
+                body=body,
+                timestamp=datetime.utcnow(),
+                is_read=False
+            )
+
+            db.session.add(message)
+            db.session.commit()
+
+            flash("Message sent successfully.", "success")
+            return redirect(url_for("landlord.messages"))
+
+        return render_template("compose_message.html")
+
+    except Exception as e:
+        db.session.rollback()
+        flash("Error sending message. Try again.", "danger")
+        print("Compose message error:", e)
+        return redirect(url_for("landlord.messages"))
