@@ -354,10 +354,10 @@ def messages():
 
 
 # ---------------- Profile ----------------
+
 @csrf.exempt
 @landlord_bp.route("/profile", methods=["GET", "POST"])
 @login_required
-  # 🔥 This disables CSRF for this route
 def profile():
     if current_user.role != "landlord":
         flash("Access denied.", "danger")
@@ -368,15 +368,21 @@ def profile():
         current_user.email = request.form.get("email")
         current_user.phone_number = request.form.get("phone_number")
 
+        # ✅ Upload to Cloudinary
         if "profile_picture" in request.files:
             picture = request.files["profile_picture"]
-            if picture:
-                filename = secure_filename(picture.filename)
-                filepath = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
-                picture.save(filepath)
-                current_user.profile_picture = filename
+
+            if picture and picture.filename != "":
+                result = cloudinary.uploader.upload(
+                    picture,
+                    folder="homehub/profile_pictures"
+                )
+
+                # Save Cloudinary URL in DB
+                current_user.profile_picture = result.get("secure_url")
 
         db.session.commit()
+
         flash("Profile updated successfully!", "success")
         return redirect(url_for("landlord.profile"))
 
