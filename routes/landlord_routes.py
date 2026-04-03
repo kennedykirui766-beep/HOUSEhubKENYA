@@ -420,3 +420,30 @@ def compose_message():
         flash("Error sending message. Try again.", "danger")
         print("Compose message error:", e)
         return redirect(url_for("landlord.messages"))
+    
+    
+@landlord_bp.route('/send_message/<int:tenant_id>', methods=['GET', 'POST'])
+@login_required
+def send_message(tenant_id):
+    tenant = User.query.get_or_404(tenant_id)
+
+    if request.method == 'POST':
+        content = request.form.get('content')
+
+        if not content:
+            flash("Message cannot be empty.", "danger")
+            return redirect(url_for('landlord.send_message', tenant_id=tenant_id))
+
+        message = Message(
+            sender_id=current_user.id,
+            receiver_id=tenant.id,
+            content=content
+        )
+
+        db.session.add(message)
+        db.session.commit()
+
+        flash("Message sent!", "success")
+        return redirect(url_for('landlord.messages'))
+
+    return render_template('landlord/send_message.html', tenant=tenant)
