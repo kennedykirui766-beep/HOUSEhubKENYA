@@ -21,6 +21,25 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(20), nullable=False, default='tenant')
     
+    # -------------------------
+    # 🏠 BUSINESS INFO (OPTIONAL)
+    # -------------------------
+    business_name = db.Column(db.String(255), nullable=True)
+    bio = db.Column(db.Text, nullable=True)
+    address = db.Column(db.String(255), nullable=True)
+
+    # -------------------------
+    # 🔔 PREFERENCES (OPTIONAL WITH DEFAULTS)
+    # -------------------------
+    email_notifications = db.Column(db.Boolean, nullable=True, default=True)
+    message_alerts = db.Column(db.Boolean, nullable=True, default=True)
+
+    # -------------------------
+    # 🔐 2FA OPTIONS (OPTIONAL)
+    # -------------------------
+    sms_2fa_enabled = db.Column(db.Boolean, nullable=True, default=False)
+    email_2fa_enabled = db.Column(db.Boolean, nullable=True, default=False)
+    
     # Legacy 2FA (TOTP/QR based)
     two_factor_enabled = db.Column(db.Boolean, default=False)
     two_factor_secret = db.Column(db.String(32), nullable=True)
