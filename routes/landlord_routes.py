@@ -521,3 +521,18 @@ def send_message(tenant_id):
         return redirect(url_for('landlord.messages'))
 
     return render_template('landlord/send_message.html', tenant=tenant)
+
+@landlord_bp.route("/delete_image/<image_name>", methods=["POST"])
+@login_required
+def delete_image(image_name):
+    import os
+
+    image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], image_name)
+
+    if os.path.exists(image_path):
+        os.remove(image_path)
+        flash("Image deleted successfully", "success")
+    else:
+        flash("Image not found", "danger")
+
+    return redirect(request.referrer or url_for('landlord.dashboard'))
