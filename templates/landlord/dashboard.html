@@ -1187,7 +1187,7 @@
             <div class="dash-list-info">
               <h4 class="dash-list-title">{{ user.name }}</h4>
               <p class="dash-list-subtitle">
-                <i class="fas fa-map-marker-alt"></i> {{ tenant.property.address if tenant.property else 'No property assigned' }}
+                <i class="fas fa-map-marker-alt"></i> {{ house.location if house else 'No property assigned' }}
               </p>
             </div>
             <a href="{{ url_for('landlord.send_message', tenant_id=user.id) }}" class="btn-dash-primary">
