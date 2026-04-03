@@ -1181,7 +1181,7 @@
     </div>
     <div class="dash-card-body">
       {% if tenants %}
-        {% for tenant in tenants[:3] %}
+        {% for user, booking, house in tenants[:3] %}
         <div class="dash-list-item">
           <div class="dash-list-top" style="align-items: center;">
             <div class="dash-list-info">
@@ -1190,7 +1190,7 @@
                 <i class="fas fa-map-marker-alt"></i> {{ tenant.property.address if tenant.property else 'No property assigned' }}
               </p>
             </div>
-            <a href="{{ url_for('landlord.send_message', tenant_id=tenant.id) }}" class="btn-dash-primary">
+            <a href="{{ url_for('landlord.send_message', tenant_id=user.id) }}" class="btn-dash-primary">
               <i class="fas fa-comment"></i> Message
             </a>
           </div>
