@@ -323,11 +323,11 @@ def messages():
         return redirect(url_for("auth.login"))
 
     try:
-        # ✅ Get messages where user is sender OR recipient
+        # ✅ Use receiver_id (NOT recipient_id)
         tenant_messages = Message.query.filter(
             or_(
                 Message.sender_id == current_user.id,
-                Message.recipient_id == current_user.id
+                Message.receiver_id == current_user.id
             )
         ).order_by(Message.timestamp.desc()).all()
 
