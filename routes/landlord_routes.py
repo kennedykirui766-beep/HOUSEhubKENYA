@@ -321,7 +321,7 @@ def delete_property(property_id):
 
 
 # ---------------- Settings ----------------
-
+@csrf.exempt
 @landlord_bp.route("/settings", methods=["GET", "POST"])
 @login_required
 def settings():
