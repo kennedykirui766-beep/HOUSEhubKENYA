@@ -358,7 +358,7 @@ def edit_property(property_id):
     house.amenities = house.amenities.split(",") if house.amenities else []
     house.accessibility_features = house.accessibility_features.split(",") if house.accessibility_features else []
 
-    house.image_list = json.loads(house.image_urls) if house.image_urls else []
+    house.image_urls = json.dumps(uploaded_urls)
 
     house.availability_date_str = (
         house.availability_date.strftime("%Y-%m-%d")
