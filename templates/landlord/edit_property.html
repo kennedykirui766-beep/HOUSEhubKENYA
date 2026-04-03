@@ -2121,7 +2121,12 @@ document.addEventListener('DOMContentLoaded', () => {
         credentials: 'include'
       });
 
-      const result = await response.json();
+      let result = {};
+        try {
+        result = await response.json();
+        } catch (e) {
+        result = { message: "Server returned non-JSON response." };
+        }
 
       if (response.ok) {
         showFeedback(result.message || 'Property updated successfully!', 'success');
