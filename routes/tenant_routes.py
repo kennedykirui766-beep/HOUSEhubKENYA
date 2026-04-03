@@ -340,17 +340,31 @@ def messages():
         return redirect(url_for("tenant.dashboard"))
 
 
-@tenant_bp.route('/compose_message/<int:landlord_id>', methods=['GET', 'POST'])
+@tenant_bp.route('/compose_message', methods=['GET', 'POST'])
 @login_required
-def compose_message(landlord_id):
-    landlord = User.query.get_or_404(landlord_id)
+def compose_message():
+    # 🔍 Find active booking for tenant
+    booking = Booking.query.filter_by(
+        tenant_id=current_user.id,
+        status='active'
+    ).first()
+
+    if not booking:
+        flash("You do not have an active booking.", "danger")
+        return redirect(url_for('tenant.dashboard'))
+
+    # 🏠 Get property
+    property = booking.property
+
+    # 👨‍💼 Get landlord from property
+    landlord = User.query.get(property.landlord_id)
 
     if request.method == 'POST':
         content = request.form.get('content')
 
         if not content:
             flash("Message cannot be empty.", "danger")
-            return redirect(url_for('tenant.compose_message', landlord_id=landlord_id))
+            return redirect(url_for('tenant.compose_message'))
 
         new_message = Message(
             sender_id=current_user.id,
@@ -362,7 +376,7 @@ def compose_message(landlord_id):
         db.session.add(new_message)
         db.session.commit()
 
-        flash("Message sent successfully!", "success")
+        flash("Message sent to your landlord!", "success")
         return redirect(url_for('tenant.messages'))
 
     return render_template(
