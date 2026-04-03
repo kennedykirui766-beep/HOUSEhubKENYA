@@ -326,12 +326,12 @@ def edit_property(property_id):
         house.pet_restrictions = request.form.get("pet_restrictions")
         house.smoking_policy = request.form.get("smoking_policy")
 
-        # ---- IMAGES (Cloudinary) ----
+        # ---- IMAGES ----
         images = request.files.getlist("images")
 
-        if images and images[0].filename != "":
-            uploaded_urls = []
+        uploaded_urls = []  # ✅ always define it
 
+        if images and images[0].filename != "":
             for image in images:
                 try:
                     result = cloudinary.uploader.upload(
@@ -342,8 +342,9 @@ def edit_property(property_id):
                 except Exception as e:
                     print("Upload error:", e)
 
-            # Replace images
-            house.image_urls = ",".join(uploaded_urls)
+            # Replace only if new images exist
+            if uploaded_urls:
+                house.image_urls = json.dumps(uploaded_urls)
 
         db.session.commit()
 
@@ -351,24 +352,22 @@ def edit_property(property_id):
         return redirect(url_for("landlord.properties"))
 
     # -------------------
-    # 🔥 FORMAT DATA FOR FORM (LIKE ADD)
+    # 🔥 FORMAT DATA FOR FORM
     # -------------------
 
     house.utilities = house.utilities.split(",") if house.utilities else []
     house.amenities = house.amenities.split(",") if house.amenities else []
     house.accessibility_features = house.accessibility_features.split(",") if house.accessibility_features else []
 
-    house.image_urls = json.dumps(uploaded_urls)
+    # safe image loading
+    try:
+        house.image_list = json.loads(house.image_urls) if house.image_urls else []
+    except:
+        house.image_list = []
 
     house.availability_date_str = (
         house.availability_date.strftime("%Y-%m-%d")
         if house.availability_date else ""
-    )
-
-    return render_template(
-        "landlord/edit_property.html",
-        house=house,
-        stats={}
     )
 
     return render_template(
