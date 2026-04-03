@@ -283,16 +283,13 @@ def edit_property(property_id):
     ).first_or_404()
 
     if request.method == "POST":
-        # -------------------
-        # TEXT FIELDS
-        # -------------------
+        # ---- BASIC INFO ----
         house.title = request.form.get("title")
         house.description = request.form.get("description")
-        house.category = request.form.get("category")
         house.property_type = request.form.get("property_type")
+        house.category = house.property_type
 
-        # Location
-        house.location = request.form.get("location")
+        # ---- LOCATION ----
         house.address_line1 = request.form.get("address_line1")
         house.address_line2 = request.form.get("address_line2")
         house.city = request.form.get("city")
@@ -300,36 +297,36 @@ def edit_property(property_id):
         house.postal_code = request.form.get("postal_code")
         house.country = request.form.get("country")
 
-        # Pricing
+        house.location = f"{house.address_line1}, {house.city}, {house.country}"
+
+        # ---- PRICING ----
         house.rent_amount = float(request.form.get("rent_amount") or 0)
         house.security_deposit = float(request.form.get("security_deposit") or 0)
-
-        # Property details
-        house.bedrooms = int(request.form.get("bedrooms") or 0)
-        house.bathrooms = float(request.form.get("bathrooms") or 0)
-        house.size = request.form.get("size")
         house.lease_term = request.form.get("lease_term")
 
-        # Availability
         availability_date = request.form.get("availability_date")
         if availability_date:
             house.availability_date = datetime.strptime(availability_date, "%Y-%m-%d")
 
-        house.available = True if request.form.get("available") == "on" else False
+        # ---- DETAILS ----
+        house.bedrooms = int(request.form.get("bedrooms") or 0)
+        house.bathrooms = float(request.form.get("bathrooms") or 0)
+        house.size = request.form.get("square_footage")
 
-        # Features
-        house.utilities = request.form.get("utilities")
-        house.pets_allowed = request.form.get("pets_allowed")
-        house.pet_restrictions = request.form.get("pet_restrictions")
+        # ---- FEATURES ----
         house.parking_availability = request.form.get("parking_availability")
         house.furnished_status = request.form.get("furnished_status")
-        house.amenities = request.form.get("amenities")
-        house.smoking_policy = request.form.get("smoking_policy")
-        house.accessibility_features = request.form.get("accessibility_features")
 
-        # -------------------
-        # 🖼️ IMAGE UPLOAD (CLOUDINARY)
-        # -------------------
+        house.utilities = ",".join(request.form.getlist("utilities"))
+        house.amenities = ",".join(request.form.getlist("amenities"))
+        house.accessibility_features = ",".join(request.form.getlist("accessibility_features"))
+
+        # ---- POLICIES ----
+        house.pets_allowed = request.form.get("pets_allowed")
+        house.pet_restrictions = request.form.get("pet_restrictions")
+        house.smoking_policy = request.form.get("smoking_policy")
+
+        # ---- IMAGES (Cloudinary) ----
         images = request.files.getlist("images")
 
         if images and images[0].filename != "":
@@ -337,23 +334,42 @@ def edit_property(property_id):
 
             for image in images:
                 try:
-                    result = cloudinary.uploader.upload(image)
+                    result = cloudinary.uploader.upload(
+                        image,
+                        folder="homehub/properties"
+                    )
                     uploaded_urls.append(result.get("secure_url"))
                 except Exception as e:
-                    print("Cloudinary upload error:", e)
+                    print("Upload error:", e)
 
-            # 👉 OPTION 1: REPLACE images
+            # Replace images
             house.image_urls = ",".join(uploaded_urls)
 
-            # 👉 OPTION 2 (better): APPEND images
-            # existing = house.image_urls.split(",") if house.image_urls else []
-            # house.image_urls = ",".join(existing + uploaded_urls)
-
-        # -------------------
         db.session.commit()
 
-        flash("✅ Property + images updated successfully!", "success")
+        flash("✅ Property updated successfully!", "success")
         return redirect(url_for("landlord.properties"))
+
+    # -------------------
+    # 🔥 FORMAT DATA FOR FORM (LIKE ADD)
+    # -------------------
+
+    house.utilities = house.utilities.split(",") if house.utilities else []
+    house.amenities = house.amenities.split(",") if house.amenities else []
+    house.accessibility_features = house.accessibility_features.split(",") if house.accessibility_features else []
+
+    house.image_list = json.loads(house.image_urls) if house.image_urls else []
+
+    house.availability_date_str = (
+        house.availability_date.strftime("%Y-%m-%d")
+        if house.availability_date else ""
+    )
+
+    return render_template(
+        "landlord/edit_property.html",
+        house=house,
+        stats={}
+    )
 
     return render_template(
         "landlord/edit_property.html",

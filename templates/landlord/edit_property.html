@@ -4,7 +4,7 @@
 
 {% block styles %}
 <style>
-  /* ========== ADD PROPERTY PAGE STYLES (SHARED) ========== */
+  /* ========== EDIT PROPERTY PAGE STYLES (SHARED) ========== */
   .add-property-page {
     padding: 2rem 0 4rem;
     background-color: var(--body-bg);
@@ -22,7 +22,6 @@
     font-size: 0.95rem;
   }
 
-  /* Header Actions for Edit Page */
   .header-actions {
     display: flex;
     gap: 0.75rem;
@@ -389,6 +388,10 @@
     transition: var(--transition);
   }
 
+  .ap-thumb.is-new {
+    border-color: #28a745; /* Green border for new uploads */
+  }
+
   .ap-thumb:hover {
     border-color: var(--primary-color);
   }
@@ -445,6 +448,39 @@
 
   .ap-upload-error.visible {
     display: block;
+  }
+
+  /* ---------- Current Images Section (Read Only) ---------- */
+  .current-images-section {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--border-color);
+  }
+  .current-images-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+  }
+  .current-images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 0.5rem;
+  }
+  .current-thumb {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    opacity: 0.7;
+  }
+  .current-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   /* ---------- Spec Grid ---------- */
@@ -505,27 +541,6 @@
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
-  }
-
-  .btn-ap-draft {
-    background-color: var(--body-bg);
-    border: 2px solid var(--border-color);
-    color: var(--text-primary);
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--radius-md);
-    font-weight: 500;
-    font-size: 0.95rem;
-    transition: var(--transition);
-    cursor: pointer;
-    font-family: inherit;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .btn-ap-draft:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
   }
 
   .btn-ap-cancel {
@@ -1188,7 +1203,6 @@
       flex-direction: column;
     }
     .ap-actions .btn-ap-submit,
-    .ap-actions .btn-ap-draft,
     .ap-actions .btn-ap-cancel,
     .ap-actions .btn-delete-prop {
       width: 100%;
@@ -1300,7 +1314,7 @@
     <div class="row g-4">
       <!-- ===== MAIN FORM COLUMN ===== -->
       <div class="col-lg-8">
-        <form id="addPropertyForm" enctype="multipart/form-data" method="POST" action="{{ url_for('landlord.edit_property', property_id=house.id) }}" novalidate>
+        <form id="editPropertyForm" enctype="multipart/form-data" method="POST" action="{{ url_for('landlord.edit_property', property_id=house.id) }}" novalidate>
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
           <!-- SECTION 1: Property Details -->
@@ -1425,7 +1439,7 @@
               <div class="col-sm-6">
                 <div class="ap-field">
                   <label for="availabilityDate">Availability Date <span style="color:#dc3545">*</span></label>
-                  <input type="date" class="ap-input" id="availabilityDate" name="availability_date" required value="{{ house.availability_date.strftime('%Y-%m-%d') if house.availability_date else '' }}" />
+                  <input type="date" class="ap-input" id="availabilityDate" name="availability_date" required value="{{ house.availability_date_str }}" />
                   <div class="invalid-feedback">Please select an availability date.</div>
                 </div>
               </div>
@@ -1438,23 +1452,43 @@
               <div class="ap-section-icon"><i class="fas fa-camera"></i></div>
               <div>
                 <h3 class="ap-section-title">Property Images</h3>
-                <p class="ap-section-subtitle">Upload new photos or manage existing ones</p>
+                <p class="ap-section-subtitle">Upload new photos to replace the current gallery</p>
               </div>
             </div>
+
+            <!-- Upload Input -->
             <div class="ap-upload-area" id="uploadArea">
               <i class="fas fa-cloud-upload-alt"></i>
               <p>Drag &amp; drop new images here or click to browse</p>
               <small>JPG or PNG, max 5MB each &middot; Up to 10 images</small>
               <input type="file" id="propertyImages" name="images" accept="image/jpeg,image/png" multiple />
             </div>
+            
             <div class="ap-upload-error" id="uploadError"></div>
             <div class="ap-upload-counter" id="uploadCounter">
               <span><span class="count-num" id="imageCountNum">0</span> new images selected</span>
-              <span style="font-size:0.72rem;opacity:0.7;">Existing images will remain unless replaced</span>
+              <span style="font-size:0.72rem;opacity:0.7;">Note: New uploads will replace all existing images.</span>
             </div>
-            <div class="ap-image-previews" id="imagePreview">
-               <!-- Existing images will be injected here by JS for preview -->
+
+            <!-- New Uploads Preview -->
+            <div class="ap-image-previews" id="imagePreview"></div>
+
+            <!-- Existing Images Display (Read Only) -->
+            {% if house.image_list and house.image_list|length > 0 %}
+            <div class="current-images-section" id="currentImagesSection">
+              <div class="current-images-title">
+                <span>Current Images ({{ house.image_list|length }})</span>
+                <span style="color:var(--text-muted);font-weight:400;font-size:0.75rem;">Will be replaced on update</span>
+              </div>
+              <div class="current-images-grid">
+                {% for image in house.image_list %}
+                  <div class="current-thumb">
+                    <img src="{{ image }}" alt="Current Property Image">
+                  </div>
+                {% endfor %}
+              </div>
             </div>
+            {% endif %}
           </div>
 
           <!-- SECTION 5: Specifications -->
@@ -1516,22 +1550,22 @@
             <div class="ap-field">
               <label>Utilities Included</label>
               <div class="ap-check-group">
-                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Water" {% if 'Water' in (house.utilities or '') %}checked{% endif %} /> <i class="fas fa-tint me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Water</label>
-                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Electricity" {% if 'Electricity' in (house.utilities or '') %}checked{% endif %} /> <i class="fas fa-bolt me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Electricity</label>
-                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Gas" {% if 'Gas' in (house.utilities or '') %}checked{% endif %} /> <i class="fas fa-fire me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Gas</label>
-                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Internet" {% if 'Internet' in (house.utilities or '') %}checked{% endif %} /> <i class="fas fa-wifi me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Internet</label>
+                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Water" {% if 'Water' in (house.utilities or []) %}checked{% endif %} /> <i class="fas fa-tint me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Water</label>
+                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Electricity" {% if 'Electricity' in (house.utilities or []) %}checked{% endif %} /> <i class="fas fa-bolt me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Electricity</label>
+                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Gas" {% if 'Gas' in (house.utilities or []) %}checked{% endif %} /> <i class="fas fa-fire me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Gas</label>
+                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Internet" {% if 'Internet' in (house.utilities or []) %}checked{% endif %} /> <i class="fas fa-wifi me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Internet</label>
               </div>
             </div>
 
             <div class="ap-field">
               <label>Amenities</label>
               <div class="ap-check-group">
-                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Air Conditioning" {% if 'Air Conditioning' in (house.amenities or '') %}checked{% endif %} /> <i class="fas fa-snowflake me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>AC</label>
-                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Washer/Dryer" {% if 'Washer' in (house.amenities or '') %}checked{% endif %} /> <i class="fas fa-tshirt me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Washer/Dryer</label>
-                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Balcony" {% if 'Balcony' in (house.amenities or '') %}checked{% endif %} /> <i class="fas fa-door-open me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Balcony</label>
-                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Gym" {% if 'Gym' in (house.amenities or '') %}checked{% endif %} /> <i class="fas fa-dumbbell me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Gym</label>
-                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Swimming Pool" {% if 'Pool' in (house.amenities or '') %}checked{% endif %} /> <i class="fas fa-swimming-pool me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Pool</label>
-                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Garden" {% if 'Garden' in (house.amenities or '') %}checked{% endif %} /> <i class="fas fa-leaf me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Garden</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Air Conditioning" {% if 'Air Conditioning' in (house.amenities or []) %}checked{% endif %} /> <i class="fas fa-snowflake me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>AC</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Washer/Dryer" {% if 'Washer' in (house.amenities or []) %}checked{% endif %} /> <i class="fas fa-tshirt me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Washer/Dryer</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Balcony" {% if 'Balcony' in (house.amenities or []) %}checked{% endif %} /> <i class="fas fa-door-open me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Balcony</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Gym" {% if 'Gym' in (house.amenities or []) %}checked{% endif %} /> <i class="fas fa-dumbbell me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Gym</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Swimming Pool" {% if 'Pool' in (house.amenities or []) %}checked{% endif %} /> <i class="fas fa-swimming-pool me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Pool</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Garden" {% if 'Garden' in (house.amenities or []) %}checked{% endif %} /> <i class="fas fa-leaf me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Garden</label>
               </div>
             </div>
           </div>
@@ -1575,69 +1609,47 @@
             <div class="ap-field">
               <label>Accessibility Features</label>
               <div class="ap-check-group">
-                <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Wheelchair Access" {% if 'Wheelchair' in (house.accessibility_features or '') %}checked{% endif %} /> <i class="fas fa-wheelchair me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Wheelchair Access</label>
-                <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Elevator" {% if 'Elevator' in (house.accessibility_features or '') %}checked{% endif %} /> <i class="fas fa-arrows-alt-v me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Elevator</label>
-                <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Grab Bars" {% if 'Grab' in (house.accessibility_features or '') %}checked{% endif %} /> <i class="fas fa-hand-paper me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Grab Bars</label>
+                <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Wheelchair Access" {% if 'Wheelchair' in (house.accessibility_features or []) %}checked{% endif %} /> <i class="fas fa-wheelchair me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Wheelchair Access</label>
+                <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Elevator" {% if 'Elevator' in (house.accessibility_features or []) %}checked{% endif %} /> <i class="fas fa-arrows-alt-v me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Elevator</label>
+                <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Grab Bars" {% if 'Grab' in (house.accessibility_features or []) %}checked{% endif %} /> <i class="fas fa-hand-paper me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Grab Bars</label>
               </div>
-            </div>
-          </div>
-
-          <!-- 2FA field (hidden by default) -->
-          <div class="ap-section" id="twoFactorGroup" style="display: none;">
-            <div class="ap-section-header">
-              <div class="ap-section-icon"><i class="fas fa-shield-alt"></i></div>
-              <div>
-                <h3 class="ap-section-title">Verification</h3>
-                <p class="ap-section-subtitle">Two-factor authentication required</p>
-              </div>
-            </div>
-            <div class="ap-field">
-              <label for="two_factor_code">Enter 6-digit code</label>
-              <input type="text" class="ap-input" id="two_factor_code" name="two_factor_code" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" style="text-align:center;font-size:1.2rem;letter-spacing:0.3em;" />
             </div>
           </div>
 
           <!-- Submit Section -->
           <div id="section-submit">
-            <!-- Form Actions -->
             <div class="ap-actions">
               <button type="submit" class="btn-ap-submit" id="submitProperty">
                 <i class="fas fa-save"></i>
                 <span id="submitBtnText">Update Property</span>
                 <div class="ap-spinner" id="submitSpinner"></div>
               </button>
-              <!-- Removed Draft button for Edit context, keeping Cancel -->
               <a href="{{ url_for('landlord.properties') }}" class="btn-ap-cancel">
                 <i class="fas fa-times"></i>
                 Cancel
               </a>
             </div>
-
-            <div class="ap-feedback" id="addPropertyFeedback"></div>
+            <div class="ap-feedback" id="editPropertyFeedback"></div>
           </div>
         </form>
       </div>
 
       <!-- ===== SIDEBAR COLUMN ===== -->
       <div class="col-lg-4">
-
         <!-- Tips -->
         <aside class="ap-tips-card" aria-label="Listing tips">
           <h5><i class="fas fa-lightbulb"></i> Editing Tips</h5>
           <div class="ap-tips-body" id="tipsBody">
             <ul class="ap-tips-list">
-              <li><i class="fas fa-circle"></i>Update your photos frequently to keep the listing fresh.</li>
-              <li><i class="fas fa-circle"></i>Adjust pricing based on seasonal demand.</li>
-              <li><i class="fas fa-circle"></i>Reply to tenant inquiries quickly.</li>
-              <li><i class="fas fa-circle"></i>Keep amenities accurate to avoid disputes.</li>
+              <li><i class="fas fa-circle"></i>Uploading new images replaces the entire current gallery.</li>
+              <li><i class="fas fa-circle"></i>Ensure the first image is your best cover photo.</li>
+              <li><i class="fas fa-circle"></i>Keep your amenities list accurate.</li>
             </ul>
           </div>
-          <button type="button" class="ap-tips-toggle" id="toggleTips" aria-expanded="true">Hide Tips</button>
         </aside>
 
         <!-- Comprehensive Live Preview -->
         <div class="ap-preview-card" aria-label="Property preview">
-
           <!-- Image Gallery -->
           <div class="ap-preview-gallery" id="previewGallery">
             <i class="fas fa-image"></i>
@@ -1645,7 +1657,6 @@
           </div>
 
           <div class="ap-preview-body">
-
             <!-- Title & Type -->
             <div class="ap-pv-section">
               <div class="ap-pv-title-row">
@@ -1699,11 +1710,8 @@
                 <div class="ap-pv-policy-row"><i class="fas fa-wheelchair"></i> <span id="previewAccess">Accessibility: None</span></div>
               </div>
             </div>
-
           </div>
         </div>
-
-        <a href="{{ url_for('auth.support') }}" class="ap-help-link"><i class="fas fa-question-circle"></i> Need Help?</a>
       </div>
     </div>
   </div>
@@ -1724,13 +1732,13 @@
             <h3 class="modal-title">Delete Property?</h3>
         </div>
         <div class="modal-body">
-            <p>Are you sure you want to delete <strong>{{ house.title }}</strong>? This action cannot be undone and will permanently remove the property.</p>
+            <p>Are you sure you want to delete <strong>{{ house.title }}</strong>? This action cannot be undone.</p>
         </div>
         <div class="modal-footer">
             <button class="btn-modal btn-modal-cancel" onclick="closeDeleteModal()">Cancel</button>
             <form id="deleteForm" action="{{ url_for('landlord.delete_property', property_id=house.id) }}" method="POST">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="btn-modal btn-modal-confirm" id="btnConfirmDelete">
+                <button type="submit" class="btn-modal btn-modal-confirm">
                     <i class="fas fa-trash-alt"></i> Delete
                 </button>
             </form>
@@ -1742,26 +1750,22 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('addPropertyForm');
-  const feedback = document.getElementById('addPropertyFeedback');
+  const form = document.getElementById('editPropertyForm');
+  const feedback = document.getElementById('editPropertyFeedback');
   const submitButton = document.getElementById('submitProperty');
   const submitBtnText = document.getElementById('submitBtnText');
   const submitSpinner = document.getElementById('submitSpinner');
-  const toggleTipsButton = document.getElementById('toggleTips');
-  const tipsBody = document.getElementById('tipsBody');
 
   const MAX_IMAGES = 10;
 
   // =============================================
-  // Global file store
-  // In Edit Mode, we also track existing images for the preview
+  // Global file store for NEW uploads
   // =============================================
-  let allFiles = [];
-  
+  let newFiles = [];
+
   // Parse existing images from Jinja
-  // Assuming house.image_urls is a comma separated string or list
-  const existingImageUrls = {{ house.image_urls.split(',') if house.image_urls else [] | tojson }};
-  let existingImages = Array.isArray(existingImageUrls) ? existingImageUrls : [];
+  // house.image_list comes from the route
+  const existingImageUrls = {{ house.image_list | tojson }};
 
   // References
   const el = (id) => document.getElementById(id);
@@ -1805,7 +1809,6 @@ document.addEventListener('DOMContentLoaded', () => {
       item.classList.toggle('selected', inp.checked);
       updatePreview();
     });
-    // Initialize visual state
     if (inp.checked) inp.closest('.ap-check-item').classList.add('selected');
   });
 
@@ -1824,6 +1827,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const imagePreview = el('imagePreview');
   const uploadError = el('uploadError');
   const imageCountNum = el('imageCountNum');
+  const currentImagesSection = el('currentImagesSection');
 
   // Drag & drop visual feedback
   ['dragover', 'dragenter'].forEach(evt => {
@@ -1833,24 +1837,31 @@ document.addEventListener('DOMContentLoaded', () => {
     uploadArea.addEventListener(evt, (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); });
   });
 
-  // Drag & drop: merge new files into allFiles
+  // Drag & drop: merge new files into newFiles
   uploadArea.addEventListener('drop', (e) => {
-    const newFiles = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-    allFiles = [...allFiles, ...newFiles].slice(0, MAX_IMAGES);
-    updateFileInput();
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+    addNewFiles(files);
   });
 
-  // File input change: merge new selections into allFiles
+  // File input change: merge new selections into newFiles
   inputs.images.addEventListener('change', (e) => {
-    const newFiles = Array.from(e.target.files);
-    allFiles = [...allFiles, ...newFiles].slice(0, MAX_IMAGES);
-    updateFileInput();
+    const files = Array.from(e.target.files);
+    addNewFiles(files);
   });
 
-  // Sync allFiles back into the native file input, then render
-  function updateFileInput() {
+  function addNewFiles(files) {
+    // In this edit mode, we might want to replace the queue or append?
+    // Given the backend replaces ALL images, let's just replace the queue for clarity.
+    // Or append up to 10.
+    // Let's append up to 10 total.
+    newFiles = [...newFiles, ...files].slice(0, MAX_IMAGES);
+    updateImageInput();
+  }
+
+  // Sync newFiles back into the native file input, then render
+  function updateImageInput() {
     const dt = new DataTransfer();
-    allFiles.forEach(file => dt.items.add(file));
+    newFiles.forEach(file => dt.items.add(file));
     inputs.images.files = dt.files;
     handleImages();
   }
@@ -1860,9 +1871,18 @@ document.addEventListener('DOMContentLoaded', () => {
     uploadError.classList.remove('visible');
     uploadError.textContent = '';
 
-    const count = allFiles.length;
+    const count = newFiles.length;
     imageCountNum.textContent = count;
     imageCountNum.className = 'count-num' + (count > 0 ? ' has-images' : '');
+
+    // Hide existing images section if new files are added, to avoid confusion
+    if (count > 0 && currentImagesSection) {
+      currentImagesSection.style.opacity = '0.4';
+      currentImagesSection.style.pointerEvents = 'none';
+    } else if (currentImagesSection) {
+      currentImagesSection.style.opacity = '1';
+      currentImagesSection.style.pointerEvents = 'auto';
+    }
 
     if (count > MAX_IMAGES) {
       uploadError.textContent = `Maximum ${MAX_IMAGES} images allowed. You have ${count}.`;
@@ -1870,7 +1890,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Validate each file
-    for (const file of allFiles) {
+    for (const file of newFiles) {
       if (!['image/jpeg', 'image/png'].includes(file.type)) {
         uploadError.textContent = `"${file.name}" is not a valid format. Use JPG or PNG.`;
         uploadError.classList.add('visible');
@@ -1883,22 +1903,24 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Render thumbnails from allFiles (New Uploads)
-    allFiles.forEach((file, idx) => {
+    // Render thumbnails from newFiles
+    newFiles.forEach((file, idx) => {
       const wrap = document.createElement('div');
-      wrap.className = 'ap-thumb';
+      wrap.className = 'ap-thumb is-new'; // New class for green border
       const img = document.createElement('img');
       img.src = URL.createObjectURL(file);
       const badge = document.createElement('div');
       badge.className = 'ap-thumb-badge';
-      badge.textContent = idx === 0 ? 'New' : `+${idx + 1}`;
+      badge.textContent = idx === 0 ? 'Cover' : `#${idx + 1}`;
+      badge.style.backgroundColor = '#28a745'; // Green badge for new
       const removeBtn = document.createElement('button');
       removeBtn.type = 'button';
       removeBtn.className = 'ap-thumb-remove';
       removeBtn.innerHTML = '<i class="fas fa-times"></i>';
       removeBtn.addEventListener('click', () => {
-        allFiles = allFiles.filter((_, i) => i !== idx);
-        updateFileInput();
+        newFiles = newFiles.filter((_, i) => i !== idx);
+        updateImageInput();
+        updatePreview(); // Update preview to revert to existing if list is empty
       });
       wrap.appendChild(img);
       wrap.appendChild(badge);
@@ -1950,35 +1972,40 @@ document.addEventListener('DOMContentLoaded', () => {
     el('previewBaths').textContent = inputs.bathrooms.value ? `${inputs.bathrooms.value} Bath${inputs.bathrooms.value > 1 ? 's' : ''}` : '0 Baths';
     el('previewSqft').textContent = inputs.squareFootage.value ? `${Number(inputs.squareFootage.value).toLocaleString()} sq ft` : '-- sq ft';
 
-    // Preview gallery
+    // Preview gallery logic
     const gallery = el('previewGallery');
     gallery.querySelectorAll('img').forEach(img => img.remove());
     const existingCountBadge = gallery.querySelector('.ap-preview-gallery-count');
     if (existingCountBadge) existingCountBadge.remove();
 
-    // Combine existing URLs + new Files for preview
+    // If user has selected NEW files, show ONLY those (backend replacement logic)
+    // If NO new files, show EXISTING images
     let displaySources = [];
-    
-    // Add existing URLs
-    existingImages.forEach(url => displaySources.push({ type: 'url', src: url }));
-    // Add new files
-    allFiles.forEach(file => displaySources.push({ type: 'file', src: URL.createObjectURL(file) }));
+    let displayCount = 0;
 
-    const totalImages = displaySources.length;
+    if (newFiles.length > 0) {
+      // Show new uploads
+      newFiles.forEach(file => displaySources.push({ type: 'file', src: URL.createObjectURL(file) }));
+      displayCount = newFiles.length;
+    } else {
+      // Show existing images
+      existingImageUrls.forEach(url => displaySources.push({ type: 'url', src: url }));
+      displayCount = existingImageUrls.length;
+    }
 
-    if (totalImages > 0) {
+    if (displayCount > 0) {
       gallery.classList.add('has-images');
-      const showCount = Math.min(totalImages, 4);
+      const showCount = Math.min(displayCount, 4);
       for (let i = 0; i < showCount; i++) {
         const img = document.createElement('img');
         img.className = 'ap-pv-gallery-img';
         img.src = displaySources[i].src;
         gallery.appendChild(img);
       }
-      if (totalImages > 1) {
+      if (displayCount > 1) {
         const countBadge = document.createElement('span');
         countBadge.className = 'ap-preview-gallery-count';
-        countBadge.textContent = `+${totalImages - 1} more`;
+        countBadge.textContent = `+${displayCount - 1} more`;
         gallery.appendChild(countBadge);
       }
     } else {
@@ -2037,13 +2064,6 @@ document.addEventListener('DOMContentLoaded', () => {
     inp.addEventListener('change', updatePreview);
   });
 
-  // ---- Toggle tips ----
-  toggleTipsButton.addEventListener('click', () => {
-    const isHidden = tipsBody.classList.toggle('collapsed');
-    toggleTipsButton.textContent = isHidden ? 'Show Tips' : 'Hide Tips';
-    toggleTipsButton.setAttribute('aria-expanded', !isHidden);
-  });
-
   // ---- Set min date to today ----
   const today = new Date().toISOString().split('T')[0];
   inputs.availabilityDate.setAttribute('min', today);
@@ -2078,17 +2098,18 @@ document.addEventListener('DOMContentLoaded', () => {
     submitButton.disabled = true;
     submitBtnText.textContent = 'Updating...';
     submitSpinner.style.display = 'block';
-    showFeedback('Updating property...', 'info');
+    showFeedback('Uploading images and updating property...', 'info');
 
     const formData = new FormData(form);
 
-    // Remove the default images entry and re-add from allFiles
+    // Remove the default images entry and re-add from newFiles
     formData.delete('images');
-    allFiles.forEach(file => formData.append('images', file));
-    
-    // Add existing images so backend knows to keep them if needed (optional depending on backend logic)
-    // Assuming backend handles retention if 'images' key is missing or if we send an 'existing_images' list.
-    // Here we just send new files. Standard Flask edit route usually appends.
+    newFiles.forEach(file => formData.append('images', file));
+
+    // Note: We do NOT send existing images because the backend logic:
+    // if images and images[0].filename != "": ... house.image_urls = ",".join(uploaded_urls)
+    // implies a full replacement if the key is present.
+    // If newFiles is empty, we don't append 'images' key, backend skips replacement, keeps old ones.
 
     const csrfToken = form.querySelector('input[name="csrf_token"]').value;
 
@@ -2104,14 +2125,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (response.ok) {
         showFeedback(result.message || 'Property updated successfully!', 'success');
-        // Optional: Redirect or refresh
         setTimeout(() => { window.location.href = "{{ url_for('landlord.properties') }}"; }, 1500);
       } else {
         showFeedback(result.message || 'Error updating property. Please try again.', 'danger');
+        submitButton.disabled = false;
+        submitBtnText.textContent = 'Update Property';
+        submitSpinner.style.display = 'none';
       }
     } catch (error) {
       showFeedback('Network error. Please check your connection and try again.', 'danger');
-    } finally {
       submitButton.disabled = false;
       submitBtnText.textContent = 'Update Property';
       submitSpinner.style.display = 'none';
@@ -2128,9 +2150,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial state
   updatePreview();
 });
-</script>
 
-<script>
 // --- Modal Logic ---
 function openDeleteModal() {
   document.getElementById('deleteModal').classList.add('active');
