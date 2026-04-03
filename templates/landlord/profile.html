@@ -302,7 +302,7 @@
              This handles cases where the DB stores the Public ID.
              Transformations: 300x300, crop='thumb' (centers on face/content).
           -->
-          {% if current_user.profile_image %}
+          {% if current_user.profile_picture %}
             <img src="{{ current_user.profile_picture }}" 
                  alt="Profile" 
                  class="profile-avatar-img" 
