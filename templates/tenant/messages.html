@@ -303,7 +303,7 @@
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     width: 100%;
-    max-width: 500px; /* Wider for compose */
+    max-width: 500px; 
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     transform: translateY(20px);
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -378,7 +378,7 @@
     color: var(--text-primary);
   }
 
-  .modal-input, .modal-textarea {
+  .modal-input, .modal-select {
     width: 100%;
     padding: 0.6rem 0.85rem;
     border: 2px solid var(--border-color);
@@ -389,13 +389,13 @@
     transition: var(--transition);
     font-family: inherit;
   }
-  
-  .modal-input:focus, .modal-textarea:focus {
+
+  .modal-select:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px var(--primary-light);
   }
-
+  
   /* Buttons */
   .btn-modal {
     padding: 0.6rem 1.2rem;
@@ -613,7 +613,7 @@
   </div>
 </div>
 
-<!-- COMPOSE MESSAGE MODAL -->
+<!-- SELECT LANDLORD MODAL -->
 <div class="modal-overlay" id="composeModal">
     <div class="modal-box">
         <div class="modal-header">
@@ -627,18 +627,32 @@
         </div>
         <div class="modal-body">
             <div class="modal-form-group">
-                <label class="modal-form-label">Landlord Name / Email</label>
-                <input type="text" id="composeTo" class="modal-input" placeholder="e.g., John Kamau" required />
+                <label class="modal-form-label">Select Landlord</label>
+                <!-- 
+                   DEVELOPER NOTE: 
+                   Populate this select box with your list of landlords.
+                   Example:
+                   <select id="landlordSelect" class="modal-select">
+                     {% for landlord in landlords %}
+                     <option value="{{ landlord.id }}">{{ landlord.name }}</option>
+                     {% endfor %}
+                   </select>
+                -->
+                <select id="landlordSelect" class="modal-select">
+                    <option value="" disabled selected>-- Choose a Landlord --</option>
+                    <!-- Placeholder options for demonstration -->
+                    <option value="1">John Doe (Landlord)</option>
+                    <option value="2">Jane Smith (Landlord)</option>
+                </select>
             </div>
-            <div class="modal-form-group">
-                <label class="modal-form-label">Message</label>
-                <textarea id="composeContent" class="modal-textarea" rows="4" placeholder="Type your message here..." required></textarea>
-            </div>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">
+                Clicking continue will take you to the message page for the selected landlord.
+            </p>
         </div>
         <div class="modal-footer">
             <button class="btn-modal btn-modal-cancel" onclick="closeComposeModal()">Cancel</button>
-            <button class="btn-modal btn-modal-primary" id="btnSendMessage">
-                <i class="fas fa-paper-plane"></i> Send Message
+            <button class="btn-modal btn-modal-primary" id="btnContinueToChat">
+                <i class="fas fa-arrow-right"></i> Continue
             </button>
         </div>
     </div>
@@ -705,8 +719,6 @@
         document.querySelectorAll('.msg-card.unread').forEach(card => {
           card.classList.remove('unread');
         });
-        // Show flash message (if you have a function for it, otherwise alert)
-        // Assuming standard flash message handling exists or alert
         alert('All messages marked as read.');
       } else {
         alert('Error: ' + (data.error || 'Could not mark messages as read'));
@@ -723,64 +735,36 @@
   }
 
   // ===========================
-  // 2. COMPOSE MESSAGE LOGIC
+  // 2. COMPOSE / SELECT LANDLORD LOGIC
   // ===========================
   const composeModal = document.getElementById('composeModal');
-  const btnSendMessage = document.getElementById('btnSendMessage');
+  const btnContinueToChat = document.getElementById('btnContinueToChat');
+  const landlordSelect = document.getElementById('landlordSelect');
 
   function openComposeModal() {
     composeModal.classList.add('active');
-    document.getElementById('composeTo').focus();
+    landlordSelect.focus();
   }
 
   function closeComposeModal() {
     composeModal.classList.remove('active');
-    document.getElementById('composeTo').value = '';
-    document.getElementById('composeContent').value = '';
+    landlordSelect.selectedIndex = 0; // Reset to default
   }
 
-  btnSendMessage.addEventListener('click', function() {
-    const toUser = document.getElementById('composeTo').value.trim();
-    const content = document.getElementById('composeContent').value.trim();
+  btnContinueToChat.addEventListener('click', function() {
+    const selectedId = landlordSelect.value;
 
-    if(!toUser || !content) {
-      alert('Please enter both a recipient and a message.');
+    if(!selectedId || selectedId === "") {
+      alert("Please select a landlord to message.");
       return;
     }
 
-    const originalText = btnSendMessage.innerHTML;
-    btnSendMessage.disabled = true;
-    btnSendMessage.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-
-    fetch('/tenant/send_message', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': getCSRF()
-      },
-      body: JSON.stringify({
-        to_user: toUser,
-        content: content
-      })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if(data.success) {
-        closeComposeModal();
-        alert('Message sent successfully!');
-        window.location.reload(); // Reload to show the new conversation
-      } else {
-        alert('Error: ' + (data.error || 'Failed to send message'));
-        btnSendMessage.disabled = false;
-        btnSendMessage.innerHTML = originalText;
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      alert('An error occurred.');
-      btnSendMessage.disabled = false;
-      btnSendMessage.innerHTML = originalText;
-    });
+    // Navigate to the Compose Page Route with the specific ID
+    // We use a URL trick to ensure the path is correctly formed via Flask
+    const baseUrl = "{{ url_for('tenant.compose_message', landlord_id=999999) }}";
+    const targetUrl = baseUrl.replace('999999', selectedId);
+    
+    window.location.href = targetUrl;
   });
 
   // ===========================
@@ -888,11 +872,11 @@
   // 5. VIEW CONVERSATION
   // ===========================
   function viewConversation(userId) {
-    // In a full app, this would navigate to a detailed chat view.
-    // Since this is a list view, we just highlight the card.
-    var card = event.currentTarget;
-    document.querySelectorAll('.msg-card').forEach(c => c.style.border = '1px solid var(--border-color)');
-    card.style.border = '1px solid var(--primary-color)';
+    // Navigate to the compose page for the specific user if you want to view the full thread
+    // This uses the same route but ensures the user is on the specific chat page.
+    const baseUrl = "{{ url_for('tenant.compose_message', landlord_id=999999) }}";
+    const targetUrl = baseUrl.replace('999999', userId);
+    window.location.href = targetUrl;
   }
 </script>
 {% endblock %}
