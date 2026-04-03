@@ -3,6 +3,7 @@ import base64
 from datetime import datetime
 from io import BytesIO
 import json
+from operator import or_
 import os
 from models.models import Document
 from flask import Blueprint, current_app, flash, jsonify, render_template, request, redirect, url_for
@@ -313,6 +314,7 @@ def all_bookings():
     bookings = Booking.query.filter_by(tenant_id=current_user.id).all()
     return render_template('tenant_bookings.html', bookings=bookings)
 
+
 @tenant_bp.route('/messages')
 @login_required
 def messages():
@@ -320,10 +322,22 @@ def messages():
         flash("Access restricted to tenants.", "danger")
         return redirect(url_for("auth.login"))
 
-    # Example: fetch messages from DB
-    tenant_messages = Message.query.filter_by(tenant_id=current_user.id).all()
+    try:
+        # ✅ Get messages where user is sender OR recipient
+        tenant_messages = Message.query.filter(
+            or_(
+                Message.sender_id == current_user.id,
+                Message.recipient_id == current_user.id
+            )
+        ).order_by(Message.timestamp.desc()).all()
 
-    return render_template("tenant/messages.html", messages=tenant_messages)
+        return render_template("tenant/messages.html", messages=tenant_messages)
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error loading messages:", e)
+        flash("Unable to load messages.", "danger")
+        return redirect(url_for("tenant.dashboard"))
 
 
 
