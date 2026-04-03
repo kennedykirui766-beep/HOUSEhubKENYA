@@ -1,37 +1,559 @@
 {% extends "base.html" %}
 
-{% block title %}Edit Property - HomeHub{% endblock %}
+{% block title %}HomeHub | Edit Property{% endblock %}
 
 {% block styles %}
 <style>
-  /* ========== EDIT PROPERTY PAGE ========== */
-  .edit-page {
+  /* ========== ADD PROPERTY PAGE STYLES (SHARED) ========== */
+  .add-property-page {
     padding: 2rem 0 4rem;
     background-color: var(--body-bg);
-    min-height: 100vh;
   }
 
-  .edit-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-
-  .edit-title {
-    font-size: 1.75rem;
-    font-weight: 700;
+  .ap-header h1 {
     color: var(--text-primary);
+    font-weight: 700;
+    font-size: 1.75rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .ap-header p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+
+  /* Header Actions for Edit Page */
+  .header-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  /* ========== STICKY STEPS BAR ========== */
+  .ap-steps-bar {
+    position: sticky;
+    top: var(--navbar-height, 70px);
+    z-index: 50;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 0.65rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ap-step {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.4rem 0.65rem;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+
+  .ap-step:hover {
+    background: var(--primary-light);
+  }
+
+  .ap-step-indicator {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border: 2px solid var(--border-color);
+    color: var(--text-muted);
+    background: var(--body-bg);
+    transition: var(--transition);
+    flex-shrink: 0;
+  }
+
+  .ap-step-indicator i {
+    font-size: 0.65rem;
+  }
+
+  .ap-step.completed .ap-step-indicator {
+    background: #28a745;
+    border-color: #28a745;
+    color: white;
+  }
+
+  .ap-step-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: var(--transition);
+  }
+
+  .ap-step.completed .ap-step-label {
+    color: #28a745;
+    font-weight: 600;
+  }
+
+  .ap-step-connector {
+    width: 20px;
+    height: 2px;
+    background: var(--border-color);
+    flex-shrink: 0;
+    transition: var(--transition);
+    border-radius: 1px;
+  }
+
+  .ap-step-connector.completed {
+    background: #28a745;
+  }
+
+  /* ---------- Form Sections ---------- */
+  .ap-section {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    margin-bottom: 1.25rem;
+    transition: var(--transition);
+  }
+
+  .ap-section:hover {
+    border-color: color-mix(in srgb, var(--primary-color) 40%, transparent);
+  }
+
+  .ap-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 1.35rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .ap-section-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    background: var(--primary-light);
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .ap-section-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 1.05rem;
     margin: 0;
   }
 
-  .btn-cancel {
+  .ap-section-subtitle {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    margin: 0;
+  }
+
+  /* ---------- Form Fields ---------- */
+  .ap-field {
+    margin-bottom: 1.15rem;
+  }
+
+  .ap-field:last-child {
+    margin-bottom: 0;
+  }
+
+  .ap-field label {
+    display: block;
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    margin-bottom: 0.35rem;
+  }
+
+  .ap-field .ap-hint {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    margin-top: 0.3rem;
+  }
+
+  .ap-input,
+  .ap-select,
+  .ap-textarea {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--body-bg);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: var(--transition);
+    font-family: inherit;
+    min-width: 0;
+  }
+
+  .ap-input:focus,
+  .ap-select:focus,
+  .ap-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px var(--primary-light);
+  }
+
+  .ap-input::placeholder,
+  .ap-textarea::placeholder {
+    color: var(--text-muted);
+  }
+
+  .ap-select option {
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+  }
+
+  .ap-textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  .ap-textarea.is-invalid,
+  .ap-input.is-invalid,
+  .ap-select.is-invalid {
+    border-color: #dc3545;
+  }
+
+  .ap-textarea.is-invalid:focus,
+  .ap-input.is-invalid:focus,
+  .ap-select.is-invalid:focus {
+    box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
+  }
+
+  .invalid-feedback {
+    color: #dc3545;
+    font-size: 0.78rem;
+    margin-top: 0.3rem;
+    display: none;
+  }
+
+  .is-invalid ~ .invalid-feedback {
+    display: block;
+  }
+
+  /* ---------- Address Grid ---------- */
+  .ap-address-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.15rem;
+  }
+
+  .ap-address-grid .ap-full {
+    grid-column: 1 / -1;
+  }
+
+  /* ---------- Checkbox / Radio Groups ---------- */
+  .ap-check-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.6rem;
+  }
+
+  .ap-check-item {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    background-color: var(--body-bg);
+    min-width: 0;
+  }
+
+  .ap-check-item:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  .ap-check-item input {
+    accent-color: var(--primary-color);
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+  }
+
+  .ap-check-item.selected {
+    border-color: var(--primary-color);
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    font-weight: 500;
+  }
+
+  /* ---------- Image Upload ---------- */
+  .ap-upload-area {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    background-color: var(--body-bg);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ap-upload-area:hover,
+  .ap-upload-area.dragover {
+    border-color: var(--primary-color);
+    background-color: var(--primary-light);
+  }
+
+  .ap-upload-area i.fa-cloud-upload-alt {
+    font-size: 2rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    display: block;
+    transition: var(--transition);
+  }
+
+  .ap-upload-area:hover i.fa-cloud-upload-alt,
+  .ap-upload-area.dragover i.fa-cloud-upload-alt {
+    color: var(--primary-color);
+  }
+
+  .ap-upload-area p {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin: 0;
+  }
+
+  .ap-upload-area small {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    opacity: 0.7;
+  }
+
+  .ap-upload-area input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .ap-upload-counter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.6rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  .ap-upload-counter .count-num {
+    font-weight: 600;
+    color: var(--primary-color);
+  }
+
+  .ap-upload-counter .count-num.has-images {
+    color: #28a745;
+  }
+
+  .ap-image-previews {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 0.6rem;
+    margin-top: 0.75rem;
+  }
+
+  .ap-thumb {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+    flex-shrink: 0;
+    transition: var(--transition);
+  }
+
+  .ap-thumb:hover {
+    border-color: var(--primary-color);
+  }
+
+  .ap-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ap-thumb-badge {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.15rem 0.3rem;
+    background: rgba(0,0,0,0.55);
+    color: white;
+    font-size: 0.6rem;
+    text-align: center;
+    font-weight: 500;
+  }
+
+  .ap-thumb-remove {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(220, 53, 69, 0.9);
+    color: white;
+    border: none;
+    font-size: 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    line-height: 1;
+  }
+
+  .ap-thumb-remove:hover {
+    background: #dc3545;
+    transform: scale(1.15);
+  }
+
+  .ap-upload-error {
+    color: #dc3545;
+    font-size: 0.78rem;
+    margin-top: 0.5rem;
+    display: none;
+  }
+
+  .ap-upload-error.visible {
+    display: block;
+  }
+
+  /* ---------- Spec Grid ---------- */
+  .ap-spec-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.15rem;
+  }
+
+  /* ---------- Char Count ---------- */
+  .ap-char-count {
+    text-align: right;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+  }
+
+  .ap-char-count.warning {
+    color: #f59e0b;
+  }
+
+  .ap-char-count.danger {
+    color: #dc3545;
+  }
+
+  /* ---------- Form Actions ---------- */
+  .ap-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding-top: 0.5rem;
+  }
+
+  .btn-ap-submit {
+    background: var(--gradient-primary);
+    border: none;
+    color: white;
+    padding: 0.75rem 2rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .btn-ap-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
+    color: white;
+  }
+
+  .btn-ap-submit:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .btn-ap-draft {
+    background-color: var(--body-bg);
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: var(--transition);
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-ap-draft:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  .btn-ap-cancel {
     background: transparent;
     border: 2px solid var(--border-color);
     color: var(--text-secondary);
-    padding: 0.65rem 1.35rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-ap-cancel:hover {
+    border-color: #dc3545;
+    color: #dc3545;
+    text-decoration: none;
+  }
+
+  .btn-delete-prop {
+    background: rgba(220, 53, 69, 0.1);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    color: var(--danger-color);
+    padding: 0.65rem 1.25rem;
     border-radius: var(--radius-md);
     font-weight: 600;
     font-size: 0.9rem;
@@ -42,259 +564,467 @@
     gap: 0.5rem;
   }
 
-  .btn-cancel:hover {
-    border-color: var(--text-muted);
-    color: var(--text-primary);
+  .btn-delete-prop:hover {
+    background: var(--danger-color);
+    color: white;
   }
 
-  /* ========== FORM CARD ========== */
-  .edit-card {
+  .ap-spinner {
+    display: none;
+    width: 16px;
+    height: 16px;
+    border: 2.5px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: apSpin 0.6s linear infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes apSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ---------- Feedback Alert ---------- */
+  .ap-feedback {
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1rem;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+  }
+
+  .ap-feedback.visible {
+    display: flex;
+  }
+
+  .ap-feedback.alert-success {
+    background-color: rgba(40, 167, 69, 0.07);
+    color: #28a745;
+    border: 1px solid rgba(40, 167, 69, 0.12);
+  }
+
+  .ap-feedback.alert-danger {
+    background-color: rgba(220, 53, 69, 0.07);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.12);
+  }
+
+  .ap-feedback.alert-info {
+    background-color: rgba(99, 102, 241, 0.07);
+    color: var(--primary-color);
+    border: 1px solid rgba(99, 102, 241, 0.12);
+  }
+
+  /* ========== COMPREHENSIVE PREVIEW CARD ========== */
+  .ap-preview-card {
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-    padding: 2rem;
-    max-width: 900px;
-    margin: 0 auto;
+    overflow: hidden;
+    position: sticky;
+    top: calc(var(--navbar-height, 70px) + 60px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.05);
   }
 
-  /* Form Layout */
-  .form-section {
-    margin-bottom: 2rem;
-    padding-bottom: 2rem;
+  .ap-preview-gallery {
+    height: 180px;
+    background-color: var(--body-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--border-color);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .ap-preview-gallery.has-images {
+    height: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 100px 100px;
+    gap: 2px;
+  }
+
+  .ap-preview-gallery.has-images .ap-pv-gallery-img:first-child {
+    grid-column: 1 / -1;
+    grid-row: 1 / -1;
+  }
+
+  .ap-preview-gallery.has-images .ap-pv-gallery-img:nth-child(n+4) {
+    display: none;
+  }
+
+  .ap-preview-gallery i {
+    font-size: 2rem;
+    color: var(--text-muted);
+    opacity: 0.4;
+  }
+
+  .ap-pv-gallery-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: relative;
+  }
+
+  .ap-preview-gallery-badge {
+    position: absolute;
+    top: 0.6rem;
+    left: 0.6rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.68rem;
+    font-weight: 600;
+    z-index: 2;
+    background: var(--gradient-primary);
+    color: white;
+  }
+
+  .ap-preview-gallery-count {
+    position: absolute;
+    bottom: 0.6rem;
+    right: 0.6rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: var(--radius-full);
+    font-size: 0.68rem;
+    font-weight: 600;
+    z-index: 2;
+    background: rgba(0,0,0,0.6);
+    color: white;
+  }
+
+  .ap-preview-body {
+    padding: 1.15rem;
+  }
+
+  .ap-pv-section {
+    margin-bottom: 0.9rem;
+    padding-bottom: 0.9rem;
     border-bottom: 1px solid var(--border-color);
   }
 
-  .form-section:last-child {
+  .ap-pv-section:last-child {
     margin-bottom: 0;
     padding-bottom: 0;
     border-bottom: none;
   }
 
-  .section-title {
-    font-size: 1.1rem;
+  .ap-pv-section-title {
+    font-size: 0.7rem;
     font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.35rem;
   }
 
-  .section-title i {
+  .ap-pv-section-title i {
     color: var(--primary-color);
+    font-size: 0.65rem;
   }
 
-  .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
+  .ap-pv-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
   }
 
-  .form-row-3 {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 1.5rem;
-  }
-
-  .form-group {
-    margin-bottom: 1.25rem;
-  }
-
-  .form-label {
-    display: block;
-    margin-bottom: 0.5rem;
+  .ap-preview-title {
     color: var(--text-primary);
-    font-weight: 500;
-    font-size: 0.9rem;
+    font-weight: 600;
+    font-size: 1rem;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
   }
 
-  .form-control {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 2px solid var(--border-color);
-    border-radius: var(--radius-md);
-    background-color: var(--body-bg);
-    color: var(--text-primary);
-    font-size: 0.95rem;
-    transition: var(--transition);
-    font-family: inherit;
+  .ap-pv-type-badge {
+    font-size: 0.65rem;
+    padding: 0.18rem 0.5rem;
+    border-radius: var(--radius-full);
+    background: var(--primary-light);
+    color: var(--primary-color);
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: none;
   }
 
-  .form-control:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 4px var(--primary-light);
+  .ap-pv-type-badge.visible {
+    display: inline-block;
   }
 
-  textarea.form-control {
-    resize: vertical;
-    min-height: 100px;
-    line-height: 1.5;
-  }
-
-  .form-text-small {
+  .ap-preview-desc {
     font-size: 0.8rem;
     color: var(--text-muted);
-    margin-top: 0.4rem;
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin: 0;
   }
 
-  /* Checkbox / Radio Groups */
-  .checkbox-group {
+  .ap-preview-location {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    margin: 0;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .ap-preview-location i {
+    color: var(--primary-color);
+    margin-right: 0.25rem;
+  }
+
+  .ap-pv-price-main {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.3rem;
+  }
+
+  .ap-pv-price-details {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .ap-pv-price-details span {
+    display: inline-block;
+    margin-right: 0.75rem;
+  }
+
+  .ap-pv-price-details i {
+    color: var(--primary-color);
+    margin-right: 0.2rem;
+    font-size: 0.7rem;
+  }
+
+  .ap-preview-specs {
     display: flex;
-    gap: 1.5rem;
+    gap: 0.85rem;
     flex-wrap: wrap;
   }
 
-  .check-item {
+  .ap-preview-spec {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
+    gap: 0.3rem;
   }
 
-  .check-item input {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-    accent-color: var(--primary-color);
+  .ap-preview-spec i {
+    color: var(--primary-color);
+    font-size: 0.72rem;
   }
 
-  /* Image Upload Area */
-  .upload-area {
-    border: 2px dashed var(--border-color);
-    border-radius: var(--radius-md);
-    padding: 2rem;
+  .ap-preview-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+
+  .ap-preview-tag {
+    font-size: 0.65rem;
+    padding: 0.18rem 0.5rem;
+    border-radius: var(--radius-full);
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .ap-pv-policy-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.3rem;
+  }
+
+  .ap-pv-policy-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .ap-pv-policy-row i {
+    color: var(--primary-color);
+    font-size: 0.7rem;
+    width: 16px;
     text-align: center;
-    background-color: var(--body-bg);
-    transition: var(--transition);
-    cursor: pointer;
+    flex-shrink: 0;
   }
 
-  .upload-area:hover {
-    border-color: var(--primary-color);
-    background: var(--primary-light);
-  }
-
-  .upload-icon {
-    font-size: 2rem;
+  .ap-pv-empty {
+    font-size: 0.78rem;
     color: var(--text-muted);
-    margin-bottom: 1rem;
+    font-style: italic;
+    opacity: 0.7;
   }
 
-  .image-preview-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 1rem;
-    margin-top: 1.5rem;
-  }
-
-  .preview-thumb {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 16/9;
-    border-radius: var(--radius-md);
-    overflow: hidden;
+  /* ---------- Tips Card ---------- */
+  .ap-tips-card {
+    background-color: var(--card-bg);
     border: 1px solid var(--border-color);
-  }
-
-  .preview-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .btn-delete-img {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    border: none;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    opacity: 0;
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
     transition: var(--transition);
   }
 
-  .preview-thumb:hover .btn-delete-img {
-    opacity: 1;
-  }
-
-  /* Buttons */
-  .btn-update {
-    background: var(--gradient-primary);
-    border: none;
-    color: white;
-    padding: 0.85rem 2rem;
-    border-radius: var(--radius-md);
+  .ap-tips-card h5 {
+    color: var(--text-primary);
     font-weight: 600;
     font-size: 1rem;
-    cursor: pointer;
-    transition: var(--transition);
-    font-family: inherit;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .btn-update:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
-    color: white;
-  }
-
-  .btn-delete {
-    background: transparent;
-    border: 1px solid var(--danger-color);
-    color: var(--danger-color);
-    padding: 0.65rem 1.35rem;
-    border-radius: var(--radius-md);
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: var(--transition);
-    font-family: inherit;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .btn-delete:hover {
-    background: var(--danger-color);
-    color: white;
-    border-color: var(--danger-color);
-  }
-
-  /* Alert Messages */
-  .alert {
-    padding: 1rem 1.25rem;
-    border-radius: var(--radius-md);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    border: 1px solid transparent;
+    gap: 0.5rem;
   }
 
-  .alert-success {
-    background-color: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
-    border-color: rgba(34, 197, 94, 0.2);
+  .ap-tips-card h5 i {
+    color: var(--primary-color);
   }
 
-  .alert-danger {
-    background-color: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-    border-color: rgba(239, 68, 68, 0.2);
+  .ap-tips-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem;
   }
 
-  /* ========== MODAL (Reused) ========== */
+  .ap-tips-list li {
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    line-height: 1.5;
+  }
+
+  .ap-tips-list li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .ap-tips-list li i {
+    color: var(--primary-color);
+    margin-top: 0.15rem;
+    flex-shrink: 0;
+    font-size: 0.75rem;
+  }
+
+  .ap-tips-toggle {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-weight: 500;
+    font-size: 0.82rem;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+    transition: var(--transition);
+  }
+
+  .ap-tips-toggle:hover {
+    color: var(--secondary-color);
+  }
+
+  .ap-tips-body {
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+
+  .ap-tips-body.collapsed {
+    max-height: 0 !important;
+  }
+
+  .ap-help-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: var(--transition);
+    margin-top: 1rem;
+  }
+
+  .ap-help-link:hover {
+    color: var(--primary-color);
+  }
+
+  /* ---------- Access Badge ---------- */
+  .ap-access-badge {
+    position: fixed;
+    bottom: 1.25rem;
+    right: 1.25rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: var(--radius-full);
+    background: var(--gradient-primary);
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  /* ---------- Flash Alert Override ---------- */
+  .ap-flash {
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1rem;
+    margin-bottom: 1.25rem;
+    border: none;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    line-height: 1.5;
+  }
+
+  .ap-flash i {
+    margin-top: 0.15rem;
+    flex-shrink: 0;
+  }
+
+  .ap-flash.alert-danger {
+    background-color: rgba(220, 53, 69, 0.07);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.12);
+  }
+
+  .ap-flash.alert-success {
+    background-color: rgba(40, 167, 69, 0.07);
+    color: #28a745;
+    border: 1px solid rgba(40, 167, 69, 0.12);
+  }
+
+  .ap-flash .btn-close {
+    padding: 0;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  /* ========== DELETE MODAL STYLES (Ported) ========== */
   .modal-overlay {
     position: fixed;
     top: 0;
@@ -303,8 +1033,7 @@
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    z-index: 1000;
+    z-index: 2000;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -325,7 +1054,7 @@
     border-radius: var(--radius-lg);
     width: 100%;
     max-width: 400px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     transform: translateY(20px);
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     overflow: hidden;
@@ -413,296 +1142,575 @@
     background-color: #dc2626;
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
   }
-  
-  .btn-modal-confirm:disabled {
-    background-color: #fca5a5;
-    cursor: not-allowed;
-    box-shadow: none;
-  }
 
   /* ========== RESPONSIVE ========== */
-  @media (max-width: 768px) {
-    .edit-header {
-      flex-direction: column;
-      align-items: flex-start;
+  @media (max-width: 1199px) {
+    .ap-spec-grid {
+      grid-template-columns: repeat(3, 1fr);
     }
-    .edit-title {
-      font-size: 1.4rem;
+  }
+
+  @media (max-width: 991px) {
+    .add-property-page {
+      padding: 1.5rem 0 3rem;
     }
-    .edit-card {
-      padding: 1.5rem 1.25rem;
+    .ap-header h1 {
+      font-size: 1.45rem;
     }
-    .form-row, .form-row-3 {
+    .ap-preview-card {
+      position: static;
+    }
+    .ap-access-badge {
+      display: none;
+    }
+    .ap-steps-bar {
+      position: sticky;
+      top: var(--navbar-height, 70px);
+      justify-content: flex-start;
+      padding: 0.5rem 0.75rem;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .ap-section {
+      padding: 1.25rem;
+    }
+    .ap-address-grid {
       grid-template-columns: 1fr;
-      gap: 1rem;
     }
-    .btn-delete {
+    .ap-spec-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .ap-check-group {
+      grid-template-columns: 1fr 1fr;
+    }
+    .ap-actions {
+      flex-direction: column;
+    }
+    .ap-actions .btn-ap-submit,
+    .ap-actions .btn-ap-draft,
+    .ap-actions .btn-ap-cancel,
+    .ap-actions .btn-delete-prop {
       width: 100%;
       justify-content: center;
+    }
+    .ap-step-label {
+      font-size: 0.72rem;
+    }
+    .ap-step-indicator {
+      width: 22px;
+      height: 22px;
+      font-size: 0.6rem;
+    }
+    .ap-step-connector {
+      width: 12px;
+    }
+    .ap-preview-gallery.has-images {
+      grid-template-rows: 80px 80px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .ap-check-group {
+      grid-template-columns: 1fr;
+    }
+    .ap-spec-grid {
+      grid-template-columns: 1fr;
+    }
+    .ap-section-icon {
+      width: 34px;
+      height: 34px;
+      font-size: 0.85rem;
+    }
+    .ap-section-title {
+      font-size: 0.95rem;
+    }
+    .ap-steps-bar {
+      gap: 0;
+    }
+    .ap-step {
+      padding: 0.3rem 0.4rem;
+      gap: 0.3rem;
     }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="edit-page">
+<div class="add-property-page">
   <div class="container">
-    
-    <!-- Flash Messages -->
+
+    <!-- Flashed Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
-        <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }}">
+        <div class="ap-flash alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
           <i class="fas fa-{{ 'exclamation-circle' if category == 'error' else 'check-circle' }}"></i>
-          {{ message }}
+          <span>{{ message }}</span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         {% endfor %}
       {% endif %}
     {% endwith %}
 
     <!-- Header -->
-    <div class="edit-header">
-      <h1 class="edit-title">Edit Property Listing</h1>
+    <header class="ap-header mb-4">
+      <div>
+        <h1>Edit Property Details</h1>
+        <p>Update the information for your listing.</p>
+      </div>
       <div class="header-actions">
-        <a href="{{ url_for('landlord.properties') }}" class="btn-cancel">
+        <a href="{{ url_for('landlord.properties') }}" class="btn-ap-cancel">
           <i class="fas fa-times"></i> Cancel
         </a>
-        <button class="btn-delete" onclick="openDeleteModal()">
+        <button type="button" class="btn-delete-prop" onclick="openDeleteModal()">
           <i class="fas fa-trash"></i> Delete Property
         </button>
       </div>
-    </div>
+    </header>
 
-    <!-- Main Form -->
-    <div class="edit-card">
-      <form id="editPropertyForm" method="POST" enctype="multipart/form-data" action="{{ url_for('landlord.edit_property', property_id=house.id) }}">
-        
-        <!-- CSRF Token -->
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <!-- Sticky Steps Bar -->
+    <nav class="ap-steps-bar" id="stepsBar" aria-label="Form progress">
+      <a class="ap-step completed" data-step-target="section-details" href="#section-details">
+        <div class="ap-step-indicator" id="stepIndicator1"><i class="fas fa-check"></i></div>
+        <span class="ap-step-label">Details</span>
+      </a>
+      <div class="ap-step-connector completed" id="stepConn1"></div>
+      <a class="ap-step completed" data-step-target="section-location" href="#section-location">
+        <div class="ap-step-indicator" id="stepIndicator2"><i class="fas fa-check"></i></div>
+        <span class="ap-step-label">Location</span>
+      </a>
+      <div class="ap-step-connector completed" id="stepConn2"></div>
+      <a class="ap-step completed" data-step-target="section-pricing" href="#section-pricing">
+        <div class="ap-step-indicator" id="stepIndicator3"><i class="fas fa-check"></i></div>
+        <span class="ap-step-label">Pricing</span>
+      </a>
+      <div class="ap-step-connector completed" id="stepConn3"></div>
+      <a class="ap-step completed" data-step-target="section-images" href="#section-images">
+        <div class="ap-step-indicator" id="stepIndicator4"><i class="fas fa-check"></i></div>
+        <span class="ap-step-label">Images</span>
+      </a>
+      <div class="ap-step-connector completed" id="stepConn4"></div>
+      <a class="ap-step completed" data-step-target="section-submit" href="#section-submit">
+        <div class="ap-step-indicator" id="stepIndicator5"><i class="fas fa-check"></i></div>
+        <span class="ap-step-label">Submit</span>
+      </a>
+    </nav>
 
-        <!-- 1. Basic Information -->
-        <div class="form-section">
-          <h3 class="section-title"><i class="fas fa-home"></i> Basic Information</h3>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Property Title <span style="color: #ef4444;">*</span></label>
-              <input type="text" name="title" class="form-control" value="{{ house.title }}" required placeholder="e.g., Sunset Villas" />
+    <div class="row g-4">
+      <!-- ===== MAIN FORM COLUMN ===== -->
+      <div class="col-lg-8">
+        <form id="addPropertyForm" enctype="multipart/form-data" method="POST" action="{{ url_for('landlord.edit_property', property_id=house.id) }}" novalidate>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+          <!-- SECTION 1: Property Details -->
+          <div class="ap-section" id="section-details" data-progress-group="1">
+            <div class="ap-section-header">
+              <div class="ap-section-icon"><i class="fas fa-building"></i></div>
+              <div>
+                <h3 class="ap-section-title">Property Details</h3>
+                <p class="ap-section-subtitle">Basic information about your property</p>
+              </div>
             </div>
-            
-            <div class="form-group">
-              <label class="form-label">Property Type <span style="color: #ef4444;">*</span></label>
-              <select name="property_type" class="form-control" required>
-                <option value="" disabled>Select Type</option>
+            <div class="ap-field">
+              <label for="propertyName">Property Name <span style="color:#dc3545">*</span></label>
+              <input type="text" class="ap-input" id="propertyName" name="title" required placeholder="e.g., Cozy Apartment in Westlands" value="{{ house.title }}" />
+              <div class="invalid-feedback">Please enter a property name.</div>
+            </div>
+            <div class="ap-field">
+              <label for="propertyType">Property Type <span style="color:#dc3545">*</span></label>
+              <select class="ap-select" id="propertyType" name="property_type" required>
+                <option value="" disabled>Select property type</option>
                 <option value="Apartment" {% if house.property_type == 'Apartment' %}selected{% endif %}>Apartment</option>
                 <option value="House" {% if house.property_type == 'House' %}selected{% endif %}>House</option>
                 <option value="Studio" {% if house.property_type == 'Studio' %}selected{% endif %}>Studio</option>
                 <option value="Condo" {% if house.property_type == 'Condo' %}selected{% endif %}>Condo</option>
-                <option value="Townhouse" {% if house.property_type == 'Townhouse' %}selected{% endif %}>Townhouse</</option>
+                <option value="Townhouse" {% if house.property_type == 'Townhouse' %}selected{% endif %}>Townhouse</option>
                 <option value="Commercial" {% if house.property_type == 'Commercial' %}selected{% endif %}>Commercial</option>
               </select>
+              <div class="invalid-feedback">Please select a property type.</div>
+            </div>
+            <div class="ap-field">
+              <label for="propertyDescription">Description <span style="color:#dc3545">*</span></label>
+              <textarea class="ap-textarea" id="propertyDescription" name="description" rows="4" required placeholder="e.g., Modern 2-bedroom apartment with balcony..." maxlength="500">{{ house.description }}</textarea>
+              <div class="ap-char-count" id="charCount">0 / 500 characters</div>
+              <div class="invalid-feedback">Please provide a description.</div>
             </div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label">Description</label>
-            <textarea name="description" class="form-control" rows="3" placeholder="Describe your property...">{{ house.description or '' }}</textarea>
-          </div>
-        </div>
-
-        <!-- 2. Location -->
-        <div class="form-section">
-          <h3 class="section-title"><i class="fas fa-map-marker-alt"></i> Location Details</h3>
-          
-          <div class="form-group">
-            <label class="form-label">Address Line 1</label>
-            <input type="text" name="address_line1" class="form-control" value="{{ house.address_line1 or '' }}" required placeholder="e.g. Ngong Road" />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Address Line 2</label>
-            <input type="text" name="address_line2" class="form-control" value="{{ house.address_line2 or '' }}" placeholder="e.g. Flat B2" />
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">City <span style="color: #ef4444;">*</span></label>
-              <input type="text" name="city" class="form-control" value="{{ house.city or '' }}" required placeholder="Nairobi" />
+          <!-- SECTION 2: Location -->
+          <div class="ap-section" id="section-location" data-progress-group="2">
+            <div class="ap-section-header">
+              <div class="ap-section-icon"><i class="fas fa-map-marker-alt"></i></div>
+              <div>
+                <h3 class="ap-section-title">Location</h3>
+                <p class="ap-section-subtitle">Where is the property located?</p>
+              </div>
             </div>
-            <div class="form-group">
-              <label class="form-label">State/Province</label>
-              <input type="text" name="state_province" class="form-control" value="{{ house.state_province or '' }}" placeholder="Nairobi County" />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Postal Code</label>
-              <input type="text" name="postal_code" class="form-control" value="{{ house.postal_code or '' }}" placeholder="00100" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Country</label>
-              <input type="text" name="country" class="form-control" value="{{ house.country or 'Kenya' }}" required />
-            </div>
-          </div>
-        </div>
-
-        <!-- 3. Financials -->
-        <div class="form-section">
-          <h3 class="section-title"><i class="fas fa-money-bill-wave"></i> Pricing & Availability</h3>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Rent Amount (KES/mo)</label>
-              <input type="number" name="rent_amount" class="form-control" value="{{ house.rent_amount or '' }}" required placeholder="50000" step="100" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Security Deposit (KES)</label>
-              <input type="number" name="security_deposit" class="form-form-control" value="{{ house.security_deposit or '' }}" placeholder="50000" step="100" />
+            <div class="ap-address-grid">
+              <div class="ap-field ap-full">
+                <label for="addressLine1">Street Address <span style="color:#dc3545">*</span></label>
+                <input type="text" class="ap-input" id="addressLine1" name="address_line1" required placeholder="e.g., 123 Moi Avenue" value="{{ house.address_line1 }}" />
+                <div class="invalid-feedback">Please enter a street address.</div>
+              </div>
+              <div class="ap-field ap-full">
+                <label for="addressLine2">Address Line 2</label>
+                <input type="text" class="ap-input" id="addressLine2" name="address_line2" placeholder="e.g., Apt 4B, Floor 3" value="{{ house.address_line2 or '' }}" />
+              </div>
+              <div class="ap-field">
+                <label for="city">City <span style="color:#dc3545">*</span></label>
+                <input type="text" class="ap-input" id="city" name="city" required placeholder="e.g., Nairobi" value="{{ house.city }}" />
+                <div class="invalid-feedback">Please enter a city.</div>
+              </div>
+              <div class="ap-field">
+                <label for="stateProvince">County / Province <span style="color:#dc3545">*</span></label>
+                <input type="text" class="ap-input" id="stateProvince" name="state_province" required placeholder="e.g., Nairobi County" value="{{ house.state_province }}" />
+                <div class="invalid-feedback">Please enter a county or province.</div>
+              </div>
+              <div class="ap-field">
+                <label for="postalCode">Postal Code</label>
+                <input type="text" class="ap-input" id="postalCode" name="postal_code" placeholder="e.g., 00100" value="{{ house.postal_code or '' }}" />
+              </div>
+              <div class="ap-field">
+                <label for="country">Country <span style="color:#dc3545">*</span></label>
+                <select class="ap-select" id="country" name="country" required>
+                  <option value="" disabled selected>Select country</option>
+                  <option value="Kenya" {% if house.country == 'Kenya' %}selected{% endif %}>Kenya</option>
+                  <option value="Uganda" {% if house.country == 'Uganda' %}selected{% endif %}>Uganda</option>
+                  <option value="Tanzania" {% if house.country == 'Tanzania' %}selected{% endif %}>Tanzania</option>
+                  <option value="Rwanda" {% if house.country == 'Rwanda' %}selected{% endif %}>Rwanda</option>
+                  <option value="Other" {% if house.country not in ['Kenya', 'Uganda', 'Tanzania', 'Rwanda'] %}selected{% endif %}>Other</option>
+                </select>
+                <div class="invalid-feedback">Please select a country.</div>
+              </div>
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Lease Term</label>
-              <select name="lease_term" class="form-control">
-                <option value="" selected>Select Term</option>
-                <option value="6 months" {% if house.lease_term == '6 months' %}selected{% endif %}>6 months</option>
-                <option value="1 year" {% if house.lease_term == '1 year' %}selected{% endif %}>1 year</option>
-                <option value="2 years" {% if house.lease_term == '2 years' %}selected{% endif %}>2 years</option>
-              </select>
+          <!-- SECTION 3: Pricing & Terms -->
+          <div class="ap-section" id="section-pricing" data-progress-group="3">
+            <div class="ap-section-header">
+              <div class="ap-section-icon"><i class="fas fa-tag"></i></div>
+              <div>
+                <h3 class="ap-section-title">Pricing &amp; Terms</h3>
+                <p class="ap-section-subtitle">Rent, lease terms, and deposit</p>
+              </div>
             </div>
-            <div class="form-group">
-              <label class="form-label">Availability Date</label>
-              <input type="date" name="availability_date" class="form-control" value="{{ house.availability_date.strftime('%Y-%m-%d') if house.availability_date else '' }}" required />
-            </div>
-          </div>
-
-          <div class="form-group">
-             <div class="check-item">
-                <input type="checkbox" name="available" id="available" {% if house.available %}checked{% endif %}>
-                <label for="available" style="font-weight: 500; color: var(--text-primary);">Property is available</label>
-             </div>
-          </div>
-        </div>
-
-        <!-- 4. Details -->
-        <div class="form-section">
-          <h3 class="section-title"><i class="fas fa-ruler-combined"></i> Specifications</h3>
-
-          <div class="form-row-3">
-            <div class="form-group">
-              <label class="form-label">Bedrooms</label>
-              <input type="number" name="bedrooms" class="form-control" value="{{ house.bedrooms or '' }}" min="0" placeholder="2" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Bathrooms</label>
-              <input type="number" name="bathrooms" class="form-control" value="{{ house.bathrooms or '' }}" min="0" step="0.5" placeholder="2" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Size (sq meters)</label>
-              <input type="number" name="size" class="form-control" value="{{ house.size or '' }}" placeholder="100" />
-            </div>
-          </div>
-        </div>
-
-        <!-- 5. Policies & Features -->
-        <div class="form-section">
-          <h3 class="section-title"><i class="fas fa-list-ul"></i> Policies & Features</h3>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Pets</label>
-              <select name="pets_allowed" class="form-control">
-                <option value="No" {% if house.pets_allowed == 'No' %}selected{% endif %}>Not Allowed</option>
-                <option value="Yes" {% if house.pets_allowed == 'Yes' %}selected{% endif %}>Allowed</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="Pet Restrictions</label>
-              <input type="text" name="pet_restrictions" class="form-control" value="{{ house.pet_restrictions or '' }}" placeholder="e.g. Small dogs only">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Parking</label>
-              <select name="parking_availability" class="form-control">
-                <option value="None" {% if house.parking_availability == 'None' %}selected{% endif %}>None</option>
-                <option value="On-Site" {% if house.parking_availability == 'On-Site' %}selected{% endif %}>On-Site</option>
-                <option value="Street" {% if house.parking_availability == 'Street' %}selected{% endif %}>Street Parking</option>
-                <div class="form-group">
-                  <label class="form-label">Furnished</label>
-                  <select name="furnished_status" class="form-control">
-                    <option value="Unfurnished" {% if house.furnished_status == 'Unfurnished' %}selected{% endif %}>Unfurnished</option>
-                    <option value="Fully" {% if house.furnished_status == 'Fully Furnished' %}selected{% endif %}>Fully</option>
-                    <option value="Partially" {% if house.furnished_status == 'Partially Furnished' %}selected{% endif %}>Partially</option>
-                  </select>
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <div class="ap-field">
+                  <label for="rentAmount">Rent Amount (KES/month) <span style="color:#dc3545">*</span></label>
+                  <input type="number" class="ap-input" id="rentAmount" name="rent_amount" required min="0" step="100" placeholder="e.g., 50000" value="{{ house.rent_amount }}" />
+                  <div class="invalid-feedback">Please enter a valid rent amount.</div>
                 </div>
               </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Smoking Policy</label>
-            <select name="smoking_policy" class="form-control">
-              <option value="Allowed" {% if house.smoking_policy == 'Allowed' %}selected{% endif %}>Allowed</option>
-              <option value="Not Allowed" {% if house.smoking_policy == 'Not Allowed' %}selected{% endif %}>Not Allowed</option>
-            </select>
-          </div>
-
-          <!-- Checkboxes as Text Inputs (per route logic) -->
-          <div class="form-group">
-            <label class="form-label">Amenities <span style="font-size: 0.75rem; font-weight: 400; color: var(--text-muted); margin-left: 0.5rem;">(Separate by comma)</span></label>
-            <input type="text" name="amenities" class="form-control" value="{{ house.amenities or '' }}" placeholder="e.g. Gym, Pool, WiFi">
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Utilities Included <span style="font-size: 0.75rem; font-weight: 400; color: var(--text-muted); margin-left: 0.5rem;">(Separate by comma)</span></label>
-            <input type="text" name="utilities" class="form-control" value="{{ house.utilities or '' }}" placeholder="e.g. Water, Electricity">
-          </div>
-        </div>
-
-        <!-- 6. Media -->
-        <div class="form-section">
-          <h3 class="title-with-actions">
-            <h3 class="section-title"><i class="fas fa-images"></i> Property Images</h3>
-          </h3>
-          
-          <!-- Upload Input -->
-          <div class="upload-area" onclick="document.getElementById('images').click()">
-            <div class="upload-icon">
-              <i class="fas fa-cloud-upload-alt"></i>
-            <p>Click or drag images here</p>
-            <small class="text-muted">Max 5MB per image (JPG/PNG)</small>
-            <input type="file" id="images" name="images" multiple accept="image/*" style="display: none;">
-          </div>
-
-          <!-- Current Images Preview -->
-          <div class="image-preview-grid">
-            {% if house.image_urls %}
-              {% for image in house.image_urls.split(',') %}
-                <div class="preview-thumb">
-                  <img src="{{ image }}" alt="Property Image">
-                  <!-- Note: The route handles image replacement. If you need individual deletion logic, add a small 'X' button here -->
+              <div class="col-sm-6">
+                <div class="ap-field">
+                  <label for="securityDeposit">Security Deposit (KES)</label>
+                  <input type="number" class="ap-input" id="securityDeposit" name="security_deposit" min="0" step="100" placeholder="e.g., 50000" value="{{ house.security_deposit or '' }}" />
                 </div>
-              {% endfor %}
-            {% endif %}
+              </div>
+              <div class="col-sm-6">
+                <div class="ap-field">
+                  <label for="leaseTerm">Lease Term <span style="color:#dc3545">*</span></label>
+                  <select class="ap-select" id="leaseTerm" name="lease_term" required>
+                    <option value="" disabled selected>Select lease term</option>
+                    <option value="Monthly" {% if house.lease_term == 'Monthly' %}selected{% endif %}>Month-to-Month</option>
+                    <option value="6 months" {% if house.lease_term == '6 months' %}selected{% endif %}>6 Months</option>
+                    <option value="12 months" {% if house.lease_term == '12 months' %}selected{% endif %}>12 Months</option>
+                    <option value="24 months" {% if house.lease_term == '24 months' %}selected{% endif %}>24 Months</option>
+                  </select>
+                  <div class="invalid-feedback">Please select a lease term.</div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="ap-field">
+                  <label for="availabilityDate">Availability Date <span style="color:#dc3545">*</span></label>
+                  <input type="date" class="ap-input" id="availabilityDate" name="availability_date" required value="{{ house.availability_date.strftime('%Y-%m-%d') if house.availability_date else '' }}" />
+                  <div class="invalid-feedback">Please select an availability date.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 4: Images -->
+          <div class="ap-section" id="section-images" data-progress-group="4">
+            <div class="ap-section-header">
+              <div class="ap-section-icon"><i class="fas fa-camera"></i></div>
+              <div>
+                <h3 class="ap-section-title">Property Images</h3>
+                <p class="ap-section-subtitle">Upload new photos or manage existing ones</p>
+              </div>
+            </div>
+            <div class="ap-upload-area" id="uploadArea">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <p>Drag &amp; drop new images here or click to browse</p>
+              <small>JPG or PNG, max 5MB each &middot; Up to 10 images</small>
+              <input type="file" id="propertyImages" name="images" accept="image/jpeg,image/png" multiple />
+            </div>
+            <div class="ap-upload-error" id="uploadError"></div>
+            <div class="ap-upload-counter" id="uploadCounter">
+              <span><span class="count-num" id="imageCountNum">0</span> new images selected</span>
+              <span style="font-size:0.72rem;opacity:0.7;">Existing images will remain unless replaced</span>
+            </div>
+            <div class="ap-image-previews" id="imagePreview">
+               <!-- Existing images will be injected here by JS for preview -->
+            </div>
+          </div>
+
+          <!-- SECTION 5: Specifications -->
+          <div class="ap-section" data-progress-group="1">
+            <div class="ap-section-header">
+              <div class="ap-section-icon"><i class="fas fa-ruler-combined"></i></div>
+              <div>
+                <h3 class="ap-section-title">Specifications</h3>
+                <p class="ap-section-subtitle">Room count and size details</p>
+              </div>
+            </div>
+            <div class="ap-spec-grid">
+              <div class="ap-field">
+                <label for="bedrooms">Bedrooms <span style="color:#dc3545">*</span></label>
+                <input type="number" class="ap-input" id="bedrooms" name="bedrooms" required min="0" placeholder="e.g., 2" value="{{ house.bedrooms }}" />
+                <div class="invalid-feedback">Required.</div>
+              </div>
+              <div class="ap-field">
+                <label for="bathrooms">Bathrooms <span style="color:#dc3545">*</span></label>
+                <input type="number" class="ap-input" id="bathrooms" name="bathrooms" required min="0" step="0.5" placeholder="e.g., 1" value="{{ house.bathrooms }}" />
+                <div class="invalid-feedback">Required.</div>
+              </div>
+              <div class="ap-field">
+                <label for="squareFootage">Size (sq ft)</label>
+                <input type="number" class="ap-input" id="squareFootage" name="square_footage" min="0" placeholder="e.g., 1000" value="{{ house.size or '' }}" />
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 6: Features & Amenities -->
+          <div class="ap-section" data-progress-group="1">
+            <div class="ap-section-header">
+              <div class="ap-section-icon"><i class="fas fa-star"></i></div>
+              <div>
+                <h3 class="ap-section-title">Features &amp; Amenities</h3>
+                <p class="ap-section-subtitle">Select what's included with the property</p>
+              </div>
+            </div>
+
+            <div class="ap-field">
+              <label>Parking Availability</label>
+              <select class="ap-select" id="parkingAvailability" name="parking_availability">
+                <option value="None" {% if house.parking_availability == 'None' or not house.parking_availability %}selected{% endif %}>None</option>
+                <option value="Street Parking" {% if house.parking_availability == 'Street Parking' %}selected{% endif %}>Street Parking</option>
+                <option value="Garage" {% if house.parking_availability == 'Garage' %}selected{% endif %}>Garage</option>
+                <option value="Driveway" {% if house.parking_availability == 'Driveway' %}selected{% endif %}>Driveway</option>
+              </select>
+            </div>
+
+            <div class="ap-field">
+              <label>Furnished Status</label>
+              <div class="ap-check-group">
+                <label class="ap-check-item"><input type="radio" name="furnished_status" value="Fully Furnished" {% if 'Fully' in (house.furnished_status or '') %}checked{% endif %} /> Fully Furnished</label>
+                <label class="ap-check-item"><input type="radio" name="furnished_status" value="Partially Furnished" {% if 'Partially' in (house.furnished_status or '') %}checked{% endif %} /> Partially</label>
+                <label class="ap-check-item"><input type="radio" name="furnished_status" value="Unfurnished" {% if house.furnished_status == 'Unfurnished' or not house.furnished_status %}checked{% endif %} /> Unfurnished</label>
+              </div>
+            </div>
+
+            <div class="ap-field">
+              <label>Utilities Included</label>
+              <div class="ap-check-group">
+                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Water" {% if 'Water' in (house.utilities or '') %}checked{% endif %} /> <i class="fas fa-tint me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Water</label>
+                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Electricity" {% if 'Electricity' in (house.utilities or '') %}checked{% endif %} /> <i class="fas fa-bolt me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Electricity</label>
+                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Gas" {% if 'Gas' in (house.utilities or '') %}checked{% endif %} /> <i class="fas fa-fire me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Gas</label>
+                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Internet" {% if 'Internet' in (house.utilities or '') %}checked{% endif %} /> <i class="fas fa-wifi me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Internet</label>
+              </div>
+            </div>
+
+            <div class="ap-field">
+              <label>Amenities</label>
+              <div class="ap-check-group">
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Air Conditioning" {% if 'Air Conditioning' in (house.amenities or '') %}checked{% endif %} /> <i class="fas fa-snowflake me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>AC</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Washer/Dryer" {% if 'Washer' in (house.amenities or '') %}checked{% endif %} /> <i class="fas fa-tshirt me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Washer/Dryer</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Balcony" {% if 'Balcony' in (house.amenities or '') %}checked{% endif %} /> <i class="fas fa-door-open me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Balcony</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Gym" {% if 'Gym' in (house.amenities or '') %}checked{% endif %} /> <i class="fas fa-dumbbell me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Gym</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Swimming Pool" {% if 'Pool' in (house.amenities or '') %}checked{% endif %} /> <i class="fas fa-swimming-pool me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Pool</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Garden" {% if 'Garden' in (house.amenities or '') %}checked{% endif %} /> <i class="fas fa-leaf me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Garden</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 7: Policies -->
+          <div class="ap-section" data-progress-group="1">
+            <div class="ap-section-header">
+              <div class="ap-section-icon"><i class="fas fa-shield-alt"></i></div>
+              <div>
+                <h3 class="ap-section-title">Policies &amp; Accessibility</h3>
+                <p class="ap-section-subtitle">Rules and accessibility features</p>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <div class="ap-field">
+                  <label>Pets Allowed</label>
+                  <div class="ap-check-group" style="grid-template-columns: 1fr 1fr;">
+                    <label class="ap-check-item"><input type="radio" name="pets_allowed" value="Yes" {% if house.pets_allowed == 'Yes' %}checked{% endif %} /> Yes</label>
+                    <label class="ap-check-item"><input type="radio" name="pets_allowed" value="No" {% if house.pets_allowed == 'No' or not house.pets_allowed %}checked{% endif %} /> No</label>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="ap-field">
+                  <label>Pet Restrictions</label>
+                  <input type="text" class="ap-input" id="petRestrictions" name="pet_restrictions" placeholder="e.g., Small dogs only" value="{{ house.pet_restrictions or '' }}" />
+                </div>
+              </div>
+            </div>
+
+            <div class="ap-field">
+              <label>Smoking Policy</label>
+              <div class="ap-check-group" style="grid-template-columns: 1fr 1fr;">
+                <label class="ap-check-item"><input type="radio" name="smoking_policy" value="Smoking Allowed" {% if 'Allowed' in (house.smoking_policy or '') %}checked{% endif %} /> Smoking Allowed</label>
+                <label class="ap-check-item"><input type="radio" name="smoking_policy" value="Non-Smoking" {% if house.smoking_policy == 'Non-Smoking' or not house.smoking_policy %}checked{% endif %} /> Non-Smoking</label>
+              </div>
+            </div>
+
+            <div class="ap-field">
+              <label>Accessibility Features</label>
+              <div class="ap-check-group">
+                <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Wheelchair Access" {% if 'Wheelchair' in (house.accessibility_features or '') %}checked{% endif %} /> <i class="fas fa-wheelchair me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Wheelchair Access</label>
+                <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Elevator" {% if 'Elevator' in (house.accessibility_features or '') %}checked{% endif %} /> <i class="fas fa-arrows-alt-v me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Elevator</label>
+                <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Grab Bars" {% if 'Grab' in (house.accessibility_features or '') %}checked{% endif %} /> <i class="fas fa-hand-paper me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Grab Bars</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2FA field (hidden by default) -->
+          <div class="ap-section" id="twoFactorGroup" style="display: none;">
+            <div class="ap-section-header">
+              <div class="ap-section-icon"><i class="fas fa-shield-alt"></i></div>
+              <div>
+                <h3 class="ap-section-title">Verification</h3>
+                <p class="ap-section-subtitle">Two-factor authentication required</p>
+              </div>
+            </div>
+            <div class="ap-field">
+              <label for="two_factor_code">Enter 6-digit code</label>
+              <input type="text" class="ap-input" id="two_factor_code" name="two_factor_code" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" style="text-align:center;font-size:1.2rem;letter-spacing:0.3em;" />
+            </div>
+          </div>
+
+          <!-- Submit Section -->
+          <div id="section-submit">
+            <!-- Form Actions -->
+            <div class="ap-actions">
+              <button type="submit" class="btn-ap-submit" id="submitProperty">
+                <i class="fas fa-save"></i>
+                <span id="submitBtnText">Update Property</span>
+                <div class="ap-spinner" id="submitSpinner"></div>
+              </button>
+              <!-- Removed Draft button for Edit context, keeping Cancel -->
+              <a href="{{ url_for('landlord.properties') }}" class="btn-ap-cancel">
+                <i class="fas fa-times"></i>
+                Cancel
+              </a>
+            </div>
+
+            <div class="ap-feedback" id="addPropertyFeedback"></div>
+          </div>
+        </form>
+      </div>
+
+      <!-- ===== SIDEBAR COLUMN ===== -->
+      <div class="col-lg-4">
+
+        <!-- Tips -->
+        <aside class="ap-tips-card" aria-label="Listing tips">
+          <h5><i class="fas fa-lightbulb"></i> Editing Tips</h5>
+          <div class="ap-tips-body" id="tipsBody">
+            <ul class="ap-tips-list">
+              <li><i class="fas fa-circle"></i>Update your photos frequently to keep the listing fresh.</li>
+              <li><i class="fas fa-circle"></i>Adjust pricing based on seasonal demand.</li>
+              <li><i class="fas fa-circle"></i>Reply to tenant inquiries quickly.</li>
+              <li><i class="fas fa-circle"></i>Keep amenities accurate to avoid disputes.</li>
+            </ul>
+          </div>
+          <button type="button" class="ap-tips-toggle" id="toggleTips" aria-expanded="true">Hide Tips</button>
+        </aside>
+
+        <!-- Comprehensive Live Preview -->
+        <div class="ap-preview-card" aria-label="Property preview">
+
+          <!-- Image Gallery -->
+          <div class="ap-preview-gallery" id="previewGallery">
+            <i class="fas fa-image"></i>
+            <span class="ap-preview-gallery-badge">Preview</span>
+          </div>
+
+          <div class="ap-preview-body">
+
+            <!-- Title & Type -->
+            <div class="ap-pv-section">
+              <div class="ap-pv-title-row">
+                <h4 class="ap-preview-title" id="previewTitle">Property Name</h4>
+                <span class="ap-pv-type-badge" id="previewTypeBadge">--</span>
+              </div>
+              <p class="ap-preview-desc" id="previewDesc">Property description will appear here as you type...</p>
+            </div>
+
+            <!-- Location -->
+            <div class="ap-pv-section">
+              <div class="ap-pv-section-title"><i class="fas fa-map-marker-alt"></i> Location</div>
+              <p class="ap-preview-location" id="previewLocation"><i class="fas fa-map-marker-alt"></i> City, Country</p>
+            </div>
+
+            <!-- Pricing -->
+            <div class="ap-pv-section">
+              <div class="ap-pv-section-title"><i class="fas fa-tag"></i> Pricing</div>
+              <div class="ap-pv-price-main" id="previewPrice">KES 0/mo</div>
+              <div class="ap-pv-price-details" id="previewPriceDetails">
+                <span id="previewDeposit"><i class="fas fa-lock"></i> Deposit: --</span>
+                <span id="previewLease"><i class="fas fa-file-contract"></i> Lease: --</span>
+                <span id="previewAvail"><i class="fas fa-calendar"></i> Available: --</span>
+              </div>
+            </div>
+
+            <!-- Specifications -->
+            <div class="ap-pv-section">
+              <div class="ap-pv-section-title"><i class="fas fa-ruler-combined"></i> Specifications</div>
+              <div class="ap-preview-specs">
+                <div class="ap-preview-spec"><i class="fas fa-bed"></i> <span id="previewBeds">0 Beds</span></div>
+                <div class="ap-preview-spec"><i class="fas fa-bath"></i> <span id="previewBaths">0 Baths</span></div>
+                <div class="ap-preview-spec"><i class="fas fa-ruler-combined"></i> <span id="previewSqft">-- sq ft</span></div>
+              </div>
+            </div>
+
+            <!-- Features & Amenities -->
+            <div class="ap-pv-section">
+              <div class="ap-pv-section-title"><i class="fas fa-star"></i> Features</div>
+              <div class="ap-preview-tags" id="previewFeatures">
+                <span class="ap-pv-empty">No features selected</span>
+              </div>
+            </div>
+
+            <!-- Policies -->
+            <div class="ap-pv-section">
+              <div class="ap-pv-section-title"><i class="fas fa-shield-alt"></i> Policies</div>
+              <div id="previewPolicies">
+                <div class="ap-pv-policy-row"><i class="fas fa-paw"></i> <span id="previewPets">Pets: No</span></div>
+                <div class="ap-pv-policy-row"><i class="fas fa-smoking-ban"></i> <span id="previewSmoking">Smoking: Non-Smoking</span></div>
+                <div class="ap-pv-policy-row"><i class="fas fa-wheelchair"></i> <span id="previewAccess">Accessibility: None</span></div>
+              </div>
+            </div>
+
           </div>
         </div>
 
-        <!-- Footer -->
-        <div class="form-actions" style="margin-top: 2.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem;">
-            <a href="{{ url_for('landlord.properties') }}" class="btn-cancel">
-              <i class="fas fa-times"></i> Cancel
-            </a>
-            <button type="submit" class="btn-update">
-              <i class="fas fa-save"></i> Update Property
-            </button>
-        </div>
-
-      </form>
+        <a href="{{ url_for('auth.support') }}" class="ap-help-link"><i class="fas fa-question-circle"></i> Need Help?</a>
+      </div>
     </div>
+  </div>
 
+  <!-- Landlord Access Badge -->
+  <div class="ap-access-badge" aria-label="Landlord access indicator">
+    <i class="fas fa-user-shield"></i> Landlord Access
   </div>
 </div>
 
@@ -720,86 +1728,420 @@
         </div>
         <div class="modal-footer">
             <button class="btn-modal btn-modal-cancel" onclick="closeDeleteModal()">Cancel</button>
-            <button class="btn-modal btn-modal-confirm" id="btnConfirmDelete">
-                <i class="fas fa-trash-alt"></i> Delete
-            </button>
+            <form id="deleteForm" action="{{ url_for('landlord.delete_property', property_id=house.id) }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn-modal btn-modal-confirm" id="btnConfirmDelete">
+                    <i class="fas fa-trash-alt"></i> Delete
+                </button>
+            </form>
         </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block scripts %}
 <script>
-  // --- Modal Logic ---
-  var deleteModal = document.getElementById('deleteModal');
-  var btnConfirmDelete = document.getElementById('btnConfirmDelete');
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('addPropertyForm');
+  const feedback = document.getElementById('addPropertyFeedback');
+  const submitButton = document.getElementById('submitProperty');
+  const submitBtnText = document.getElementById('submitBtnText');
+  const submitSpinner = document.getElementById('submitSpinner');
+  const toggleTipsButton = document.getElementById('toggleTips');
+  const tipsBody = document.getElementById('tipsBody');
 
-  function openDeleteModal() {
-    deleteModal.classList.add('active');
+  const MAX_IMAGES = 10;
+
+  // =============================================
+  // Global file store
+  // In Edit Mode, we also track existing images for the preview
+  // =============================================
+  let allFiles = [];
+  
+  // Parse existing images from Jinja
+  // Assuming house.image_urls is a comma separated string or list
+  const existingImageUrls = {{ house.image_urls.split(',') if house.image_urls else [] | tojson }};
+  let existingImages = Array.isArray(existingImageUrls) ? existingImageUrls : [];
+
+  // References
+  const el = (id) => document.getElementById(id);
+  const inputs = {
+    name: el('propertyName'),
+    type: el('propertyType'),
+    description: el('propertyDescription'),
+    addressLine1: el('addressLine1'),
+    addressLine2: el('addressLine2'),
+    city: el('city'),
+    stateProvince: el('stateProvince'),
+    postalCode: el('postalCode'),
+    country: el('country'),
+    rent: el('rentAmount'),
+    deposit: el('securityDeposit'),
+    leaseTerm: el('leaseTerm'),
+    availabilityDate: el('availabilityDate'),
+    images: el('propertyImages'),
+    bedrooms: el('bedrooms'),
+    bathrooms: el('bathrooms'),
+    squareFootage: el('squareFootage'),
+    parking: el('parkingAvailability'),
+    furnished: document.querySelectorAll('input[name="furnished_status"]'),
+    utilities: document.querySelectorAll('input[name="utilities"]'),
+    amenities: document.querySelectorAll('input[name="amenities"]'),
+    pets: document.querySelectorAll('input[name="pets_allowed"]'),
+    petRestrictions: el('petRestrictions'),
+    smoking: document.querySelectorAll('input[name="smoking_policy"]'),
+    accessibility: document.querySelectorAll('input[name="accessibility_features"]')
+  };
+
+  // ---- Check item visual toggle ----
+  document.querySelectorAll('.ap-check-item input').forEach(inp => {
+    inp.addEventListener('change', () => {
+      const item = inp.closest('.ap-check-item');
+      if (inp.type === 'radio') {
+        document.querySelectorAll(`input[name="${inp.name}"]`).forEach(r => {
+          r.closest('.ap-check-item').classList.remove('selected');
+        });
+      }
+      item.classList.toggle('selected', inp.checked);
+      updatePreview();
+    });
+    // Initialize visual state
+    if (inp.checked) inp.closest('.ap-check-item').classList.add('selected');
+  });
+
+  // ---- Character count ----
+  const charCount = el('charCount');
+  inputs.description.addEventListener('input', () => {
+    const len = inputs.description.value.length;
+    charCount.textContent = `${len} / 500 characters`;
+    charCount.className = 'ap-char-count' + (len > 450 ? (len > 500 ? ' danger' : ' warning') : '');
+    inputs.description.classList.toggle('is-invalid', len > 500);
+    updatePreview();
+  });
+
+  // ---- Image upload ----
+  const uploadArea = el('uploadArea');
+  const imagePreview = el('imagePreview');
+  const uploadError = el('uploadError');
+  const imageCountNum = el('imageCountNum');
+
+  // Drag & drop visual feedback
+  ['dragover', 'dragenter'].forEach(evt => {
+    uploadArea.addEventListener(evt, (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+  });
+  ['dragleave', 'drop'].forEach(evt => {
+    uploadArea.addEventListener(evt, (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); });
+  });
+
+  // Drag & drop: merge new files into allFiles
+  uploadArea.addEventListener('drop', (e) => {
+    const newFiles = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+    allFiles = [...allFiles, ...newFiles].slice(0, MAX_IMAGES);
+    updateFileInput();
+  });
+
+  // File input change: merge new selections into allFiles
+  inputs.images.addEventListener('change', (e) => {
+    const newFiles = Array.from(e.target.files);
+    allFiles = [...allFiles, ...newFiles].slice(0, MAX_IMAGES);
+    updateFileInput();
+  });
+
+  // Sync allFiles back into the native file input, then render
+  function updateFileInput() {
+    const dt = new DataTransfer();
+    allFiles.forEach(file => dt.items.add(file));
+    inputs.images.files = dt.files;
+    handleImages();
   }
 
-  function closeDeleteModal() {
-    deleteModal.classList.remove('active');
-  }
+  function handleImages() {
+    imagePreview.innerHTML = '';
+    uploadError.classList.remove('visible');
+    uploadError.textContent = '';
 
-  // Close modal if clicking outside
-  deleteModal.addEventListener('click', function(e) {
-    if (e.target === deleteModal) {
-      closeDeleteModal();
+    const count = allFiles.length;
+    imageCountNum.textContent = count;
+    imageCountNum.className = 'count-num' + (count > 0 ? ' has-images' : '');
+
+    if (count > MAX_IMAGES) {
+      uploadError.textContent = `Maximum ${MAX_IMAGES} images allowed. You have ${count}.`;
+      uploadError.classList.add('visible');
     }
-  });
 
-  // Confirm Delete Action
-  btnConfirmDelete.addEventListener('click', function() {
-    var originalText = btnConfirmDelete.innerHTML;
-    btnConfirmDelete.disabled = true;
-    btnConfirmDelete.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+    // Validate each file
+    for (const file of allFiles) {
+      if (!['image/jpeg', 'image/png'].includes(file.type)) {
+        uploadError.textContent = `"${file.name}" is not a valid format. Use JPG or PNG.`;
+        uploadError.classList.add('visible');
+        continue;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        uploadError.textContent = `"${file.name}" exceeds the 5MB limit.`;
+        uploadError.classList.add('visible');
+        continue;
+      }
+    }
 
-    // Perform deletion via form submission to the route
-    var form = document.getElementById('editPropertyForm');
-    form.method = "POST";
-    form.action = "{{ url_for('landlord.delete_property', property_id=house.id) }}"; // Assumes a delete route exists
-    form.submit();
-  });
+    // Render thumbnails from allFiles (New Uploads)
+    allFiles.forEach((file, idx) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'ap-thumb';
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      const badge = document.createElement('div');
+      badge.className = 'ap-thumb-badge';
+      badge.textContent = idx === 0 ? 'New' : `+${idx + 1}`;
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'ap-thumb-remove';
+      removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+      removeBtn.addEventListener('click', () => {
+        allFiles = allFiles.filter((_, i) => i !== idx);
+        updateFileInput();
+      });
+      wrap.appendChild(img);
+      wrap.appendChild(badge);
+      wrap.appendChild(removeBtn);
+      imagePreview.appendChild(wrap);
+    });
 
-  // --- Image Preview (Frontend Only) ---
-  const fileInput = document.getElementById('images');
-  const previewGrid = document.querySelector('.image-preview-grid');
+    updatePreview();
+  }
 
-  fileInput.addEventListener('change', function(e) {
-    // Just for preview purposes. Actual upload happens on form submit.
-    // Note: The route replaces images, so we just preview what user selected.
-    previewGrid.innerHTML = ''; // Clear previous previews
+  // ---- Real-time comprehensive preview ----
+  function updatePreview() {
+    // Title & Type
+    el('previewTitle').textContent = inputs.name.value || 'Property Name';
+    const typeBadge = el('previewTypeBadge');
+    if (inputs.type.value) {
+      typeBadge.textContent = inputs.type.value;
+      typeBadge.classList.add('visible');
+    } else {
+      typeBadge.classList.remove('visible');
+    }
 
-    const files = e.target.files;
+    // Description
+    el('previewDesc').textContent = inputs.description.value || 'Property description will appear here as you type...';
+
+    // Location
+    const shortLoc = [inputs.city.value, inputs.country.value].filter(Boolean).join(', ');
+    el('previewLocation').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${shortLoc || 'City, Country'}`;
+
+    // Pricing
+    el('previewPrice').textContent = inputs.rent.value ? `KES ${Number(inputs.rent.value).toLocaleString()}/mo` : 'KES 0/mo';
+    el('previewDeposit').innerHTML = `<i class="fas fa-lock"></i> Deposit: ${inputs.deposit.value ? 'KES ' + Number(inputs.deposit.value).toLocaleString() : '--'}`;
+
+    if (inputs.leaseTerm.value) {
+      el('previewLease').innerHTML = `<i class="fas fa-file-contract"></i> Lease: ${inputs.leaseTerm.value}`;
+    } else {
+      el('previewLease').innerHTML = `<i class="fas fa-file-contract"></i> Lease: --`;
+    }
+
+    if (inputs.availabilityDate.value) {
+      const d = new Date(inputs.availabilityDate.value + 'T00:00:00');
+      el('previewAvail').innerHTML = `<i class="fas fa-calendar"></i> Available: ${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+    } else {
+      el('previewAvail').innerHTML = `<i class="fas fa-calendar"></i> Available: --`;
+    }
+
+    // Specs
+    el('previewBeds').textContent = inputs.bedrooms.value ? `${inputs.bedrooms.value} Bed${inputs.bedrooms.value > 1 ? 's' : ''}` : '0 Beds';
+    el('previewBaths').textContent = inputs.bathrooms.value ? `${inputs.bathrooms.value} Bath${inputs.bathrooms.value > 1 ? 's' : ''}` : '0 Baths';
+    el('previewSqft').textContent = inputs.squareFootage.value ? `${Number(inputs.squareFootage.value).toLocaleString()} sq ft` : '-- sq ft';
+
+    // Preview gallery
+    const gallery = el('previewGallery');
+    gallery.querySelectorAll('img').forEach(img => img.remove());
+    const existingCountBadge = gallery.querySelector('.ap-preview-gallery-count');
+    if (existingCountBadge) existingCountBadge.remove();
+
+    // Combine existing URLs + new Files for preview
+    let displaySources = [];
     
-    // Limit to 5
-    if (files.length > 5) {
-      alert('You can only upload up to 5 images.');
-      // Reset input
-      fileInput.value = ''; 
-      return;
+    // Add existing URLs
+    existingImages.forEach(url => displaySources.push({ type: 'url', src: url }));
+    // Add new files
+    allFiles.forEach(file => displaySources.push({ type: 'file', src: URL.createObjectURL(file) }));
+
+    const totalImages = displaySources.length;
+
+    if (totalImages > 0) {
+      gallery.classList.add('has-images');
+      const showCount = Math.min(totalImages, 4);
+      for (let i = 0; i < showCount; i++) {
+        const img = document.createElement('img');
+        img.className = 'ap-pv-gallery-img';
+        img.src = displaySources[i].src;
+        gallery.appendChild(img);
+      }
+      if (totalImages > 1) {
+        const countBadge = document.createElement('span');
+        countBadge.className = 'ap-preview-gallery-count';
+        countBadge.textContent = `+${totalImages - 1} more`;
+        gallery.appendChild(countBadge);
+      }
+    } else {
+      gallery.classList.remove('has-images');
     }
 
-    Array.from(files).forEach(file => {
-      if (!file.type.startsWith('image/')) return;
+    // Features tags
+    const tags = [];
+    const furnished = Array.from(inputs.furnished).find(f => f.checked);
+    if (furnished && furnished.value !== 'Unfurnished') tags.push(furnished.value);
+    if (inputs.parking.value !== 'None') tags.push(inputs.parking.value);
+    Array.from(inputs.utilities).filter(u => u.checked).forEach(u => tags.push(u.value));
+    Array.from(inputs.amenities).filter(a => a.checked).forEach(a => tags.push(a.value));
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const div = document.createElement('div');
-        div.className = 'preview-thumb';
-        div.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-        previewGrid.appendChild(div);
-      };
-      reader.readAsDataURL(file);
+    const featuresEl = el('previewFeatures');
+    if (tags.length > 0) {
+      featuresEl.innerHTML = tags.map(t => `<span class="ap-preview-tag">${t}</span>`).join('');
+    } else {
+      featuresEl.innerHTML = '<span class="ap-pv-empty">No features selected</span>';
+    }
+
+    // Policies
+    const petsVal = Array.from(inputs.pets).find(p => p.checked);
+    el('previewPets').textContent = `Pets: ${petsVal ? petsVal.value : 'No'}`;
+    const smokeVal = Array.from(inputs.smoking).find(s => s.checked);
+    el('previewSmoking').textContent = `Smoking: ${smokeVal ? smokeVal.value : 'Non-Smoking'}`;
+    const accessVals = Array.from(inputs.accessibility).filter(a => a.checked).map(a => a.value);
+    el('previewAccess').textContent = `Accessibility: ${accessVals.length > 0 ? accessVals.join(', ') : 'None'}`;
+  }
+
+  // ---- Steps bar click-to-scroll ----
+  document.querySelectorAll('.ap-step').forEach(step => {
+    step.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetId = step.getAttribute('data-step-target');
+      const target = document.getElementById(targetId);
+      if (target) {
+        const stepsBar = el('stepsBar');
+        const stepsBarHeight = stepsBar ? stepsBar.offsetHeight : 0;
+        const navHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--navbar-height')) || 70;
+        const offset = navHeight + stepsBarHeight + 12;
+        const top = target.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
     });
   });
 
-  // Auto-select property type if empty (UX enhancement)
-  const typeSelect = document.querySelector('select[name="property_type"]');
-  if(typeSelect && typeSelect.value === "") {
-    // Logic to select based on context if needed
+  // Listen on all text/select inputs for preview
+  [inputs.name, inputs.type, inputs.description, inputs.addressLine1, inputs.addressLine2,
+   inputs.city, inputs.stateProvince, inputs.postalCode, inputs.country, inputs.rent,
+   inputs.deposit, inputs.leaseTerm, inputs.availabilityDate, inputs.bedrooms, inputs.bathrooms,
+   inputs.squareFootage, inputs.parking, inputs.petRestrictions
+  ].forEach(inp => {
+    if (!inp) return;
+    inp.addEventListener('input', updatePreview);
+    inp.addEventListener('change', updatePreview);
+  });
+
+  // ---- Toggle tips ----
+  toggleTipsButton.addEventListener('click', () => {
+    const isHidden = tipsBody.classList.toggle('collapsed');
+    toggleTipsButton.textContent = isHidden ? 'Show Tips' : 'Hide Tips';
+    toggleTipsButton.setAttribute('aria-expanded', !isHidden);
+  });
+
+  // ---- Set min date to today ----
+  const today = new Date().toISOString().split('T')[0];
+  inputs.availabilityDate.setAttribute('min', today);
+
+  // ---- Form submission ----
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const requiredFields = form.querySelectorAll('[required]');
+    let valid = true;
+    requiredFields.forEach(f => {
+      if (!f.value || (f.tagName === 'SELECT' && f.value === '')) {
+        f.classList.add('is-invalid');
+        valid = false;
+      } else {
+        f.classList.remove('is-invalid');
+      }
+    });
+
+    if (inputs.description.value.length > 500) {
+      inputs.description.classList.add('is-invalid');
+      valid = false;
+    }
+
+    if (!valid) {
+      showFeedback('Please fill in all required fields correctly.', 'danger');
+      const firstInvalid = form.querySelector('.is-invalid');
+      if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    submitButton.disabled = true;
+    submitBtnText.textContent = 'Updating...';
+    submitSpinner.style.display = 'block';
+    showFeedback('Updating property...', 'info');
+
+    const formData = new FormData(form);
+
+    // Remove the default images entry and re-add from allFiles
+    formData.delete('images');
+    allFiles.forEach(file => formData.append('images', file));
+    
+    // Add existing images so backend knows to keep them if needed (optional depending on backend logic)
+    // Assuming backend handles retention if 'images' key is missing or if we send an 'existing_images' list.
+    // Here we just send new files. Standard Flask edit route usually appends.
+
+    const csrfToken = form.querySelector('input[name="csrf_token"]').value;
+
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken },
+        body: formData,
+        credentials: 'include'
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        showFeedback(result.message || 'Property updated successfully!', 'success');
+        // Optional: Redirect or refresh
+        setTimeout(() => { window.location.href = "{{ url_for('landlord.properties') }}"; }, 1500);
+      } else {
+        showFeedback(result.message || 'Error updating property. Please try again.', 'danger');
+      }
+    } catch (error) {
+      showFeedback('Network error. Please check your connection and try again.', 'danger');
+    } finally {
+      submitButton.disabled = false;
+      submitBtnText.textContent = 'Update Property';
+      submitSpinner.style.display = 'none';
+    }
+  });
+
+  // ---- Feedback helper ----
+  function showFeedback(msg, type) {
+    const iconMap = { success: 'check-circle', danger: 'exclamation-circle', info: 'spinner fa-spin' };
+    feedback.className = `ap-feedback alert-${type} visible`;
+    feedback.innerHTML = `<i class="fas fa-${iconMap[type] || 'info-circle'}"></i><span>${msg}</span>`;
   }
+
+  // Initial state
+  updatePreview();
+});
+</script>
+
+<script>
+// --- Modal Logic ---
+function openDeleteModal() {
+  document.getElementById('deleteModal').classList.add('active');
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('active');
+}
+
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteModal();
+});
 </script>
 {% endblock %}
