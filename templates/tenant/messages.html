@@ -33,6 +33,34 @@
     margin: 0;
   }
 
+  .msg-header-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .btn-msg-action {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.65rem 1.2rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    font-family: inherit;
+  }
+
+  .btn-msg-action:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: var(--primary-light);
+  }
+
   .btn-compose {
     background: var(--gradient-primary);
     border: none;
@@ -81,7 +109,7 @@
     transform: translateY(-2px);
   }
   
-  /* Unread indicator (Optional logic if you add read status) */
+  /* Unread indicator */
   .msg-card.unread {
     border-left: 4px solid var(--primary-color);
   }
@@ -245,7 +273,7 @@
     margin-bottom: 0.5rem;
   }
 
-  /* ========== MODAL (Reused) ========== */
+  /* ========== MODALS (General Styles) ========== */
   .modal-overlay {
     position: fixed;
     top: 0;
@@ -275,7 +303,7 @@
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     width: 100%;
-    max-width: 400px;
+    max-width: 500px; /* Wider for compose */
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     transform: translateY(20px);
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -292,21 +320,29 @@
     padding: 1.25rem 1.5rem 0.5rem;
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .modal-title-group {
+    display: flex;
+    align-items: center;
     gap: 1rem;
   }
 
   .modal-icon {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     flex-shrink: 0;
-    background-color: #fee2e2;
-    color: #ef4444;
   }
+
+  .modal-icon.danger { background-color: #fee2e2; color: #ef4444; }
+  .modal-icon.primary { background-color: var(--primary-light); color: var(--primary-color); }
 
   .modal-title {
     font-size: 1.1rem;
@@ -329,6 +365,38 @@
     gap: 0.75rem;
   }
 
+  /* Modal Inputs */
+  .modal-form-group {
+    margin-bottom: 1rem;
+  }
+
+  .modal-form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .modal-input, .modal-textarea {
+    width: 100%;
+    padding: 0.6rem 0.85rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--body-bg);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: var(--transition);
+    font-family: inherit;
+  }
+  
+  .modal-input:focus, .modal-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-light);
+  }
+
+  /* Buttons */
   .btn-modal {
     padding: 0.6rem 1.2rem;
     border-radius: var(--radius-md);
@@ -364,15 +432,37 @@
     background-color: #dc2626;
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
   }
+
+  .btn-modal-primary {
+    background: var(--gradient-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
   
-  .btn-modal-confirm:disabled {
-    background-color: #fca5a5;
+  .btn-modal-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  }
+
+  .btn-modal:disabled {
+    opacity: 0.6;
     cursor: not-allowed;
+    transform: none;
     box-shadow: none;
   }
 
   /* ========== RESPONSIVE ========== */
   @media (max-width: 767px) {
+    .msg-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .msg-header-actions {
+      width: 100%;
+      justify-content: flex-end;
+    }
     .msg-header-left h1 {
       font-size: 1.4rem;
     }
@@ -416,10 +506,16 @@
         <h1>Messages</h1>
         <p>View your communication history with landlords.</p>
       </div>
-      <!-- Link to compose page (Assuming route exists) -->
-      <!-- <a href="{{ url_for('tenant.compose_message') }}" class="btn-compose">
-        <i class="fas fa-pen"></i> Compose
-      </a> -->
+      
+      <!-- Header Actions -->
+      <div class="msg-header-actions">
+        <button class="btn-msg-action" onclick="markAllRead()" title="Mark all as read">
+          <i class="fas fa-check-double"></i> Mark All Read
+        </button>
+        <button class="btn-compose" onclick="openComposeModal()">
+          <i class="fas fa-pen"></i> Message Landlord
+        </button>
+      </div>
     </div>
 
     <!-- Search -->
@@ -507,6 +603,9 @@
       </div>
       <h3>No Messages Yet</h3>
       <p>You haven't exchanged any messages with your landlord yet.</p>
+      <button class="btn-compose" onclick="openComposeModal()">
+        <i class="fas fa-pen"></i> Start a Conversation
+      </button>
     </div>
 
     {% endif %}
@@ -514,14 +613,48 @@
   </div>
 </div>
 
+<!-- COMPOSE MESSAGE MODAL -->
+<div class="modal-overlay" id="composeModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-title-group">
+                <div class="modal-icon primary">
+                    <i class="fas fa-paper-plane"></i>
+                </div>
+                <h3 class="modal-title">New Message</h3>
+            </div>
+            <button class="btn-modal-cancel" onclick="closeComposeModal()" style="padding: 0.4rem;"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-form-group">
+                <label class="modal-form-label">Landlord Name / Email</label>
+                <input type="text" id="composeTo" class="modal-input" placeholder="e.g., John Kamau" required />
+            </div>
+            <div class="modal-form-group">
+                <label class="modal-form-label">Message</label>
+                <textarea id="composeContent" class="modal-textarea" rows="4" placeholder="Type your message here..." required></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-modal btn-modal-cancel" onclick="closeComposeModal()">Cancel</button>
+            <button class="btn-modal btn-modal-primary" id="btnSendMessage">
+                <i class="fas fa-paper-plane"></i> Send Message
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- DELETE CONFIRMATION MODAL -->
 <div class="modal-overlay" id="deleteModal">
     <div class="modal-box">
         <div class="modal-header">
-            <div class="modal-icon">
-                <i class="fas fa-exclamation-triangle"></i>
+            <div class="modal-title-group">
+                <div class="modal-icon danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3 class="modal-title">Delete Message?</h3>
             </div>
-            <h3 class="modal-title">Delete Message?</h3>
+            <button class="btn-modal-cancel" onclick="closeDeleteModal()" style="padding: 0.4rem;"><i class="fas fa-times"></i></button>
         </div>
         <div class="modal-body">
             <p>Are you sure you want to delete this message? This action cannot be undone.</p>
@@ -538,9 +671,123 @@
 
 {% block scripts %}
 <script>
-  // ---- Delete Modal Logic ----
-  var deleteModal = document.getElementById('deleteModal');
-  var btnConfirmDelete = document.getElementById('btnConfirmDelete');
+  // --- Utility: Get CSRF Token ---
+  function getCSRF() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    if (meta) return meta.getAttribute('content');
+    const input = document.querySelector('input[name="csrf_token"]');
+    if (input) return input.value;
+    return '';
+  }
+
+  // ===========================
+  // 1. MARK ALL READ LOGIC
+  // ===========================
+  function markAllRead() {
+    const btn = document.querySelector('.btn-msg-action');
+    const originalText = btn.innerHTML;
+    
+    // Loading State
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+
+    fetch('/tenant/messages/mark_all_read', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRF()
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if(data.success) {
+        // Remove visual unread indicators
+        document.querySelectorAll('.msg-card.unread').forEach(card => {
+          card.classList.remove('unread');
+        });
+        // Show flash message (if you have a function for it, otherwise alert)
+        // Assuming standard flash message handling exists or alert
+        alert('All messages marked as read.');
+      } else {
+        alert('Error: ' + (data.error || 'Could not mark messages as read'));
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert('An error occurred.');
+    })
+    .finally(() => {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    });
+  }
+
+  // ===========================
+  // 2. COMPOSE MESSAGE LOGIC
+  // ===========================
+  const composeModal = document.getElementById('composeModal');
+  const btnSendMessage = document.getElementById('btnSendMessage');
+
+  function openComposeModal() {
+    composeModal.classList.add('active');
+    document.getElementById('composeTo').focus();
+  }
+
+  function closeComposeModal() {
+    composeModal.classList.remove('active');
+    document.getElementById('composeTo').value = '';
+    document.getElementById('composeContent').value = '';
+  }
+
+  btnSendMessage.addEventListener('click', function() {
+    const toUser = document.getElementById('composeTo').value.trim();
+    const content = document.getElementById('composeContent').value.trim();
+
+    if(!toUser || !content) {
+      alert('Please enter both a recipient and a message.');
+      return;
+    }
+
+    const originalText = btnSendMessage.innerHTML;
+    btnSendMessage.disabled = true;
+    btnSendMessage.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+    fetch('/tenant/send_message', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRF()
+      },
+      body: JSON.stringify({
+        to_user: toUser,
+        content: content
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if(data.success) {
+        closeComposeModal();
+        alert('Message sent successfully!');
+        window.location.reload(); // Reload to show the new conversation
+      } else {
+        alert('Error: ' + (data.error || 'Failed to send message'));
+        btnSendMessage.disabled = false;
+        btnSendMessage.innerHTML = originalText;
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert('An error occurred.');
+      btnSendMessage.disabled = false;
+      btnSendMessage.innerHTML = originalText;
+    });
+  });
+
+  // ===========================
+  // 3. DELETE MESSAGE LOGIC
+  // ===========================
+  const deleteModal = document.getElementById('deleteModal');
+  const btnConfirmDelete = document.getElementById('btnConfirmDelete');
   var messageToDeleteId = null;
 
   function openDeleteModal(id) {
@@ -553,46 +800,25 @@
     messageToDeleteId = null;
   }
 
-  // Close modal if clicking outside
-  deleteModal.addEventListener('click', function(e) {
-    if (e.target === deleteModal) {
-      closeDeleteModal();
-    }
-  });
-
-  // Close on Escape key
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && deleteModal.classList.contains('active')) {
-      closeDeleteModal();
-    }
-  });
-
-  // Confirm Delete Action
   btnConfirmDelete.addEventListener('click', function() {
     if (!messageToDeleteId) return;
 
-    // Add loading state
-    var originalBtnText = btnConfirmDelete.innerHTML;
+    const originalText = btnConfirmDelete.innerHTML;
     btnConfirmDelete.disabled = true;
     btnConfirmDelete.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
 
-    var headers = { 'Content-Type': 'application/json' };
-    
-    // Attempt to get CSRF token
-    var csrfToken = document.querySelector('input[name="csrf_token"]');
-    if (csrfToken) headers['X-CSRFToken'] = csrfToken.value;
-
-    // Adjust URL if your delete route is different (e.g., /tenant/messages/delete/<id>)
     fetch('/tenant/delete_message/' + messageToDeleteId, {
       method: 'POST',
-      headers: headers
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRF()
+      }
     })
     .then(function(response) { return response.json(); })
     .then(function(data) {
       if (data.success) {
         closeDeleteModal();
         
-        // Animate removal
         var card = document.querySelector('.msg-card[data-id="' + messageToDeleteId + '"]');
         if (card) {
           card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
@@ -601,29 +827,45 @@
           
           setTimeout(function() {
             card.remove();
-            // Check if list is empty
             var remaining = document.querySelectorAll('.msg-card').length;
             if (remaining === 0) {
-              window.location.reload(); // Reload to show empty state template
+              window.location.reload();
             }
           }, 300);
         }
       } else {
         alert('Error: ' + (data.error || 'Failed to delete message.'));
-        // Reset button
         btnConfirmDelete.disabled = false;
-        btnConfirmDelete.innerHTML = originalBtnText;
+        btnConfirmDelete.innerHTML = originalText;
       }
     })
     .catch(function() {
       alert('An error occurred. Please try again.');
-      // Reset button
       btnConfirmDelete.disabled = false;
-      btnConfirmDelete.innerHTML = originalBtnText;
+      btnConfirmDelete.innerHTML = originalText;
     });
   });
 
-  // ---- Search Filter ----
+  // Close Modals on Outside Click
+  [composeModal, deleteModal].forEach(modal => {
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        modal.classList.remove('active');
+      }
+    });
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      composeModal.classList.remove('active');
+      deleteModal.classList.remove('active');
+    }
+  });
+
+  // ===========================
+  // 4. SEARCH FILTER
+  // ===========================
   document.getElementById('msgSearch').addEventListener('input', function(e) {
     var query = e.target.value.toLowerCase();
     var cards = document.querySelectorAll('.msg-card');
@@ -642,18 +884,14 @@
     });
   });
 
-  // ---- View Conversation Helper ----
+  // ===========================
+  // 5. VIEW CONVERSATION
+  // ===========================
   function viewConversation(userId) {
-    // This would ideally navigate to a detailed chat view
-    // e.g. window.location.href = "/tenant/conversation/" + userId;
-    console.log("Open conversation with user ID: " + userId);
-    
-    // Fallback for demo purposes if route doesn't exist yet:
-    // Just highlighting the card visually for now
+    // In a full app, this would navigate to a detailed chat view.
+    // Since this is a list view, we just highlight the card.
     var card = event.currentTarget;
-    // Reset all
     document.querySelectorAll('.msg-card').forEach(c => c.style.border = '1px solid var(--border-color)');
-    // Highlight active
     card.style.border = '1px solid var(--primary-color)';
   }
 </script>
