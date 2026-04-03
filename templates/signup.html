@@ -16,6 +16,7 @@
   .signup-container {
     max-width: 500px;
     margin: 0 auto;
+    width: 100%;
   }
 
   .signup-card {
@@ -24,6 +25,7 @@
     border-radius: var(--radius-lg);
     padding: 2.5rem;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    margin: 0 1rem; /* Ensure side margins on small screens */
   }
 
   .signup-header {
@@ -52,6 +54,7 @@
   .form-field {
     display: flex;
     flex-direction: column;
+    width: 100%;
   }
 
   .form-field label {
@@ -78,6 +81,8 @@
     font-size: 0.9rem;
     font-family: inherit;
     transition: var(--transition);
+    width: 100%;
+    box-sizing: border-box; /* Ensure padding doesn't increase width */
   }
 
   .form-field input:focus,
@@ -102,6 +107,7 @@
     font-size: 0.8rem;
     margin-top: 0.5rem;
     line-height: 1.5;
+    word-break: break-word; /* Prevents text overflow */
   }
 
   .form-row {
@@ -110,8 +116,9 @@
     gap: 1rem;
   }
 
+  /* FIX: Ensures grid items respect the column width and don't overflow */
   .form-row .form-field {
-    margin: 0;
+    min-width: 0;
   }
 
   .form-checkbox {
@@ -136,12 +143,14 @@
     color: var(--text-secondary);
     cursor: pointer;
     line-height: 1.5;
+    word-break: break-word; /* Prevents long terms text from overflowing */
   }
 
   .form-checkbox a {
     color: var(--primary-color);
     text-decoration: none;
     font-weight: 500;
+    white-space: nowrap;
   }
 
   .form-checkbox a:hover {
@@ -205,12 +214,13 @@
     border: none;
     font-size: 0.9rem;
     display: flex;
-    align-items: center;
+    align-items: flex-start; /* Align icon to top if text wraps */
     gap: 0.5rem;
   }
 
   .alert i {
     flex-shrink: 0;
+    margin-top: 0.15rem;
   }
 
   .alert-danger {
@@ -225,19 +235,34 @@
     border: 1px solid rgba(40, 167, 69, 0.2);
   }
 
+  /* ========== RESPONSIVE ========== */
   @media (max-width: 640px) {
     .signup-page {
-      padding: 1.5rem 0;
+      padding: 2rem 0;
     }
     .signup-card {
-      padding: 1.75rem;
+      padding: 1.5rem;
       margin: 0 1rem;
     }
     .signup-header h1 {
-      font-size: 1.45rem;
+      font-size: 1.5rem;
     }
     .form-row {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr; /* Stack columns on mobile */
+    }
+    .form-checkbox label {
+      font-size: 0.85rem;
+    }
+  }
+
+  /* Extra small screens (iPhone SE, etc) */
+  @media (max-width: 380px) {
+    .signup-header h1 {
+      font-size: 1.35rem;
+    }
+    .btn-signup {
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
     }
   }
 </style>

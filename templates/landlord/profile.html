@@ -303,7 +303,7 @@
              Transformations: 300x300, crop='thumb' (centers on face/content).
           -->
           {% if current_user.profile_image %}
-            <img src="{{ cloudinary_url(current_user.profile_image, width=300, height=300, crop='thumb', gravity='face', quality='auto') }}" 
+            <img src="{{ current_user.profile_picture }}" 
                  alt="Profile" 
                  class="profile-avatar-img" 
                  id="avatarPreview">

@@ -12,6 +12,8 @@ import logging
 import pyotp
 from werkzeug.utils import secure_filename
 import os
+from flask import current_app
+import cloudinary.uploader
 
 # ------------------- LOGGING -------------------
 logging.basicConfig(level=logging.DEBUG)
@@ -111,14 +113,12 @@ def signup():
                 flash("Invalid role.", "danger")
                 return redirect(url_for("auth.signup"))
 
-            # ✅ Phone validation (Kenya format: 9 digits after +254)
+            # Phone validation
             if not re.match(r"^\d{9}$", phone_number):
                 flash("Phone number must be 9 digits after +254.", "danger")
                 return redirect(url_for("auth.signup"))
 
-            # Optional: Add prefix before saving to DB
             full_phone = f"+254{phone_number}"
-
 
             # Password validation
             if not re.match(
@@ -132,37 +132,41 @@ def signup():
                 flash("Passwords do not match.", "danger")
                 return redirect(url_for("auth.signup"))
 
-            # Profile picture handling
-            profile_picture_path = None
+            # 🔥 Upload to Cloudinary
+            profile_picture_url = None
             if profile_picture and profile_picture.filename:
-                filename = secure_filename(profile_picture.filename)
-                upload_folder = app.config.get("UPLOAD_FOLDER", "static/images")
-                os.makedirs(upload_folder, exist_ok=True)
-                profile_picture_path = os.path.join(upload_folder, filename)
-                profile_picture.save(profile_picture_path)
+                upload_result = cloudinary.uploader.upload(
+                    profile_picture,
+                    folder="homehub/profile_pictures",
+                    resource_type="image"
+                )
+                profile_picture_url = upload_result.get("secure_url")
 
             # Create user
             user = User(
                 name=full_name,
                 email=email,
-                phone_number=phone_number,
+                phone_number=full_phone,  # ✅ FIXED
                 role=role,
                 mpesa_details=mpesa_details if role in ["landlord", "service"] else None,
-                profile_picture=profile_picture_path,
+                profile_picture=profile_picture_url,  # ✅ URL instead of local path
                 language=language,
             )
             user.set_password(password)
 
             db.session.add(user)
             db.session.commit()
+
             flash("Account created. Please login.", "success")
             logger.debug(f"User {email} created.")
+
             return redirect(url_for("auth.login"))
 
         except IntegrityError:
             db.session.rollback()
             flash("Email or phone already registered.", "danger")
             return redirect(url_for("auth.signup"))
+
         except Exception as e:
             db.session.rollback()
             logger.error(f"Signup error: {str(e)}", exc_info=True)

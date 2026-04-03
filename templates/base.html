@@ -1499,20 +1499,32 @@
 
         <div class="navbar-right">
             {% if current_user.is_authenticated %}
-            <a href="{{ url_for('landlord.profile') if current_user.role.lower() == 'landlord' else url_for('tenant.profile') if current_user.role.lower() == 'tenant' else url_for('service_provider.profile') if current_user.role.lower() == 'service' else '#' }}" 
-               class="navbar-profile d-none d-md-flex">
-                {% if current_user.profile_image %}
-                <img src="{{ current_user.profile_image }}" 
-                     alt="Profile" 
-                     class="navbar-profile-avatar">
+
+            {% set profile_url =
+                url_for('landlord.profile') if current_user.role.lower() == 'landlord'
+                else url_for('tenant.profile') if current_user.role.lower() == 'tenant'
+                else url_for('service_provider.profile') if current_user.role.lower() == 'service'
+                else '#' %}
+
+            <a href="{{ profile_url }}" class="navbar-profile d-none d-md-flex">
+
+                {% if current_user.profile_picture %}
+                    <img src="{{ current_user.profile_picture }}" 
+                        alt="Profile" 
+                        class="navbar-profile-avatar">
                 {% else %}
-                <div class="navbar-profile-placeholder">
-                    <i class="fas fa-user"></i>
-                </div>
+                    <div class="navbar-profile-placeholder">
+                        <i class="fas fa-user"></i>
+                    </div>
                 {% endif %}
-                <span class="navbar-profile-name d-none d-lg-inline">{{ current_user.name.split()[0] }}</span>
+
+                <span class="navbar-profile-name d-none d-lg-inline">
+                    {{ current_user.name.split()[0] }}
+                </span>
             </a>
+
             {% endif %}
+
             <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode">
                 <i class="fas fa-moon"></i>
                 <i class="fas fa-sun"></i>

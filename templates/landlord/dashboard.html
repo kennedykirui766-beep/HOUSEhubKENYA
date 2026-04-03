@@ -1005,18 +1005,19 @@
     </a>
 
     <div class="dash-profile">
-      {% if current_user.profile_image %}
-      <img src="{{ current_user.profile_image }}" alt="User Avatar" class="dash-avatar" />
-      {% else %}
-      <div class="dash-avatar-placeholder">
-        <i class="fas fa-user"></i>
+        {% if current_user.profile_picture %}
+          <img src="{{ current_user.profile_picture }}" alt="User Avatar" class="dash-avatar" />
+        {% else %}
+          <div class="dash-avatar-placeholder">
+            <i class="fas fa-user"></i>
+          </div>
+        {% endif %}
+
+        <div class="dash-profile-info">
+          <h4>{{ current_user.name }}</h4>
+          <p>{{ current_user.role|capitalize }}</p>
+        </div>
       </div>
-      {% endif %}
-      <div class="dash-profile-info">
-        <h4>{{ current_user.name }}</h4>
-        <p>Landlord</p>
-      </div>
-    </div>
   </div>
 </div>
 
