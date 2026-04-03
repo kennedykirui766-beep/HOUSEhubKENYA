@@ -340,25 +340,21 @@ def messages():
         return redirect(url_for("tenant.dashboard"))
 
 
-@tenant_bp.route('/compose_message', methods=['GET', 'POST'])
+@tenant_bp.route('/compose_message/<int:landlord_id>', methods=['GET', 'POST'])
 @login_required
-def compose_message():
-    # Get all landlords (or whoever tenant can message)
-    landlords = User.query.filter_by(role='landlord').all()
+def compose_message(landlord_id):
+    landlord = User.query.get_or_404(landlord_id)
 
     if request.method == 'POST':
-        receiver_id = request.form.get('receiver_id')
         content = request.form.get('content')
 
-        # Validation
-        if not receiver_id or not content:
-            flash("All fields are required.", "danger")
-            return redirect(url_for('tenant.compose_message'))
+        if not content:
+            flash("Message cannot be empty.", "danger")
+            return redirect(url_for('tenant.compose_message', landlord_id=landlord_id))
 
-        # Create message
         new_message = Message(
             sender_id=current_user.id,
-            receiver_id=int(receiver_id),
+            receiver_id=landlord.id,
             content=content,
             is_read=False
         )
@@ -369,7 +365,10 @@ def compose_message():
         flash("Message sent successfully!", "success")
         return redirect(url_for('tenant.messages'))
 
-    return render_template('tenant/compose_message.html', landlords=landlords)
+    return render_template(
+        'tenant/compose_message.html',
+        landlord=landlord
+    )
 
 
 # Contact service providers
