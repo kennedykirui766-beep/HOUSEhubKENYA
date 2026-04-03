@@ -1551,19 +1551,37 @@
 
         {% if current_user.is_authenticated %}
         <div class="user-profile-section">
-            {% if current_user.profile_image %}
-            <img src="{{ current_user.profile_image }}" alt="{{ current_user.name }}" class="user-avatar">
+
+            {% if current_user.profile_picture %}
+                <img src="{{ current_user.profile_picture }}" 
+                    alt="{{ current_user.name }}" 
+                    class="user-avatar">
             {% else %}
-            <div class="user-avatar-placeholder">
-                <i class="fas fa-user"></i>
-            </div>
+                <div class="user-avatar-placeholder">
+                    <i class="fas fa-user"></i>
+                </div>
             {% endif %}
-            <div class="user-name">{{ current_user.name }}</div>
+
+            <div class="user-name">
+                {{ current_user.name if current_user.name else "User" }}
+            </div>
+
             <span class="user-role-badge role-{{ current_user.role.lower() }}">
-                <i class="fas fa-{% if current_user.role.lower() == 'landlord' %}building{% elif current_user.role.lower() == 'tenant' %}user{% elif current_user.role.lower() == 'admin' %}shield-alt{% else %}wrench{% endif %}"></i>
-                {{ current_user.role }}
+                <i class="fas fa-{% if current_user.role.lower() == 'landlord' %}
+                    building
+                {% elif current_user.role.lower() == 'tenant' %}
+                    user
+                {% elif current_user.role.lower() == 'admin' %}
+                    shield-alt
+                {% else %}
+                    wrench
+                {% endif %}"></i>
+
+                {{ current_user.role|capitalize }}
             </span>
+
         </div>
+
 
         <nav class="sidebar-nav">
             <div class="sidebar-section-title">Menu</div>
