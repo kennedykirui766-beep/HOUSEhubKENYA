@@ -1,6 +1,7 @@
 import os
 import logging
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
+from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from datetime import datetime
@@ -320,6 +321,7 @@ def delete_property(property_id):
 
 
 # ---------------- Settings ----------------
+
 @landlord_bp.route("/settings", methods=["GET", "POST"])
 @login_required
 def settings():
@@ -328,9 +330,75 @@ def settings():
         return redirect(url_for("main.index"))
 
     if request.method == "POST":
-        # Later: save landlord preferences here (e.g., language, notifications)
-        flash("Settings updated successfully!", "success")
-        return redirect(url_for("landlord.settings"))
+        try:
+            # -------------------------
+            # 🔐 PASSWORD CHANGE
+            # -------------------------
+            current_password = request.form.get("current_password")
+            new_password = request.form.get("new_password")
+            confirm_password = request.form.get("confirm_password")
+
+            if new_password:  # Only if user wants to change password
+                if not current_password:
+                    flash("Enter current password.", "danger")
+                    return redirect(url_for("landlord.settings"))
+
+                if not current_user.check_password(current_password):
+                    flash("Current password is incorrect.", "danger")
+                    return redirect(url_for("landlord.settings"))
+
+                if new_password != confirm_password:
+                    flash("Passwords do not match.", "danger")
+                    return redirect(url_for("landlord.settings"))
+
+                current_user.set_password(new_password)
+
+            # -------------------------
+            # 🏠 BUSINESS INFO (OPTIONAL SAFE UPDATE)
+            # -------------------------
+            business_name = request.form.get("business_name")
+            bio = request.form.get("bio")
+            address = request.form.get("address")
+
+            if business_name is not None:
+                current_user.business_name = business_name.strip() or None
+
+            if bio is not None:
+                current_user.bio = bio.strip() or None
+
+            if address is not None:
+                current_user.address = address.strip() or None
+
+            # -------------------------
+            # 🔔 PREFERENCES
+            # -------------------------
+            current_user.email_notifications = bool(request.form.get("email_notifications"))
+            current_user.message_alerts = bool(request.form.get("message_alerts"))
+
+            # -------------------------
+            # 🔐 2FA SETTINGS
+            # -------------------------
+            current_user.two_factor_enabled = bool(request.form.get("two_factor_enabled"))
+            current_user.email_2fa_enabled = bool(request.form.get("email_2fa_enabled"))
+            current_user.sms_2fa_enabled = bool(request.form.get("sms_2fa_enabled"))
+
+            preferred_2fa = request.form.get("preferred_2fa_method")
+            if preferred_2fa in ["email", "sms", "totp"]:
+                current_user.preferred_2fa_method = preferred_2fa
+
+            # -------------------------
+            # 💾 SAVE
+            # -------------------------
+            db.session.commit()
+
+            flash("Settings updated successfully!", "success")
+            return redirect(url_for("landlord.settings"))
+
+        except Exception as e:
+            db.session.rollback()
+            print("Settings error:", e)
+            flash("Error updating settings.", "danger")
+            return redirect(url_for("landlord.settings"))
 
     return render_template("landlord/settings.html", stats={})
 
