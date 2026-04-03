@@ -72,7 +72,6 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    cursor: pointer;
     transition: var(--transition);
     text-decoration: none;
     font-family: inherit;
@@ -273,7 +272,7 @@
     margin-bottom: 0.5rem;
   }
 
-  /* ========== MODALS (General Styles) ========== */
+  /* ========== MODAL (Delete Only) ========== */
   .modal-overlay {
     position: fixed;
     top: 0;
@@ -303,7 +302,7 @@
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     width: 100%;
-    max-width: 500px; 
+    max-width: 400px;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     transform: translateY(20px);
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -342,7 +341,6 @@
   }
 
   .modal-icon.danger { background-color: #fee2e2; color: #ef4444; }
-  .modal-icon.primary { background-color: var(--primary-light); color: var(--primary-color); }
 
   .modal-title {
     font-size: 1.1rem;
@@ -365,37 +363,6 @@
     gap: 0.75rem;
   }
 
-  /* Modal Inputs */
-  .modal-form-group {
-    margin-bottom: 1rem;
-  }
-
-  .modal-form-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--text-primary);
-  }
-
-  .modal-input, .modal-select {
-    width: 100%;
-    padding: 0.6rem 0.85rem;
-    border: 2px solid var(--border-color);
-    border-radius: var(--radius-md);
-    background-color: var(--body-bg);
-    color: var(--text-primary);
-    font-size: 0.9rem;
-    transition: var(--transition);
-    font-family: inherit;
-  }
-
-  .modal-select:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px var(--primary-light);
-  }
-  
   /* Buttons */
   .btn-modal {
     padding: 0.6rem 1.2rem;
@@ -431,19 +398,6 @@
   .btn-modal-confirm:hover {
     background-color: #dc2626;
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-  }
-
-  .btn-modal-primary {
-    background: var(--gradient-primary);
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  
-  .btn-modal-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
   }
 
   .btn-modal:disabled {
@@ -512,9 +466,14 @@
         <button class="btn-msg-action" onclick="markAllRead()" title="Mark all as read">
           <i class="fas fa-check-double"></i> Mark All Read
         </button>
-        <button class="btn-compose" onclick="openComposeModal()">
+        
+        <!-- 
+           UPDATED: Links directly to the route that handles auto-detection.
+           The route will handle finding the active booking and the landlord.
+        -->
+        <a href="{{ url_for('tenant.compose_message') }}" class="btn-compose">
           <i class="fas fa-pen"></i> Message Landlord
-        </button>
+        </a>
       </div>
     </div>
 
@@ -603,59 +562,15 @@
       </div>
       <h3>No Messages Yet</h3>
       <p>You haven't exchanged any messages with your landlord yet.</p>
-      <button class="btn-compose" onclick="openComposeModal()">
+      <!-- Link to the auto-detect route -->
+      <a href="{{ url_for('tenant.compose_message') }}" class="btn-compose">
         <i class="fas fa-pen"></i> Start a Conversation
-      </button>
+      </a>
     </div>
 
     {% endif %}
 
   </div>
-</div>
-
-<!-- SELECT LANDLORD MODAL -->
-<div class="modal-overlay" id="composeModal">
-    <div class="modal-box">
-        <div class="modal-header">
-            <div class="modal-title-group">
-                <div class="modal-icon primary">
-                    <i class="fas fa-paper-plane"></i>
-                </div>
-                <h3 class="modal-title">New Message</h3>
-            </div>
-            <button class="btn-modal-cancel" onclick="closeComposeModal()" style="padding: 0.4rem;"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="modal-body">
-            <div class="modal-form-group">
-                <label class="modal-form-label">Select Landlord</label>
-                <!-- 
-                   DEVELOPER NOTE: 
-                   Populate this select box with your list of landlords.
-                   Example:
-                   <select id="landlordSelect" class="modal-select">
-                     {% for landlord in landlords %}
-                     <option value="{{ landlord.id }}">{{ landlord.name }}</option>
-                     {% endfor %}
-                   </select>
-                -->
-                <select id="landlordSelect" class="modal-select">
-                    <option value="" disabled selected>-- Choose a Landlord --</option>
-                    <!-- Placeholder options for demonstration -->
-                    <option value="1">John Doe (Landlord)</option>
-                    <option value="2">Jane Smith (Landlord)</option>
-                </select>
-            </div>
-            <p style="font-size: 0.8rem; color: var(--text-muted);">
-                Clicking continue will take you to the message page for the selected landlord.
-            </p>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-modal btn-modal-cancel" onclick="closeComposeModal()">Cancel</button>
-            <button class="btn-modal btn-modal-primary" id="btnContinueToChat">
-                <i class="fas fa-arrow-right"></i> Continue
-            </button>
-        </div>
-    </div>
 </div>
 
 <!-- DELETE CONFIRMATION MODAL -->
@@ -735,40 +650,7 @@
   }
 
   // ===========================
-  // 2. COMPOSE / SELECT LANDLORD LOGIC
-  // ===========================
-  const composeModal = document.getElementById('composeModal');
-  const btnContinueToChat = document.getElementById('btnContinueToChat');
-  const landlordSelect = document.getElementById('landlordSelect');
-
-  function openComposeModal() {
-    composeModal.classList.add('active');
-    landlordSelect.focus();
-  }
-
-  function closeComposeModal() {
-    composeModal.classList.remove('active');
-    landlordSelect.selectedIndex = 0; // Reset to default
-  }
-
-  btnContinueToChat.addEventListener('click', function() {
-    const selectedId = landlordSelect.value;
-
-    if(!selectedId || selectedId === "") {
-      alert("Please select a landlord to message.");
-      return;
-    }
-
-    // Navigate to the Compose Page Route with the specific ID
-    // We use a URL trick to ensure the path is correctly formed via Flask
-    const baseUrl = "{{ url_for('tenant.compose_message', landlord_id=999999) }}";
-    const targetUrl = baseUrl.replace('999999', selectedId);
-    
-    window.location.href = targetUrl;
-  });
-
-  // ===========================
-  // 3. DELETE MESSAGE LOGIC
+  // 2. DELETE MESSAGE LOGIC
   // ===========================
   const deleteModal = document.getElementById('deleteModal');
   const btnConfirmDelete = document.getElementById('btnConfirmDelete');
@@ -831,24 +713,21 @@
   });
 
   // Close Modals on Outside Click
-  [composeModal, deleteModal].forEach(modal => {
-    modal.addEventListener('click', function(e) {
-      if (e.target === modal) {
-        modal.classList.remove('active');
-      }
-    });
+  deleteModal.addEventListener('click', function(e) {
+    if (e.target === deleteModal) {
+      closeDeleteModal();
+    }
   });
 
   // Close on Escape
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
-      composeModal.classList.remove('active');
       deleteModal.classList.remove('active');
     }
   });
 
   // ===========================
-  // 4. SEARCH FILTER
+  // 3. SEARCH FILTER
   // ===========================
   document.getElementById('msgSearch').addEventListener('input', function(e) {
     var query = e.target.value.toLowerCase();
@@ -869,14 +748,14 @@
   });
 
   // ===========================
-  // 5. VIEW CONVERSATION
+  // 4. VIEW CONVERSATION
   // ===========================
   function viewConversation(userId) {
-    // Navigate to the compose page for the specific user if you want to view the full thread
-    // This uses the same route but ensures the user is on the specific chat page.
-    const baseUrl = "{{ url_for('tenant.compose_message', landlord_id=999999) }}";
-    const targetUrl = baseUrl.replace('999999', userId);
-    window.location.href = targetUrl;
+    // In a full app, this might navigate to a chat view.
+    // For now, it just highlights the card.
+    var card = event.currentTarget;
+    document.querySelectorAll('.msg-card').forEach(c => c.style.border = '1px solid var(--border-color)');
+    card.style.border = '1px solid var(--primary-color)';
   }
 </script>
 {% endblock %}
