@@ -443,7 +443,7 @@
         {% set other_id = other_user.id if other_user else message.sender_id if message.sender_id != current_user.id else message.receiver_id %}
         
         {% if other_id not in seen_ids %}
-          {% do seen_ids.append(other_id) %}
+          {% set _ = seen_ids.append(other_id) %}
           
           <!-- Initials for Avatar Fallback -->
           {% set initials = '' %}
