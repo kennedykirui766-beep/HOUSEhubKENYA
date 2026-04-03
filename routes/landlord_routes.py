@@ -269,6 +269,7 @@ def reports():
 
 
 # ---------------- Edit Property ----------------
+
 @landlord_bp.route("/properties/<int:property_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_property(property_id):
@@ -276,19 +277,89 @@ def edit_property(property_id):
         flash("Access denied.", "danger")
         return redirect(url_for("main.index"))
 
-    house = House.query.filter_by(id=property_id, owner_id=current_user.id).first_or_404()
+    house = House.query.filter_by(
+        id=property_id,
+        owner_id=current_user.id
+    ).first_or_404()
 
     if request.method == "POST":
+        # -------------------
+        # TEXT FIELDS
+        # -------------------
         house.title = request.form.get("title")
         house.description = request.form.get("description")
-        house.location = request.form.get("location")
-        house.rent_amount = request.form.get("rent_amount")
+        house.category = request.form.get("category")
+        house.property_type = request.form.get("property_type")
 
+        # Location
+        house.location = request.form.get("location")
+        house.address_line1 = request.form.get("address_line1")
+        house.address_line2 = request.form.get("address_line2")
+        house.city = request.form.get("city")
+        house.state_province = request.form.get("state_province")
+        house.postal_code = request.form.get("postal_code")
+        house.country = request.form.get("country")
+
+        # Pricing
+        house.rent_amount = float(request.form.get("rent_amount") or 0)
+        house.security_deposit = float(request.form.get("security_deposit") or 0)
+
+        # Property details
+        house.bedrooms = int(request.form.get("bedrooms") or 0)
+        house.bathrooms = float(request.form.get("bathrooms") or 0)
+        house.size = request.form.get("size")
+        house.lease_term = request.form.get("lease_term")
+
+        # Availability
+        availability_date = request.form.get("availability_date")
+        if availability_date:
+            house.availability_date = datetime.strptime(availability_date, "%Y-%m-%d")
+
+        house.available = True if request.form.get("available") == "on" else False
+
+        # Features
+        house.utilities = request.form.get("utilities")
+        house.pets_allowed = request.form.get("pets_allowed")
+        house.pet_restrictions = request.form.get("pet_restrictions")
+        house.parking_availability = request.form.get("parking_availability")
+        house.furnished_status = request.form.get("furnished_status")
+        house.amenities = request.form.get("amenities")
+        house.smoking_policy = request.form.get("smoking_policy")
+        house.accessibility_features = request.form.get("accessibility_features")
+
+        # -------------------
+        # 🖼️ IMAGE UPLOAD (CLOUDINARY)
+        # -------------------
+        images = request.files.getlist("images")
+
+        if images and images[0].filename != "":
+            uploaded_urls = []
+
+            for image in images:
+                try:
+                    result = cloudinary.uploader.upload(image)
+                    uploaded_urls.append(result.get("secure_url"))
+                except Exception as e:
+                    print("Cloudinary upload error:", e)
+
+            # 👉 OPTION 1: REPLACE images
+            house.image_urls = ",".join(uploaded_urls)
+
+            # 👉 OPTION 2 (better): APPEND images
+            # existing = house.image_urls.split(",") if house.image_urls else []
+            # house.image_urls = ",".join(existing + uploaded_urls)
+
+        # -------------------
         db.session.commit()
-        flash("Property updated successfully!", "success")
+
+        flash("✅ Property + images updated successfully!", "success")
         return redirect(url_for("landlord.properties"))
 
-    return render_template("landlord/edit_property.html", house=house, stats={})
+    return render_template(
+        "landlord/edit_property.html",
+        house=house,
+        stats={}
+    )
 
 
 from extensions import csrf
