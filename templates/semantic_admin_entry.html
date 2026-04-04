@@ -27,6 +27,7 @@
       </div>
 
       <form method="POST" action="{{ url_for('auth.semantic_admin_continue') }}" class="d-flex flex-wrap gap-2">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn btn-light btn-lg fw-semibold">
           Continue to admin login
         </button>
