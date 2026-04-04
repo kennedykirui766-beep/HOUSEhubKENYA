@@ -10,10 +10,6 @@ def rentals():
     houses = House.query.filter_by(category='Rental').all()
     return render_template('rentals.html', houses=houses)
 
-@house_bp.route('/hotels')
-def hotels():
-    houses = House.query.filter_by(category='Hotel').all()
-    return render_template('hotel.html', houses=houses)
 
 @house_bp.route('/bnb')
 def bnb():
