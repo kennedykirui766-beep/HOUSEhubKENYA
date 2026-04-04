@@ -128,13 +128,13 @@ def login():
 
     return render_template("login.html", admin_entry_required=admin_entry_required)
 
-
+@csrf.exempt
 @auth_bp.route('/semantic/admin')
 def semantic_admin_entry():
     """Private admin entrypoint page."""
     return render_template('semantic_admin_entry.html')
 
-
+@csrf.exempt
 @auth_bp.route('/semantic/admin/continue', methods=['POST'])
 def semantic_admin_continue():
     """Confirm the private admin entry and move to login."""
