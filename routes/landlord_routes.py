@@ -3,6 +3,7 @@ import logging
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import login_required, current_user
+from extensions import db, csrf
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from extensions import db, csrf
@@ -498,6 +499,20 @@ def messages():
         flash("Access denied.", "danger")
         return redirect(url_for("main.index"))
 
+@landlord_bp.route('/delete_account', methods=['GET', 'POST'])
+@login_required
+def delete_account():
+    if request.method == 'POST':
+        user = current_user
+        db.session.delete(user)
+        db.session.commit()
+        return redirect(url_for('auth.login'))
+
+    return render_template(
+        'shared/delete_account.html',
+        back_url=url_for('landlord.settings'),
+        post_url=url_for('landlord.delete_account')
+    )
     # Fetch messages where landlord is involved
     messages = Message.query.filter(
         (Message.receiver_id == current_user.id) |
