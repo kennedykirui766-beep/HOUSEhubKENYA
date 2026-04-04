@@ -469,7 +469,8 @@
                                 </div>
                                 
                                 <div class="price-tag">
-                                    KES {{ "{:,}".format(house.rent_amount) }}<span style="font-size: 0.7rem; font-weight: 500;">/mo</span>
+                                    KES {{ "{:,}".format(house.price or 0) }}
+                                    <span style="font-size: 0.7rem; font-weight: 500;">/mo</span>
                                 </div>
                             </div>
 
