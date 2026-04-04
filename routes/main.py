@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import current_user, login_required
 from models.models import House, SupportMessage
 from extensions import db
+from extensions import csrf
 
 main_bp = Blueprint('main', __name__)
 
@@ -25,7 +26,7 @@ def index():
 def about():
     return render_template('about.html')
 
-
+@csrf.exempt
 @main_bp.route('/contact', methods=['GET', 'POST'])
 @login_required
 def contact():
