@@ -1691,7 +1691,7 @@
                                 <li><a href="{{ url_for('landlord.add_property') }}">Add Property</a></li>
                                 {% elif current_user.role.lower() == 'tenant' %}
                                 <li><a href="{{ url_for('tenant.dashboard') }}">Dashboard</a></li>
-                                <li><a href="{{ url_for('house.hotels') }}">Browse Properties</a></li>
+                                <li><a href="{{ url_for('tenant.properties') }}">Browse Properties</a></li>
                                 {% elif current_user.role.lower() == 'admin' %}
                                 <li><a href="{{ url_for('admin.manage_users') }}">Manage Users</a></li>
                                 {% elif current_user.role.lower() == 'service' %}
