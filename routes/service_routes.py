@@ -7,6 +7,7 @@ from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+from extensions import db, csrf
 
 service_provider_bp = Blueprint('service_provider', __name__, url_prefix='/service_provider')
 
@@ -99,7 +100,7 @@ def dashboard():
         earnings_data=earnings_data,
         notifications=notifications
     )
-
+@csrf.exempt
 @service_provider_bp.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
