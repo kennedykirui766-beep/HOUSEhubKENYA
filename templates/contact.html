@@ -17,15 +17,18 @@
   }
 
   .cp-header h1 {
-    font-size: 2.25rem;
+    font-size: 2.5rem; /* Larger base for desktop */
     font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.2;
   }
 
   .cp-header p {
     color: var(--text-secondary);
-    font-size: 1.1rem;
+    font-size: 1.15rem;
+    max-width: 600px;
+    margin: 0 auto;
   }
 
   /* Contact Info Cards */
@@ -33,49 +36,54 @@
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    padding: 1.5rem;
+    padding: 2rem; /* More padding for desktop */
     text-align: center;
     height: 100%;
     transition: var(--transition);
     margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 
   .cp-info-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
     border-color: var(--primary-color);
   }
 
   .cp-icon-box {
-    width: 60px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
     background: var(--primary-light);
     color: var(--primary-color);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
-    margin: 0 auto 1rem;
+    font-size: 1.75rem;
+    margin: 0 auto 1.25rem;
+    flex-shrink: 0;
   }
 
   .cp-info-title {
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 0.5rem;
-    font-size: 1.1rem;
+    font-size: 1.25rem;
   }
 
   .cp-info-text {
     color: var(--text-secondary);
-    font-size: 0.95rem;
-    line-height: 1.5;
+    font-size: 1rem;
+    line-height: 1.6;
   }
 
   .cp-link {
     color: var(--primary-color);
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
   }
   .cp-link:hover {
     text-decoration: underline;
@@ -86,26 +94,26 @@
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    padding: 2.5rem;
+    padding: 3rem; /* Larger padding for desktop */
     box-shadow: var(--shadow-sm);
   }
 
   .cp-form-label {
-    font-weight: 500;
-    font-size: 0.9rem;
+    font-weight: 600;
+    font-size: 0.95rem;
     color: var(--text-primary);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.6rem;
     display: block;
   }
 
   .cp-input, .cp-select, .cp-textarea {
     width: 100%;
-    padding: 0.75rem 1rem;
+    padding: 0.85rem 1.1rem; /* Taller inputs for touch */
     border: 2px solid var(--border-color);
     border-radius: var(--radius-md);
     background-color: var(--body-bg);
     color: var(--text-primary);
-    font-size: 0.95rem;
+    font-size: 1rem; /* 16px prevents iOS zoom */
     transition: var(--transition);
     font-family: inherit;
   }
@@ -118,17 +126,17 @@
 
   .cp-textarea {
     resize: vertical;
-    min-height: 120px;
+    min-height: 140px;
   }
 
   .cp-btn-submit {
     background: var(--gradient-primary);
     border: none;
     color: white;
-    padding: 0.85rem 2.5rem;
+    padding: 1rem 2.5rem;
     border-radius: var(--radius-md);
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 1.05rem;
     cursor: pointer;
     transition: var(--transition);
     width: 100%;
@@ -136,6 +144,7 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    touch-action: manipulation; /* Improves touch response */
   }
 
   .cp-btn-submit:hover {
@@ -144,15 +153,19 @@
     color: white;
   }
 
+  .cp-btn-submit:active {
+    transform: translateY(0);
+  }
+
   /* FAQ Cards */
   .cp-faq-card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    padding: 1.25rem;
+    padding: 1.5rem;
     display: flex;
-    align-items: center;
-    gap: 1rem;
+    align-items: center; /* Align items horizontally */
+    gap: 1.25rem;
     text-decoration: none;
     color: var(--text-primary);
     transition: var(--transition);
@@ -163,12 +176,13 @@
     border-color: var(--primary-color);
     background: var(--primary-light);
     color: var(--primary-color);
-    transform: translateX(5px);
+    transform: translateY(-3px); /* Slight lift instead of slide */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
   }
 
   .cp-faq-icon {
-    width: 45px;
-    height: 45px;
+    width: 50px;
+    height: 50px;
     background: var(--primary-light);
     color: var(--primary-color);
     border-radius: 50%;
@@ -176,7 +190,12 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    font-size: 1.2rem;
+    font-size: 1.25rem;
+  }
+  
+  .cp-faq-card h5 {
+      font-weight: 700;
+      font-size: 1.1rem;
   }
 
   /* Map */
@@ -185,7 +204,7 @@
     overflow: hidden;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
-    height: 350px;
+    height: 400px; /* Taller on desktop */
   }
   
   .cp-map-frame {
@@ -198,25 +217,133 @@
   .alert-custom {
     border-radius: var(--radius-md);
     border: none;
-    padding: 1rem 1.5rem;
+    padding: 1.25rem 1.5rem;
     margin-bottom: 2rem;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    justify-content: space-between;
+    box-shadow: var(--shadow-sm);
   }
   
+  .alert-custom-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.95rem;
+  }
+
   .alert-custom-success {
     background-color: rgba(40, 167, 69, 0.1);
     color: #28a745;
     border: 1px solid rgba(40, 167, 69, 0.2);
   }
 
+  /* ========== RESPONSIVE MEDIA QUERIES ========== */
+
+  /* Tablets (max-width: 991px) */
   @media (max-width: 991px) {
+    .cp-header h1 {
+      font-size: 2rem;
+    }
+    .cp-form-card {
+      padding: 2rem;
+    }
+    .cp-map-container {
+      height: 350px;
+    }
+  }
+
+  /* Mobile Devices (max-width: 767px) */
+  @media (max-width: 767px) {
+    .contact-page {
+      padding: 1.5rem 0 3rem;
+    }
+
+    .cp-header {
+      margin-bottom: 2.5rem;
+    }
+
+    .cp-header h1 {
+      font-size: 1.75rem; /* Smaller font for mobile */
+    }
+
+    .cp-header p {
+      font-size: 1rem;
+    }
+
+    /* Adjust Info Cards for Mobile */
+    .cp-info-card {
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      flex-direction: column; /* Center everything nicely */
+      text-align: center;
+    }
+
+    .cp-icon-box {
+      width: 60px;
+      height: 60px;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .cp-info-title {
+      font-size: 1.1rem;
+    }
+
+    .cp-info-text {
+      font-size: 0.9rem;
+    }
+
+    /* Adjust Form for Mobile */
     .cp-form-card {
       padding: 1.5rem;
+      margin-bottom: 1.5rem;
     }
+
+    .cp-btn-submit {
+      padding: 0.85rem 1.5rem;
+      font-size: 1rem;
+    }
+
+    /* Adjust Map for Mobile */
+    .cp-map-container {
+      height: 250px; /* Reduce height significantly on mobile */
+    }
+
+    /* Adjust FAQ Cards for Mobile */
+    .cp-faq-card {
+      flex-direction: column; /* Stack icon and text */
+      text-align: center;
+      padding: 1.25rem;
+    }
+
+    .cp-faq-card h5 {
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .cp-faq-card p {
+        font-size: 0.85rem !important;
+    }
+
+    .cp-faq-icon {
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  /* Small Mobile (max-width: 480px) */
+  @media (max-width: 480px) {
     .cp-header h1 {
-      font-size: 1.75rem;
+      font-size: 1.5rem;
+    }
+    
+    .cp-form-card, .cp-info-card {
+      padding: 1.25rem;
+    }
+
+    .cp-btn-submit {
+      font-size: 0.95rem;
+      padding: 0.8rem;
     }
   }
 </style>
@@ -231,9 +358,11 @@
       {% if messages %}
         {% for category, message in messages %}
         <div class="alert alert-custom-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
-          <i class="fas fa-{{ 'exclamation-circle' if category == 'error' else 'check-circle' }} me-2"></i>
-          <span>{{ message }}</span>
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <div class="alert-custom-content">
+            <i class="fas fa-{{ 'exclamation-circle' if category == 'error' else 'check-circle' }}"></i>
+            <span>{{ message }}</span>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="background:none; border:none; color:inherit; font-size:1.2rem; opacity:0.6; cursor:pointer;"></button>
         </div>
         {% endfor %}
       {% endif %}
@@ -358,10 +487,10 @@
     <!-- FAQ Section -->
     <div class="row mt-5 pt-4" style="border-top: 1px solid var(--border-color);">
       <div class="col-12">
-        <h3 class="mb-4" style="font-size: 1.5rem; color: var(--text-primary);">Frequently Asked Questions</h3>
+        <h3 class="mb-4 text-center" style="font-size: 1.75rem; color: var(--text-primary);">Frequently Asked Questions</h3>
         
-        <div class="row g-3">
-          <div class="col-md-6 col-lg-3">
+        <div class="row g-3 justify-content-center">
+          <div class="col-12 col-md-6 col-lg-3">
             <a href="#" class="cp-faq-card">
               <div class="cp-faq-icon"><i class="fas fa-question-circle"></i></div>
               <div>
@@ -371,7 +500,7 @@
             </a>
           </div>
 
-          <div class="col-md-6 col-lg-3">
+          <div class="col-12 col-md-6 col-lg-3">
             <a href="{{ url_for('main.how_it_works_landlord') }}" class="cp-faq-card">
               <div class="cp-faq-icon"><i class="fas fa-home"></i></div>
               <div>
@@ -381,7 +510,7 @@
             </a>
           </div>
 
-          <div class="col-md-6 col-lg-3">
+          <div class="col-12 col-md-6 col-lg-3">
             <a href="{{ url_for('main.how_it_works_tenant') }}" class="cp-faq-card">
               <div class="cp-faq-icon"><i class="fas fa-user"></i></div>
               <div>
@@ -391,7 +520,7 @@
             </a>
           </div>
 
-          <div class="col-md-6 col-lg-3">
+          <div class="col-12 col-md-6 col-lg-3">
             <a href="{{ url_for('main.how_it_works_provider') }}" class="cp-faq-card">
               <div class="cp-faq-icon"><i class="fas fa-tools"></i></div>
               <div>
@@ -411,7 +540,9 @@
 {% block scripts %}
 <script>
   // Simple Form Validation UI Feedback
-  document.getElementById('contactForm').addEventListener('submit', function() {
+  document.getElementById('contactForm').addEventListener('submit', function(e) {
+    // Optional: Prevent default if you want AJAX, 
+    // but here we just add visual feedback before the POST reloads the page.
     const btn = this.querySelector('.cp-btn-submit');
     const originalText = btn.innerHTML;
     
@@ -419,8 +550,7 @@
     btn.style.opacity = '0.8';
     btn.style.pointerEvents = 'none';
     
-    // Note: The actual submission is handled by the browser POST action
-    // This JS just provides immediate UI feedback before the page reloads/redirects
+    // Allow form to submit naturally
   });
 </script>
 {% endblock %}
