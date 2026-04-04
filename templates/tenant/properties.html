@@ -472,7 +472,7 @@
                                 </div>
                                 
                                 <div class="price-tag">
-                                    {{ "{:,.0f}".format(house.rent_amount) }}
+                                    {{ "{:,.0f}".format(house.price or 0) }}
                                     <span style="font-size: 0.7rem; font-weight: 500;">/mo</span>
                                 </div>
                             </div>
