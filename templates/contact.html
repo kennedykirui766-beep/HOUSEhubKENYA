@@ -1,293 +1,327 @@
-{% extends "base.html" %} {% block title %}How It Works - Landlord{% endblock %}
-{% block content %}
+{% extends "base.html" %}
+
+{% block title %}Contact Support - HomeHub{% endblock %}
+
+{% block styles %}
 <style>
-  :root {
-    --primary: #4361ee;
-    --primary-dark: #3a0ca3;
-    --secondary: #7209b7;
-    --accent: #f72585;
-    --light: #f8f9fa;
-    --dark: #212529;
-    --success: #06ffa5;
-    --info: #00b4d8;
-    --warning: #ffbe0b;
+  /* ========== CONTACT PAGE STYLES ========== */
+  .contact-page {
+    padding: 2rem 0 4rem;
+    background-color: var(--body-bg);
+    min-height: 80vh;
   }
 
-  .hero-section {
-    background: linear-gradient(
-      135deg,
-      var(--primary) 0%,
-      var(--primary-dark) 100%
-    );
-    color: white;
-    padding: 3rem 0; /* Reduced padding */
-    position: relative;
-    overflow: hidden;
-  }
-
-  .hero-section::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')
-      no-repeat bottom;
-    background-size: cover;
-  }
-
-  .contact-card {
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-    background: white;
-    margin-bottom: 1.5rem; /* Added margin between cards */
-  }
-
-  .contact-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
-  }
-
-  .contact-icon {
-    width: 50px; /* Reduced size */
-    height: 50px; /* Reduced size */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    margin: 0 auto 1rem; /* Reduced margin */
-    font-size: 1.2rem; /* Reduced font size */
-    color: white;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  }
-
-  .form-control:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    border: none;
-    padding: 0.75rem 2rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(67, 97, 238, 0.3);
-  }
-
-  .faq-link {
-    display: flex;
-    align-items: center;
-    padding: 1rem;
-    border-radius: 10px;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    color: var(--dark);
-    margin-bottom: 1rem; /* Added margin between links */
-  }
-
-  .faq-link:hover {
-    background: var(--light);
-    transform: translateX(5px);
-  }
-
-  .faq-icon {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    margin-right: 1rem;
-    color: white;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  }
-
-  .response-note {
-    background: linear-gradient(135deg, var(--light), #e9ecef);
-    border-radius: 15px;
-    padding: 1.5rem;
-    margin-top: 2rem;
+  .cp-header {
     text-align: center;
-    border-left: 4px solid var(--primary);
+    margin-bottom: 3rem;
   }
 
-  .chat-widget {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    z-index: 1000;
+  .cp-header h1 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
   }
 
-  .chat-button {
+  .cp-header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+  }
+
+  /* Contact Info Cards */
+  .cp-info-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    text-align: center;
+    height: 100%;
+    transition: var(--transition);
+    margin-bottom: 1.5rem;
+  }
+
+  .cp-info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    border-color: var(--primary-color);
+  }
+
+  .cp-icon-box {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--success), var(--info));
-    color: white;
-    border: none;
-    box-shadow: 0 5px 15px rgba(6, 255, 165, 0.4);
+    background: var(--primary-light);
+    color: var(--primary-color);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.5rem;
-    transition: all 0.3s ease;
+    margin: 0 auto 1rem;
+  }
+
+  .cp-info-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+  }
+
+  .cp-info-text {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .cp-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .cp-link:hover {
+    text-decoration: underline;
+  }
+
+  /* Form Styling */
+  .cp-form-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .cp-form-label {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .cp-input, .cp-select, .cp-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--body-bg);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: var(--transition);
+    font-family: inherit;
+  }
+
+  .cp-input:focus, .cp-select:focus, .cp-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px var(--primary-light);
+  }
+
+  .cp-textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  .cp-btn-submit {
+    background: var(--gradient-primary);
+    border: none;
+    color: white;
+    padding: 0.85rem 2.5rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 1rem;
     cursor: pointer;
+    transition: var(--transition);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
   }
 
-  .chat-button:hover {
-    transform: scale(1.1);
-    box-shadow: 0 8px 25px rgba(6, 255, 165, 0.6);
+  .cp-btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
+    color: white;
   }
 
-  .map-container {
-    border-radius: 15px;
+  /* FAQ Cards */
+  .cp-faq-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: var(--transition);
+    height: 100%;
+  }
+
+  .cp-faq-card:hover {
+    border-color: var(--primary-color);
+    background: var(--primary-light);
+    color: var(--primary-color);
+    transform: translateX(5px);
+  }
+
+  .cp-faq-icon {
+    width: 45px;
+    height: 45px;
+    background: var(--primary-light);
+    color: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.2rem;
+  }
+
+  /* Map */
+  .cp-map-container {
+    border-radius: var(--radius-lg);
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    height: 300px; /* Reduced height */
-    margin-bottom: 3rem; /* Added space before footer */
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    height: 350px;
+  }
+  
+  .cp-map-frame {
+    width: 100%;
+    height: 100%;
+    border: 0;
   }
 
-  /* Main content container adjustments */
-  .main-content {
-    padding-bottom: 3rem; /* Added padding at bottom */
+  /* Flash Message Override */
+  .alert-custom {
+    border-radius: var(--radius-md);
+    border: none;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .alert-custom-success {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+    border: 1px solid rgba(40, 167, 69, 0.2);
   }
 
-  @media (max-width: 768px) {
-    .hero-section {
-      padding: 2rem 0; /* Further reduced for mobile */
+  @media (max-width: 991px) {
+    .cp-form-card {
+      padding: 1.5rem;
     }
-
-    .chat-widget {
-      bottom: 20px;
-      right: 20px;
-    }
-
-    .map-container {
-      height: 250px; /* Further reduced for mobile */
+    .cp-header h1 {
+      font-size: 1.75rem;
     }
   }
 </style>
+{% endblock %}
 
-<!-- Hero Section -->
-<section class="hero-section">
-  <div class="container text-center position-relative">
-    <h1 class="display-5 fw-bold mb-3">Contact Support</h1>
-    <!-- Reduced heading size -->
-    <p class="lead mb-0">We're here to help</p>
-    <p class="lead">Reach out to our team for any questions about HomeHub.</p>
-  </div>
-</section>
-
-<!-- Main Content -->
-<section class="py-4 main-content">
-  <!-- Reduced padding and added class -->
+{% block content %}
+<div class="contact-page">
   <div class="container">
+    
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-custom-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+          <i class="fas fa-{{ 'exclamation-circle' if category == 'error' else 'check-circle' }} me-2"></i>
+          <span>{{ message }}</span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="cp-header">
+      <h1>Contact Support</h1>
+      <p>Have questions? We're here to help you every step of the way.</p>
+    </div>
+
     <div class="row g-4">
-      <!-- Quick Contact Information -->
+      <!-- Left Column: Contact Info -->
       <div class="col-lg-4">
-        <h2 class="mb-4">Get in Touch</h2>
-
-        <div class="contact-card p-3">
-          <!-- Reduced padding -->
-          <div class="text-center mb-3">
-            <div class="contact-icon">
-              <i class="fas fa-envelope"></i>
-            </div>
+        <div class="cp-info-card">
+          <div class="cp-icon-box">
+            <i class="fas fa-envelope"></i>
           </div>
-          <h4 class="text-center mb-2">Email Us</h4>
-          <p class="text-center mb-0">
-            <a href="mailto:support@homehub.com" class="text-decoration-none"
-              >support@homehub.com</a
-            >
+          <h3 class="cp-info-title">Email Us</h3>
+          <p class="cp-info-text">
+            <a href="mailto:support@homehub.com" class="cp-link">support@homehub.com</a>
+          </p>
+          <p class="cp-info-text" style="margin-top: 0.5rem; font-size: 0.85rem;">
+            We reply within 24 hours
           </p>
         </div>
 
-        <div class="contact-card p-3">
-          <!-- Reduced padding -->
-          <div class="text-center mb-3">
-            <div class="contact-icon">
-              <i class="fas fa-phone-alt"></i>
-            </div>
+        <div class="cp-info-card">
+          <div class="cp-icon-box">
+            <i class="fas fa-phone-alt"></i>
           </div>
-          <h4 class="text-center mb-2">Call/WhatsApp</h4>
-          <p class="text-center mb-0">
-            <a href="tel:+254712345678" class="text-decoration-none"
-              >+254 712 345 678</a
-            >
+          <h3 class="cp-info-title">Call Us</h3>
+          <p class="cp-info-text">
+            <a href="tel:+254712345678" class="cp-link">+254 712 345 678</a>
+          </p>
+          <p class="cp-info-text" style="margin-top: 0.5rem; font-size: 0.85rem;">
+            Mon - Fri, 9am - 5pm EAT
           </p>
         </div>
 
-        <div class="contact-card p-3">
-          <!-- Reduced padding -->
-          <div class="text-center mb-3">
-            <div class="contact-icon">
-              <i class="fas fa-map-marker-alt"></i>
-            </div>
+        <div class="cp-info-card">
+          <div class="cp-icon-box">
+            <i class="fas fa-map-marker-alt"></i>
           </div>
-          <h4 class="text-center mb-2">Our Office</h4>
-          <p class="text-center mb-0">
-            HomeHub Headquarters<br />
-            Kericho-Bomet Road<br />
+          <h3 class="cp-info-title">Visit Us</h3>
+          <p class="cp-info-text">
+            HomeHub HQ<br>
+            Kericho-Bomet Road<br>
             Kericho, Kenya
           </p>
         </div>
       </div>
 
-      <!-- Support Form -->
+      <!-- Right Column: Support Form -->
       <div class="col-lg-8">
-        <div class="contact-card p-4">
-          <h2 class="mb-4">Send us a Message</h2>
+        <div class="cp-form-card">
+          <h2 style="margin-bottom: 1.5rem; color: var(--text-primary);">Send a Message</h2>
+          
+          <form action="{{ url_for('main.contact') }}" method="POST" id="contactForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-          <form id="supportForm">
             <div class="row g-3">
               <div class="col-md-6">
-                <label for="fullName" class="form-label">Full Name</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="fullName"
-                  placeholder="Enter your full name"
-                  required
-                />
+                <label for="fullName" class="cp-form-label">Full Name</label>
+                <input type="text" class="cp-input" id="fullName" name="fullName" 
+                       placeholder="Your full name" required
+                       value="{{ current_user.name if current_user.is_authenticated else '' }}">
               </div>
 
               <div class="col-md-6">
-                <label for="email" class="form-label"
-                  >Email Address <span class="text-danger">*</span></label
-                >
-                <input
-                  type="email"
-                  class="form-control"
-                  id="email"
-                  placeholder="Enter your email"
-                  required
-                />
+                <label for="email" class="cp-form-label">Email Address</label>
+                <input type="email" class="cp-input" id="email" name="email" 
+                       placeholder="name@example.com" required
+                       value="{{ current_user.email if current_user.is_authenticated else '' }}">
               </div>
 
               <div class="col-md-6">
-                <label for="phone" class="form-label">Phone Number</label>
-                <input
-                  type="tel"
-                  class="form-control"
-                  id="phone"
-                  placeholder="Enter your phone number"
-                />
+                <label for="phone" class="cp-form-label">Phone Number</label>
+                <input type="tel" class="cp-input" id="phone" name="phone" 
+                       placeholder="+254 7..." 
+                       value="{{ current_user.phone if current_user.is_authenticated else '' }}">
               </div>
 
               <div class="col-md-6">
-                <label for="role" class="form-label">Role</label>
-                <select class="form-select" id="role" required>
-                  <option value="" selected disabled>Select your role</option>
-                  <option value="landlord">Landlord</option>
-                  <option value="tenant">Tenant</option>
+                <label for="role" class="cp-form-label">I am a...</label>
+                <select class="cp-select" id="role" name="role" required>
+                  <option value="" disabled>Select your role</option>
+                  <option value="landlord" {% if current_user.is_authenticated and current_user.role == 'landlord' %}selected{% endif %}>Landlord</option>
+                  <option value="tenant" {% if current_user.is_authenticated and current_user.role == 'tenant' %}selected{% endif %}>Tenant</option>
                   <option value="service-provider">Service Provider</option>
                   <option value="admin">Administrator</option>
                   <option value="other">Other</option>
@@ -295,104 +329,74 @@
               </div>
 
               <div class="col-12">
-                <label for="message" class="form-label"
-                  >Message / Question</label
-                >
-                <textarea
-                  class="form-control"
-                  id="message"
-                  rows="4"
-                  placeholder="Type your message or question here"
-                  required
-                ></textarea>
-                <!-- Reduced rows -->
+                <label for="message" class="cp-form-label">Message</label>
+                <textarea class="cp-textarea" id="message" name="message" 
+                          placeholder="How can we help you?" required></textarea>
               </div>
 
-              <div class="col-12">
-                <button type="submit" class="btn btn-primary">
-                  Send Message
+              <div class="col-12 mt-4">
+                <button type="submit" class="cp-btn-submit">
+                  <i class="fas fa-paper-plane"></i> Send Message
                 </button>
               </div>
             </div>
           </form>
+        </div>
 
-          <div class="response-note">
-            <p class="mb-0">
-              <i class="fas fa-info-circle me-2"></i>Our support team will get
-              back to you within 24 hours.
-            </p>
-          </div>
+        <!-- Map Section -->
+        <div class="cp-map-container mt-4">
+           <iframe 
+             class="cp-map-frame"
+             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.486447547632!2d35.28501631475363!3d-0.368319999749814!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182a119e2337a6c7%3A0x6d8b6a7f7d7e8e9f!2sKericho%2C%20Kenya!5e0!3m2!1sen!2sus!4v1629785466789!5m2!1sen!2sus" 
+             allowfullscreen="" 
+             loading="lazy">
+           </iframe>
         </div>
       </div>
     </div>
 
-    <!-- FAQ / Help Links -->
-    <div class="row mt-4">
-      <!-- Reduced margin -->
+    <!-- FAQ Section -->
+    <div class="row mt-5 pt-4" style="border-top: 1px solid var(--border-color);">
       <div class="col-12">
-        <h2 class="mb-3">Frequently Asked Questions</h2>
-        <!-- Reduced margin -->
-        <p class="mb-3">
-          Check these resources first - your question might already be answered!
-        </p>
-        <!-- Reduced margin -->
-
+        <h3 class="mb-4" style="font-size: 1.5rem; color: var(--text-primary);">Frequently Asked Questions</h3>
+        
         <div class="row g-3">
           <div class="col-md-6 col-lg-3">
-            <a href="#" class="faq-link">
-              <div class="faq-icon">
-                <i class="fas fa-question-circle"></i>
-              </div>
+            <a href="#" class="cp-faq-card">
+              <div class="cp-faq-icon"><i class="fas fa-question-circle"></i></div>
               <div>
                 <h5 class="mb-1">General FAQs</h5>
-                <p class="mb-0 text-muted">Common questions about HomeHub</p>
+                <p class="mb-0" style="font-size: 0.9rem; color: var(--text-secondary);">Common questions about HomeHub</p>
               </div>
             </a>
           </div>
 
           <div class="col-md-6 col-lg-3">
-            <a
-              href="{{ url_for('main.how_it_works_landlord') }}"
-              class="faq-link"
-            >
-              <div class="faq-icon">
-                <i class="fas fa-home"></i>
-              </div>
+            <a href="{{ url_for('main.how_it_works_landlord') }}" class="cp-faq-card">
+              <div class="cp-faq-icon"><i class="fas fa-home"></i></div>
               <div>
                 <h5 class="mb-1">For Landlords</h5>
-                <p class="mb-0 text-muted">How HomeHub works for landlords</p>
+                <p class="mb-0" style="font-size: 0.9rem; color: var(--text-secondary);">How to list your property</p>
               </div>
             </a>
           </div>
 
           <div class="col-md-6 col-lg-3">
-            <a
-              href="{{ url_for('main.how_it_works_tenant') }}"
-              class="faq-link"
-            >
-              <div class="faq-icon">
-                <i class="fas fa-user"></i>
-              </div>
+            <a href="{{ url_for('main.how_it_works_tenant') }}" class="cp-faq-card">
+              <div class="cp-faq-icon"><i class="fas fa-user"></i></div>
               <div>
                 <h5 class="mb-1">For Tenants</h5>
-                <p class="mb-0 text-muted">How HomeHub works for tenants</p>
+                <p class="mb-0" style="font-size: 0.9rem; color: var(--text-secondary);">How to find a home</p>
               </div>
             </a>
           </div>
 
           <div class="col-md-6 col-lg-3">
-            <a
-              href="{{ url_for('main.how_it_works_provider') }}"
-              class="faq-link"
-            >
-              <div class="faq-icon">
-                <i class="fas fa-tools"></i>
-              </div>
+            <a href="{{ url_for('main.how_it_works_provider') }}" class="cp-faq-card">
+              <div class="cp-faq-icon"><i class="fas fa-tools"></i></div>
               <div>
-                <h5 class="mb-1">For Service Providers</h5>
-                <p class="mb-0 text-muted">
-                  How HomeHub works for service providers
-                </p>
+                <h5 class="mb-1">For Providers</h5>
+                <p class="mb-0" style="font-size: 0.9rem; color: var(--text-secondary);">Offer your services</p>
               </div>
             </a>
           </div>
@@ -400,71 +404,23 @@
       </div>
     </div>
 
-    <!-- Map Section -->
-    <div class="row mt-4">
-      <!-- Reduced margin -->
-      <div class="col-12">
-        <h2 class="mb-3">Visit Our Office</h2>
-        <!-- Reduced margin -->
-        <div class="map-container">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.486447547632!2d35.28501631475363!3d-0.368319999749814!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182a119e2337a6c7%3A0x6d8b6a7f7d7e8e9f!2sKericho%2C%20Kenya!5e0!3m2!1sen!2sus!4v1629785466789!5m2!1sen!2sus"
-            width="100%"
-            height="100%"
-            style="border: 0"
-            allowfullscreen=""
-            loading="lazy"
-          >
-          </iframe>
-        </div>
-      </div>
-    </div>
   </div>
-</section>
-
-<!-- Live Chat Widget -->
-<div class="chat-widget">
-  <button class="chat-button" id="chatButton">
-    <i class="fas fa-comments"></i>
-  </button>
 </div>
-{% endblock %} {% block extra_js %}
+{% endblock %}
+
+{% block scripts %}
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Form submission
-    const supportForm = document.getElementById("supportForm");
-    if (supportForm) {
-      supportForm.addEventListener("submit", function (e) {
-        e.preventDefault();
-
-        // Get form values
-        const fullName = document.getElementById("fullName").value;
-        const email = document.getElementById("email").value;
-        const phone = document.getElementById("phone").value;
-        const role = document.getElementById("role").value;
-        const message = document.getElementById("message").value;
-
-        // Here you would normally send the data to your server
-        // For demo purposes, we'll just show a success message
-        alert(
-          `Thank you, ${fullName}! Your message has been sent. Our support team will contact you at ${email} within 24 hours.`
-        );
-
-        // Reset form
-        supportForm.reset();
-      });
-    }
-
-    // Chat widget functionality
-    const chatButton = document.getElementById("chatButton");
-    if (chatButton) {
-      chatButton.addEventListener("click", function () {
-        // Here you would normally open a chat widget
-        alert(
-          "Live chat feature would open here. This is a demo implementation."
-        );
-      });
-    }
+  // Simple Form Validation UI Feedback
+  document.getElementById('contactForm').addEventListener('submit', function() {
+    const btn = this.querySelector('.cp-btn-submit');
+    const originalText = btn.innerHTML;
+    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    btn.style.opacity = '0.8';
+    btn.style.pointerEvents = 'none';
+    
+    // Note: The actual submission is handled by the browser POST action
+    // This JS just provides immediate UI feedback before the page reloads/redirects
   });
 </script>
 {% endblock %}

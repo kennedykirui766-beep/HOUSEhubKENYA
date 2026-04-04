@@ -1,5 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from models.models import House
+from flask_login import current_user, login_required
+from models.models import House, SupportMessage
+from extensions import db
 
 main_bp = Blueprint('main', __name__)
 
@@ -23,8 +25,33 @@ def index():
 def about():
     return render_template('about.html')
 
-@main_bp.route('/contact')
+
+@main_bp.route('/contact', methods=['GET', 'POST'])
+@login_required
 def contact():
+    if request.method == 'POST':
+        full_name = request.form.get('fullName')
+        email = request.form.get('email')
+        phone = request.form.get('phone')
+        role = request.form.get('role')
+        message = request.form.get('message')
+
+        # Save to database
+        new_message = SupportMessage(
+            full_name=full_name,
+            email=email,
+            phone=phone,
+            role=role,
+            message=message,
+            user_id=current_user.id
+        )
+
+        db.session.add(new_message)
+        db.session.commit()
+
+        flash("Message sent successfully!", "success")
+        return redirect(url_for('main.contact'))
+
     return render_template('contact.html')
 
 @main_bp.route('/terms')
