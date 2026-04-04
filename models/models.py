@@ -205,11 +205,20 @@ class Review(db.Model):
 
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    tenant_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    house_id = db.Column(db.Integer, db.ForeignKey('house.id'))
-    status = db.Column(db.String(50))
-    lease_start_date = db.Column(db.Date)
-    lease_end_date = db.Column(db.Date)
+
+    tenant_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    house_id = db.Column(db.Integer, db.ForeignKey('house.id'), nullable=False)
+
+    status = db.Column(db.String(50), default="pending")  # pending, approved, rejected
+
+    lease_start_date = db.Column(db.Date, nullable=True)
+    lease_end_date = db.Column(db.Date, nullable=True)
+
+    created_at = db.Column(db.DateTime, default=db.func.now())
+
+    # Relationships (VERY useful)
+    tenant = db.relationship("User", backref="bookings")
+    house = db.relationship("House", backref="bookings")
 
 class Document(db.Model):
     id = db.Column(db.Integer, primary_key=True)

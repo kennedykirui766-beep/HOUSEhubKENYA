@@ -362,6 +362,32 @@ def move_out(booking_id):
     return redirect(url_for('tenant.dashboard'))
 
 
+@tenant_bp.route("/book/<int:house_id>", methods=["POST"])
+@login_required
+def book_house(house_id):
+    house = House.query.get_or_404(house_id)
+
+    # Check availability
+    if not house.available:
+        flash("House is already booked.", "danger")
+        return redirect(url_for("tenant.properties"))
+
+    # Create booking
+    booking = Booking(
+        tenant_id=current_user.id,
+        house_id=house.id,
+        status="pending"
+    )
+
+    # Mark house as unavailable
+    house.available = False
+
+    db.session.add(booking)
+    db.session.commit()
+
+    flash("Booking request sent!", "success")
+    return redirect(url_for("tenant.properties"))
+
 
 # View all bookings
 @tenant_bp.route('/all_bookings')
