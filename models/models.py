@@ -281,6 +281,22 @@ class ChatMessage(db.Model):
     # Relationships (use back_populates to avoid conflicts)
     user = db.relationship('User', foreign_keys=[user_id], back_populates='sent_chat_messages')
     agent = db.relationship('User', foreign_keys=[support_agent_id], back_populates='received_chat_messages')
+    
+
+class SupportMessage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    full_name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(20))
+
+    role = db.Column(db.String(50))
+    message = db.Column(db.Text, nullable=False)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Optional: link to user if logged in
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
 
 
 # ----------------- SupportTicket -----------------
