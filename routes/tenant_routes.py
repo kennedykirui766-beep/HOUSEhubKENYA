@@ -130,15 +130,19 @@ import json
 from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
 
+from sqlalchemy.orm import joinedload
+from sqlalchemy import or_
+import json
+
 @tenant_bp.route("/properties", methods=['GET'])
 def properties():
     query = request.args.get('query', '').strip()
     is_guest = not current_user.is_authenticated
 
-    # Base query with owner (optimization)
+    # Base query with owner
     house_query = House.query.options(joinedload(House.owner))
 
-    # Search functionality
+    # Search
     if query:
         house_query = house_query.filter(
             or_(
@@ -149,16 +153,14 @@ def properties():
             )
         )
 
-    # Order: Available houses first
     houses = house_query.order_by(House.available.desc()).all()
 
-    # Process houses (images + status)
     processed_houses = []
 
     for house in houses:
         images = []
 
-        # Handle image_urls (JSON or string)
+        # ✅ Handle JSON or comma-separated string
         if house.image_urls:
             try:
                 images = json.loads(house.image_urls)
@@ -170,13 +172,16 @@ def properties():
                     if img.strip()
                 ]
 
-        # Optimize Cloudinary images
+        # ✅ Optimize Cloudinary images
         def optimize(url):
-            if "res.cloudinary.com" in url:
+            if url and "res.cloudinary.com" in url:
                 return url.replace("/upload/", "/upload/f_auto,q_auto/")
             return url
 
         images = [optimize(img) for img in images]
+
+        # ✅ Default fallback image
+        image_url = images[0] if images else url_for('static', filename='images/default-house.jpg')
 
         processed_houses.append({
             "id": house.id,
@@ -185,14 +190,15 @@ def properties():
             "price": house.rent_amount,
             "bedrooms": house.bedrooms,
             "bathrooms": house.bathrooms,
-            "image": images[0] if images else None,
+            "image": image_url,
             "available": house.available,
             "owner": house.owner.name if house.owner else "Unknown"
         })
 
+    # ✅ IMPORTANT: pass processed_houses (not raw houses)
     return render_template(
         "tenant/properties.html",
-        houses=houses,
+        houses=processed_houses,
         query=query,
         is_guest=is_guest
     )
