@@ -15,14 +15,26 @@ from utils_2fa import (
     get_enabled_2fa_methods
 )
 from utils_email_2fa import send_2fa_email, verify_email_format
+from utils_security import (
+    consume_rate_limit,
+    is_approved_admin,
+    mark_admin_totp_verified,
+    clear_admin_totp_verification,
+    get_allowed_admin_email,
+    has_admin_totp_verified,
+)
 from sqlalchemy.exc import IntegrityError
 import re
 import logging
 import pyotp
+import time
+import base64
+from io import BytesIO
 from werkzeug.utils import secure_filename
 import os
 from flask import current_app
 import cloudinary.uploader
+import qrcode
 
 # ------------------- LOGGING -------------------
 logging.basicConfig(level=logging.DEBUG)
@@ -41,6 +53,12 @@ def login():
             two_factor_code = request.form.get("two_factor_code")
             remember_me = request.form.get("remember_me") == "on"
 
+            rate_limit_key = f"login:{(identifier or request.remote_addr or 'unknown').strip().lower()}"
+            allowed, retry_after = consume_rate_limit(rate_limit_key, 5, 60)
+            if not allowed:
+                flash(f"Too many login attempts. Please wait {retry_after}s and try again.", "warning")
+                return render_template("login.html")
+
             if not identifier or not password:
                 flash("Email/phone and password are required.", "danger")
                 return render_template("login.html")
@@ -58,36 +76,22 @@ def login():
                 flash("Incorrect password.", "danger")
                 return render_template("login.html")
 
-            # Handle legacy 2FA (TOTP)
-            if user.two_factor_enabled:
-                if not two_factor_code:
-                    flash("2FA code required.", "warning")
-                    return render_template("login.html", requires_2fa=True)
-                if not verify_2fa_code(user, two_factor_code):
-                    flash("Invalid 2FA code.", "danger")
-                    return render_template("login.html")
-            
-            # Check if user has new-style 2FA enabled (email/SMS)
-            elif has_valid_2fa_method(user):
-                # Send verification code
-                preferred_method = user.preferred_2fa_method or 'email'
-                code_obj = create_verification_code(user, method=preferred_method)
-                
-                if preferred_method == 'email':
-                    if send_2fa_email(user.email, user.name, code_obj.code):
-                        session['pending_2fa_user_id'] = user.id
-                        session['2fa_method'] = preferred_method
-                        return redirect(url_for('auth.verify_2fa_login'))
-                    else:
-                        flash("Failed to send 2FA email. Try again.", "danger")
-                        return render_template("login.html")
-                # SMS will be added in Phase 2
-            
-            # No 2FA enabled
+            if user.role == "admin" and not is_approved_admin(user):
+                flash("This admin account is not approved for platform administration.", "danger")
+                return render_template("login.html")
 
-            login_user(user, remember=remember_me)
-            flash("Login successful.", "success")
-            logger.debug(f"User {identifier} logged in.")
+            # Always verify the user's account email before granting access.
+            code_obj = create_verification_code(user, method='email')
+            if send_2fa_email(user.email, user.name, code_obj.code, method='login'):
+                session['pending_2fa_user_id'] = user.id
+                session['2fa_method'] = 'email'
+                session['remember_me'] = remember_me
+                session['otp_resend_allowed_at'] = int(time.time()) + 30
+                flash("We sent a login code to your account email. Enter it to continue.", "info")
+                return redirect(url_for('auth.verify_2fa_login'))
+
+            flash("Failed to send the login code. Please try again.", "danger")
+            return render_template("login.html")
 
             # Redirect based on role
             if user.role == "tenant":
@@ -184,7 +188,7 @@ def signup():
             db.session.add(user)
             db.session.commit()
 
-            flash("Account created. Please login.", "success")
+            flash("Account created. Please log in to receive your email verification code.", "success")
             logger.debug(f"User {email} created.")
 
             return redirect(url_for("auth.login"))
@@ -265,6 +269,7 @@ def support():
 @login_required
 def logout():
     logout_user()
+    clear_admin_totp_verification()
     flash("Logged out successfully.", "info")
     return redirect(url_for("auth.login"))
 
@@ -274,6 +279,114 @@ def logout():
 @login_required
 def profile():
     return render_template("profile.html", user=current_user)
+
+
+@auth_bp.route('/admin-security-setup', methods=['GET', 'POST'])
+@login_required
+def admin_security_setup():
+    if not is_approved_admin(current_user):
+        flash("Access denied. Admins only.", "danger")
+        return redirect(url_for('auth.login'))
+
+    if request.method == 'POST':
+        verification_code = (request.form.get('verification_code') or '').strip()
+        secret = current_user.two_factor_secret
+
+        if not secret:
+            flash('Admin 2FA setup session expired. Please try again.', 'danger')
+            return redirect(url_for('auth.admin_security_setup'))
+
+        totp = pyotp.TOTP(secret)
+        if totp.verify(verification_code):
+            current_user.two_factor_enabled = True
+            current_user.preferred_2fa_method = 'totp'
+            db.session.commit()
+            mark_admin_totp_verified(current_user)
+            flash('Admin authenticator 2FA enabled successfully.', 'success')
+            return redirect(url_for('admin.dashboard'))
+
+        flash('Invalid verification code. Please try again.', 'danger')
+
+    if not current_user.two_factor_secret:
+        secret = pyotp.random_base32()
+        current_user.two_factor_secret = secret
+        db.session.commit()
+    else:
+        secret = current_user.two_factor_secret
+
+    totp_uri = pyotp.totp.TOTP(secret).provisioning_uri(
+        name=current_user.email,
+        issuer_name='HomeHub'
+    )
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(totp_uri)
+    qr.make(fit=True)
+    img = qr.make_image(fill='black', back_color='white')
+    buffered = BytesIO()
+    img.save(buffered)
+    qr_code_b64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+
+    return render_template(
+        '2fa_setup.html',
+        qr_code=qr_code_b64,
+        secret=secret,
+        setup_title='Admin Authenticator Setup',
+        intro_text='Scan the QR code with Google Authenticator, Authy, or Microsoft Authenticator to secure the admin account.',
+        back_url=url_for('admin.dashboard'),
+        back_label='Admin Dashboard',
+        email_option_url=None,
+        email_option_text=None,
+        show_email_option=False,
+        post_url=url_for('auth.admin_security_setup'),
+    )
+
+
+@auth_bp.route('/admin-2fa-verify', methods=['GET', 'POST'])
+@login_required
+def admin_2fa_verify():
+    if not is_approved_admin(current_user):
+        flash("Access denied. Admins only.", "danger")
+        return redirect(url_for('auth.login'))
+
+    if not current_user.two_factor_enabled or not current_user.two_factor_secret:
+        flash("Enable authenticator 2FA before accessing admin pages.", "warning")
+        return redirect(url_for('auth.admin_security_setup'))
+
+    if request.method == 'POST':
+        code = (request.form.get('code') or '').strip()
+        if not code:
+            flash('Please enter your authenticator code.', 'danger')
+            return render_template(
+                'verify_2fa_login.html',
+                method='totp',
+                masked_email=current_user.email,
+                resend_wait_seconds=0,
+            )
+
+        allowed, retry_after = consume_rate_limit(f"admin-totp:{current_user.id}", 5, 60)
+        if not allowed:
+            flash(f"Too many attempts. Please wait {retry_after}s and try again.", 'warning')
+            return render_template(
+                'verify_2fa_login.html',
+                method='totp',
+                masked_email=current_user.email,
+                resend_wait_seconds=0,
+            )
+
+        totp = pyotp.TOTP(current_user.two_factor_secret)
+        if totp.verify(code, valid_window=1):
+            mark_admin_totp_verified(current_user)
+            flash('Admin authenticator verification complete.', 'success')
+            return redirect(url_for('admin.dashboard'))
+
+        flash('Invalid authenticator code. Please try again.', 'danger')
+
+    return render_template(
+        'verify_2fa_login.html',
+        method='totp',
+        masked_email=current_user.email,
+        resend_wait_seconds=0,
+    )
 
 # ------------------- UPDATE PROFILE -------------------
 @auth_bp.route("/update_profile", methods=["POST"])
@@ -320,6 +433,11 @@ def update_profile():
 def setup_email_2fa():
     """Start email 2FA setup - send initial verification code"""
     if request.method == 'POST':
+        # Email 2FA is always tied to the account email stored in DB.
+        if not current_user.email or not verify_email_format(current_user.email):
+            flash("Your account email is invalid. Update your profile email first.", "danger")
+            return redirect(url_for('auth.profile'))
+
         # Generate OTP and send to user's email
         code_obj = create_verification_code(current_user, method='email')
         
@@ -334,7 +452,7 @@ def setup_email_2fa():
     verification = current_user.two_factor_verification
     email_enabled = verification.email_enabled if verification else False
     
-    return render_template('setup_email_2fa.html', email_enabled=email_enabled)
+    return render_template('setup_email_2fa.html', email_enabled=email_enabled, account_email=current_user.email)
 
 
 @auth_bp.route('/verify-email-2fa', methods=['GET', 'POST'])
@@ -362,9 +480,8 @@ def verify_email_2fa():
             if not verification.backup_codes:
                 verification.backup_codes = generate_backup_codes(10)
             
-            # Set as preferred method if no other method enabled
-            if current_user.preferred_2fa_method is None:
-                current_user.preferred_2fa_method = 'email'
+            # Email 2FA should become the active preference when the user enables it
+            current_user.preferred_2fa_method = 'email'
             
             db.session.commit()
             
@@ -397,6 +514,10 @@ def verify_2fa_login():
     """Verify 2FA code during login"""
     user_id = session.get('pending_2fa_user_id')
     method = session.get('2fa_method', 'email')
+
+    def _resend_wait_seconds():
+        allowed_at = int(session.get('otp_resend_allowed_at', 0) or 0)
+        return max(0, allowed_at - int(time.time()))
     
     if not user_id:
         flash("Please log in first.", "warning")
@@ -412,7 +533,12 @@ def verify_2fa_login():
         
         if not code:
             flash("Please enter the verification code.", "danger")
-            return render_template('verify_2fa_login.html', method=method, masked_email=user.email[:3] + '***' + user.email[-10:])
+            return render_template(
+                'verify_2fa_login.html',
+                method=method,
+                masked_email=user.email[:3] + '***' + user.email[-10:],
+                resend_wait_seconds=_resend_wait_seconds(),
+            )
         
         # Check if backup code (starts with letter, 8 chars)
         if len(code) == 8 and code[0].isalpha():
@@ -421,7 +547,8 @@ def verify_2fa_login():
                 db.session.commit()
                 session.pop('pending_2fa_user_id')
                 session.pop('2fa_method')
-                login_user(user)
+                session.pop('otp_resend_allowed_at', None)
+                login_user(user, remember=session.pop('remember_me', False))
                 flash("Logged in with backup code. Please generate new backup codes.", "warning")
                 logger.info(f"User {user.id} logged in with backup code")
                 return redirect(url_for('auth.show_backup_codes'))
@@ -432,7 +559,8 @@ def verify_2fa_login():
         elif verify_code(user, code, method=method):
             session.pop('pending_2fa_user_id')
             session.pop('2fa_method')
-            login_user(user)
+            session.pop('otp_resend_allowed_at', None)
+            login_user(user, remember=session.pop('remember_me', False))
             flash("Login successful.", "success")
             logger.info(f"User {user.id} logged in with {method} 2FA")
             
@@ -449,10 +577,55 @@ def verify_2fa_login():
                 return redirect(url_for("main.index"))
         else:
             flash("Invalid or expired code. Please request a new one.", "danger")
-            return render_template('verify_2fa_login.html', method=method, masked_email=user.email[:3] + '***' + user.email[-10:])
+            return render_template(
+                'verify_2fa_login.html',
+                method=method,
+                masked_email=user.email[:3] + '***' + user.email[-10:],
+                resend_wait_seconds=_resend_wait_seconds(),
+            )
     
     masked_email = user.email[:3] + '***' + user.email[-10:]
-    return render_template('verify_2fa_login.html', method=method, masked_email=masked_email)
+    return render_template(
+        'verify_2fa_login.html',
+        method=method,
+        masked_email=masked_email,
+        resend_wait_seconds=_resend_wait_seconds(),
+    )
+
+
+@auth_bp.route('/resend-2fa-login-code', methods=['POST'])
+def resend_2fa_login_code():
+    """Resend login OTP to account email with cooldown protection."""
+    user_id = session.get('pending_2fa_user_id')
+    method = session.get('2fa_method', 'email')
+
+    if not user_id:
+        flash("Your login session expired. Please log in again.", "warning")
+        return redirect(url_for('auth.login'))
+
+    user = User.query.get(user_id)
+    if not user:
+        session.pop('pending_2fa_user_id', None)
+        session.pop('2fa_method', None)
+        session.pop('otp_resend_allowed_at', None)
+        flash("User not found. Please log in again.", "danger")
+        return redirect(url_for('auth.login'))
+
+    now = int(time.time())
+    allowed_at = int(session.get('otp_resend_allowed_at', 0) or 0)
+    if now < allowed_at:
+        wait_seconds = allowed_at - now
+        flash(f"Please wait {wait_seconds}s before requesting a new code.", "warning")
+        return redirect(url_for('auth.verify_2fa_login'))
+
+    code_obj = create_verification_code(user, method=method)
+    if send_2fa_email(user.email, user.name, code_obj.code, method='login'):
+        session['otp_resend_allowed_at'] = int(time.time()) + 30
+        flash("A new login code has been sent to your email.", "info")
+    else:
+        flash("Could not resend code right now. Please try again.", "danger")
+
+    return redirect(url_for('auth.verify_2fa_login'))
 
 
 @auth_bp.route('/disable-email-2fa', methods=['POST'])
@@ -496,7 +669,10 @@ def security_settings():
     
     return render_template('security_settings.html', 
                           verification=verification,
-                          enabled_methods=enabled_methods)
+                          enabled_methods=enabled_methods,
+                          approved_admin_email=get_allowed_admin_email(),
+                          is_admin_account=is_approved_admin(current_user),
+                          admin_totp_verified=has_admin_totp_verified(current_user))
 
 
 # ================ VERIFY 2FA (Legacy TOTP) ================

@@ -53,6 +53,11 @@ class Config:
     OTP_TIMEOUT_SECONDS = 300  # 5 minutes
     MAX_OTP_ATTEMPTS = 5  # Max attempts before blocking
     BACKUP_CODES_COUNT = 10  # Number of backup codes generated
+
+    # ========== ADMIN SECURITY ==========
+    ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', '')
+    ADMIN_RATE_LIMIT = int(os.environ.get('ADMIN_RATE_LIMIT', 20))
+    ADMIN_RATE_LIMIT_WINDOW = int(os.environ.get('ADMIN_RATE_LIMIT_WINDOW', 60))
     
     # Upload folders
     UPLOAD_FOLDER = os.environ.get(

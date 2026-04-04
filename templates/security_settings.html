@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Security Settings - HomeHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+          <h1 class="h3 mb-1">Security Settings</h1>
+          <p class="text-muted mb-0">Manage your 2FA methods, backup codes, and admin access controls.</p>
+        </div>
+        <a href="{{ url_for('auth.profile') }}" class="btn btn-outline-primary">Back to Profile</a>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category in ['error', 'danger'] else category }}" role="alert">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <div class="row g-4">
+        <div class="col-lg-6">
+          <div class="card shadow-sm border-0 h-100">
+            <div class="card-body p-4">
+              <h5 class="card-title mb-3">Active 2FA Methods</h5>
+
+              {% if enabled_methods %}
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                  {% for method in enabled_methods %}
+                    <span class="badge bg-success text-uppercase">{{ method }}</span>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="alert alert-warning mb-3">No 2FA methods are enabled yet.</div>
+              {% endif %}
+
+              <div class="list-group list-group-flush">
+                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                  <div>
+                    <strong>Email 2FA</strong>
+                    <div class="text-muted small">Codes are sent to your account email.</div>
+                  </div>
+                  {% if verification and verification.email_enabled %}
+                    <span class="badge bg-success">Enabled</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Disabled</span>
+                  {% endif %}
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                  <div>
+                    <strong>Authenticator App</strong>
+                    <div class="text-muted small">QR-code based TOTP for the strongest protection.</div>
+                  </div>
+                  {% if verification and verification.totp_enabled or current_user.two_factor_enabled %}
+                    <span class="badge bg-success">Enabled</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Disabled</span>
+                  {% endif %}
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                  <div>
+                    <strong>Backup Codes</strong>
+                    <div class="text-muted small">One-time recovery codes for account access.</div>
+                  </div>
+                  {% if verification and verification.backup_codes %}
+                    <span class="badge bg-success">Available</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Not generated</span>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="mt-4 d-flex flex-wrap gap-2">
+                <a href="{{ url_for('auth.setup_email_2fa') }}" class="btn btn-primary">Enable Email 2FA</a>
+                <a href="{{ url_for('auth.show_backup_codes') }}" class="btn btn-outline-primary">View Backup Codes</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="card shadow-sm border-0 h-100">
+            <div class="card-body p-4">
+              <h5 class="card-title mb-3">Admin Access</h5>
+
+              {% if is_admin_account %}
+                <div class="alert alert-info">
+                  <strong>Approved admin email:</strong> {{ approved_admin_email }}<br>
+                  <strong>Authenticator verified:</strong> {% if admin_totp_verified %}Yes{% else %}No{% endif %}
+                </div>
+                <div class="d-grid gap-2">
+                  <a href="{{ url_for('auth.admin_security_setup') }}" class="btn btn-primary">Set Up Admin QR 2FA</a>
+                  <a href="{{ url_for('auth.admin_2fa_verify') }}" class="btn btn-outline-primary">Verify Admin Authenticator</a>
+                </div>
+              {% else %}
+                <div class="alert alert-secondary mb-0">
+                  This account is not the approved admin account, so admin-only controls are not available here.
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0 mt-4">
+        <div class="card-body p-4">
+          <h5 class="card-title mb-3">Recommended Next Steps</h5>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="p-3 border rounded h-100">
+                <strong>1. Prefer authenticator apps</strong>
+                <div class="text-muted small mt-1">Use QR-based TOTP for admin and sensitive actions.</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="p-3 border rounded h-100">
+                <strong>2. Keep backup codes offline</strong>
+                <div class="text-muted small mt-1">Store backup codes somewhere separate from your device.</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="p-3 border rounded h-100">
+                <strong>3. Review admin access</strong>
+                <div class="text-muted small mt-1">Only the approved admin email can pass the admin gate.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

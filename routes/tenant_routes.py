@@ -322,7 +322,7 @@ def twofa_setup():
 
         if not secret:
             flash('2FA setup session expired. Please try again.', category='error')
-            return redirect(url_for('tenant.2fa_setup'))
+            return redirect(url_for('tenant.twofa_setup'))
 
         # Verify the provided code
         totp = pyotp.TOTP(secret)

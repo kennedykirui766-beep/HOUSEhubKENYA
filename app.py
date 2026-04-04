@@ -1,5 +1,9 @@
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 if os.environ.get("USE_EVENTLET") == "true":
     import eventlet
     eventlet.monkey_patch()
@@ -8,12 +12,13 @@ from config import Config
 from extensions import db, migrate, login_manager, csrf
 from flask_socketio import SocketIO
 from flask_cors import CORS
-from models.models import User, House, ChatMessage, SupportTicket  # Added SupportTicket
+from models.models import User, House, ChatMessage, SupportTicket
 from flask_login import login_required, current_user
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 import os
 import logging
+from utils_security import is_approved_admin
 
 def create_app():
     app = Flask(__name__)
@@ -161,21 +166,6 @@ def create_app():
             db.session.rollback()
         db.session.remove()
 
-    @app.route("/subscribe", methods=["POST"])
-    def subscribe():
-        email = request.form.get("email")
-        if email:
-            try:
-                # TODO: save email to DB or send confirmation
-                logger.info(f"Subscription attempt with email: {email}")
-                flash(f"Subscribed successfully with {email}", "success")
-            except Exception as e:
-                logger.error(f"Error processing subscription: {str(e)}")
-                flash("Error processing subscription.", "danger")
-        else:
-            flash("No email provided", "danger")
-        return redirect(url_for("index"))
-
     # Central portal for role-based redirect
     @app.route('/portal')
     @login_required
@@ -183,6 +173,9 @@ def create_app():
         role = current_user.role.lower()
         logger.info(f"User {current_user.id} accessing portal with role: {role}")
         if role == 'admin':
+            if not is_approved_admin(current_user):
+                flash("Access denied. Admins only.", "danger")
+                return redirect(url_for('auth.logout'))
             return redirect(url_for('admin.manage_users'))
         elif role == 'landlord':
             return redirect(url_for('landlord.dashboard'))

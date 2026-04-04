@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from flask_socketio import emit
 from extensions import db, socketio
 from models.models import User, ChatMessage
+from utils_security import is_approved_admin, has_admin_totp_verified
 from datetime import datetime
 import os
 from werkzeug.utils import secure_filename
@@ -146,9 +147,16 @@ def agent_status(data):
 @support_bp.route('/admin')
 @login_required
 def admin_dashboard():
-    if current_user.role.lower() != 'admin':
+    if not is_approved_admin(current_user):
         flash('Access denied.', 'danger')
         return redirect(url_for('main.index'))
+
+    if not current_user.two_factor_enabled or not current_user.two_factor_secret:
+        flash('Enable authenticator 2FA before using the admin area.', 'warning')
+        return redirect(url_for('auth.admin_security_setup'))
+
+    if not has_admin_totp_verified(current_user):
+        return redirect(url_for('auth.admin_2fa_verify'))
 
     open_chats = ChatMessage.query.filter_by(is_read=False).all()
     return render_template('support/admin.html', chats=open_chats)

@@ -1845,7 +1845,7 @@
 </section>
 
 <!-- Newsletter Signup Form -->
-<section class="newsletter-section">
+<section class="newsletter-section" id="newsletter">
   <div class="container">
     <div class="newsletter-content">
       <div class="newsletter-text">
@@ -1854,11 +1854,31 @@
       </div>
       <div class="newsletter-form-container">
         <form action="{{ url_for('main.subscribe') }}" method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
           <div class="mb-3">
             <input type="text" name="name" placeholder="Your Name" required class="form-control" />
           </div>
           <div class="mb-3">
             <input type="email" name="email" placeholder="Your Email" required class="form-control" />
+          </div>
+          <div class="mb-3 p-3" style="background: rgba(255, 255, 255, 0.08); border-radius: 12px;">
+            <p class="mb-2" style="font-weight: 600;">Newsletter categories:</p>
+            <div class="form-check mb-1">
+              <input class="form-check-input" type="checkbox" name="newsletter_topics" value="platform_updates" id="topic_platform" checked>
+              <label class="form-check-label" for="topic_platform">- Platform updates</label>
+            </div>
+            <div class="form-check mb-1">
+              <input class="form-check-input" type="checkbox" name="newsletter_topics" value="security_alerts" id="topic_security">
+              <label class="form-check-label" for="topic_security">- Security alerts</label>
+            </div>
+            <div class="form-check mb-1">
+              <input class="form-check-input" type="checkbox" name="newsletter_topics" value="maintenance_notices" id="topic_maintenance">
+              <label class="form-check-label" for="topic_maintenance">- Maintenance notices</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="newsletter_topics" value="new_features" id="topic_features">
+              <label class="form-check-label" for="topic_features">- New features</label>
+            </div>
           </div>
           <button type="submit" class="btn-hero-primary w-100 justify-content-center">
             <i class="fas fa-paper-plane"></i> Subscribe

@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}System Updates{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-1"><i class="fas fa-bullhorn me-2"></i>System Updates Broadcast</h2>
+      <p class="text-muted mb-0">Send update announcements to all active subscribers.</p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">Back to Admin</a>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category in ['error', 'danger'] else category }}" role="alert">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Compose Update</h5>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="{{ url_for('admin.system_updates') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="mb-3">
+              <label class="form-label" for="topic">Target Audience</label>
+              <select class="form-select" id="topic" name="topic">
+                {% for key, label in topic_choices.items() %}
+                  <option value="{{ key }}" {% if selected_topic == key %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="title">Update Title</label>
+              <input class="form-control" id="title" name="title" maxlength="150" placeholder="e.g. Scheduled maintenance tonight" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="body">Update Details</label>
+              <textarea class="form-control" id="body" name="body" rows="8" placeholder="Write the system update details here..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-paper-plane me-2"></i>Send to Subscribers
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Active Subscribers</h5>
+          <span class="badge bg-light text-dark">{{ subscribers|length }}</span>
+        </div>
+        <div class="card-body p-0">
+          {% if subscribers %}
+            <ul class="list-group list-group-flush">
+              {% for sub in subscribers[:20] %}
+                <li class="list-group-item">
+                  <div class="fw-semibold">{{ sub.name or 'Subscriber' }}</div>
+                  <small class="text-muted">{{ sub.email }}</small>
+                  <div class="small text-secondary mt-1">
+                    Topics: {{ sub.topics or 'platform_updates' }}
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+            {% if subscribers|length > 20 %}
+              <div class="p-3 text-muted small">Showing first 20 subscribers.</div>
+            {% endif %}
+          {% else %}
+            <div class="p-3 text-muted">No subscribers yet.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
