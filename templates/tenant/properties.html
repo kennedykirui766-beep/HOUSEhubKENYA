@@ -10,7 +10,7 @@
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
     color: white;
     padding: 4rem 0;
-    border-radius: 0 0 var(--radius-xl) var(--radius-xl); /* Rounded bottom corners */
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
     margin-bottom: 3rem;
     position: relative;
     overflow: hidden;
@@ -37,19 +37,20 @@
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-xl);
-    padding: 2rem;
-    margin-top: -3rem; /* Overlap hero */
+    padding: 1.5rem; /* Reduced padding slightly */
+    margin-top: -3rem;
     box-shadow: var(--shadow-lg);
     position: relative;
     z-index: 10;
     margin-bottom: 3rem;
   }
 
+  /* UPDATED: Smaller Inputs */
   .form-control, .form-select {
-    padding: 0.8rem 1rem;
+    padding: 0.6rem 0.9rem; /* Reduced padding */
     border: 2px solid var(--border-color);
     border-radius: var(--radius-md);
-    font-size: 1rem;
+    font-size: 0.95rem; /* Slightly smaller font */
     transition: var(--transition);
     background-color: var(--body-bg);
     color: var(--text-primary);
@@ -57,12 +58,13 @@
 
   .form-control:focus, .form-select:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.15);
+    box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.15);
     background-color: white;
   }
 
+  /* UPDATED: Smaller Search Button */
   .btn-search {
-    padding: 0.8rem 1.5rem;
+    padding: 0.6rem 1rem; /* Reduced padding */
     background: var(--gradient-primary);
     color: white;
     border: none;
@@ -70,10 +72,8 @@
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    font-size: 0.9rem; /* Smaller font */
+    /* Removed height: 100% to let padding dictate size */
   }
 
   .btn-search:hover {
@@ -130,9 +130,9 @@
     position: absolute;
     top: 1rem;
     right: 1rem;
-    padding: 0.4rem 1rem;
+    padding: 0.3rem 0.8rem; /* Slightly smaller badge */
     border-radius: var(--radius-full);
-    font-size: 0.8rem;
+    font-size: 0.75rem; /* Smaller font */
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -150,14 +150,14 @@
   }
 
   .property-content {
-    padding: 1.5rem;
+    padding: 1.25rem; /* Reduced padding inside card */
     flex: 1;
     display: flex;
     flex-direction: column;
   }
 
   .property-title {
-    font-size: 1.25rem;
+    font-size: 1.15rem; /* Slightly smaller title */
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 0.5rem;
@@ -168,8 +168,8 @@
 
   .property-location {
     color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
+    font-size: 0.85rem; /* Smaller font */
+    margin-bottom: 0.8rem;
     display: flex;
     align-items: center;
   }
@@ -181,10 +181,10 @@
 
   .property-features {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    gap: 0.8rem; /* Tighter gap */
+    margin-bottom: 0.8rem;
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
 
   .property-features div {
@@ -207,25 +207,26 @@
   }
 
   .property-price {
-    font-size: 1.4rem;
+    font-size: 1.25rem; /* Slightly smaller price */
     font-weight: 800;
     color: var(--text-primary);
   }
   
   .property-price span {
-    font-size: 0.9rem;
+    font-size: 0.8rem; /* Smaller "per month" */
     font-weight: 400;
     color: var(--text-muted);
   }
 
+  /* UPDATED: Smaller Book Button */
   .btn-book {
     background: var(--gradient-primary);
     color: white;
-    padding: 0.6rem 1.5rem;
+    padding: 0.45rem 1rem; /* Reduced padding */
     border-radius: var(--radius-full);
     text-decoration: none;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.85rem; /* Smaller font */
     transition: var(--transition);
   }
 
@@ -256,7 +257,7 @@
     position: fixed;
     bottom: 30px;
     right: 30px;
-    width: 350px;
+    width: 320px; /* Slightly narrower */
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
@@ -270,38 +271,41 @@
   .chat-header {
     background: var(--gradient-primary);
     color: white;
-    padding: 1rem;
+    padding: 0.8rem; /* Reduced padding */
     display: flex;
     justify-content: space-between;
     align-items: center;
+    font-size: 0.9rem; /* Smaller header font */
   }
 
   .chat-messages {
-    height: 300px;
+    height: 280px; /* Reduced height */
     overflow-y: auto;
-    padding: 1rem;
+    padding: 0.8rem; /* Reduced padding */
     background: var(--body-bg);
   }
 
   .chat-form {
-    padding: 1rem;
+    padding: 0.8rem; /* Reduced padding */
     border-top: 1px solid var(--border-color);
     background: var(--card-bg);
   }
 
   .chat-input {
     width: 100%;
-    padding: 0.75rem;
+    padding: 0.6rem; /* Reduced padding */
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
+    font-size: 0.9rem;
   }
 
+  /* UPDATED: Smaller Chat Toggle Button */
   .chat-button {
     position: fixed;
     bottom: 30px;
     right: 30px;
-    width: 60px;
-    height: 60px;
+    width: 50px; /* Reduced from 60px */
+    height: 50px; /* Reduced from 60px */
     border-radius: 50%;
     background: var(--gradient-primary);
     color: white;
@@ -310,7 +314,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.2rem; /* Reduced from 1.5rem */
     cursor: pointer;
     transition: var(--transition);
     z-index: 999;
@@ -323,10 +327,10 @@
 
   .message {
     margin-bottom: 1rem;
-    padding: 0.75rem 1rem;
+    padding: 0.6rem 0.8rem; /* Smaller message bubbles */
     border-radius: 12px;
     max-width: 85%;
-    font-size: 0.9rem;
+    font-size: 0.85rem; /* Smaller font */
     line-height: 1.4;
   }
 
@@ -348,7 +352,7 @@
   .message small {
     display: block;
     margin-top: 0.25rem;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     opacity: 0.7;
   }
 
@@ -364,7 +368,7 @@
     .search-card { padding: 1.5rem; margin-top: -2rem; }
     .property-grid { grid-template-columns: 1fr; }
     .chat-widget { width: calc(100% - 40px); right: 20px; left: 20px; bottom: 20px; }
-    .chat-button { width: 50px; height: 50px; font-size: 1.25rem; bottom: 20px; right: 20px; }
+    .chat-button { width: 45px; height: 45px; font-size: 1.1rem; bottom: 20px; right: 20px; }
   }
 </style>
 {% endblock %}
@@ -473,7 +477,7 @@
 
             <div class="property-footer">
                 <div class="property-price">
-                    KES {{ "{:,.0f}".format(house.price) if house.price else '0' }}
+                    KES {{ "{:,.0f}".format(house.rent_amount) if house.rent_amount else '0' }}
                     <span>/mo</span>
                 </div>
                 <a href="{{ url_for('tenant.book_house', house_id=house.id) }}" class="btn-book">
@@ -488,7 +492,7 @@
         <i class="fas fa-search"></i>
         <h3>No Houses Found</h3>
         <p>Try adjusting your search criteria or check back later.</p>
-        <a href="{{ url_for('house.hotels') }}" class="btn btn-outline-primary">Refresh</a>
+        <a href="{{ url_for('house.hotels') }}" class="btn btn-outline-primary btn-sm">Refresh</a>
       </div>
     {% endif %}
   </div>
@@ -504,7 +508,7 @@
   <form id="chat-form" class="chat-form">
     <div class="input-group">
       <input type="text" id="chat-input" class="chat-input" placeholder="Type a message..." />
-      <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+      <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-paper-plane"></i></button>
     </div>
     <div class="mt-2 text-end">
         <button type="button" id="upload-file-btn" class="btn btn-sm btn-outline-secondary">
