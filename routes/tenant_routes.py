@@ -293,6 +293,23 @@ def pay_rent():
 def profile():
     return render_template('profile.html', tenant=current_user)
 
+
+@tenant_bp.route('/delete_account', methods=['GET', 'POST'])
+@login_required
+def delete_account():
+    if request.method == 'POST':
+        user = current_user
+        db.session.delete(user)
+        db.session.commit()
+        # After deletion, redirect to sign-in
+        return redirect(url_for('auth.login'))
+
+    return render_template(
+        'shared/delete_account.html',
+        back_url=url_for('tenant.profile'),
+        post_url=url_for('tenant.delete_account')
+    )
+
 @tenant_bp.route('/feedback', methods=['GET', 'POST'])
 @login_required
 def feedback():
