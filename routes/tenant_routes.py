@@ -195,7 +195,6 @@ def properties():
             "owner": house.owner.name if house.owner else "Unknown"
         })
 
-    # ✅ IMPORTANT: pass processed_houses (not raw houses)
     return render_template(
         "tenant/properties.html",
         houses=processed_houses,
