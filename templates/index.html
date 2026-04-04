@@ -1576,7 +1576,10 @@
               {% if property.bedrooms %}<span class="me-3"><i class="fas fa-bed"></i> {{ property.bedrooms }} Bed</span>{% endif %}
               {% if property.bathrooms %}<span><i class="fas fa-bath"></i> {{ property.bathrooms }} Bath</span>{% endif %}
             </div>
-            <p class="property-description">{{ property.description[:100] }}{% if property.description|length > 100 %}...{% endif %}</p>
+            <p class="property-description">
+              {{ property.description[:100] if property.description else '' }}
+              {% if property.description and property.description|length > 100 %}...{% endif %}
+            </p>
             <div class="property-actions d-flex gap-2">
               <a href="{{ url_for('house.view_property', property_id=property.id) }}" class="btn-outline-custom">View</a>
               {% if not is_guest %}
