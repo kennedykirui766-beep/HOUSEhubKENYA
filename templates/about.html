@@ -1,182 +1,253 @@
-{% extends "base.html" %} {% block title %}How It Works - Landlord{% endblock %}
-{% block content %}
-<style>
-  :root {
-    --primary: #4361ee;
-    --primary-dark: #3a0ca3;
-    --secondary: #7209b7;
-    --accent: #f72585;
-    --light: #f8f9fa;
-    --dark: #212529;
-    --success: #06ffa5;
-    --info: #00b4d8;
-    --warning: #ffbe0b;
-  }
+{% extends "base.html" %}
 
-  .hero-section {
-    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80');
+{% block title %}About Us - HomeHub{% endblock %}
+
+{% block styles %}
+<style>
+  /* ========== ABOUT PAGE SPECIFIC STYLES ========== */
+  
+  /* Hero Section */
+  .about-hero {
+    position: relative;
+    background-image: url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80');
     background-size: cover;
     background-position: center;
     color: white;
-    padding: 8rem 0;
-    position: relative;
-  }
-
-  .section-title {
-    position: relative;
+    padding: 6rem 0; /* Responsive padding handled below */
     margin-bottom: 3rem;
-    text-align: center;
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl); /* Rounded bottom corners */
+    overflow: hidden;
   }
 
-  .section-title::after {
+  /* Dark Overlay for readability */
+  .about-hero::before {
     content: "";
     position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80px;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(67, 97, 238, 0.4) 100%);
+    z-index: 1;
+  }
+
+  .about-hero .container {
+    position: relative;
+    z-index: 2;
+  }
+
+  .about-hero h1 {
+    font-weight: 800;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  }
+
+  /* Section Headers */
+  .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    position: relative;
+  }
+
+  .section-header h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .section-header::after {
+    content: "";
+    display: block;
+    width: 60px;
     height: 4px;
-    background: var(--primary);
+    background: var(--gradient-primary);
+    margin: 0.5rem auto 0;
     border-radius: 2px;
   }
 
-  .feature-card {
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-    height: 100%;
-    background: white;
+  /* Common Card Style */
+  .info-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
     padding: 2rem;
-    text-align: center;
+    height: 100%;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
   }
 
-  .feature-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+  .info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
   }
 
-  .feature-icon {
-    width: 80px;
-    height: 80px;
+  /* Feature Icons */
+  .feature-icon-wrapper {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    color: var(--primary-color);
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    margin: 0 auto 1.5rem;
-    font-size: 2rem;
+    font-size: 1.75rem;
+    margin: 0 auto 1.25rem;
+    transition: var(--transition);
+  }
+
+  .info-card:hover .feature-icon-wrapper {
+    background: var(--gradient-primary);
     color: white;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   }
 
-  .value-card {
-    border-radius: 15px;
-    padding: 2rem;
-    height: 100%;
-    background: white;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
+  /* Story Section List */
+  .story-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
   }
 
-  .value-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+  .story-list li {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: flex-start;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
   }
 
-  .team-member {
-    text-align: center;
-    margin-bottom: 2rem;
+  .story-list i {
+    color: var(--primary-color);
+    margin-top: 4px;
+    margin-right: 10px;
+    flex-shrink: 0;
   }
 
-  .team-member img {
-    width: 150px;
-    height: 150px;
+  /* Team Members */
+  .team-member-img {
+    width: 140px;
+    height: 140px;
     border-radius: 50%;
     object-fit: cover;
-    margin-bottom: 1rem;
-    border: 5px solid var(--light);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    margin: 0 auto 1rem;
+    border: 4px solid var(--card-bg);
+    box-shadow: var(--shadow-md);
   }
 
-  .testimonial {
-    background: white;
-    border-radius: 15px;
+  /* Testimonials */
+  .testimonial-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
     padding: 2rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    position: relative;
     height: 100%;
+    position: relative;
   }
 
-  .testimonial::before {
-    content: """;
+  .testimonial-card::before {
+    content: "\201C";
     position: absolute;
     top: 1rem;
     left: 1.5rem;
-    font-size: 4rem;
-    color: rgba(67, 97, 238, 0.1);
+    font-size: 3.5rem;
+    color: var(--primary-light);
     font-family: serif;
+    line-height: 1;
+    opacity: 0.5;
   }
 
+  .testimonial-text {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 1.5rem;
+    font-style: italic;
+    color: var(--text-secondary);
+  }
+
+  .user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+
+  /* CTA Section */
   .cta-section {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    background: var(--gradient-primary);
     color: white;
     padding: 4rem 0;
-    border-radius: 15px;
-    margin: 4rem 0;
+    border-radius: var(--radius-xl);
+    margin-top: 4rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   }
 
-  .footer {
-    background: var(--dark);
-    color: white;
-    padding: 3rem 0 1rem;
+  /* Responsive Adjustments */
+  @media (max-width: 991px) {
+    .about-hero {
+      padding: 4rem 0;
+    }
+    .section-header h2 {
+      font-size: 1.75rem;
+    }
   }
 
-  .footer a {
-    color: var(--light);
-    text-decoration: none;
-    transition: color 0.3s ease;
-  }
+  @media (max-width: 767px) {
+    .about-hero {
+      padding: 3rem 0;
+      margin-bottom: 2rem;
+    }
+    
+    .about-hero h1 {
+      font-size: 2rem;
+    }
 
-  .footer a:hover {
-    color: var(--primary);
-  }
+    .section-header h2 {
+      font-size: 1.5rem;
+    }
 
-  @media (max-width: 768px) {
-    .hero-section {
-      padding: 5rem 0;
+    .info-card, .testimonial-card {
+      padding: 1.5rem;
+    }
+    
+    .cta-section {
+      padding: 3rem 1.5rem;
+      text-align: center;
     }
   }
 </style>
+{% endblock %}
+
+{% block content %}
+
 <!-- Hero Section -->
-<section class="hero-section">
+<section class="about-hero">
   <div class="container text-center">
-    <h1 class="display-4 fw-bold mb-4">About HomeHub</h1>
-    <p class="lead">
-      Simplifying property management for landlords, tenants, and service
-      providers.
+    <h1 class="display-4 fw-bold mb-3">About HomeHub</h1>
+    <p class="lead opacity-90">
+      Simplifying property management for landlords, tenants, and service providers across Kenya.
     </p>
   </div>
 </section>
 
 <!-- Who We Are Section -->
-<section class="py-5">
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-lg-8">
-        <div class="section-title">
-          <h2>Who We Are</h2>
-        </div>
-        <p class="lead text-center mb-4">
-          HomeHub is a comprehensive property management platform designed to
-          streamline the rental experience for everyone involved.
-        </p>
-        <div class="text-center">
-          <blockquote class="blockquote">
-            <p class="mb-0">
-              "Our mission is to make rental and property management seamless,
-              transparent, and efficient."
-            </p>
-          </blockquote>
+<section class="container mb-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="section-header">
+        <h2>Who We Are</h2>
+      </div>
+      <p class="text-center lead mb-4" style="color: var(--text-secondary);">
+        HomeHub is a comprehensive property management platform designed to streamline the rental experience for everyone involved.
+      </p>
+      <div class="text-center">
+        <div class="info-card border-0 bg-transparent shadow-none">
+          <h4 style="color: var(--primary-color); font-weight: 700; margin-bottom: 1rem;">Our Mission</h4>
+          <p class="mb-0 fs-5 fst-italic">
+            "To make rental and property management seamless, transparent, and efficient through technology."
+          </p>
         </div>
       </div>
     </div>
@@ -184,339 +255,288 @@
 </section>
 
 <!-- Our Story Section -->
-<section class="py-5 bg-light">
-  <div class="container">
-    <div class="section-title">
-      <h2>Our Story</h2>
+<section class="container mb-5">
+  <div class="row align-items-center g-5">
+    <div class="col-lg-6">
+      <div class="section-header text-start">
+        <h2>Our Story</h2>
+      </div>
+      <p class="mb-3">
+        Property management in Kenya has long been plagued by challenges: late rent payments, communication gaps between landlords and tenants, inefficient maintenance processes, and poor record-keeping.
+      </p>
+      <p>
+        Recognizing these pain points, our team of real estate professionals and technology experts came together to create HomeHub - a platform that addresses these challenges head-on.
+      </p>
     </div>
 
-    <div class="row align-items-center">
-      <div class="col-lg-6 mb-4">
-        <h3>Why HomeHub Was Created</h3>
-        <p>
-          Property management in Kenya has long been plagued by challenges: late
-          rent payments, communication gaps between landlords and tenants,
-          inefficient maintenance processes, and poor record-keeping. These
-          issues created frustration for property owners, tenants, and service
-          providers alike.
-        </p>
-        <p>
-          Recognizing these pain points, our team of real estate professionals
-          and technology experts came together to create HomeHub - a platform
-          that would address these challenges head-on and transform the property
-          management landscape.
-        </p>
-      </div>
-
-      <div class="col-lg-6 mb-4">
-        <div class="card border-0 shadow-sm">
-          <div class="card-body p-4">
-            <h4 class="card-title">How HomeHub Solves These Problems</h4>
-            <ul class="list-unstyled">
-              <li class="mb-3">
-                <i class="fas fa-check-circle text-primary me-2"></i>
-                <strong>Automated Rent Collection:</strong> Timely payments with
-                M-Pesa integration
-              </li>
-              <li class="mb-3">
-                <i class="fas fa-check-circle text-primary me-2"></i>
-                <strong>Centralized Communication:</strong> Direct messaging
-                between all parties
-              </li>
-              <li class="mb-3">
-                <i class="fas fa-check-circle text-primary me-2"></i>
-                <strong>Efficient Maintenance:</strong> Quick connection to
-                verified service providers
-              </li>
-              <li class="mb-3">
-                <i class="fas fa-check-circle text-primary me-2"></i>
-                <strong>Digital Record-Keeping:</strong> Secure storage of
-                leases, payments, and documents
-              </li>
-            </ul>
-          </div>
-        </div>
+    <div class="col-lg-6">
+      <div class="info-card" style="background: linear-gradient(135deg, var(--primary-light), white);">
+        <h4 class="mb-4 fw-bold">How We Solve It</h4>
+        <ul class="story-list">
+          <li>
+            <i class="fas fa-check-circle"></i>
+            <div>
+              <strong>Automated Rent Collection:</strong><br>
+              <span class="small">Timely payments integrated with M-Pesa.</span>
+            </div>
+          </li>
+          <li>
+            <i class="fas fa-check-circle"></i>
+            <div>
+              <strong>Centralized Communication:</strong><br>
+              <span class="small">Direct messaging between landlords, tenants, and providers.</span>
+            </div>
+          </li>
+          <li>
+            <i class="fas fa-check-circle"></i>
+            <div>
+              <strong>Efficient Maintenance:</strong><br>
+              <span class="small">Quick connection to verified service providers.</span>
+            </div>
+          </li>
+          <li>
+            <i class="fas fa-check-circle"></i>
+            <div>
+              <strong>Digital Record-Keeping:</strong><br>
+              <span class="small">Secure storage of leases, payments, and documents.</span>
+            </div>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
 </section>
 
 <!-- Core Features Section -->
-<section class="py-5">
-  <div class="container">
-    <div class="section-title">
-      <h2>What We Do</h2>
+<section class="container mb-5">
+  <div class="section-header">
+    <h2>What We Do</h2>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-md-6 col-lg-3">
+      <div class="info-card text-center">
+        <div class="feature-icon-wrapper">
+          <i class="fas fa-home"></i>
+        </div>
+        <h5>Property Management</h5>
+        <p class="small text-muted mt-2">
+          Comprehensive tools for listing properties, screening tenants, and managing leases effectively.
+        </p>
+      </div>
     </div>
 
-    <div class="row g-4">
-      <div class="col-md-6 col-lg-3">
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-home"></i>
-          </div>
-          <h4>Landlord Property Management</h4>
-          <p>
-            Comprehensive tools for listing properties, screening tenants, and
-            managing leases.
-          </p>
+    <div class="col-md-6 col-lg-3">
+      <div class="info-card text-center">
+        <div class="feature-icon-wrapper">
+          <i class="fas fa-users"></i>
         </div>
+        <h5>Tenant Experience</h5>
+        <p class="small text-muted mt-2">
+          Easy rent payments, digital lease signing, and direct communication with landlords.
+        </p>
       </div>
+    </div>
 
-      <div class="col-md-6 col-lg-3">
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-users"></i>
-          </div>
-          <h4>Tenant Rent Tracking & Communication</h4>
-          <p>
-            Easy rent payments, digital lease signing, and direct communication
-            with landlords.
-          </p>
+    <div class="col-md-6 col-lg-3">
+      <div class="info-card text-center">
+        <div class="feature-icon-wrapper">
+          <i class="fas fa-tools"></i>
         </div>
+        <h5>Service Connection</h5>
+        <p class="small text-muted mt-2">
+          Connecting property owners with verified maintenance professionals in their area.
+        </p>
       </div>
+    </div>
 
-      <div class="col-md-6 col-lg-3">
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-tools"></i>
-          </div>
-          <h4>Service Provider Connection</h4>
-          <p>
-            Connecting property owners with verified maintenance professionals
-            in their area.
-          </p>
+    <div class="col-md-6 col-lg-3">
+      <div class="info-card text-center">
+        <div class="feature-icon-wrapper">
+          <i class="fas fa-chart-pie"></i>
         </div>
-      </div>
-
-      <div class="col-md-6 col-lg-3">
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-chart-pie"></i>
-          </div>
-          <h4>Dashboard & Reports</h4>
-          <p>
-            Real-time analytics and financial reporting for informed
-            decision-making.
-          </p>
-        </div>
+        <h5>Analytics</h5>
+        <p class="small text-muted mt-2">
+          Real-time analytics and financial reporting for informed decision-making.
+        </p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- Our Values Section -->
-<section class="py-5 bg-light">
-  <div class="container">
-    <div class="section-title">
-      <h2>Our Values</h2>
+<section class="container mb-5" style="background-color: var(--body-bg); padding: 3rem; border-radius: var(--radius-lg);">
+  <div class="section-header">
+    <h2>Our Values</h2>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-md-6 col-lg-3">
+      <div class="info-card text-center">
+        <div class="feature-icon-wrapper">
+          <i class="fas fa-eye"></i>
+        </div>
+        <h5>Transparency</h5>
+        <p class="small text-muted mt-2">
+          Clear, open communication and honest dealings with all our users.
+        </p>
+      </div>
     </div>
 
-    <div class="row g-4">
-      <div class="col-md-6 col-lg-3">
-        <div class="value-card text-center">
-          <div class="feature-icon">
-            <i class="fas fa-eye"></i>
-          </div>
-          <h4>Transparency</h4>
-          <p>
-            We believe in clear, open communication and honest dealings with all
-            our users.
-          </p>
+    <div class="col-md-6 col-lg-3">
+      <div class="info-card text-center">
+        <div class="feature-icon-wrapper">
+          <i class="fas fa-shield-alt"></i>
         </div>
+        <h5>Reliability</h5>
+        <p class="small text-muted mt-2">
+          Built to be dependable, with consistent performance and guaranteed uptime.
+        </p>
       </div>
+    </div>
 
-      <div class="col-md-6 col-lg-3">
-        <div class="value-card text-center">
-          <div class="feature-icon">
-            <i class="fas fa-shield-alt"></i>
-          </div>
-          <h4>Reliability</h4>
-          <p>
-            Our platform is built to be dependable, with consistent performance
-            and uptime.
-          </p>
+    <div class="col-md-6 col-lg-3">
+      <div class="info-card text-center">
+        <div class="feature-icon-wrapper">
+          <i class="fas fa-lightbulb"></i>
         </div>
+        <h5>Innovation</h5>
+        <p class="small text-muted mt-2">
+          Continuously improving the platform with new features and technology.
+        </p>
       </div>
+    </div>
 
-      <div class="col-md-6 col-lg-3">
-        <div class="value-card text-center">
-          <div class="feature-icon">
-            <i class="fas fa-lightbulb"></i>
-          </div>
-          <h4>Innovation</h4>
-          <p>
-            We continuously improve our platform with new features and
-            technological advancements.
-          </p>
+    <div class="col-md-6 col-lg-3">
+      <div class="info-card text-center">
+        <div class="feature-icon-wrapper">
+          <i class="fas fa-headset"></i>
         </div>
-      </div>
-
-      <div class="col-md-6 col-lg-3">
-        <div class="value-card text-center">
-          <div class="feature-icon">
-            <i class="fas fa-headset"></i>
-          </div>
-          <h4>Customer Support</h4>
-          <p>
-            Our dedicated team is always ready to assist users with any
-            questions or issues.
-          </p>
-        </div>
+        <h5>Support</h5>
+        <p class="small text-muted mt-2">
+          A dedicated team ready to assist users with any questions or issues.
+        </p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- Meet the Team Section -->
-<section class="py-5">
-  <div class="container">
-    <div class="section-title">
-      <h2>Meet Our Team</h2>
-    </div>
-
-    <div class="row">
-      <div class="col-md-6 col-lg-3">
-        <div class="team-member">
-          <img
-            src="https://randomuser.me/api/portraits/men/32.jpg"
-            alt="Team Member"
-          />
-          <h5>David Kimani</h5>
-          <p class="text-muted">Founder & CEO</p>
-          <p>
-            Former real estate agent with 15+ years of experience in property
-            management.
-          </p>
-        </div>
-      </div>
-
-      <div class="col-md-6 col-lg-3">
-        <div class="team-member">
-          <img
-            src="https://randomuser.me/api/portraits/women/44.jpg"
-            alt="Team Member"
-          />
-          <h5>Grace Otieno</h5>
-          <p class="text-muted">CTO</p>
-          <p>
-            Tech expert with a passion for creating solutions that solve
-            real-world problems.
-          </p>
-        </div>
-      </div>
-
-      <div class="col-md-6 col-lg-3">
-        <div class="team-member">
-          <img
-            src="https://randomuser.me/api/portraits/men/67.jpg"
-            alt="Team Member"
-          />
-          <h5>Michael Wanjala</h5>
-          <p class="text-muted">Head of Operations</p>
-          <p>
-            Ensures smooth day-to-day operations and excellent customer
-            experience.
-          </p>
-        </div>
-      </div>
-
-      <div class="col-md-6 col-lg-3">
-        <div class="team-member">
-          <img
-            src="https://randomuser.me/api/portraits/women/28.jpg"
-            alt="Team Member"
-          />
-          <h5>Sarah Achieng</h5>
-          <p class="text-muted">Customer Support Lead</p>
-          <p>
-            Dedicated to helping users get the most out of the HomeHub platform.
-          </p>
-        </div>
-      </div>
-    </div>
+<section class="container mb-5">
+  <div class="section-header">
+    <h2>Meet Our Team</h2>
   </div>
-</section>
 
-<!-- How It Works CTA -->
-<section class="py-5 bg-light">
-  <div class="container text-center">
-    <h2 class="mb-4">Want to see how it works?</h2>
-    <a
-      href="{{ url_for('main.how_it_works_general') }}"
-      class="btn btn-primary btn-lg px-4"
-      >How It Works →</a
-    >
+  <div class="row g-4">
+    <div class="col-md-6 col-lg-3">
+      <div class="info-card text-center">
+        <img
+          src="https://randomuser.me/api/portraits/men/32.jpg"
+          alt="David Kimani"
+          class="team-member-img"
+        />
+        <h5 class="fw-bold">David Kimani</h5>
+        <p class="text-primary small fw-bold mb-2">Founder & CEO</p>
+        <p class="small text-muted">
+          Former real estate agent with 15+ years of experience in property management.
+        </p>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+      <div class="info-card text-center">
+        <img
+          src="https://randomuser.me/api/portraits/women/44.jpg"
+          alt="Grace Otieno"
+          class="team-member-img"
+        />
+        <h5 class="fw-bold">Grace Otieno</h5>
+        <p class="text-primary small fw-bold mb-2">CTO</p>
+        <p class="small text-muted">
+          Tech expert with a passion for creating solutions that solve real-world problems.
+        </p>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+      <div class="info-card text-center">
+        <img
+          src="https://randomuser.me/api/portraits/men/67.jpg"
+          alt="Michael Wanjala"
+          class="team-member-img"
+        />
+        <h5 class="fw-bold">Michael Wanjala</h5>
+        <p class="text-primary small fw-bold mb-2">Head of Operations</p>
+        <p class="small text-muted">
+          Ensures smooth day-to-day operations and excellent customer experience.
+        </p>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+      <div class="info-card text-center">
+        <img
+          src="https://randomuser.me/api/portraits/women/28.jpg"
+          alt="Sarah Achieng"
+          class="team-member-img"
+        />
+        <h5 class="fw-bold">Sarah Achieng</h5>
+        <p class="text-primary small fw-bold mb-2">Customer Support Lead</p>
+        <p class="small text-muted">
+          Dedicated to helping users get the most out of the HomeHub platform.
+        </p>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- Testimonials Section -->
-<section class="py-5">
-  <div class="container">
-    <div class="section-title">
-      <h2>What Our Users Say</h2>
+<section class="container mb-5">
+  <div class="section-header">
+    <h2>What Our Users Say</h2>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-4">
+      <div class="testimonial-card">
+        <p class="testimonial-text">
+          "HomeHub made it easier for me to manage my tenants! Rent collection is now automated, and I can track everything from my phone."
+        </p>
+        <div class="d-flex align-items-center">
+          <div class="user-avatar bg-primary me-3">JK</div>
+          <div>
+            <h6 class="mb-0 fw-bold">John K.</h6>
+            <small class="text-muted">Landlord in Kericho</small>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="row g-4">
-      <div class="col-lg-4">
-        <div class="testimonial">
-          <p class="mb-4">
-            "HomeHub made it easier for me to manage my tenants! Rent collection
-            is now automated, and I can track everything from my phone."
-          </p>
-          <div class="d-flex align-items-center">
-            <div
-              class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3"
-              style="width: 50px; height: 50px"
-            >
-              <span class="fw-bold">JK</span>
-            </div>
-            <div>
-              <h6 class="mb-0">John K.</h6>
-              <small class="text-muted">Landlord in Kericho</small>
-            </div>
+    <div class="col-lg-4">
+      <div class="testimonial-card">
+        <p class="testimonial-text">
+          "As a tenant, I love paying rent through M-Pesa on HomeHub. It's so convenient, and I never have to worry about payment receipts getting lost."
+        </p>
+        <div class="d-flex align-items-center">
+          <div class="user-avatar bg-success me-3">AM</div>
+          <div>
+            <h6 class="mb-0 fw-bold">Amina M.</h6>
+            <small class="text-muted">Tenant in Mombasa</small>
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="col-lg-4">
-        <div class="testimonial">
-          <p class="mb-4">
-            "As a tenant, I love paying rent through M-Pesa on HomeHub. It's so
-            convenient, and I never have to worry about payment receipts getting
-            lost."
-          </p>
-          <div class="d-flex align-items-center">
-            <div
-              class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center me-3"
-              style="width: 50px; height: 50px"
-            >
-              <span class="fw-bold">AM</span>
-            </div>
-            <div>
-              <h6 class="mb-0">Amina M.</h6>
-              <small class="text-muted">Tenant in Mombasa</small>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-lg-4">
-        <div class="testimonial">
-          <p class="mb-4">
-            "HomeHub has connected me with more property maintenance jobs in
-            Kisumu. The bidding system is fair and transparent."
-          </p>
-          <div class="d-flex align-items-center">
-            <div
-              class="rounded-circle bg-warning text-white d-flex align-items-center justify-content-center me-3"
-              style="width: 50px; height: 50px"
-            >
-              <span class="fw-bold">PN</span>
-            </div>
-            <div>
-              <h6 class="mb-0">Peter N.</h6>
-              <small class="text-muted">Plumber in Kisumu</small>
-            </div>
+    <div class="col-lg-4">
+      <div class="testimonial-card">
+        <p class="testimonial-text">
+          "HomeHub has connected me with more property maintenance jobs in Kisumu. The bidding system is fair and transparent."
+        </p>
+        <div class="d-flex align-items-center">
+          <div class="user-avatar bg-warning me-3">PN</div>
+          <div>
+            <h6 class="mb-0 fw-bold">Peter N.</h6>
+            <small class="text-muted">Plumber in Kisumu</small>
           </div>
         </div>
       </div>
@@ -525,20 +545,17 @@
 </section>
 
 <!-- Call to Action Section -->
-<section class="cta-section">
-  <div class="container text-center">
-    <h2 class="mb-4">Join HomeHub Today</h2>
-    <p class="lead mb-5">
+<section class="container">
+  <div class="cta-section text-center">
+    <h2 class="fw-bold mb-3">Join HomeHub Today</h2>
+    <p class="lead mb-4 opacity-75">
       Experience the future of property management in Kenya
     </p>
     <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
-      <a href="#" class="btn btn-light btn-lg px-4">Get Started</a>
-      <a
-        href="{{ url_for('main.contact') }}"
-        class="btn btn-outline-light btn-lg px-4"
-        >Contact Us</a
-      >
+      <a href="{{ url_for('auth.signup') }}" class="btn btn-light btn-lg px-4 fw-bold shadow-sm">Get Started</a>
+      <a href="{{ url_for('main.contact') }}" class="btn btn-outline-light btn-lg px-4 fw-bold">Contact Us</a>
     </div>
   </div>
 </section>
+
 {% endblock %}
