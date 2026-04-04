@@ -14,7 +14,12 @@ def delete_user_and_dependents(user):
     """Delete a user and all dependent records in a safe order.
     This performs explicit deletions instead of relying on ON DELETE CASCADE.
     """
+    # Protect admin accounts from accidental deletion
     try:
+        if hasattr(user, 'role') and getattr(user, 'role', '').lower() == 'admin':
+            msg = "Refusing to delete admin account"
+            logger.warning(f"{msg}: user_id={user.id}")
+            return False, msg
         # Two-factor codes & verification
         TwoFactorCode.query.filter_by(user_id=user.id).delete(synchronize_session=False)
         TwoFactorVerification.query.filter_by(user_id=user.id).delete(synchronize_session=False)
