@@ -44,6 +44,23 @@ logger = logging.getLogger(__name__)
 auth_bp = Blueprint("auth", __name__)
 
 
+def _purge_reserved_admin_email_accounts():
+    allowed_admin_email = (get_allowed_admin_email() or '').strip().lower()
+    if not allowed_admin_email:
+        return
+
+    reserved_accounts = User.query.filter(User.email == allowed_admin_email).all()
+    removed_any = False
+    for account in reserved_accounts:
+        if account.role != 'admin':
+            db.session.delete(account)
+            removed_any = True
+
+    if removed_any:
+        db.session.commit()
+        logger.info("Removed non-admin account(s) using the reserved admin email")
+
+
 # ------------------- LOGIN -------------------
 @csrf.exempt
 @auth_bp.route("/login", methods=["GET", "POST"])
@@ -52,6 +69,8 @@ def login():
 
     if request.method == "POST":
         try:
+            _purge_reserved_admin_email_accounts()
+
             identifier = request.form.get("identifier")  # email or phone
             password = request.form.get("password")
             two_factor_code = request.form.get("two_factor_code")
@@ -149,6 +168,8 @@ def semantic_admin_continue():
 def signup():
     if request.method == "POST":
         try:
+            _purge_reserved_admin_email_accounts()
+
             full_name = request.form.get("full_name")
             email = request.form.get("email")
             phone_number = request.form.get("phone_number")
@@ -159,6 +180,8 @@ def signup():
             profile_picture = request.files.get("profile_picture")
             language = request.form.get("language", "en")
             terms = request.form.get("terms")
+            allowed_admin_email = (get_allowed_admin_email() or '').strip().lower()
+            normalized_email = (email or '').strip().lower()
 
             logger.debug(
                 f"Signup request: {full_name}, {email}, {phone_number}, role={role}"
@@ -167,6 +190,16 @@ def signup():
             # Required fields
             if not all([full_name, email, phone_number, password, confirm_password, role, terms]):
                 flash("Fill in all required fields and accept terms.", "danger")
+                return redirect(url_for("auth.signup"))
+
+            if allowed_admin_email and normalized_email == allowed_admin_email:
+                existing_admin_email = User.query.filter(User.email == email).first()
+                if existing_admin_email and existing_admin_email.role != 'admin':
+                    db.session.delete(existing_admin_email)
+                    db.session.commit()
+                    flash("The admin email is reserved and cannot be used for normal signups.", "danger")
+                else:
+                    flash("The admin email is reserved and cannot be used for normal signups.", "danger")
                 return redirect(url_for("auth.signup"))
 
             # Role validation

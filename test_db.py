@@ -1,7 +1,9 @@
+import os
 from sqlalchemy import create_engine
+from dotenv import load_dotenv
 
-# Use your password here if it's set
-db_url = "mysql+pymysql://root:@localhost/house_db"
+load_dotenv()
+db_url = os.environ.get("DATABASE_URL") or "sqlite:///app.db"
 engine = create_engine(db_url)
 
 try:
