@@ -93,7 +93,7 @@
         box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
     }
 
-    /* Filter Tags (Visual only for this demo) */
+    /* Filter Tags */
     .filter-tags {
         display: flex;
         gap: 0.75rem;
@@ -418,33 +418,36 @@
             <div class="row g-4">
                 {% for house in houses %}
                     
-                    {# Determine Image URL #}
-                    {% set image_url = url_for('static', filename='images/default-house.jpg') %}
-
-                        {% if house.image_urls %}
-
-                            {# If stored as comma-separated string #}
-                            {% if house.image_urls is string %}
-                                {% set images_list = house.image_urls.split(',') %}
-                            
-                            {# If already a list #}
-                            {% elif house.image_urls is iterable and house.image_urls is not string %}
-                                {% set images_list = house.image_urls %}
+                    {# 
+                        LOGIC TO EXTRACT AND OPTIMIZE CLOUDINARY IMAGES 
+                        Since the route passes raw SQLAlchemy objects, we parse the image_urls here.
+                    #}
+                    {% set image_src = url_for('static', filename='images/default-house.jpg') %}
+                    {% if house.image_urls %}
+                        {% set raw_data = house.image_urls %}
+                        {# Handle JSON String format (e.g., "[url1, url2]") #}
+                        {% if raw_data is string and raw_data.startswith('[') %}
+                            {% set clean_data = raw_data | replace('[', '') | replace(']', '') | replace("'", '"') %}
+                            {% set first_img = clean_data.split(',')[0] | replace('"', '') | trim %}
+                        {# Handle CSV String format #}
+                        {% elif raw_data is string %}
+                            {% set first_img = raw_data.split(',')[0] | trim %}
+                        {# Handle List format (if deserialized) #}
+                        {% elif raw_data is iterable and raw_data is not string %}
+                            {% if raw_data | length > 0 %}
+                                {% set first_img = raw_data[0] %}
                             {% endif %}
-
-                            {% if images_list and images_list[0] %}
-                                {% set first_image = images_list[0].strip() %}
-
-                                {# Cloudinary or any external URL #}
-                                {% if first_image.startswith('http') %}
-                                    {% set image_url = first_image %}
-                                {% else %}
-                                    {# fallback if somehow local path is stored #}
-                                    {% set image_url = url_for('static', filename=first_image) %}
-                                {% endif %}
-                            {% endif %}
-
                         {% endif %}
+
+                        {# Apply Cloudinary Optimizations #}
+                        {% if first_img and first_img.startswith('http') %}
+                            {% set image_src = first_img %}
+                            {# Inject Cloudinary transformations: Width 800, Auto Format, Auto Quality, Center Fill #}
+                            {% if 'cloudinary' in image_src %}
+                                {% set image_src = image_src | replace('/upload/', '/upload/w_800,f_auto,q_auto,c_fill/') %}
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
 
                     {# Determine Availability Status #}
                     {% set status_class = 'status-success' if house.available else 'status-danger' %}
@@ -460,7 +463,7 @@
 
                             <!-- Image -->
                             <div class="card-image-wrapper">
-                                <img src="{{ image_url }}" alt="{{ house.title }}" class="card-img-top">
+                                <img src="{{ image_src }}" alt="{{ house.title }}" class="card-img-top" loading="lazy">
                                 
                                 <div class="card-badges">
                                     <span class="status-badge {{ status_class }}">
@@ -469,7 +472,7 @@
                                 </div>
                                 
                                 <div class="price-tag">
-                                    KES {{ "{:,}".format(house.price or 0) }}
+                                    KES {{ "{:,}".format(house.rent_amount or 0) }}
                                     <span style="font-size: 0.7rem; font-weight: 500;">/mo</span>
                                 </div>
                             </div>
@@ -477,7 +480,7 @@
                             <!-- Content -->
                             <div class="card-body-custom">
                                 <div class="property-type">{{ house.property_type|default('Property') }}</div>
-                                <a href="#" class="property-title">{{ house.title }}</a>
+                                <a href="{{ url_for('tenant.property_details', id=house.id) }}" class="property-title">{{ house.title }}</a>
                                 <div class="property-location">
                                     <i class="fas fa-map-marker-alt"></i> {{ house.location }}, {{ house.city }}
                                 </div>
@@ -498,11 +501,11 @@
                             <!-- Footer -->
                             <div class="card-footer-custom">
                                 <div class="owner-info">
-                                    <!-- Placeholder for owner image if not available -->
+                                    <!-- Owner Avatar Placeholder -->
                                     <img src="https://ui-avatars.com/api/?name={{ house.owner.name if house.owner else 'Unknown' }}&background=random" alt="Owner" class="owner-avatar">
                                     <span class="owner-name">{{ house.owner.name if house.owner else 'Unknown' }}</span>
                                 </div>
-                                <a href="{{ url_for('house.view_property', property_id=house.id) }}" class="view-btn">
+                                <a href="{{ url_for('tenant.property_details', id=house.id) }}" class="view-btn">
                                     View <i class="fas fa-arrow-right"></i>
                                 </a>
                             </div>
@@ -540,10 +543,9 @@
 
 {% block scripts %}
 <script>
-    // Add simple fade-in animation on scroll
     document.addEventListener("DOMContentLoaded", function() {
+        // Fade-in animation
         const cards = document.querySelectorAll('.property-card');
-        
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -554,14 +556,13 @@
         }, { threshold: 0.1 });
 
         cards.forEach((card, index) => {
-            // Set initial state
             card.style.opacity = "0";
             card.style.transform = "translateY(20px)";
-            card.style.transition = `all 0.5s ease ${index * 0.05}s`; // Staggered delay
+            card.style.transition = `all 0.5s ease ${index * 0.05}s`;
             observer.observe(card);
         });
 
-        // Handle Active State for Filter Tags
+        // Filter tags active state
         const filterTags = document.querySelectorAll('.filter-tag');
         filterTags.forEach(tag => {
             tag.addEventListener('click', function() {
