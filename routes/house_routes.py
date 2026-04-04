@@ -35,10 +35,25 @@ def index():
 @login_required
 def view_property(property_id):
     """
-    View details of a specific property.
+    View details of a specific property with full house + owner details.
     """
-    property = House.query.get_or_404(property_id)
-    return render_template('view_property.html', property=property)
+    # Fetch house
+    house = House.query.get_or_404(property_id)
+
+    # Fetch owner (User)
+    owner = house.owner  # thanks to relationship
+
+    # Handle images (assuming comma-separated URLs)
+    image_list = []
+    if house.image_urls:
+        image_list = [img.strip() for img in house.image_urls.split(",") if img.strip()]
+
+    return render_template(
+        'view_property.html',
+        house=house,
+        owner=owner,
+        images=image_list
+    )
 
 @house_bp.route('/edit/<int:property_id>')
 @login_required

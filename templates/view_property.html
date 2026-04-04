@@ -1,945 +1,647 @@
-{% extends "base.html" %} {% block title %}How It Works - Landlord{% endblock %}
-{% block content %}
+{% extends "base.html" %}
+
+{% block title %}{{ house.title }} - HomeHub{% endblock %}
+
+{% block styles %}
 <style>
-  :root {
-    --primary: #4361ee;
-    --primary-dark: #3a0ca3;
-    --secondary: #7209b7;
-    --accent: #f72585;
-    --light: #f8f9fa;
-    --dark: #212529;
-    --success: #06ffa5;
-    --info: #00b4d8;
-    --warning: #ffbe0b;
-    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    --transition: all 0.3s ease;
+  /* ========== VIEW PROPERTY PAGE STYLES ========== */
+  .vp-page {
+    padding: 2rem 0 4rem;
+    background-color: var(--body-bg);
   }
 
-  .property-container {
-    display: flex;
-    min-height: calc(100vh - 56px);
-    background-color: var(--light);
-  }
-
-  .property-sidebar {
-    width: 260px;
-    background: linear-gradient(
-      135deg,
-      var(--primary) 0%,
-      var(--primary-dark) 100%
-    );
-    color: white;
-    padding: 2rem 1.5rem;
-    position: fixed;
-    top: 56px;
-    left: 0;
-    height: calc(100vh - 56px);
-    overflow-y: auto;
-    z-index: 100;
-    box-shadow: var(--shadow);
-  }
-
-  .property-sidebar h2 {
-    font-size: 1.5rem;
+  /* Breadcrumbs */
+  .vp-breadcrumbs {
     margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
   }
-
-  .property-sidebar ul {
-    list-style: none;
-    padding: 0;
-  }
-
-  .property-sidebar ul li {
-    margin-bottom: 1rem;
-  }
-
-  .property-sidebar ul li a {
-    color: white;
+  .vp-breadcrumbs a {
+    color: var(--text-secondary);
     text-decoration: none;
-    display: flex;
-    align-items: center;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
     transition: var(--transition);
   }
-
-  .property-sidebar ul li a:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateX(5px);
+  .vp-breadcrumbs a:hover {
+    color: var(--primary-color);
+  }
+  .vp-breadcrumbs span {
+    margin: 0 0.5rem;
   }
 
-  .property-sidebar ul li a i {
-    margin-right: 0.75rem;
-  }
-
-  .property-main {
-    flex: 1;
+  /* Header */
+  .vp-header {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
     padding: 2rem;
-    margin-left: 260px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
   }
 
-  .property-header {
-    background: white;
-    border-radius: 15px;
-    box-shadow: var(--shadow);
-    padding: 2rem;
-    margin-bottom: 2rem;
-    overflow: hidden;
+  .vp-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
   }
 
-  .property-title {
+  .vp-title {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--dark);
-    margin-bottom: 1rem;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.2;
   }
 
-  .property-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
+  .vp-badge {
+    padding: 0.35rem 0.85rem;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
   }
 
-  .meta-item {
+  .vp-badge.available {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+    border: 1px solid rgba(40, 167, 69, 0.2);
+  }
+  
+  .vp-badge.unavailable {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.2);
+  }
+
+  .vp-location {
     display: flex;
     align-items: center;
-    font-size: 1rem;
-    color: var(--dark);
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    margin-bottom: 0;
   }
-
-  .meta-item i {
-    color: var(--primary);
+  .vp-location i {
+    color: var(--primary-color);
     margin-right: 0.5rem;
-    font-size: 1.2rem;
   }
 
-  .property-gallery {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    grid-template-rows: 250px 120px;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    height: 380px;
-  }
-
-  .gallery-main {
-    grid-row: 1 / 3;
-    border-radius: 15px;
+  /* Gallery */
+  .vp-gallery-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
     overflow: hidden;
-    box-shadow: var(--shadow);
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
   }
 
-  .gallery-main img {
+  .vp-main-image-wrapper {
+    width: 100%;
+    height: 450px;
+    position: relative;
+    background-color: #eee;
+  }
+
+  .vp-main-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: var(--transition);
+    cursor: zoom-in;
+    transition: transform 0.5s ease;
   }
 
-  .gallery-main:hover img {
-    transform: scale(1.05);
+  .vp-thumbs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 2px;
+    padding-top: 2px;
+    background-color: var(--card-bg);
   }
 
-  .gallery-thumb {
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: var(--shadow);
+  .vp-thumb {
+    aspect-ratio: 16/9;
     cursor: pointer;
+    overflow: hidden;
+    opacity: 0.8;
+    transition: var(--transition);
   }
 
-  .gallery-thumb img {
+  .vp-thumb:hover, .vp-thumb.active {
+    opacity: 1;
+  }
+
+  .vp-thumb img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: var(--transition);
   }
 
-  .gallery-thumb:hover img {
-    transform: scale(1.05);
-  }
-
-  .property-content {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 2rem;
-  }
-
-  .property-details {
-    background: white;
-    border-radius: 15px;
-    box-shadow: var(--shadow);
-    padding: 2rem;
-  }
-
-  .section-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--dark);
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 2px solid var(--light);
-    display: flex;
-    align-items: center;
-  }
-
-  .section-title i {
-    color: var(--primary);
-    margin-right: 0.75rem;
-    font-size: 1.5rem;
-  }
-
-  .property-description {
-    line-height: 1.6;
-    color: #555;
-    margin-bottom: 2rem;
-    font-size: 1.1rem;
-  }
-
-  .amenities-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  .amenity-item {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem;
-    background: var(--light);
-    border-radius: 8px;
-    transition: var(--transition);
-  }
-
-  .amenity-item:hover {
-    background: #e9ecef;
-    transform: translateY(-3px);
-  }
-
-  .amenity-item i {
-    color: var(--primary);
-    margin-right: 0.75rem;
-    font-size: 1.2rem;
-  }
-
-  .property-sidebar-content {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-
-  .info-card {
-    background: white;
-    border-radius: 15px;
-    box-shadow: var(--shadow);
+  /* Cards */
+  .vp-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
     padding: 1.5rem;
-    transition: var(--transition);
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
   }
 
-  .info-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-  }
-
-  .info-card h3 {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--dark);
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid var(--light);
+  .vp-card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .vp-card-title i {
+    color: var(--primary-color);
   }
 
-  .info-card h3 i {
-    color: var(--primary);
-    margin-right: 0.5rem;
+  /* Key Specs */
+  .vp-specs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
   }
 
-  .price {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--primary);
+  .vp-spec-item {
+    background: var(--body-bg);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    text-align: center;
+    border: 1px solid var(--border-color);
+  }
+
+  .vp-spec-icon {
+    color: var(--primary-color);
+    font-size: 1.2rem;
     margin-bottom: 0.5rem;
   }
 
-  .price-period {
-    font-size: 0.9rem;
-    color: #777;
+  .vp-spec-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: block;
   }
 
-  .owner-info {
+  .vp-spec-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Description */
+  .vp-description {
+    color: var(--text-secondary);
+    line-height: 1.7;
+    font-size: 1rem;
+    white-space: pre-wrap; /* Preserves line breaks */
+  }
+
+  /* Features/Amenities */
+  .vp-features-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .vp-feature-tag {
+    background: var(--primary-light);
+    color: var(--primary-color);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 500;
     display: flex;
     align-items: center;
+    gap: 0.5rem;
+  }
+  .vp-feature-tag i {
+    font-size: 0.8rem;
+  }
+
+  /* Pricing Card (Sticky) */
+  .vp-sidebar-card {
+    position: sticky;
+    top: calc(var(--navbar-height, 70px) + 20px);
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  }
+
+  .vp-price-large {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .vp-price-period {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    display: block;
+  }
+
+  .vp-btn {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    transition: var(--transition);
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+  }
+
+  .vp-btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+  }
+
+  .vp-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
+    color: white;
+  }
+
+  .vp-btn-outline {
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  .vp-btn-outline:hover {
+    background: var(--primary-light);
+    color: var(--primary-color);
+  }
+
+  /* Owner Card */
+  .vp-owner-profile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
     margin-bottom: 1rem;
   }
 
-  .owner-avatar {
-    width: 50px;
-    height: 50px;
+  .vp-owner-avatar {
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
-    background: var(--primary);
+    background: var(--gradient-primary);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    margin-right: 1rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    flex-shrink: 0;
   }
 
-  .owner-details h4 {
-    font-size: 1rem;
-    margin-bottom: 0.25rem;
+  .vp-owner-name {
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    font-size: 1.1rem;
   }
 
-  .owner-details p {
+  .vp-owner-role {
     font-size: 0.85rem;
-    color: #777;
+    color: var(--text-muted);
     margin: 0;
   }
 
-  .property-actions {
+  .vp-contact-links {
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    gap: 0.5rem;
   }
-
-  .btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
-    text-decoration: none;
-    text-align: center;
-    cursor: pointer;
-    transition: var(--transition);
-    border: none;
-    font-size: 1rem;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: white;
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(67, 97, 238, 0.3);
-  }
-
-  .btn-outline {
-    background: transparent;
-    color: var(--primary);
-    border: 2px solid var(--primary);
-  }
-
-  .btn-outline:hover {
-    background: var(--primary);
-    color: white;
-  }
-
-  .contact-methods {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
-  }
-
-  .contact-btn {
+  
+  .vp-contact-btn {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: var(--light);
-    color: var(--primary);
     display: flex;
     align-items: center;
     justify-content: center;
+    background: var(--body-bg);
+    color: var(--text-secondary);
     transition: var(--transition);
   }
-
-  .contact-btn:hover {
-    background: var(--primary);
+  .vp-contact-btn:hover {
+    background: var(--primary-color);
     color: white;
   }
 
-  .property-map {
-    height: 250px;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: var(--shadow);
-    margin-top: 1rem;
-  }
-
-  .property-map iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-  }
-
-  .availability-status {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    border-radius: 50px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-  }
-
-  .available {
-    background: rgba(6, 255, 165, 0.2);
-    color: #00b4d8;
-  }
-
-  .unavailable {
-    background: rgba(247, 37, 133, 0.2);
-    color: var(--accent);
-  }
-
-  .location-info {
-    background: linear-gradient(
-      135deg,
-      rgba(67, 97, 238, 0.1),
-      rgba(58, 12, 163, 0.1)
-    );
-    border-radius: 15px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    border-left: 4px solid var(--primary);
-  }
-
-  .location-info h3 {
-    color: var(--primary-dark);
-    margin-bottom: 1rem;
-    font-size: 1.3rem;
-  }
-
-  .location-info p {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    color: #555;
-  }
-
-  .additional-info {
-    background: white;
-    border-radius: 15px;
-    box-shadow: var(--shadow);
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-  }
-
-  .additional-info h3 {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: var(--dark);
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid var(--light);
+  /* Info Rows */
+  .vp-info-row {
     display: flex;
-    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.95rem;
   }
-
-  .additional-info h3 i {
-    color: var(--primary);
-    margin-right: 0.5rem;
+  .vp-info-row:last-child {
+    border-bottom: none;
   }
-
-  .info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
+  .vp-info-label {
+    color: var(--text-secondary);
   }
-
-  .info-item {
-    padding: 1rem;
-    background: var(--light);
-    border-radius: 8px;
-    transition: var(--transition);
-  }
-
-  .info-item:hover {
-    background: #e9ecef;
-    transform: translateY(-3px);
-  }
-
-  .info-item h4 {
-    font-size: 0.9rem;
-    color: #777;
-    margin-bottom: 0.25rem;
-  }
-
-  .info-item p {
-    font-size: 1.1rem;
+  .vp-info-val {
     font-weight: 600;
-    color: var(--dark);
-    margin: 0;
+    color: var(--text-primary);
+    text-align: right;
   }
 
-  .dark-mode .property-sidebar {
-    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+  /* Map */
+  .vp-map-frame {
+    width: 100%;
+    height: 300px;
+    border: 0;
+    border-radius: var(--radius-md);
   }
 
-  .dark-mode .property-header,
-  .dark-mode .property-details,
-  .dark-mode .info-card {
-    background: #2d3748;
-    color: #e2e8f0;
-  }
-
-  .dark-mode .property-title,
-  .dark-mode .section-title,
-  .dark-mode .info-card h3 {
-    color: #e2e8f0;
-  }
-
-  .dark-mode .property-description {
-    color: #cbd5e0;
-  }
-
-  .dark-mode .amenity-item {
-    background: #4a5568;
-  }
-
-  .dark-mode .amenity-item:hover {
-    background: #2d3748;
-  }
-
-  .dark-mode .meta-item {
-    color: #e2e8f0;
-  }
-
-  .dark-mode .owner-details p {
-    color: #a0aec0;
-  }
-
-  .dark-mode .location-info {
-    background: linear-gradient(
-      135deg,
-      rgba(67, 97, 238, 0.2),
-      rgba(58, 12, 163, 0.2)
-    );
-  }
-
-  .dark-mode .location-info h3 {
-    color: #90cdf4;
-  }
-
-  .dark-mode .location-info p {
-    color: #cbd5e0;
-  }
-
-  .dark-mode .info-item {
-    background: #4a5568;
-  }
-
-  .dark-mode .info-item:hover {
-    background: #2d3748;
-  }
-
-  @media (max-width: 992px) {
-    .property-content {
-      grid-template-columns: 1fr;
+  @media (max-width: 991px) {
+    .vp-sidebar-card {
+      position: static;
     }
-
-    .property-sidebar {
-      transform: translateX(-100%);
-      transition: transform 0.3s ease;
+    .vp-main-image-wrapper {
+      height: 300px;
     }
-
-    .property-sidebar.active {
-      transform: translateX(0);
-    }
-
-    .property-main {
-      margin-left: 0;
-    }
-
-    .mobile-menu-toggle {
-      display: block;
-      position: fixed;
-      top: 70px;
-      left: 20px;
-      z-index: 101;
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: var(--shadow);
-    }
-  }
-
-  @media (max-width: 768px) {
-    .property-gallery {
-      grid-template-columns: 1fr;
-      grid-template-rows: 250px repeat(3, 100px);
-      height: auto;
-    }
-
-    .gallery-main {
-      grid-row: 1;
-    }
-
-    .amenities-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .info-grid {
-      grid-template-columns: 1fr;
+    .vp-title {
+      font-size: 1.5rem;
     }
   }
 </style>
-<button class="mobile-menu-toggle d-lg-none" id="mobileMenuToggle">
-  <i class="fas fa-bars"></i>
-</button>
+{% endblock %}
 
-<div class="property-container">
-  <!-- Sidebar -->
-  <aside class="property-sidebar" id="propertySidebar">
-    <h2>Property Navigation</h2>
-    <ul>
-      {% if current_user.is_authenticated and current_user.role.lower() ==
-      'landlord' and property.owner_id == current_user.id %}
-      <li>
-        <a href="{{ url_for('house.edit_property', property_id=property.id) }}">
-          <i class="fas fa-edit"></i> Edit Property
-        </a>
-      </li>
-      {% endif %}
-      <li>
-        <a href="{{ url_for('house.hotels') }}">
-          <i class="fas fa-arrow-left"></i> Back to Properties
-        </a>
-      </li>
-      <li>
-        <a href="{{ url_for('auth.profile') }}">
-          <i class="fas fa-user"></i> Profile
-        </a>
-      </li>
-      <li>
-        <a href="{{ url_for('auth.logout') }}">
-          <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
-      </li>
-    </ul>
-  </aside>
+{% block content %}
+<div class="vp-page">
+  <div class="container">
+    
+    <!-- Breadcrumbs -->
+    <nav class="vp-breadcrumbs">
+      <a href="{{ url_for('main.index') }}">Home</a> <span>/</span>
+      <a href="{{ url_for('house.hotels') if current_user.role == 'landlord' else url_for('main.index') }}">Properties</a> <span>/</span>
+      <span>{{ house.title }}</span>
+    </nav>
 
-  <!-- Main Content -->
-  <main class="property-main">
-    <!-- Property Header -->
-    <div class="property-header">
-      <h1 class="property-title">{{ property.title }}</h1>
-
-      <div class="property-meta">
-        <div class="meta-item">
-          <i class="fas fa-map-marker-alt"></i>
-          <span>{{ property.location }}</span>
-        </div>
-        <div class="meta-item">
-          <i class="fas fa-bed"></i>
-          <span>{{ property.bedrooms or 3 }} Bedrooms</span>
-        </div>
-        <div class="meta-item">
-          <i class="fas fa-bath"></i>
-          <span>{{ property.bathrooms or 2 }} Bathrooms</span>
-        </div>
-        <div class="meta-item">
-          <i class="fas fa-ruler-combined"></i>
-          <span>{{ property.size or '1200' }} sq ft</span>
+    <!-- Header Section -->
+    <header class="vp-header">
+      <div class="vp-title-row">
+        <h1 class="vp-title">{{ house.title }}</h1>
+        <div style="display: flex; gap: 0.5rem;">
+          {% if house.is_available %}
+            <span class="vp-badge available">Available Now</span>
+          {% else %}
+            <span class="vp-badge unavailable">Rented Out</span>
+          {% endif %}
         </div>
       </div>
+      
+      <p class="vp-location">
+        <i class="fas fa-map-marker-alt"></i>
+        {{ house.address_line1 }}, {{ house.city }}, {{ house.country }}
+      </p>
+    </header>
 
-      <div
-        class="availability-status {% if property.is_available %}available{% else %}unavailable{% endif %}"
-      >
-        {% if property.is_available %}Available Now{% else %}Currently
-        Unavailable{% endif %}
-      </div>
-    </div>
+    <div class="row g-4">
+      <!-- LEFT COLUMN: Main Content -->
+      <div class="col-lg-8">
+        
+        <!-- Gallery -->
+        <div class="vp-gallery-container">
+          <div class="vp-main-image-wrapper">
+            {% if images %}
+              <img src="{{ images[0] }}" alt="{{ house.title }}" class="vp-main-image" id="mainGalleryImg">
+            {% else %}
+              <img src="https://via.placeholder.com/800x450?text=No+Image" alt="No Image" class="vp-main-image">
+            {% endif %}
+          </div>
+          {% if images|length > 1 %}
+          <div class="vp-thumbs-grid">
+            {% for image in images[1:] %}
+            <div class="vp-thumb" onclick="changeImage('{{ image }}')">
+              <img src="{{ image }}" alt="Thumbnail">
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
 
-    <!-- Property Gallery -->
-    <div class="property-gallery">
-      <div class="gallery-main">
-        {% if property.image_urls %}
-        <img
-          src="{{ url_for('static', filename='images/' ~ property.image_urls.split(',')[0]) }}"
-          alt="{{ property.title }}"
-        />
-        {% else %}
-        <img
-          src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80"
-          alt="{{ property.title }}"
-        />
-        {% endif %}
-      </div>
-
-      {% if property.image_urls and property.image_urls.split(',')|length > 1 %}
-      {% for image in property.image_urls.split(',')[1:4] %}
-      <div class="gallery-thumb">
-        <img
-          src="{{ url_for('static', filename='images/' ~ image) }}"
-          alt="{{ property.title }}"
-        />
-      </div>
-      {% endfor %} {% else %}
-      <div class="gallery-thumb">
-        <img
-          src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80"
-          alt="{{ property.title }}"
-        />
-      </div>
-      <div class="gallery-thumb">
-        <img
-          src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80"
-          alt="{{ property.title }}"
-        />
-      </div>
-      {% endif %}
-    </div>
-
-    <!-- Property Content -->
-    <div class="property-content">
-      <!-- Property Details -->
-      <div class="property-details">
-        <h2 class="section-title">
-          <i class="fas fa-info-circle"></i> Property Description
-        </h2>
-        <p class="property-description">{{ property.description | safe }}</p>
-
-        <h2 class="section-title"><i class="fas fa-star"></i> Amenities</h2>
-        <div class="amenities-grid">
-          <div class="amenity-item">
-            <i class="fas fa-wifi"></i>
-            <span>High-Speed WiFi</span>
+        <!-- Key Specs -->
+        <div class="vp-specs-grid">
+          <div class="vp-spec-item">
+            <div class="vp-spec-icon"><i class="fas fa-bed"></i></div>
+            <span class="vp-spec-value">{{ house.bedrooms }}</span>
+            <span class="vp-spec-label">Bedrooms</span>
           </div>
-          <div class="amenity-item">
-            <i class="fas fa-car"></i>
-            <span>Parking Space</span>
+          <div class="vp-spec-item">
+            <div class="vp-spec-icon"><i class="fas fa-bath"></i></div>
+            <span class="vp-spec-value">{{ house.bathrooms }}</span>
+            <span class="vp-spec-label">Bathrooms</span>
           </div>
-          <div class="amenity-item">
-            <i class="fas fa-snowflake"></i>
-            <span>Air Conditioning</span>
+          <div class="vp-spec-item">
+            <div class="vp-spec-icon"><i class="fas fa-ruler-combined"></i></div>
+            <span class="vp-spec-value">{{ house.size }} <small style="font-size:0.7em">sqft</small></span>
+            <span class="vp-spec-label">Size</span>
           </div>
-          <div class="amenity-item">
-            <i class="fas fa-tv"></i>
-            <span>Cable TV</span>
-          </div>
-          <div class="amenity-item">
-            <i class="fas fa-swimming-pool"></i>
-            <span>Swimming Pool</span>
-          </div>
-          <div class="amenity-item">
-            <i class="fas fa-dumbbell"></i>
-            <span>Gym</span>
-          </div>
-          <div class="amenity-item">
-            <i class="fas fa-shield-alt"></i>
-            <span>24/7 Security</span>
-          </div>
-          <div class="amenity-item">
-            <i class="fas fa-bolt"></i>
-            <span>Backup Power</span>
+          <div class="vp-spec-item">
+            <div class="vp-spec-icon"><i class="fas fa-building"></i></div>
+            <span class="vp-spec-value">{{ house.property_type }}</span>
+            <span class="vp-spec-label">Type</span>
           </div>
         </div>
 
-        <h2 class="section-title">
-          <i class="fas fa-map-marked-alt"></i> Location
-        </h2>
-        <div class="location-info">
-          <h3>{{ property.location }}</h3>
-          <p>
-            This property is located in a vibrant neighborhood with easy access
-            to shopping centers, restaurants, schools, and public
-            transportation. The area is well-connected and offers a convenient
-            lifestyle for residents.
+        <!-- Description -->
+        <div class="vp-card">
+          <h3 class="vp-card-title"><i class="fas fa-align-left"></i> Description</h3>
+          <p class="vp-description">{{ house.description }}</p>
+        </div>
+
+        <!-- Amenities -->
+        <div class="vp-card">
+          <h3 class="vp-card-title"><i class="fas fa-star"></i> Amenities & Features</h3>
+          <div class="vp-features-list">
+            <!-- Dynamically render amenities if they exist as a list or string -->
+            {% if house.amenities %}
+              {% if house.amenities is iterable and house.amenities is not string %}
+                {% for amenity in house.amenities %}
+                  <span class="vp-feature-tag"><i class="fas fa-check"></i> {{ amenity }}</span>
+                {% endfor %}
+              {% else %}
+                 {% for amenity in house.amenities.split(',') %}
+                  <span class="vp-feature-tag"><i class="fas fa-check"></i> {{ amenity.strip() }}</span>
+                {% endfor %}
+              {% endif %}
+            {% else %}
+              <span class="text-muted">No amenities listed.</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Location Map -->
+        <div class="vp-card">
+          <h3 class="vp-card-title"><i class="fas fa-map-marked-alt"></i> Location</h3>
+          <p style="margin-bottom: 1rem; color: var(--text-secondary);">
+            {{ house.address_line1 }}, {{ house.city }}, {{ house.state_province }}.
           </p>
-        </div>
-
-        <div class="property-map">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.486447547632!2d35.28501631475363!3d-0.368319999749814!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182a119e2337a6c7%3A0x6d8b6a7f7d7e8e9f!2sKericho%2C%20Kenya!5e0!3m2!1sen!2sus!4v1629785466789!5m2!1sen!2sus"
-            allowfullscreen=""
-            loading="lazy"
-          >
+          <!-- Placeholder map using generic coordinates since we don't have lat/long in the model -->
+          <iframe 
+            class="vp-map-frame"
+            src="https://maps.google.com/maps?q={{ house.city }},{{ house.country }}&t=&z=13&ie=UTF8&iwloc=&output=embed" 
+            frameborder="0" 
+            scrolling="no" 
+            marginheight="0" 
+            marginwidth="0">
           </iframe>
         </div>
 
-        <div class="additional-info">
-          <h3><i class="fas fa-list-alt"></i> Additional Information</h3>
-          <div class="info-grid">
-            <div class="info-item">
-              <h4>Property Type</h4>
-              <p>{{ property.property_type or 'Apartment' }}</p>
-            </div>
-            <div class="info-item">
-              <h4>Furnishing</h4>
-              <p>{{ property.furnishing or 'Semi-Furnished' }}</p>
-            </div>
-            <div class="info-item">
-              <h4>Pet Policy</h4>
-              <p>{{ property.pet_policy or 'Pets Allowed' }}</p>
-            </div>
-            <div class="info-item">
-              <h4>Lease Term</h4>
-              <p>{{ property.lease_term or '12 Months' }}</p>
-            </div>
-          </div>
-        </div>
       </div>
 
-      <!-- Property Sidebar Content -->
-      <div class="property-sidebar-content">
+      <!-- RIGHT COLUMN: Sidebar -->
+      <div class="col-lg-4">
+        
         <!-- Pricing Card -->
-        <div class="info-card">
-          <h3><i class="fas fa-tag"></i> Rental Information</h3>
-          <div class="price">KES {{ property.price or '35,000' }}</div>
-          <div class="price-period">per month</div>
-
-          <div class="property-actions">
-            {% if current_user.is_authenticated and current_user.role.lower() ==
-            'tenant' %} {% if property.is_available %}
-            <form
-              action="{{ url_for('house.request_rental', property_id=property.id) }}"
-              method="POST"
-            >
-              <button type="submit" class="btn btn-primary">
-                Request Rental
-              </button>
-            </form>
-            <a href="#" class="btn btn-outline">Schedule Tour</a>
-            {% else %}
-            <button class="btn btn-outline" disabled>
-              Property Unavailable
-            </button>
-            <a href="{{ url_for('house.hotles') }}" class="btn btn-primary"
-              >View Similar Properties</a
-            >
-            {% endif %} {% endif %}
+        <div class="vp-sidebar-card">
+          <div class="vp-price-large">
+            KES {{ "{:,.0f}".format(house.rent_amount) }}
           </div>
+          <span class="vp-price-period">per month</span>
+
+          {% if current_user.is_authenticated and current_user.role.lower() == 'tenant' %}
+            {% if house.is_available %}
+              <form action="{{ url_for('house.request_rental', property_id=house.id) }}" method="POST">
+                <button type="submit" class="vp-btn vp-btn-primary">
+                  Request Rental
+                </button>
+              </form>
+              <a href="#" class="vp-btn vp-btn-outline">
+                <i class="far fa-calendar-alt"></i> Schedule Tour
+              </a>
+            {% else %}
+              <button class="vp-btn vp-btn-outline" disabled style="opacity:0.6; cursor:not-allowed;">
+                Currently Unavailable
+              </button>
+            {% endif %}
+          {% elif current_user.is_authenticated and current_user.role.lower() == 'landlord' and house.owner_id == current_user.id %}
+             <a href="{{ url_for('landlord.edit_property', property_id=house.id) }}" class="vp-btn vp-btn-primary">
+               <i class="fas fa-edit"></i> Edit Listing
+             </a>
+          {% endif %}
         </div>
 
-        <!-- Owner Information -->
-        <div class="info-card">
-          <h3><i class="fas fa-user-tie"></i> Property Owner</h3>
-          <div class="owner-info">
-            <div class="owner-avatar">{{ property.owner.name[0]|upper }}</div>
-            <div class="owner-details">
-              <h4>{{ property.owner.name }}</h4>
-              <p>{{ property.owner.email }}</p>
+        <!-- Owner Card -->
+        <div class="vp-card" style="margin-top: 1.5rem;">
+          <h3 class="vp-card-title" style="font-size: 1.1rem; margin-bottom: 1rem;">
+            <i class="fas fa-user-tie"></i> Listed by
+          </h3>
+          
+          <div class="vp-owner-profile">
+            <div class="vp-owner-avatar">
+              {{ owner.name[0]|upper }}
+            </div>
+            <div>
+              <h4 class="vp-owner-name">{{ owner.name }}</h4>
+              <p class="vp-owner-role">Property Owner</p>
             </div>
           </div>
 
-          <p>
-            Listed since {{ property.created_at.strftime('%B %Y') if
-            property.created_at else 'January 2023' }}
-          </p>
+          <div class="vp-info-row" style="border-top: 1px solid var(--border-color); padding-top: 1rem;">
+            <span class="vp-info-label">Member Since</span>
+            <span class="vp-info-val">{{ owner.created_at.strftime('%Y') if owner.created_at else 'N/A' }}</span>
+          </div>
 
-          <div class="contact-methods">
-            <a
-              href="tel:{{ property.owner.phone or '+254712345678' }}"
-              class="contact-btn"
-              title="Call Owner"
-            >
-              <i class="fas fa-phone"></i>
-            </a>
-            <a
-              href="mailto:{{ property.owner.email }}"
-              class="contact-btn"
-              title="Email Owner"
-            >
-              <i class="fas fa-envelope"></i>
-            </a>
-            <a href="#" class="contact-btn" title="WhatsApp Owner">
-              <i class="fab fa-whatsapp"></i>
-            </a>
+          <div style="margin-top: 1.5rem;">
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Contact Owner</p>
+            <div class="vp-contact-links">
+              <a href="mailto:{{ owner.email }}" class="vp-contact-btn" title="Email">
+                <i class="fas fa-envelope"></i>
+              </a>
+              {% if owner.phone %}
+              <a href="tel:{{ owner.phone }}" class="vp-contact-btn" title="Call">
+                <i class="fas fa-phone"></i>
+              </a>
+              {% endif %}
+              <a href="#" class="vp-contact-btn" title="Chat">
+                <i class="fas fa-comment-dots"></i>
+              </a>
+            </div>
           </div>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="info-card">
-          <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
-          <div class="property-actions">
-            <a href="#" class="btn btn-outline">
-              <i class="fas fa-heart me-2"></i> Save Property
-            </a>
-            <a href="#" class="btn btn-outline">
-              <i class="fas fa-share-alt me-2"></i> Share Property
-            </a>
-            <a href="#" class="btn btn-outline">
-              <i class="fas fa-calculator me-2"></i> Mortgage Calculator
-            </a>
+        <!-- Property Details Card -->
+        <div class="vp-card" style="margin-top: 1.5rem;">
+          <h3 class="vp-card-title" style="font-size: 1.1rem; margin-bottom: 1rem;">
+            <i class="fas fa-list"></i> Details
+          </h3>
+          
+          <div class="vp-info-row">
+            <span class="vp-info-label">Property ID</span>
+            <span class="vp-info-val">#{{ house.id }}</span>
           </div>
+          <div class="vp-info-row">
+            <span class="vp-info-label">Price</span>
+            <span class="vp-info-val">KES {{ "{:,.0f}".format(house.rent_amount) }}</span>
+          </div>
+          <div class="vp-info-row">
+            <span class="vp-info-label">Security Deposit</span>
+            <span class="vp-info-val">
+              {% if house.security_deposit %}KES {{ "{:,.0f}".format(house.security_deposit) }}{% else %}N/A{% endif %}
+            </span>
+          </div>
+          <div class="vp-info-row">
+            <span class="vp-info-label">Lease Term</span>
+            <span class="vp-info-val">{{ house.lease_term or 'Flexible' }}</span>
+          </div>
+          <div class="vp-info-row">
+            <span class="vp-info-label">Parking</span>
+            <span class="vp-info-val">{{ house.parking_availability or 'None' }}</span>
+          </div>
+          <div class="vp-info-row">
+            <span class="vp-info-label">Pets Allowed</span>
+            <span class="vp-info-val">{{ house.pets_allowed or 'No' }}</span>
+          </div>
+           <div class="vp-info-row">
+            <span class="vp-info-label">Furnished</span>
+            <span class="vp-info-val">{{ house.furnished_status or 'Unfurnished' }}</span>
+          </div>
+
         </div>
+
       </div>
     </div>
-  </main>
+  </div>
 </div>
-{% endblock %} {% block extra_js %}
+{% endblock %}
+
+{% block scripts %}
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Mobile menu toggle
-    const mobileMenuToggle = document.getElementById("mobileMenuToggle");
-    const propertySidebar = document.getElementById("propertySidebar");
-
-    if (mobileMenuToggle) {
-      mobileMenuToggle.addEventListener("click", function () {
-        propertySidebar.classList.toggle("active");
-      });
+  function changeImage(src) {
+    const mainImg = document.getElementById('mainGalleryImg');
+    if(mainImg) {
+      // Simple fade effect
+      mainImg.style.opacity = '0.5';
+      setTimeout(() => {
+        mainImg.src = src;
+        mainImg.style.opacity = '1';
+      }, 200);
     }
-
-    // Gallery image click handler
-    const galleryThumbs = document.querySelectorAll(".gallery-thumb img");
-    const galleryMain = document.querySelector(".gallery-main img");
-
-    galleryThumbs.forEach((thumb) => {
-      thumb.addEventListener("click", function () {
-        const tempSrc = galleryMain.src;
-        galleryMain.src = this.src;
-        this.src = tempSrc;
-      });
-    });
-
-    // Form submission handler
-    const rentalForm = document.querySelector('form[action*="request_rental"]');
-    if (rentalForm) {
-      rentalForm.addEventListener("submit", function (e) {
-        e.preventDefault();
-
-        // Here you would normally submit the form
-        // For demo purposes, we'll show a success message
-        alert(
-          "Your rental request has been submitted successfully! The property owner will contact you soon."
-        );
-      });
-    }
-
-    // Save property functionality
-    const savePropertyBtn = document.querySelector('a[href="#"].btn-outline');
-    if (
-      savePropertyBtn &&
-      savePropertyBtn.textContent.includes("Save Property")
-    ) {
-      savePropertyBtn.addEventListener("click", function (e) {
-        e.preventDefault();
-
-        // Toggle saved state
-        const icon = this.querySelector("i");
-        if (icon.classList.contains("fas")) {
-          icon.classList.remove("fas");
-          icon.classList.add("far");
-          this.innerHTML = '<i class="far fa-heart me-2"></i> Save Property';
-        } else {
-          icon.classList.remove("far");
-          icon.classList.add("fas");
-          this.innerHTML = '<i class="fas fa-heart me-2"></i> Saved Property';
-        }
-      });
-    }
-  });
+  }
 </script>
 {% endblock %}
