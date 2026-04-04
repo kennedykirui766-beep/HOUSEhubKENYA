@@ -35,6 +35,7 @@ import os
 from flask import current_app
 import cloudinary.uploader
 import qrcode
+from extensions import db, csrf
 
 # ------------------- LOGGING -------------------
 logging.basicConfig(level=logging.DEBUG)
@@ -44,6 +45,7 @@ auth_bp = Blueprint("auth", __name__)
 
 
 # ------------------- LOGIN -------------------
+@csrf.exempt
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
