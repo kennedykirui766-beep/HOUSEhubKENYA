@@ -1600,7 +1600,7 @@
 
                 {% elif current_user.role.lower() == 'tenant' %}
                 <li class="nav-item"><a href="{{ url_for('tenant.dashboard') }}" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('house.hotels') }}" class="nav-link"><i class="fas fa-search"></i> <span>Browse Properties</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('tenant.properties') }}" class="nav-link"><i class="fas fa-search"></i> <span>Browse Properties</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('tenant.all_bookings') }}" class="nav-link"><i class="fas fa-calendar-check"></i> <span>My Bookings</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('tenant.pay_rent') }}" class="nav-link"><i class="fas fa-money-bill-wave"></i> <span>Pay Rent</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('tenant.submit_request') }}" class="nav-link"><i class="fas fa-tools"></i> <span>Maintenance Requests</span></a></li>

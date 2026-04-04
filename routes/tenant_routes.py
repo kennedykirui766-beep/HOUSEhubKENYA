@@ -126,20 +126,76 @@ def bookings(house_id):
     db.session.commit()
     return redirect(url_for('tenant.dashboard'))
 
+import json
+from sqlalchemy import or_
+from sqlalchemy.orm import joinedload
+
 @tenant_bp.route("/properties", methods=['GET'])
 def properties():
-    query = request.args.get('query', '')
+    query = request.args.get('query', '').strip()
     is_guest = not current_user.is_authenticated
-    print(f"Search query: {query}, Guest: {is_guest}")
+
+    # Base query with owner (optimization)
+    house_query = House.query.options(joinedload(House.owner))
+
+    # Search functionality
     if query:
-        houses = House.query.filter(
-            (House.location.ilike(f'%{query}%')) |
-            (House.title.ilike(f'%{query}%'))
-        ).all()
-    else:
-        houses = House.query.all()
-    print(f"Found houses: {len(houses)}")
-    return render_template('index.html', houses=houses, query=query, is_guest=is_guest)
+        house_query = house_query.filter(
+            or_(
+                House.location.ilike(f'%{query}%'),
+                House.title.ilike(f'%{query}%'),
+                House.city.ilike(f'%{query}%'),
+                House.property_type.ilike(f'%{query}%')
+            )
+        )
+
+    # Order: Available houses first
+    houses = house_query.order_by(House.available.desc()).all()
+
+    # Process houses (images + status)
+    processed_houses = []
+
+    for house in houses:
+        images = []
+
+        # Handle image_urls (JSON or string)
+        if house.image_urls:
+            try:
+                images = json.loads(house.image_urls)
+                if not isinstance(images, list):
+                    images = []
+            except Exception:
+                images = [
+                    img.strip() for img in house.image_urls.split(",")
+                    if img.strip()
+                ]
+
+        # Optimize Cloudinary images
+        def optimize(url):
+            if "res.cloudinary.com" in url:
+                return url.replace("/upload/", "/upload/f_auto,q_auto/")
+            return url
+
+        images = [optimize(img) for img in images]
+
+        processed_houses.append({
+            "id": house.id,
+            "title": house.title,
+            "location": house.location,
+            "price": house.rent_amount,
+            "bedrooms": house.bedrooms,
+            "bathrooms": house.bathrooms,
+            "image": images[0] if images else None,
+            "available": house.available,
+            "owner": house.owner.name if house.owner else "Unknown"
+        })
+
+    return render_template(
+        "index.html",
+        houses=processed_houses,
+        query=query,
+        is_guest=is_guest
+    )
 
 
 @tenant_bp.route('/upload_document', methods=['GET', 'POST'])
