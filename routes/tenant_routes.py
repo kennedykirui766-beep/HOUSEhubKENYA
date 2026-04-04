@@ -192,7 +192,7 @@ def properties():
 
     return render_template(
         "index.html",
-        houses=processed_houses,
+        houses=houses,  # ✅ real objects
         query=query,
         is_guest=is_guest
     )
