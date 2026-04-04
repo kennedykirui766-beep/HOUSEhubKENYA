@@ -191,7 +191,7 @@ def properties():
         })
 
     return render_template(
-        "index.html",
+        "properties.html",
         houses=houses,  # ✅ real objects
         query=query,
         is_guest=is_guest
