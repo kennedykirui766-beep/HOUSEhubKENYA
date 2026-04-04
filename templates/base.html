@@ -1597,6 +1597,7 @@
                 <li class="nav-item"><a href="{{ url_for('landlord.messages') }}" class="nav-link"><i class="fas fa-envelope"></i> <span>Messages</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('landlord.settings') }}" class="nav-link"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('landlord.profile') }}" class="nav-link"><i class="fas fa-user"></i> <span>My Profile</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('landlord.delete_account') }}" class="nav-link text-danger"><i class="fas fa-trash-alt"></i> <span>Delete Account</span></a></li>
 
                 {% elif current_user.role.lower() == 'tenant' %}
                 <li class="nav-item"><a href="{{ url_for('tenant.dashboard') }}" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
@@ -1607,6 +1608,7 @@
                 <li class="nav-item"><a href="{{ url_for('tenant.documents') }}" class="nav-link"><i class="fas fa-file-alt"></i> <span>Documents</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('tenant.messages') }}" class="nav-link"><i class="fas fa-envelope"></i> <span>Messages</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('tenant.profile') }}" class="nav-link"><i class="fas fa-user"></i> <span>My Profile</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('tenant.delete_account') }}" class="nav-link text-danger"><i class="fas fa-trash-alt"></i> <span>Delete Account</span></a></li>
 
                 {% elif current_user.role.lower() == 'admin' %}
                 <li class="nav-item"><a href="{{ url_for('admin.dashboard') }}" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
@@ -1623,6 +1625,7 @@
                 <li class="nav-item"><a href="{{ url_for('service_provider.profile') }}" class="nav-link"><i class="fas fa-user"></i> <span>My Profile</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('service_provider.reviews') }}" class="nav-link"><i class="fas fa-star"></i> <span>Reviews</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('service_provider.settings') }}" class="nav-link"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('service_provider.delete_account') }}" class="nav-link text-danger"><i class="fas fa-trash-alt"></i> <span>Delete Account</span></a></li>
                 {% endif %}
 
                 <li class="nav-item mt-2"><div class="sidebar-divider"></div></li>

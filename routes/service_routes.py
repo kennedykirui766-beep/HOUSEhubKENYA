@@ -352,15 +352,18 @@ def download_data():
 @login_required
 def delete_account():
     if request.method == "POST":
-        # ⚠️ Example: Permanently delete the current user's account
-        # You may want to add a confirmation step before this
         user = current_user
         db.session.delete(user)
         db.session.commit()
         flash("Your account has been deleted successfully.", "success")
-        return redirect(url_for("main.index"))  # redirect to homepage after deletion
+        return redirect(url_for("auth.login"))  # redirect to sign-in after deletion
 
-    return render_template("service_provider/delete_account.html")
+    # Render shared delete template with back and post URLs
+    return render_template(
+        "shared/delete_account.html",
+        back_url=url_for('service_provider.settings'),
+        post_url=url_for('service_provider.delete_account'),
+    )
 
 @service_provider_bp.route('/browse_jobs')
 @login_required
