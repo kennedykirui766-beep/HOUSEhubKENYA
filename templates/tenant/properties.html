@@ -480,7 +480,7 @@
                             <!-- Content -->
                             <div class="card-body-custom">
                                 <div class="property-type">{{ house.property_type|default('Property') }}</div>
-                                <a href="{{ url_for('tenant.property_details', id=house.id) }}" class="property-title">{{ house.title }}</a>
+                                <a href="{{ url_for('house.view_property', property_id=house.id) }}" class="property-title">{{ house.title }}</a>
                                 <div class="property-location">
                                     <i class="fas fa-map-marker-alt"></i> {{ house.location }}, {{ house.city }}
                                 </div>
