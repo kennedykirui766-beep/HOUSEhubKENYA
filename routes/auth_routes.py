@@ -48,6 +48,8 @@ auth_bp = Blueprint("auth", __name__)
 @csrf.exempt
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
+    admin_entry_required = bool(session.get('admin_entry_granted'))
+
     if request.method == "POST":
         try:
             identifier = request.form.get("identifier")  # email or phone
@@ -82,6 +84,17 @@ def login():
                 flash("This admin account is not approved for platform administration.", "danger")
                 return render_template("login.html")
 
+            if user.role == "admin":
+                # Admin users must start from the private semantic entry link.
+                if not session.get('admin_entry_granted'):
+                    flash("Admin access requires the private admin access link.", "warning")
+                    return redirect(url_for('auth.semantic_admin_entry'))
+
+                allowed_admin_email = (get_allowed_admin_email() or '').strip().lower()
+                if not allowed_admin_email or (user.email or '').strip().lower() != allowed_admin_email:
+                    flash("Use the approved admin email for this environment.", "danger")
+                    return render_template("login.html")
+
             # Always verify the user's account email before granting access.
             code_obj = create_verification_code(user, method='email')
             if send_2fa_email(user.email, user.name, code_obj.code, method='login'):
@@ -113,7 +126,22 @@ def login():
             flash("An error occurred during login. Try again.", "danger")
             return render_template("login.html")
 
-    return render_template("login.html")
+    return render_template("login.html", admin_entry_required=admin_entry_required)
+
+
+@auth_bp.route('/semantic/admin')
+def semantic_admin_entry():
+    """Private admin entrypoint page."""
+    return render_template('semantic_admin_entry.html')
+
+
+@auth_bp.route('/semantic/admin/continue', methods=['POST'])
+def semantic_admin_continue():
+    """Confirm the private admin entry and move to login."""
+    session['admin_entry_granted'] = True
+    session['admin_entry_granted_at'] = int(time.time())
+    flash("Admin entry confirmed. Continue with the approved email and password.", "info")
+    return redirect(url_for('auth.login'))
 
 
 # ------------------- SIGNUP -------------------
@@ -142,7 +170,7 @@ def signup():
                 return redirect(url_for("auth.signup"))
 
             # Role validation
-            if role not in ["tenant", "landlord", "service", "admin"]:
+            if role not in ["tenant", "landlord", "service"]:
                 flash("Invalid role.", "danger")
                 return redirect(url_for("auth.signup"))
 
@@ -272,6 +300,8 @@ def support():
 def logout():
     logout_user()
     clear_admin_totp_verification()
+    session.pop('admin_entry_granted', None)
+    session.pop('admin_entry_granted_at', None)
     flash("Logged out successfully.", "info")
     return redirect(url_for("auth.login"))
 

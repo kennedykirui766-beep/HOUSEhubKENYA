@@ -11,8 +11,8 @@ class Config:
     if database_url and database_url.startswith("postgres://"):
         database_url = database_url.replace("postgres://", "postgresql://", 1)
 
-    # Final DB URI
-    SQLALCHEMY_DATABASE_URI = database_url
+    # Final DB URI (never leave this as None)
+    SQLALCHEMY_DATABASE_URI = database_url or os.environ.get("SQLITE_FALLBACK_URL", "sqlite:///app.db")
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
