@@ -420,18 +420,31 @@
                     
                     {# Determine Image URL #}
                     {% set image_url = url_for('static', filename='images/default-house.jpg') %}
-                    {% if house.image_urls %}
-                        {% if house.image_urls is string %}
-                            {% set images_list = house.image_urls.split(',') %}
-                            {% if images_list[0] %}
-                                {% set image_url = images_list[0].strip() %}
+
+                        {% if house.image_urls %}
+
+                            {# If stored as comma-separated string #}
+                            {% if house.image_urls is string %}
+                                {% set images_list = house.image_urls.split(',') %}
+                            
+                            {# If already a list #}
+                            {% elif house.image_urls is iterable and house.image_urls is not string %}
+                                {% set images_list = house.image_urls %}
                             {% endif %}
-                        {% elif house.image_urls is iterable and house.image_urls is not string %}
-                            {% if house.image_urls[0] %}
-                                {% set image_url = house.image_urls[0] %}
+
+                            {% if images_list and images_list[0] %}
+                                {% set first_image = images_list[0].strip() %}
+
+                                {# Cloudinary or any external URL #}
+                                {% if first_image.startswith('http') %}
+                                    {% set image_url = first_image %}
+                                {% else %}
+                                    {# fallback if somehow local path is stored #}
+                                    {% set image_url = url_for('static', filename=first_image) %}
+                                {% endif %}
                             {% endif %}
+
                         {% endif %}
-                    {% endif %}
 
                     {# Determine Availability Status #}
                     {% set status_class = 'status-success' if house.available else 'status-danger' %}
