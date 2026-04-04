@@ -488,7 +488,7 @@
                                     <img src="https://ui-avatars.com/api/?name={{ house.owner.name if house.owner else 'Unknown' }}&background=random" alt="Owner" class="owner-avatar">
                                     <span class="owner-name">{{ house.owner.name if house.owner else 'Unknown' }}</span>
                                 </div>
-                                <a href="{{ url_for('tenant.property_details', id=house.id) }}" class="view-btn">
+                                <a href="{{ url_for('view_property', id=house.id) }}" class="view-btn">
                                     View <i class="fas fa-arrow-right"></i>
                                 </a>
                             </div>
