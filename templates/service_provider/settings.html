@@ -526,8 +526,9 @@ endblock %} {% block content %}
       </a>
 
       <a
-        href="{{ url_for('service_provider.delete_account') }}"
-        class="action-item delete-action"
+        href="#"
+        data-delete-url="{{ url_for('service_provider.delete_account') }}"
+        class="action-item delete-action js-delete-account"
       >
         <div class="action-icon">
           <i class="fas fa-trash-alt"></i>

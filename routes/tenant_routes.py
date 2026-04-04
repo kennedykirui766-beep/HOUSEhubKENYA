@@ -7,7 +7,8 @@ from operator import or_
 import os
 from models.models import Document
 from flask import Blueprint, current_app, flash, jsonify, render_template, request, redirect, url_for
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, logout_user
+from utils_delete import delete_user_and_dependents
 import pyotp
 import qrcode as qr_code
 from models.models import Booking, MaintenanceRequest, Message, House, Notification, Payment, User
@@ -298,11 +299,14 @@ def profile():
 @login_required
 def delete_account():
     if request.method == 'POST':
-        user = current_user
-        db.session.delete(user)
-        db.session.commit()
-        # After deletion, redirect to sign-in
-        return redirect(url_for('auth.login'))
+        success, error = delete_user_and_dependents(current_user)
+        if success:
+            logout_user()
+            flash("Your account has been deleted.", "success")
+            return redirect(url_for('auth.login'))
+        else:
+            flash("Could not delete account: " + (error or "internal error"), "danger")
+            return redirect(url_for('tenant.profile'))
 
     return render_template(
         'shared/delete_account.html',
