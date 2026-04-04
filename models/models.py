@@ -54,7 +54,7 @@ class User(db.Model, UserMixin):
 
     # Relationships
     houses = db.relationship('House', backref='owner', lazy=True)
-    bookings = db.relationship('Booking', backref='tenant', lazy=True)
+    bookings = db.relationship('Booking', back_populates='tenant', lazy=True)
     sent_messages = db.relationship(
         'Message',
         foreign_keys='Message.sender_id',
@@ -217,7 +217,7 @@ class Booking(db.Model):
     created_at = db.Column(db.DateTime, default=db.func.now())
 
     # Relationships (VERY useful)
-    tenant = db.relationship("User", backref="bookings")
+    tenant = db.relationship('User', back_populates='bookings')
     house = db.relationship("House", backref="bookings")
 
 class Document(db.Model):
