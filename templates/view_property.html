@@ -56,11 +56,13 @@
   }
 
   .vp-badge {
-    padding: 0.35rem 0.85rem;
+    padding: 0.5rem 1rem;
     border-radius: var(--radius-full);
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 600;
     white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 
   .vp-badge.available {
@@ -101,7 +103,7 @@
     width: 100%;
     height: 450px;
     position: relative;
-    background-color: #eee;
+    background-color: #f8f9fa;
   }
 
   .vp-main-image {
@@ -109,7 +111,7 @@
     height: 100%;
     object-fit: cover;
     cursor: zoom-in;
-    transition: transform 0.5s ease;
+    transition: transform 0.3s ease;
   }
 
   .vp-thumbs-grid {
@@ -124,12 +126,14 @@
     aspect-ratio: 16/9;
     cursor: pointer;
     overflow: hidden;
-    opacity: 0.8;
+    opacity: 0.7;
     transition: var(--transition);
+    border: 2px solid transparent;
   }
 
   .vp-thumb:hover, .vp-thumb.active {
     opacity: 1;
+    border-color: var(--primary-color);
   }
 
   .vp-thumb img {
@@ -174,20 +178,26 @@
 
   .vp-spec-item {
     background: var(--body-bg);
-    padding: 1rem;
+    padding: 1.25rem 1rem;
     border-radius: var(--radius-md);
     text-align: center;
     border: 1px solid var(--border-color);
+    transition: var(--transition);
+  }
+
+  .vp-spec-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   }
 
   .vp-spec-icon {
     color: var(--primary-color);
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     margin-bottom: 0.5rem;
   }
 
   .vp-spec-value {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: var(--text-primary);
     display: block;
@@ -203,9 +213,9 @@
   /* Description */
   .vp-description {
     color: var(--text-secondary);
-    line-height: 1.7;
-    font-size: 1rem;
-    white-space: pre-wrap; /* Preserves line breaks */
+    line-height: 1.8;
+    font-size: 1.05rem;
+    white-space: pre-wrap;
   }
 
   /* Features/Amenities */
@@ -218,16 +228,17 @@
   .vp-feature-tag {
     background: var(--primary-light);
     color: var(--primary-color);
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 1.2rem;
     border-radius: var(--radius-md);
     font-size: 0.9rem;
     font-weight: 500;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    border: 1px solid rgba(99, 102, 241, 0.1);
   }
   .vp-feature-tag i {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
   }
 
   /* Pricing Card (Sticky) */
@@ -238,7 +249,8 @@
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 2rem;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    z-index: 10;
   }
 
   .vp-price-large {
@@ -246,12 +258,12 @@
     font-weight: 800;
     color: var(--primary-color);
     line-height: 1;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
   }
 
   .vp-price-period {
-    color: var(--text-secondary);
-    font-size: 1rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
     margin-bottom: 1.5rem;
     display: block;
   }
@@ -267,12 +279,13 @@
     transition: var(--transition);
     margin-bottom: 0.75rem;
     font-size: 1rem;
+    cursor: pointer;
+    border: none;
   }
 
   .vp-btn-primary {
     background: var(--gradient-primary);
     color: white;
-    border: none;
   }
 
   .vp-btn-primary:hover {
@@ -290,6 +303,14 @@
   .vp-btn-outline:hover {
     background: var(--primary-light);
     color: var(--primary-color);
+  }
+  
+  .vp-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #ccc;
+    border-color: #ccc;
+    color: #666;
   }
 
   /* Owner Card */
@@ -342,6 +363,7 @@
     background: var(--body-bg);
     color: var(--text-secondary);
     transition: var(--transition);
+    text-decoration: none;
   }
   .vp-contact-btn:hover {
     background: var(--primary-color);
@@ -397,7 +419,7 @@
     <!-- Breadcrumbs -->
     <nav class="vp-breadcrumbs">
       <a href="{{ url_for('main.index') }}">Home</a> <span>/</span>
-      <a href="{{ url_for('house.hotels') if current_user.role == 'landlord' else url_for('main.index') }}">Properties</a> <span>/</span>
+      <a href="{{ url_for('landlord.properties') if current_user.role == 'landlord' else url_for('main.index') }}">Properties</a> <span>/</span>
       <span>{{ house.title }}</span>
     </nav>
 
@@ -405,8 +427,8 @@
     <header class="vp-header">
       <div class="vp-title-row">
         <h1 class="vp-title">{{ house.title }}</h1>
-        <div style="display: flex; gap: 0.5rem;">
-          {% if house.is_available %}
+        <div>
+          {% if status == "Available" %}
             <span class="vp-badge available">Available Now</span>
           {% else %}
             <span class="vp-badge unavailable">Rented Out</span>
@@ -424,19 +446,19 @@
       <!-- LEFT COLUMN: Main Content -->
       <div class="col-lg-8">
         
-        <!-- Gallery -->
+        <!-- Gallery (Using Cloudinary URLs) -->
         <div class="vp-gallery-container">
           <div class="vp-main-image-wrapper">
             {% if images %}
               <img src="{{ images[0] }}" alt="{{ house.title }}" class="vp-main-image" id="mainGalleryImg">
             {% else %}
-              <img src="https://via.placeholder.com/800x450?text=No+Image" alt="No Image" class="vp-main-image">
+              <img src="https://via.placeholder.com/800x450?text=No+Image+Available" alt="No Image" class="vp-main-image">
             {% endif %}
           </div>
           {% if images|length > 1 %}
           <div class="vp-thumbs-grid">
             {% for image in images[1:] %}
-            <div class="vp-thumb" onclick="changeImage('{{ image }}')">
+            <div class="vp-thumb" onclick="changeImage('{{ image }}', this)">
               <img src="{{ image }}" alt="Thumbnail">
             </div>
             {% endfor %}
@@ -458,7 +480,7 @@
           </div>
           <div class="vp-spec-item">
             <div class="vp-spec-icon"><i class="fas fa-ruler-combined"></i></div>
-            <span class="vp-spec-value">{{ house.size }} <small style="font-size:0.7em">sqft</small></span>
+            <span class="vp-spec-value">{{ house.size }} <small style="font-size:0.6em">sqft</small></span>
             <span class="vp-spec-label">Size</span>
           </div>
           <div class="vp-spec-item">
@@ -470,7 +492,7 @@
 
         <!-- Description -->
         <div class="vp-card">
-          <h3 class="vp-card-title"><i class="fas fa-align-left"></i> Description</h3>
+          <h3 class="vp-card-title"><i class="fas fa-align-left"></i> About this Property</h3>
           <p class="vp-description">{{ house.description }}</p>
         </div>
 
@@ -478,7 +500,6 @@
         <div class="vp-card">
           <h3 class="vp-card-title"><i class="fas fa-star"></i> Amenities & Features</h3>
           <div class="vp-features-list">
-            <!-- Dynamically render amenities if they exist as a list or string -->
             {% if house.amenities %}
               {% if house.amenities is iterable and house.amenities is not string %}
                 {% for amenity in house.amenities %}
@@ -495,26 +516,28 @@
           </div>
         </div>
 
-        <!-- Location Map -->
+        <!-- Location Map (Exact Location) -->
         <div class="vp-card">
           <h3 class="vp-card-title"><i class="fas fa-map-marked-alt"></i> Location</h3>
           <p style="margin-bottom: 1rem; color: var(--text-secondary);">
             {{ house.address_line1 }}, {{ house.city }}, {{ house.state_province }}.
           </p>
-          <!-- Placeholder map using generic coordinates since we don't have lat/long in the model -->
+          
+          <!-- Construct query with full address for precision -->
           <iframe 
             class="vp-map-frame"
-            src="https://maps.google.com/maps?q={{ house.city }},{{ house.country }}&t=&z=13&ie=UTF8&iwloc=&output=embed" 
+            src="https://maps.google.com/maps?q={{ house.address_line1 }}, {{ house.city }}, {{ house.state_province }}&t=&z=15&ie=UTF8&iwloc=&output=embed" 
             frameborder="0" 
             scrolling="no" 
             marginheight="0" 
-            marginwidth="0">
+            marginwidth="0"
+            allowfullscreen>
           </iframe>
         </div>
 
       </div>
 
-      <!-- RIGHT COLUMN: Sidebar -->
+      <!-- RIGHT COLUMN: Sticky Sidebar -->
       <div class="col-lg-4">
         
         <!-- Pricing Card -->
@@ -525,7 +548,7 @@
           <span class="vp-price-period">per month</span>
 
           {% if current_user.is_authenticated and current_user.role.lower() == 'tenant' %}
-            {% if house.is_available %}
+            {% if status == "Available" %}
               <form action="{{ url_for('house.request_rental', property_id=house.id) }}" method="POST">
                 <button type="submit" class="vp-btn vp-btn-primary">
                   Request Rental
@@ -535,14 +558,17 @@
                 <i class="far fa-calendar-alt"></i> Schedule Tour
               </a>
             {% else %}
-              <button class="vp-btn vp-btn-outline" disabled style="opacity:0.6; cursor:not-allowed;">
-                Currently Unavailable
+              <button class="vp-btn vp-btn-outline" disabled>
+                Property Rented Out
               </button>
             {% endif %}
           {% elif current_user.is_authenticated and current_user.role.lower() == 'landlord' and house.owner_id == current_user.id %}
              <a href="{{ url_for('landlord.edit_property', property_id=house.id) }}" class="vp-btn vp-btn-primary">
                <i class="fas fa-edit"></i> Edit Listing
              </a>
+             <button class="vp-btn vp-btn-outline" style="margin-top: 0.5rem;" onclick="alert('Feature coming soon')">
+               <i class="fas fa-chart-line"></i> View Analytics
+             </button>
           {% endif %}
         </div>
 
@@ -562,7 +588,22 @@
             </div>
           </div>
 
-          <div class="vp-info-row" style="border-top: 1px solid var(--border-color); padding-top: 1rem;">
+          <!-- Phone Number Added Here -->
+          <div class="vp-info-row" style="border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 0.5rem;">
+            <span class="vp-info-label">Phone</span>
+            <span class="vp-info-val">
+                <a href="tel:{{ owner.phone }}" style="color: var(--primary-color); text-decoration: none;">
+                    <i class="fas fa-phone-alt" style="font-size: 0.8em; margin-right: 4px;"></i>{{ owner.phone }}
+                </a>
+            </span>
+          </div>
+
+          <div class="vp-info-row">
+            <span class="vp-info-label">Email</span>
+            <span class="vp-info-val" style="font-size: 0.9em;">{{ owner.email }}</span>
+          </div>
+          
+          <div class="vp-info-row">
             <span class="vp-info-label">Member Since</span>
             <span class="vp-info-val">{{ owner.created_at.strftime('%Y') if owner.created_at else 'N/A' }}</span>
           </div>
@@ -573,11 +614,9 @@
               <a href="mailto:{{ owner.email }}" class="vp-contact-btn" title="Email">
                 <i class="fas fa-envelope"></i>
               </a>
-              {% if owner.phone %}
-              <a href="tel:{{ owner.phone }}" class="vp-contact-btn" title="Call">
-                <i class="fas fa-phone"></i>
+              <a href="https://wa.me/{{ owner.phone.replace(' ', '') }}" target="_blank" class="vp-contact-btn" title="WhatsApp">
+                <i class="fab fa-whatsapp"></i>
               </a>
-              {% endif %}
               <a href="#" class="vp-contact-btn" title="Chat">
                 <i class="fas fa-comment-dots"></i>
               </a>
@@ -596,8 +635,8 @@
             <span class="vp-info-val">#{{ house.id }}</span>
           </div>
           <div class="vp-info-row">
-            <span class="vp-info-label">Price</span>
-            <span class="vp-info-val">KES {{ "{:,.0f}".format(house.rent_amount) }}</span>
+            <span class="vp-info-label">Status</span>
+            <span class="vp-info-val" style="color: {% if status == 'Available' %}#28a745{% else %}#dc3545{% endif %}">{{ status }}</span>
           </div>
           <div class="vp-info-row">
             <span class="vp-info-label">Security Deposit</span>
@@ -632,15 +671,21 @@
 
 {% block scripts %}
 <script>
-  function changeImage(src) {
+  function changeImage(src, element) {
     const mainImg = document.getElementById('mainGalleryImg');
     if(mainImg) {
       // Simple fade effect
-      mainImg.style.opacity = '0.5';
+      mainImg.style.opacity = '0.7';
       setTimeout(() => {
         mainImg.src = src;
         mainImg.style.opacity = '1';
       }, 200);
+    }
+    
+    // Update active state on thumbnails
+    document.querySelectorAll('.vp-thumb').forEach(el => el.classList.remove('active'));
+    if(element) {
+        element.classList.add('active');
     }
   }
 </script>

@@ -35,26 +35,30 @@ def index():
 @login_required
 def view_property(property_id):
     """
-    View details of a specific property with full house + owner details.
+    View details of a specific property (available or rented).
     """
+
     # Fetch house
     house = House.query.get_or_404(property_id)
 
-    # Fetch owner (User)
-    owner = house.owner  # thanks to relationship
+    # Fetch owner
+    owner = house.owner
 
-    # Handle images (assuming comma-separated URLs)
+    # Handle images
     image_list = []
     if house.image_urls:
         image_list = [img.strip() for img in house.image_urls.split(",") if img.strip()]
+
+    # Determine status
+    status = "Available" if house.available else "Rented"
 
     return render_template(
         'view_property.html',
         house=house,
         owner=owner,
-        images=image_list
+        images=image_list,
+        status=status
     )
-
 @house_bp.route('/edit/<int:property_id>')
 @login_required
 def edit_property(property_id):
