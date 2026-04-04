@@ -55,6 +55,19 @@
     margin-bottom: 1.75rem;
     line-height: 1.55;
   }
+  
+  .admin-entry-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.85rem;
+    margin-bottom: 1rem;
+    border-radius: var(--radius-md);
+    background: var(--primary-light);
+    color: var(--primary-hover);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
 
   /* ========== INFO SIDE ========== */
   .login-info-side {
@@ -599,6 +612,12 @@
       <h1>Welcome Back</h1>
       <p class="subtitle">Log in to access your account and manage your properties.</p>
 
+        {% if admin_entry_required %}
+        <div class="admin-entry-note">
+          <i class="fa-solid fa-shield-halved"></i>
+          Admin access is active. Continue only if you used the private admin link.
+        </div>
+        {% endif %}
       <!-- Flash Messages -->
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}

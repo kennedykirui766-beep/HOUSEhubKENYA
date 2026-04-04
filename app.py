@@ -26,7 +26,11 @@ def create_app():
     
     # Ensure critical configurations are set
     app.config['SECRET_KEY'] = app.config.get('SECRET_KEY', 'your-secure-secret-key')
-    app.config['SQLALCHEMY_DATABASE_URI'] = app.config.get('SQLALCHEMY_DATABASE_URI', 'sqlite:///app.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = (
+        app.config.get('SQLALCHEMY_DATABASE_URI')
+        or os.environ.get('DATABASE_URL')
+        or 'sqlite:///app.db'
+    )
     app.config['UPLOAD_FOLDER'] = app.config.get('UPLOAD_FOLDER', 'static/images')
     app.config['CHAT_UPLOAD_FOLDER'] = app.config.get('CHAT_UPLOAD_FOLDER', 'static/uploads/chat')
     app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}  # For chat file uploads

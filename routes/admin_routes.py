@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, request, url_for, flash
+from flask import Blueprint, render_template, redirect, request, url_for, flash, session
 from flask_login import login_required, current_user
 from sqlalchemy import inspect
 from models.models import User, House, SystemUpdateSubscriber
@@ -19,6 +19,10 @@ def is_admin():
 
 @admin_bp.before_request
 def restrict_to_admin():
+    if not session.get('admin_entry_granted'):
+        flash("Use the private admin access link before opening admin pages.", "warning")
+        return redirect(url_for('auth.semantic_admin_entry'))
+
     if not is_admin():
         flash("Access denied. Admins only.", "danger")
         return redirect(url_for('auth.login'))
