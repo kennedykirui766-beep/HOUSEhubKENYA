@@ -393,3 +393,23 @@ class TwoFactorVerification(db.Model):
     def is_any_method_enabled(self):
         """Check if any 2FA method is enabled"""
         return self.email_enabled or self.sms_enabled or self.totp_enabled
+
+
+class Subscriber(db.Model):
+    """Stores newsletter/system update subscribers."""
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=True)
+    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+
+class SystemUpdateSubscriber(db.Model):
+    """Stores system-update subscribers and their selected newsletter topics."""
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=True)
+    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    topics = db.Column(db.Text, nullable=False, default='')  # comma-separated topic keys
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)

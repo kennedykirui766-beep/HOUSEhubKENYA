@@ -621,7 +621,7 @@
           <label for="identifier">Email or Phone Number</label>
           <div class="login-input-wrap">
             <i class="fas fa-user field-icon"></i>
-            <input type="text" class="form-control" id="identifier" name="identifier" placeholder="Enter your email or phone" required />
+            <input type="text" class="form-control" id="identifier" name="identifier" placeholder="Enter your email or phone" value="{{ request.form.get('identifier', '') }}" required />
           </div>
           <div class="field-error">Please enter a valid email or phone number.</div>
         </div>
@@ -645,11 +645,11 @@
           </div>
         </div>
 
-        <div class="two-fa-field" id="twoFactorGroup" style="display: none;">
+        <div class="two-fa-field" id="twoFactorGroup" style="display: {% if requires_2fa %}block{% else %}none{% endif %};">
           <label for="two_factor_code">Two-Factor Authentication Code</label>
           <div class="login-input-wrap">
             <i class="fas fa-shield-alt field-icon"></i>
-            <input type="text" class="form-control" id="two_factor_code" name="two_factor_code" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" />
+            <input type="text" class="form-control" id="two_factor_code" name="two_factor_code" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" {% if requires_2fa %}required{% endif %} />
           </div>
         </div>
 
@@ -787,15 +787,13 @@
     document.getElementById("loginButton").disabled = true;
   });
 
-  // Conditional 2FA field
-  document.getElementById("identifier").addEventListener("blur", function() {
-    var group = document.getElementById("twoFactorGroup");
-    if (this.value.toLowerCase().includes("2fa")) {
-      group.style.display = "block";
-    } else {
-      group.style.display = "none";
-    }
-  });
+  // When backend requests 2FA, focus the code field for quick confirmation
+  {% if requires_2fa %}
+  var twoFactorInput = document.getElementById("two_factor_code");
+  if (twoFactorInput) {
+    twoFactorInput.focus();
+  }
+  {% endif %}
 
   // Social login handlers — replace with real OAuth redirect in production
   document.getElementById("googleBtn").addEventListener("click", function() {

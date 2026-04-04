@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import current_user, login_required
-from models.models import House, SupportMessage
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy import inspect
+from models.models import House, SystemUpdateSubscriber
 from extensions import db
-from extensions import csrf
+from utils_email_2fa import send_support_contact_email, verify_email_format
 
 main_bp = Blueprint('main', __name__)
 
@@ -26,31 +27,24 @@ def index():
 def about():
     return render_template('about.html')
 
-@csrf.exempt
 @main_bp.route('/contact', methods=['GET', 'POST'])
-@login_required
 def contact():
     if request.method == 'POST':
-        full_name = request.form.get('fullName')
-        email = request.form.get('email')
-        phone = request.form.get('phone')
-        role = request.form.get('role')
-        message = request.form.get('message')
+        full_name = (request.form.get('full_name') or '').strip()
+        email = (request.form.get('email') or '').strip()
+        phone = (request.form.get('phone') or '').strip()
+        role = (request.form.get('role') or '').strip()
+        message = (request.form.get('message') or '').strip()
 
-        # Save to database
-        new_message = SupportMessage(
-            full_name=full_name,
-            email=email,
-            phone=phone,
-            role=role,
-            message=message,
-            user_id=current_user.id
-        )
+        if not full_name or not email or not message:
+            flash('Please provide your name, email, and message.', 'danger')
+            return redirect(url_for('main.contact'))
 
-        db.session.add(new_message)
-        db.session.commit()
+        if send_support_contact_email(full_name, email, phone, role, message):
+            flash('Your message has been sent to support.', 'success')
+            return redirect(url_for('main.contact'))
 
-        flash("Message sent successfully!", "success")
+        flash('Unable to send your message right now. Please try again later.', 'danger')
         return redirect(url_for('main.contact'))
 
     return render_template('contact.html')
@@ -69,7 +63,7 @@ def accessibility():
 
 @main_bp.route('/subscribe')
 def subscribe():
-    return render_template('subscribe.html')
+    return redirect(url_for('main.index') + '#newsletter')
 
 @main_bp.route('/help')
 def help():
@@ -140,9 +134,58 @@ def how_it_works(role):
 
 @main_bp.route('/subscribe', methods=['POST'])
 def subscribe_post():
-    email = request.form.get('email')
-    if email:
-        flash(f'Subscribed successfully with {email}', 'success')
-    else:
+    name = (request.form.get('name') or '').strip()
+    email = (request.form.get('email') or '').strip().lower()
+    topics = request.form.getlist('newsletter_topics')
+
+    allowed_topics = {
+        'platform_updates',
+        'security_alerts',
+        'maintenance_notices',
+        'new_features',
+    }
+    selected_topics = [topic for topic in topics if topic in allowed_topics]
+
+    if not email:
         flash('No email provided', 'danger')
+        return redirect(url_for('main.index'))
+
+    if not verify_email_format(email):
+        flash('Please provide a valid email address.', 'danger')
+        return redirect(url_for('main.index'))
+
+    if not selected_topics:
+        flash('Please select at least one newsletter category.', 'danger')
+        return redirect(url_for('main.index') + '#newsletter')
+
+    # Keep feature functional even when Alembic history is out of sync.
+    if not inspect(db.engine).has_table('system_update_subscriber'):
+        db.create_all()
+
+    existing = SystemUpdateSubscriber.query.filter_by(email=email).first()
+    if existing:
+        existing.is_active = True
+        existing.name = name or existing.name
+        existing.topics = ','.join(selected_topics)
+        db.session.commit()
+        flash('Your newsletter preferences were updated.', 'success')
+        return redirect(url_for('main.index'))
+
+    subscriber = SystemUpdateSubscriber(
+        name=name or None,
+        email=email,
+        topics=','.join(selected_topics),
+        is_active=True,
+    )
+    db.session.add(subscriber)
+    try:
+        db.session.commit()
+        flash('Subscribed successfully for system updates.', 'success')
+    except IntegrityError:
+        db.session.rollback()
+        flash('This email is already subscribed.', 'info')
+    except Exception:
+        db.session.rollback()
+        flash('Could not complete subscription. Please try again.', 'danger')
+
     return redirect(url_for('main.index'))

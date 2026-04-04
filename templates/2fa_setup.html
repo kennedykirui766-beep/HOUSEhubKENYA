@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}{{ setup_title|default('Set Up Two-Factor Authentication') }}{% endblock %}
+
+{% block content %}
+<div class="container py-4 py-md-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-9 col-xl-8">
+        {% if show_email_option|default(true) %}
+        <div class="alert alert-primary border-0 shadow-sm mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+          <div>
+            <h5 class="mb-1"><i class="fas fa-envelope me-2"></i>Prefer email instead of an authenticator app?</h5>
+            <p class="mb-0">You can receive 2FA codes by email and confirm them from your inbox.</p>
+          </div>
+          <a href="{{ email_option_url|default(url_for('auth.setup_email_2fa')) }}" class="btn btn-primary">
+            <i class="fas fa-paper-plane me-2"></i>Use Email 2FA
+          </a>
+        </div>
+      </div>
+        {% endif %}
+
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h4 class="mb-0"><i class="fas fa-shield-halved me-2"></i>{{ setup_title|default('Set Up Two-Factor Authentication') }}</h4>
+          <a href="{{ back_url|default(url_for('tenant.dashboard')) }}" class="btn btn-sm btn-light">
+            <i class="fas fa-arrow-left me-1"></i>{{ back_label|default('Dashboard') }}
+          </a>
+        </div>
+
+        <div class="card-body p-4 p-md-5">
+          <div class="alert alert-info" role="alert">
+            <strong>Protect your account:</strong> {{ intro_text|default('Scan the QR code with Google Authenticator, Authy, or Microsoft Authenticator, then enter the 6-digit code to activate 2FA.') }}
+          </div>
+
+          <div class="row g-4 align-items-start">
+            <div class="col-md-6 text-center">
+              <h6 class="fw-bold mb-3">1. Scan This QR Code</h6>
+              <img
+                src="data:image/png;base64,{{ qr_code }}"
+                alt="2FA QR Code"
+                class="img-fluid border rounded p-2 bg-white"
+                style="max-width: 260px;"
+              >
+            </div>
+
+            <div class="col-md-6">
+              <h6 class="fw-bold mb-3">2. Or Use Manual Key</h6>
+              <div class="bg-light border rounded p-3 mb-3">
+                <code class="text-break fs-6">{{ secret }}</code>
+              </div>
+
+              <h6 class="fw-bold mb-3">3. Verify Setup</h6>
+              <form method="POST" action="{{ post_url|default(url_for('tenant.twofa_setup')) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="mb-3">
+                  <label for="verification_code" class="form-label">6-digit verification code</label>
+                  <input
+                    type="text"
+                    id="verification_code"
+                    name="verification_code"
+                    class="form-control"
+                    maxlength="6"
+                    minlength="6"
+                    pattern="[0-9]{6}"
+                    inputmode="numeric"
+                    autocomplete="one-time-code"
+                    placeholder="Enter code from your app"
+                    required
+                  >
+                </div>
+
+                <button type="submit" class="btn btn-success w-100">
+                  <i class="fas fa-check-circle me-2"></i>Enable 2FA
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

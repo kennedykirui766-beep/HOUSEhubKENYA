@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Backup Codes - HomeHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-warning text-dark">
+          <h4 class="mb-0"><i class="fas fa-key me-2"></i>Backup Codes</h4>
+        </div>
+        <div class="card-body p-4">
+          <div class="alert alert-warning">
+            Save these backup codes somewhere safe. Each code can be used once if you lose access to your normal 2FA method.
+          </div>
+
+          {% if codes %}
+            <div class="row g-3">
+              {% for code in codes.split(',') %}
+                <div class="col-md-6">
+                  <div class="border rounded p-3 bg-light text-center fw-bold">{{ code }}</div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="alert alert-info mb-0">No backup codes are available.</div>
+          {% endif %}
+
+          <div class="mt-4 d-flex gap-2 flex-wrap">
+            <a href="{{ url_for('auth.security_settings') }}" class="btn btn-primary">
+              <i class="fas fa-shield-alt me-2"></i>Security Settings
+            </a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary">
+              Back to Login
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

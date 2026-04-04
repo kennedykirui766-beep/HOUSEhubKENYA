@@ -4,17 +4,73 @@ Handles sending email-based 2FA codes.
 Supports multiple providers (Flask-Mail, SendGrid, etc).
 """
 
-import os
+import json
 import logging
+import os
 from typing import Optional
-from flask import render_template_string
+from urllib import error as urlerror, request as urlrequest
 
 logger = logging.getLogger(__name__)
 
 # Email provider configuration
-EMAIL_PROVIDER = os.environ.get('EMAIL_PROVIDER', 'smtp')  # 'smtp', 'sendgrid', 'mailgun'
-SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'noreply@homehub.app')
+EMAIL_PROVIDER = os.environ.get('EMAIL_PROVIDER', 'sendgrid')  # 'smtp', 'sendgrid', 'mailgun'
+SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'kamauemilio466@gmail.com')
+SUPPORT_EMAIL = os.environ.get('SUPPORT_EMAIL', SENDER_EMAIL)
 SENDER_NAME = os.environ.get('SENDER_NAME', 'HomeHub')
+
+
+def _send_sendgrid_message(
+    recipient_email: str,
+    subject: str,
+    html_content: str,
+    text_content: str,
+    reply_to_email: Optional[str] = None,
+) -> bool:
+    """Send an email through the SendGrid REST API."""
+    sendgrid_key = os.environ.get('SENDGRID_API_KEY')
+    if not sendgrid_key:
+        logger.error("SENDGRID_API_KEY not configured")
+        return False
+
+    payload = {
+        "personalizations": [
+            {
+                "to": [{"email": recipient_email}],
+            }
+        ],
+        "from": {"email": SENDER_EMAIL, "name": SENDER_NAME},
+        "subject": subject,
+        "content": [
+            {"type": "text/plain", "value": text_content},
+            {"type": "text/html", "value": html_content},
+        ],
+    }
+
+    if reply_to_email:
+        payload["reply_to"] = {"email": reply_to_email}
+
+    request = urlrequest.Request(
+        "https://api.sendgrid.com/v3/mail/send",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {sendgrid_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+
+    try:
+        with urlrequest.urlopen(request, timeout=20) as response:
+            if response.status in (200, 201, 202):
+                return True
+            logger.error(f"SendGrid error: {response.status}")
+            return False
+    except urlerror.HTTPError as exc:
+        logger.error(f"SendGrid HTTP error: {exc.code} - {exc.read().decode('utf-8', errors='ignore')}")
+        return False
+    except Exception as exc:
+        logger.error(f"Failed to send SendGrid email: {str(exc)}")
+        return False
 
 
 def send_2fa_email(recipient_email: str, user_name: str, otp_code: str, method: str = 'email') -> bool:
@@ -43,168 +99,115 @@ def send_2fa_email(recipient_email: str, user_name: str, otp_code: str, method: 
 
 
 def _send_smtp(recipient_email: str, user_name: str, otp_code: str, method: str) -> bool:
-    """Send email via SMTP (requires Flask-Mail setup)"""
-    try:
-        from flask_mail import Mail, Message
-        from app import app
-        
-        mail = Mail(app)
-        
-        subject = f"Your HomeHub 2FA Code: {otp_code}"
-        
-        html_body = f"""
-        <html>
-            <body style="font-family: Arial, sans-serif; color: #333;">
-                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                    <h2 style="color: #4361ee;">HomeHub 2FA Verification</h2>
-                    
-                    <p>Hi {user_name},</p>
-                    
-                    <p>Your 2-Factor Authentication code is:</p>
-                    
-                    <div style="background-color: #f0f0f0; padding: 15px; border-radius: 5px; text-align: center;">
-                        <h1 style="letter-spacing: 5px; color: #4361ee; margin: 0;">{otp_code}</h1>
-                    </div>
-                    
-                    <p style="color: #666; margin-top: 20px;">
-                        <strong>⏱️ This code expires in 5 minutes.</strong>
-                    </p>
-                    
-                    <p style="color: #999; font-size: 12px;">
-                        If you didn't request this code, ignore this email. Your account is secure.
-                    </p>
-                    
-                    <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
-                    
-                    <p style="color: #999; font-size: 11px;">
-                        HomeHub Security Team<br>
-                        This is an automated message, please do not reply.
-                    </p>
-                </div>
-            </body>
-        </html>
-        """
-        
-        msg = Message(
-            subject=subject,
-            sender=(SENDER_NAME, SENDER_EMAIL),
-            recipients=[recipient_email],
-            html=html_body
-        )
-        
-        mail.send(msg)
-        logger.info(f"2FA email sent to {recipient_email}")
-        return True
-        
-    except Exception as e:
-        logger.error(f"Failed to send SMTP email: {str(e)}")
-        return False
+    """Legacy SMTP path is not used in this deployment."""
+    logger.warning("SMTP email provider is disabled in favor of SendGrid")
+    return False
 
 
 def _send_sendgrid(recipient_email: str, user_name: str, otp_code: str, method: str) -> bool:
-    """Send email via SendGrid API"""
-    try:
-        from sendgrid import SendGridAPIClient
-        from sendgrid.helpers.mail import Mail, Email, To, Content
-        
-        sendgrid_key = os.environ.get('SENDGRID_API_KEY')
-        if not sendgrid_key:
-            logger.error("SENDGRID_API_KEY not configured")
-            return False
-        
-        subject = f"Your HomeHub 2FA Code: {otp_code}"
-        
+    """Send email via SendGrid REST API"""
+    subject = f"Your HomeHub 2FA Code: {otp_code}"
+
+    html_content = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; color: #333;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #4361ee;">HomeHub 2FA Verification</h2>
+                <p>Hi {user_name},</p>
+                <p>Your 2-Factor Authentication code is:</p>
+                <div style="background-color: #f0f0f0; padding: 15px; border-radius: 5px; text-align: center;">
+                    <h1 style="letter-spacing: 5px; color: #4361ee; margin: 0;">{otp_code}</h1>
+                </div>
+                <p style="color: #666; margin-top: 20px;"><strong>⏱️ This code expires in 5 minutes.</strong></p>
+                <p style="color: #999; font-size: 12px;">If you didn't request this code, ignore this email. Your account is secure.</p>
+            </div>
+        </body>
+    </html>
+    """
+
+    text_content = (
+        f"Hi {user_name},\n\n"
+        f"Your HomeHub 2FA code is: {otp_code}\n"
+        "This code expires in 5 minutes.\n\n"
+        "If you didn't request this code, ignore this email."
+    )
+
+    success = _send_sendgrid_message(recipient_email, subject, html_content, text_content)
+    if success:
+        logger.info(f"2FA email sent via SendGrid to {recipient_email}")
+    return success
+
+
+def send_support_contact_email(full_name: str, sender_email: str, phone: str, role: str, message: str) -> bool:
+    """Send a contact/support message to the configured support inbox via SendGrid."""
+    subject = f"HomeHub Contact Message from {full_name}"
+
+    safe_phone = phone or "Not provided"
+    safe_role = role or "Not provided"
+    safe_message = message or "No message provided"
+
+    html_content = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; color: #333;">
+            <div style="max-width: 640px; margin: 0 auto; padding: 24px;">
+                <h2 style="color: #4361ee;">New HomeHub Support Message</h2>
+                <p><strong>Name:</strong> {full_name}</p>
+                <p><strong>Email:</strong> {sender_email}</p>
+                <p><strong>Phone:</strong> {safe_phone}</p>
+                <p><strong>Role:</strong> {safe_role}</p>
+                <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+                <p style="white-space: pre-wrap;"><strong>Message:</strong><br>{safe_message}</p>
+            </div>
+        </body>
+    </html>
+    """
+
+    text_content = (
+        f"New HomeHub Support Message\n\n"
+        f"Name: {full_name}\n"
+        f"Email: {sender_email}\n"
+        f"Phone: {safe_phone}\n"
+        f"Role: {safe_role}\n\n"
+        f"Message:\n{safe_message}"
+    )
+
+    return _send_sendgrid_message(
+        SUPPORT_EMAIL,
+        subject,
+        html_content,
+        text_content,
+        reply_to_email=sender_email,
+    )
+
+
+def send_system_update_email(recipient_email: str, title: str, body: str) -> bool:
+        """Send a platform/system update email to one subscriber."""
+        subject = f"HomeHub Update: {title}"
+        safe_body = body or "No update details provided."
+
         html_content = f"""
         <html>
             <body style="font-family: Arial, sans-serif; color: #333;">
-                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                    <h2 style="color: #4361ee;">HomeHub 2FA Verification</h2>
-                    <p>Hi {user_name},</p>
-                    <p>Your 2-Factor Authentication code is:</p>
-                    <div style="background-color: #f0f0f0; padding: 15px; border-radius: 5px; text-align: center;">
-                        <h1 style="letter-spacing: 5px; color: #4361ee; margin: 0;">{otp_code}</h1>
-                    </div>
-                    <p style="color: #666; margin-top: 20px;"><strong>⏱️ This code expires in 5 minutes.</strong></p>
-                    <p style="color: #999; font-size: 12px;">If you didn't request this code, ignore this email. Your account is secure.</p>
+                <div style="max-width: 640px; margin: 0 auto; padding: 24px;">
+                    <h2 style="color: #4361ee; margin-bottom: 12px;">{title}</h2>
+                    <div style="white-space: pre-wrap; line-height: 1.6;">{safe_body}</div>
+                    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+                    <p style="font-size: 12px; color: #6b7280;">
+                        You are receiving this because you subscribed to HomeHub system updates.
+                    </p>
                 </div>
             </body>
         </html>
         """
-        
-        message = Mail(
-            from_email=(SENDER_EMAIL, SENDER_NAME),
-            to_emails=To(recipient_email),
-            subject=subject,
-            html_content=html_content
-        )
-        
-        sg = SendGridAPIClient(sendgrid_key)
-        response = sg.send(message)
-        
-        if response.status_code in [200, 201, 202]:
-            logger.info(f"2FA email sent via SendGrid to {recipient_email}")
-            return True
-        else:
-            logger.error(f"SendGrid error: {response.status_code}")
-            return False
-            
-    except Exception as e:
-        logger.error(f"Failed to send SendGrid email: {str(e)}")
-        return False
+
+        text_content = f"{title}\n\n{safe_body}\n\nYou are receiving this because you subscribed to HomeHub system updates."
+        return _send_sendgrid_message(recipient_email, subject, html_content, text_content)
 
 
 def _send_mailgun(recipient_email: str, user_name: str, otp_code: str, method: str) -> bool:
-    """Send email via Mailgun API"""
-    try:
-        import requests
-        
-        mailgun_domain = os.environ.get('MAILGUN_DOMAIN')
-        mailgun_key = os.environ.get('MAILGUN_API_KEY')
-        
-        if not mailgun_domain or not mailgun_key:
-            logger.error("Mailgun credentials not configured")
-            return False
-        
-        subject = f"Your HomeHub 2FA Code: {otp_code}"
-        
-        html_content = f"""
-        <html>
-            <body style="font-family: Arial, sans-serif; color: #333;">
-                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                    <h2 style="color: #4361ee;">HomeHub 2FA Verification</h2>
-                    <p>Hi {user_name},</p>
-                    <p>Your 2-Factor Authentication code is:</p>
-                    <div style="background-color: #f0f0f0; padding: 15px; border-radius: 5px; text-align: center;">
-                        <h1 style="letter-spacing: 5px; color: #4361ee; margin: 0;">{otp_code}</h1>
-                    </div>
-                    <p style="color: #666; margin-top: 20px;"><strong>⏱️ This code expires in 5 minutes.</strong></p>
-                    <p style="color: #999; font-size: 12px;">If you didn't request this code, ignore this email. Your account is secure.</p>
-                </div>
-            </body>
-        </html>
-        """
-        
-        response = requests.post(
-            f"https://api.mailgun.net/v3/{mailgun_domain}/messages",
-            auth=("api", mailgun_key),
-            data={
-                "from": f"{SENDER_NAME} <{SENDER_EMAIL}>",
-                "to": recipient_email,
-                "subject": subject,
-                "html": html_content
-            }
-        )
-        
-        if response.status_code == 200:
-            logger.info(f"2FA email sent via Mailgun to {recipient_email}")
-            return True
-        else:
-            logger.error(f"Mailgun error: {response.status_code} - {response.text}")
-            return False
-            
-    except Exception as e:
-        logger.error(f"Failed to send Mailgun email: {str(e)}")
-        return False
+    """Legacy Mailgun path is not used in this deployment."""
+    logger.warning("Mailgun email provider is disabled in favor of SendGrid")
+    return False
 
 
 def verify_email_format(email: str) -> bool:
