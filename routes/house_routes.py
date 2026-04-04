@@ -31,6 +31,8 @@ def index():
     print("Houses data:", houses)  # Debug output
     return render_template('index.html', houses=houses)
 
+import json
+
 @house_bp.route('/view/<int:property_id>')
 @login_required
 def view_property(property_id):
@@ -44,10 +46,32 @@ def view_property(property_id):
     # Fetch owner
     owner = house.owner
 
-    # Handle images
+    # Handle Cloudinary images properly
     image_list = []
+
     if house.image_urls:
-        image_list = [img.strip() for img in house.image_urls.split(",") if img.strip()]
+        try:
+            # Case 1: JSON list (recommended)
+            image_list = json.loads(house.image_urls)
+
+            # Ensure it's actually a list
+            if not isinstance(image_list, list):
+                image_list = []
+
+        except Exception:
+            # Case 2: Comma-separated fallback
+            image_list = [
+                img.strip() for img in house.image_urls.split(",")
+                if img.strip()
+            ]
+
+    # ✅ Optimize Cloudinary images (faster loading)
+    def optimize_cloudinary(url):
+        if "res.cloudinary.com" in url:
+            return url.replace("/upload/", "/upload/f_auto,q_auto/")
+        return url
+
+    image_list = [optimize_cloudinary(img) for img in image_list]
 
     # Determine status
     status = "Available" if house.available else "Rented"
