@@ -476,7 +476,7 @@
                     KES {{ "{:,.0f}".format(house.price) if house.price else '0' }}
                     <span>/mo</span>
                 </div>
-                <a href="{{ url_for('house.book_house', house_id=house.id) }}" class="btn-book">
+                <a href="{{ url_for('tenant.book_house', house_id=house.id) }}" class="btn-book">
                     Book Now
                 </a>
             </div>
