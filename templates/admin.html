@@ -95,6 +95,7 @@
     Switch to {{ 'Swahili' if current_user.language == 'English' else 'English' }}
   </button>
   <form id="language-form" action="{{ url_for('admin.set_language') }}" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <select name="language" onchange="this.form.submit()" value="{{ current_user.language }}">
       <option value="English" {% if current_user.language == 'English' %}selected{% endif %}>English</option>
       <option value="Swahili" {% if current_user.language == 'Swahili' %}selected{% endif %}>Swahili</option>
@@ -140,6 +141,7 @@
     <!-- Platform Announcement -->
     <section class="platform-announcement">
       <form action="{{ url_for('admin.send_announcement') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <textarea name="announcement" placeholder="Enter platform announcement"></textarea>
         <button type="submit" class="btn btn-primary" style="background: #3D8B40; color: white;">Send Announcement</button>
       </form>
@@ -151,6 +153,7 @@
       <div id="users" class="tab-content" style="display: none">
         <h2 style="color: #1A1A1A;">All Users</h2>
         <form action="{{ url_for('admin.bulk_action') }}" method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <select name="bulk_action">
             <option value="suspend">Suspend</option>
             <option value="notify">Notify</option>
@@ -178,6 +181,7 @@
               <td>{{ user.last_login | datetimeformat }}</td>
               <td>
                 <form action="{{ url_for('admin.user_action', user_id=user.id) }}" method="POST" style="display: inline;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <button name="action" value="suspend" style="background: #B22222; color: white;">Suspend</button>
                   <button name="action" value="reactivate" style="background: #3D8B40; color: white;">Reactivate</button>
                 </form>
@@ -193,6 +197,7 @@
       <div id="properties" class="tab-content" style="display: none">
         <h2 style="color: #1A1A1A;">All Properties</h2>
         <form action="{{ url_for('admin.bulk_action') }}" method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <select name="bulk_action">
             <option value="suspend">Suspend</option>
             <option value="notify">Notify</option>
@@ -216,6 +221,7 @@
               <td>{{ house.status }}</td>
               <td>
                 <form action="{{ url_for('admin.delete_property', house_id=house.id) }}" method="POST" style="display: inline;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <button type="submit">Remove</button>
                 </form>
                 <button onclick="showPropertyDetails('{{ house.id }}')">View</button>
