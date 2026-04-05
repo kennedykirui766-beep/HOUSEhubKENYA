@@ -3,8 +3,24 @@
 {% block content %}
 <div class="admin-container">
   <!-- Use the global sidebar from base.html — removed the legacy admin left panel -->
+  <style>
+    /* Ensure admin pages align with global sidebar on wide screens */
+    @media (min-width: 992px) {
+      .admin-main {
+        margin-left: calc(var(--sidebar-width) + 1rem);
+        max-width: calc(100% - var(--sidebar-width) - 1rem);
+      }
+    }
+    @media (max-width: 991px) {
+      .admin-main {
+        margin-left: 0;
+        max-width: 100%;
+      }
+    }
+  </style>
+
   <!-- Main Content -->
-  <main class="admin-main" style="margin-left: 0;">
+  <main class="admin-main">
     <h1 style="color: #3D8B40;">Admin Dashboard</h1>
     <p>Manage users, properties, and platform operations.</p>
 
