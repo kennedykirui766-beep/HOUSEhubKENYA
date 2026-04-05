@@ -228,6 +228,11 @@ def create_app():
             # otherwise show maintenance page
             return render_template('maintenance.html'), 503
         except Exception as e:
+            # Rollback any failed transaction so subsequent queries are not blocked
+            try:
+                db.session.rollback()
+            except Exception:
+                pass
             app.logger.error(f"Error checking maintenance mode: {e}")
             # If admin started impersonation, prevent state-changing requests (read-only impersonation)
             if session.get('is_impersonating'):

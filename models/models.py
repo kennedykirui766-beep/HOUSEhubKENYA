@@ -463,15 +463,30 @@ class SystemSetting(db.Model):
 
     @staticmethod
     def get(key, default=None):
-        s = SystemSetting.query.filter_by(key=key).first()
-        return s.value if s else default
+        try:
+            s = SystemSetting.query.filter_by(key=key).first()
+            return s.value if s else default
+        except Exception:
+            # If the table doesn't exist or DB is in an error state, rollback and return default
+            try:
+                db.session.rollback()
+            except Exception:
+                pass
+            return default
 
     @staticmethod
     def set(key, value):
-        s = SystemSetting.query.filter_by(key=key).first()
-        if not s:
-            s = SystemSetting(key=key, value=value)
-            db.session.add(s)
-        else:
-            s.value = value
-        db.session.commit()
+        try:
+            s = SystemSetting.query.filter_by(key=key).first()
+            if not s:
+                s = SystemSetting(key=key, value=value)
+                db.session.add(s)
+            else:
+                s.value = value
+            db.session.commit()
+        except Exception:
+            try:
+                db.session.rollback()
+            except Exception:
+                pass
+            raise
