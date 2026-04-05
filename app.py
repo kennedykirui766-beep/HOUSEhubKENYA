@@ -7,12 +7,12 @@ load_dotenv()
 if os.environ.get("USE_EVENTLET") == "true":
     import eventlet
     eventlet.monkey_patch()
-from flask import Flask, redirect, url_for, flash, render_template, request
+from flask import Flask, redirect, url_for, flash, render_template, request, session
 from config import Config
 from extensions import db, migrate, login_manager, csrf
 from flask_socketio import SocketIO
 from flask_cors import CORS
-from models.models import User, House, ChatMessage, SupportTicket
+from models.models import User, House, ChatMessage, SupportTicket, SystemSetting
 from flask_login import login_required, current_user
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
@@ -24,8 +24,7 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     
-    # Ensure critical configurations are set
-    app.config['SECRET_KEY'] = app.config.get('SECRET_KEY', 'your-secure-secret-key')
+    # Ensure critical configurations are set. Secret values must be provided via environment or Config.
     app.config['SQLALCHEMY_DATABASE_URI'] = (
         app.config.get('SQLALCHEMY_DATABASE_URI')
         or os.environ.get('DATABASE_URL')
@@ -191,6 +190,51 @@ def create_app():
             logger.warning(f"Unrecognized role for user {current_user.id}: {role}")
             flash("Unrecognized role. Contact system administrator.", "danger")
             return redirect(url_for('auth.logout'))
+
+    # --- Maintenance mode enforcement ---
+    @app.before_request
+    def check_maintenance():
+        # Allow static, socket, and admin endpoints for admins.
+        try:
+            mode = SystemSetting.get('maintenance_mode', '0') == '1'
+            start = SystemSetting.get('maintenance_start', '')
+            end = SystemSetting.get('maintenance_end', '')
+            scheduled = False
+            if start and end:
+                try:
+                    sdt = datetime.fromisoformat(start)
+                    edt = datetime.fromisoformat(end)
+                    now_dt = datetime.now()
+                    if sdt <= now_dt <= edt:
+                        scheduled = True
+                except Exception:
+                    scheduled = False
+
+            if not (mode or scheduled):
+                return None
+
+            # allow admins to access site
+            if current_user.is_authenticated and is_approved_admin(current_user):
+                return None
+
+            # allow access to static assets and auth endpoints
+            if request.path.startswith('/static') or request.endpoint in ('auth.login', 'auth.signup', 'auth.semantic_admin_entry'):
+                return None
+
+            # admin blueprint should still be accessible to admins
+            if request.endpoint and str(request.endpoint).startswith('admin.'):
+                return None
+
+            # otherwise show maintenance page
+            return render_template('maintenance.html'), 503
+        except Exception as e:
+            app.logger.error(f"Error checking maintenance mode: {e}")
+            # If admin started impersonation, prevent state-changing requests (read-only impersonation)
+            if session.get('is_impersonating'):
+                if request.method not in ('GET', 'HEAD', 'OPTIONS') and request.endpoint not in ('admin.stop_impersonate', 'auth.logout'):
+                    return ("Action disabled while impersonating. Stop impersonation to make changes.", 403)
+
+            return None
 
     return app, socketio
 

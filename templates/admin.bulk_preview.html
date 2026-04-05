@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Bulk Action Preview{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Bulk Action Preview</h2>
+  <p>Review the proposed changes below. This is a dry-run: no database changes have been made.</p>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name / Title</th>
+        <th>Planned Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for it in items %}
+      <tr>
+        <td>{{ it.id }}</td>
+        <td>{{ it.username or it.title or '-' }}</td>
+        <td>{{ it.action }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <form method="POST" action="{{ url_for('admin.bulk_action') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="action" value="{{ action }}">
+    {% for it in items %}
+      <input type="hidden" name="ids" value="{{ it.id }}">
+    {% endfor %}
+    <input type="hidden" name="confirm" value="{{ confirm_mode or 'soft' }}">
+    <button type="submit" class="btn btn-danger">Execute These Changes</button>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary ms-2">Cancel</a>
+  </form>
+</div>
+{% endblock %}

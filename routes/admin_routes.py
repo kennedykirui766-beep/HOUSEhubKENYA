@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, request, url_for, flash, session
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, login_user, logout_user
 from sqlalchemy import inspect
 import logging
 from models.models import User, House, SystemUpdateSubscriber, SystemSetting
@@ -454,6 +454,19 @@ def bulk_action():
     if action == "delete_users":
         # require explicit confirmation for hard delete
         confirm_mode = request.form.get('confirm')
+        dry_run = request.form.get('dry_run') == '1'
+        preview = []
+        for user_id in ids:
+            user = User.query.get(user_id)
+            if not user:
+                continue
+            if confirm_mode == 'hard':
+                preview.append({'id': user.id, 'username': user.username, 'action': 'permanently delete'})
+            else:
+                preview.append({'id': user.id, 'username': user.username, 'action': 'soft-deactivate'})
+
+        if dry_run:
+            return render_template('admin.bulk_preview.html', items=preview, action=action, confirm_mode=confirm_mode)
         deleted = 0
         for user_id in ids:
             user = User.query.get(user_id)
@@ -472,6 +485,19 @@ def bulk_action():
 
     elif action == "delete_properties":
         confirm_mode = request.form.get('confirm')
+        dry_run = request.form.get('dry_run') == '1'
+        preview = []
+        for house_id in ids:
+            house = House.query.get(house_id)
+            if not house:
+                continue
+            if confirm_mode == 'hard':
+                preview.append({'id': house.id, 'title': getattr(house, 'title', str(house.id)), 'action': 'permanently delete'})
+            else:
+                preview.append({'id': house.id, 'title': getattr(house, 'title', str(house.id)), 'action': 'mark unavailable'})
+
+        if dry_run:
+            return render_template('admin.bulk_preview.html', items=preview, action=action, confirm_mode=confirm_mode)
         processed = 0
         for house_id in ids:
             house = House.query.get(house_id)
@@ -526,6 +552,50 @@ def user_action(user_id):
         flash("Invalid user action.", "danger")
 
     return redirect(url_for('admin.manage_users'))
+
+
+# --- Impersonation (read-only) ---
+@admin_bp.route('/impersonate/<int:user_id>', methods=['POST'])
+@login_required
+def impersonate(user_id):
+    if not is_approved_admin(current_user):
+        flash('Access denied.', 'danger')
+        return redirect(url_for('admin.dashboard'))
+
+    target = User.query.get_or_404(user_id)
+    if target.id == current_user.id:
+        flash('You cannot impersonate yourself.', 'warning')
+        return redirect(url_for('admin.manage_users'))
+
+    # Save admin id so we can return to it later
+    session['admin_id'] = current_user.id
+    session['is_impersonating'] = True
+    # Remove admin entry token to avoid accidental admin area access during impersonation
+    session.pop('admin_entry_granted', None)
+
+    login_user(target)
+    flash(f"Now impersonating {getattr(target, 'username', target.id)} (read-only).", 'info')
+    return redirect(url_for('main.index'))
+
+
+@admin_bp.route('/stop_impersonate', methods=['POST'])
+@login_required
+def stop_impersonate():
+    admin_id = session.pop('admin_id', None)
+    session.pop('is_impersonating', None)
+    # Restore admin session if possible
+    if admin_id:
+        admin = User.query.get(admin_id)
+        if admin:
+            login_user(admin)
+            session['admin_entry_granted'] = True
+            flash('Stopped impersonation. You are back as admin.', 'success')
+            return redirect(url_for('admin.dashboard'))
+
+    # Fallback: log out
+    logout_user()
+    flash('Stopped impersonation. Please sign in.', 'info')
+    return redirect(url_for('auth.login'))
 
 # --- Export Reports ---
 @admin_bp.route('/export_reports')

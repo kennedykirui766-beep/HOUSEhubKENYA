@@ -27,25 +27,34 @@
     const btnCancel = document.getElementById('confirm-modal-cancel');
     const btnConfirm = document.getElementById('confirm-modal-confirm');
 
-    window.confirmFormSubmission = function(formId, message="Are you sure?"){
+    window.confirmFormSubmission = function(formId, message="Are you sure?", options){
       activeForm = document.getElementById(formId);
       if(!activeForm) return false;
       title.textContent = 'Confirm Action';
       msg.textContent = message;
       hardCheckbox.checked = false;
+      // support hiding the hard-delete checkbox for certain flows (dry-run preview)
+      try{
+        if(options && options.hideHard){
+          hardCheckbox.style.display = 'none';
+        } else {
+          hardCheckbox.style.display = 'block';
+        }
+      } catch(e){}
       modal.style.display = 'block';
     }
 
-    btnCancel.addEventListener('click', function(){ modal.style.display = 'none'; activeForm = null; });
+    btnCancel.addEventListener('click', function(){ modal.style.display = 'none'; activeForm = null; hardCheckbox.style.display = 'block'; });
 
     btnConfirm.addEventListener('click', function(){
-      if(!activeForm) { modal.style.display = 'none'; return; }
+      if(!activeForm) { modal.style.display = 'none'; hardCheckbox.style.display = 'block'; return; }
       const hard = hardCheckbox.checked;
       const confirmInput = activeForm.querySelector("input[name='confirm']");
       if(confirmInput){ confirmInput.value = hard ? 'hard' : 'soft'; }
       modal.style.display = 'none';
       activeForm.submit();
       activeForm = null;
+      hardCheckbox.style.display = 'block';
     });
 
     window.closeConfirmModal = function(){ modal.style.display = 'none'; activeForm = null; }
