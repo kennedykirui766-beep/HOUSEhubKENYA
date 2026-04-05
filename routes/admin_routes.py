@@ -81,7 +81,8 @@ def dashboard():
 @admin_bp.route('/system_settings')
 @login_required
 def system_settings():
-    return render_template('admin.system_settings')
+    # Render the existing platform settings template for system settings
+    return render_template('platform_settings.html')
 
 @admin_bp.route('/manage_users')
 @login_required

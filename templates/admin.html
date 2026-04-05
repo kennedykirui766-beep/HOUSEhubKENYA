@@ -2,47 +2,9 @@
 {% block title %}Admin Dashboard{% endblock %}
 {% block content %}
 <div class="admin-container">
-  <!-- Sidebar -->
-  <aside class="admin-sidebar">
-    <h2>Admin Panel</h2>
-    <ul>
-      <li><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
-      <li>
-        <a href="#" class="dropdown-toggle" data-target="sub-menu-users">Manage Users</a>
-        <ul class="sub-menu" id="sub-menu-users">
-          <li><a href="#" onclick="showTab('users')">Users</a></li>
-        </ul>
-      </li>
-      <li>
-        <a href="#" class="dropdown-toggle" data-target="sub-menu-properties">Manage Properties</a>
-        <ul class="sub-menu" id="sub-menu-properties">
-          <li><a href="#" onclick="showTab('properties')">Properties</a></li>
-        </ul>
-      </li>
-      <li>
-        <a href="#" class="dropdown-toggle" data-target="sub-menu-reports">Reports</a>
-        <ul class="sub-menu" id="sub-menu-reports">
-          <li><a href="#" onclick="showTab('reports')">Reports</a></li>
-        </ul>
-      </li>
-      <li><a href="{{ url_for('admin.platform_settings') }}" class="btn btn-secondary">Platform Settings</a></li>
-      <li><a href="{{ url_for('auth.security_settings') }}" class="btn btn-secondary">Security Settings</a></li>
-      <li><a href="{{ url_for('auth.support') }}" class="btn btn-help">Need Help?</a></li>
-      <li><a href="{{ url_for('auth.profile') }}">Profile</a></li>
-      <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
-    </ul>
-    <aside class="tips-sidebar">
-      <h3>Admin Tips</h3>
-      <ul>
-        <li>Use filters to manage large user bases.</li>
-        <li>Monitor user activity regularly.</li>
-      </ul>
-      <button class="toggle-tips">Toggle Tips</button>
-    </aside>
-  </aside>
-
+  <!-- Use the global sidebar from base.html — removed the legacy admin left panel -->
   <!-- Main Content -->
-  <main class="admin-main">
+  <main class="admin-main" style="margin-left: 0;">
     <h1 style="color: #3D8B40;">Admin Dashboard</h1>
     <p>Manage users, properties, and platform operations.</p>
 
