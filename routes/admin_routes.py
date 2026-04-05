@@ -313,6 +313,78 @@ def delete_role(role_id):
     flash('Role deleted.', 'success')
     return redirect(url_for('admin.roles'))
 
+
+# --- Permission management routes ---
+@admin_bp.route('/permissions')
+@login_required
+def permissions():
+    from sqlalchemy import inspect
+    from models.models import Permission
+    # seed default permissions if none exist
+    if not inspect(db.engine).has_table('permission'):
+        db.create_all()
+    if Permission.query.count() == 0:
+        defaults = [
+            ('manage_users', 'Create/Edit/Delete users'),
+            ('manage_properties', 'Create/Edit/Delete properties'),
+            ('view_reports', 'View reports and exports'),
+            ('manage_roles', 'Create/Edit/Delete roles and permissions'),
+            ('download_audit_log', 'Download audit logs'),
+            ('send_announcements', 'Send platform announcements')
+        ]
+        for name, desc in defaults:
+            db.session.add(Permission(name=name, description=desc))
+        db.session.commit()
+
+    permissions = Permission.query.order_by(Permission.name).all()
+    return render_template('admin.permissions.html', permissions=permissions)
+
+
+@admin_bp.route('/permissions/create', methods=['GET', 'POST'])
+@login_required
+def create_permission():
+    from models.models import Permission
+    if request.method == 'POST':
+        name = (request.form.get('name') or '').strip()
+        description = (request.form.get('description') or '').strip()
+        if not name:
+            flash('Permission name is required.', 'danger')
+            return redirect(url_for('admin.permissions'))
+        if Permission.query.filter_by(name=name).first():
+            flash('Permission already exists.', 'danger')
+            return redirect(url_for('admin.permissions'))
+        p = Permission(name=name, description=description)
+        db.session.add(p)
+        db.session.commit()
+        flash('Permission created.', 'success')
+        return redirect(url_for('admin.permissions'))
+    return render_template('admin.permission_form.html', permission=None)
+
+
+@admin_bp.route('/permissions/<int:perm_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_permission(perm_id):
+    from models.models import Permission
+    p = Permission.query.get_or_404(perm_id)
+    if request.method == 'POST':
+        p.name = (request.form.get('name') or '').strip()
+        p.description = (request.form.get('description') or '').strip()
+        db.session.commit()
+        flash('Permission updated.', 'success')
+        return redirect(url_for('admin.permissions'))
+    return render_template('admin.permission_form.html', permission=p)
+
+
+@admin_bp.route('/permissions/<int:perm_id>/delete', methods=['POST'])
+@login_required
+def delete_permission(perm_id):
+    from models.models import Permission
+    p = Permission.query.get_or_404(perm_id)
+    db.session.delete(p)
+    db.session.commit()
+    flash('Permission deleted.', 'success')
+    return redirect(url_for('admin.permissions'))
+
         sent = 0
         failed = 0
         for sub in recipients:

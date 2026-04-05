@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Manage Permissions{% endblock %}
+{% block content %}
+<div class="content-card">
+  <div class="content-card-header">
+    <h3 class="content-card-title">Permissions</h3>
+    <a href="{{ url_for('admin.create_permission') }}" class="btn btn-primary">Create Permission</a>
+  </div>
+  <div class="content-card-body">
+    <table class="custom-table">
+      <thead>
+        <tr><th>Name</th><th>Description</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for p in permissions %}
+        <tr>
+          <td>{{ p.name }}</td>
+          <td>{{ p.description or '-' }}</td>
+          <td>
+            <a href="{{ url_for('admin.edit_permission', perm_id=p.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+            <form action="{{ url_for('admin.delete_permission', perm_id=p.id) }}" method="POST" style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this permission?')">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
