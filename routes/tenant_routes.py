@@ -11,7 +11,7 @@ from flask_login import login_required, current_user
 import pyotp
 import qrcode as qr_code
 from models.models import Booking, MaintenanceRequest, Message, House, Notification, Payment, User
-from extensions import db
+from extensions import db, csrf
 from models.models import Event
 from werkzeug.utils import secure_filename
 
@@ -118,6 +118,7 @@ def save_dashboard_order():
 
 
 # Make a booking for a house
+@csrf.exempt
 @tenant_bp.route('/bookings/<int:house_id>')
 @login_required
 def bookings(house_id):
