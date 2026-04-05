@@ -508,8 +508,14 @@ endblock %} {% block content %}
       </a>
 
       <a
+<<<<<<< HEAD
         href="{{ url_for('service_provider.delete_account') }}"
         class="action-item"
+=======
+        href="#"
+        data-delete-url="{{ url_for('service_provider.delete_account') }}"
+        class="action-item js-delete-account"
+>>>>>>> 125729340ccf7d4c7f937acd6c30539769345b25
       >
         <div
           class="action-icon"

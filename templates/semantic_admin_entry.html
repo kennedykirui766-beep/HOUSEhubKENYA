@@ -26,6 +26,7 @@
         </ol>
       </div>
 
+<<<<<<< HEAD
       <form method="POST" action="{{ url_for('auth.semantic_admin_continue') }}" class="d-flex flex-wrap gap-2">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn btn-light btn-lg fw-semibold">
@@ -34,6 +35,20 @@
         <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">
           Return to regular login
         </a>
+=======
+      <form method="POST" action="{{ url_for('auth.semantic_admin_continue') }}" class="d-flex flex-column gap-3">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="mb-2">
+          <label class="form-label text-white">Set admin password (optional)</label>
+          <input type="password" name="admin_password" class="form-control" placeholder="Enter a new admin password">
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-light btn-lg fw-semibold">Continue to admin login</button>
+          <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">Return to regular login</a>
+        </div>
+>>>>>>> 125729340ccf7d4c7f937acd6c30539769345b25
       </form>
     </div>
   </div>
