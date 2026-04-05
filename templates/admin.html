@@ -313,6 +313,11 @@
       <h2>Quick Links</h2>
       <a href="{{ url_for('admin.manage_users') }}" class="btn btn-primary" style="background: #3D8B40; color: white;">Manage Users</a>
       <a href="{{ url_for('admin.export_reports') }}" class="btn btn-primary" style="background: #3D8B40; color: white;">View Reports</a>
+      <form action="{{ url_for('admin.export_financial') }}" method="GET" style="display:inline-block; margin-left:8px;">
+        <input type="hidden" name="start" id="financial-start">
+        <input type="hidden" name="end" id="financial-end">
+        <button type="button" class="btn btn-outline-secondary" style="margin-left:8px;" onclick="openFinancialExport()">Download Financial CSV</button>
+      </form>
     </section>
   </main>
 
@@ -460,6 +465,16 @@
   function showTab(tabId) {
     document.querySelectorAll(".tab-content").forEach(tab => tab.style.display = "none");
     document.getElementById(tabId).style.display = "block";
+  }
+
+  function openFinancialExport(){
+    // prompt for optional date range using simple prompts (can be replaced with modal later)
+    const start = prompt('Start date (YYYY-MM-DD) or leave blank for all:');
+    const end = prompt('End date (YYYY-MM-DD) or leave blank for all:');
+    const url = new URL(window.location.origin + '{{ url_for("admin.export_financial") }}');
+    if(start) url.searchParams.set('start', start);
+    if(end) url.searchParams.set('end', end);
+    window.open(url.toString(), '_blank');
   }
 
   function toggleAllCheckboxes(source) {

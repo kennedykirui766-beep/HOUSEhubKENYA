@@ -605,6 +605,48 @@ def export_reports():
     flash("Reports exported successfully (placeholder).", "success")
     return redirect(url_for('admin.view_reports'))
 
+
+@admin_bp.route('/export_financial')
+@login_required
+def export_financial():
+    # Export payments as CSV. Accept optional start/end ISO dates as query params.
+    from models.models import Payment
+    import csv, io
+
+    start = request.args.get('start')
+    end = request.args.get('end')
+
+    q = Payment.query
+    if start:
+        try:
+            from datetime import datetime
+            sdt = datetime.fromisoformat(start)
+            q = q.filter(Payment.date >= sdt)
+        except Exception:
+            pass
+    if end:
+        try:
+            from datetime import datetime
+            edt = datetime.fromisoformat(end)
+            q = q.filter(Payment.date <= edt)
+        except Exception:
+            pass
+
+    payments = q.order_by(Payment.date.desc()).all()
+
+    si = io.StringIO()
+    cw = csv.writer(si)
+    cw.writerow(['id', 'tenant_id', 'tenant_email', 'amount', 'date', 'reference', 'status'])
+    for p in payments:
+        tenant_email = p.tenant.email if getattr(p, 'tenant', None) else ''
+        cw.writerow([p.id, p.tenant_id, tenant_email, float(p.amount or 0), p.date.isoformat() if p.date else '', getattr(p, 'reference', ''), getattr(p, 'status', '')])
+
+    output = si.getvalue().encode('utf-8')
+    return (output, 200, {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': 'attachment; filename="financial_reports.csv"'
+    })
+
 # --- Download Audit Log ---
 @admin_bp.route('/download_audit_log')
 @login_required
