@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, request, url_for, flash,
 from flask_login import login_required, current_user
 from sqlalchemy import inspect
 import logging
-from models.models import User, House, SystemUpdateSubscriber
+from models.models import User, House, SystemUpdateSubscriber, SystemSetting
 from extensions import db, csrf
 from utils_delete import delete_user_and_dependents
 
@@ -156,10 +156,38 @@ def view_reports():
 @admin_bp.route('/platform_settings',  methods=['GET', 'POST'])
 @login_required
 def platform_settings():
+    # ensure settings table exists
+    if not inspect(db.engine).has_table('system_setting'):
+        db.create_all()
+
+    if request.method == 'POST':
+        # Read values from form
+        max_listings = request.form.get('max_listings', '').strip()
+        default_status = request.form.get('default_status', 'active')
+        notification_enabled = 'notification_enabled' in request.form
+        maintenance_mode = 'maintenance_mode' in request.form
+        maintenance_start = request.form.get('maintenance_start') or ''
+        maintenance_end = request.form.get('maintenance_end') or ''
+
+        # Persist
+        SystemSetting.set('max_listings', str(max_listings))
+        SystemSetting.set('default_status', default_status)
+        SystemSetting.set('notification_enabled', '1' if notification_enabled else '0')
+        SystemSetting.set('maintenance_mode', '1' if maintenance_mode else '0')
+        SystemSetting.set('maintenance_start', maintenance_start)
+        SystemSetting.set('maintenance_end', maintenance_end)
+
+        flash('Platform settings saved.', 'success')
+        return redirect(url_for('admin.platform_settings'))
+
+    # GET: build settings dict from DB
     settings = {
-        "language": "English",
-        "theme": "Light",
-        "maintenance_mode": False
+        'max_listings': SystemSetting.get('max_listings', '10'),
+        'default_status': SystemSetting.get('default_status', 'active'),
+        'notification_enabled': SystemSetting.get('notification_enabled', '1') == '1',
+        'maintenance_mode': SystemSetting.get('maintenance_mode', '0') == '1',
+        'maintenance_start': SystemSetting.get('maintenance_start', ''),
+        'maintenance_end': SystemSetting.get('maintenance_end', ''),
     }
     return render_template('platform_settings.html', settings=settings)
 

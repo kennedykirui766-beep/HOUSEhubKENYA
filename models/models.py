@@ -451,3 +451,27 @@ class SystemUpdateSubscriber(db.Model):
     is_active = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+
+class SystemSetting(db.Model):
+    """Simple key/value store for platform settings, including maintenance mode."""
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(100), unique=True, nullable=False, index=True)
+    value = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    @staticmethod
+    def get(key, default=None):
+        s = SystemSetting.query.filter_by(key=key).first()
+        return s.value if s else default
+
+    @staticmethod
+    def set(key, value):
+        s = SystemSetting.query.filter_by(key=key).first()
+        if not s:
+            s = SystemSetting(key=key, value=value)
+            db.session.add(s)
+        else:
+            s.value = value
+        db.session.commit()

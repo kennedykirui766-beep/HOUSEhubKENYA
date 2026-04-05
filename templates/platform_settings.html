@@ -86,6 +86,23 @@
                     Enable Notifications
                 </label>
             </div>
+
+            <hr>
+            <h4>Maintenance Mode</h4>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="maintenance_mode" id="maintenance_mode" {% if settings.maintenance_mode %}checked{% endif %}>
+                    Enable Maintenance Mode
+                </label>
+            </div>
+            <div class="form-group">
+                <label for="maintenance_start">Start (local):</label>
+                <input type="datetime-local" id="maintenance_start" name="maintenance_start" value="{{ settings.maintenance_start }}">
+            </div>
+            <div class="form-group">
+                <label for="maintenance_end">End (local):</label>
+                <input type="datetime-local" id="maintenance_end" name="maintenance_end" value="{{ settings.maintenance_end }}">
+            </div>
             <button type="submit">Save Changes</button>
         </form>
         <p style="text-align: center;">
