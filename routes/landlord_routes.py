@@ -528,10 +528,7 @@ def delete_account():
         back_url=url_for('landlord.settings'),
         post_url=url_for('landlord.delete_account')
     )
-<<<<<<< HEAD
-=======
     
->>>>>>> adb1e5d (Landlord: fix messages view, add missing templates for send_message and tenants)
 
 
 # ---------------- Profile ----------------
