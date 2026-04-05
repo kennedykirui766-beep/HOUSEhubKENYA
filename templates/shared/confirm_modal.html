@@ -1,0 +1,62 @@
+<div class="modal" id="confirm-modal" style="display:none;">
+  <div class="modal-content">
+    <h3 id="confirm-modal-title">Confirm Action</h3>
+    <p id="confirm-modal-message">Are you sure you want to proceed?</p>
+    <label style="display:block;margin:8px 0;"><input type="checkbox" id="confirm-modal-hard"> Permanently delete (hard)</label>
+    <div style="margin-top:12px;">
+      <button id="confirm-modal-cancel" class="btn">Cancel</button>
+      <button id="confirm-modal-confirm" class="btn btn-danger">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  #confirm-modal { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5); z-index: 1000; }
+  #confirm-modal .modal-content { background: #fff; margin: 10% auto; padding: 20px; width: 420px; border-radius: 6px; }
+  #confirm-modal .btn { padding: 6px 12px; margin-left: 8px; }
+  #confirm-modal .btn-danger { background: #B22222; color: white; }
+</style>
+
+<script>
+  (function(){
+    let activeForm = null;
+    const modal = document.getElementById('confirm-modal');
+    const msg = document.getElementById('confirm-modal-message');
+    const title = document.getElementById('confirm-modal-title');
+    const hardCheckbox = document.getElementById('confirm-modal-hard');
+    const btnCancel = document.getElementById('confirm-modal-cancel');
+    const btnConfirm = document.getElementById('confirm-modal-confirm');
+
+    window.confirmFormSubmission = function(formId, message="Are you sure?", options){
+      activeForm = document.getElementById(formId);
+      if(!activeForm) return false;
+      title.textContent = 'Confirm Action';
+      msg.textContent = message;
+      hardCheckbox.checked = false;
+      // support hiding the hard-delete checkbox for certain flows (dry-run preview)
+      try{
+        if(options && options.hideHard){
+          hardCheckbox.style.display = 'none';
+        } else {
+          hardCheckbox.style.display = 'block';
+        }
+      } catch(e){}
+      modal.style.display = 'block';
+    }
+
+    btnCancel.addEventListener('click', function(){ modal.style.display = 'none'; activeForm = null; hardCheckbox.style.display = 'block'; });
+
+    btnConfirm.addEventListener('click', function(){
+      if(!activeForm) { modal.style.display = 'none'; hardCheckbox.style.display = 'block'; return; }
+      const hard = hardCheckbox.checked;
+      const confirmInput = activeForm.querySelector("input[name='confirm']");
+      if(confirmInput){ confirmInput.value = hard ? 'hard' : 'soft'; }
+      modal.style.display = 'none';
+      activeForm.submit();
+      activeForm = null;
+      hardCheckbox.style.display = 'block';
+    });
+
+    window.closeConfirmModal = function(){ modal.style.display = 'none'; activeForm = null; }
+  })();
+</script>

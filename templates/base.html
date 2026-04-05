@@ -1613,9 +1613,11 @@
                 {% elif current_user.role.lower() == 'admin' %}
                 <li class="nav-item"><a href="{{ url_for('admin.dashboard') }}" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('admin.manage_users') }}" class="nav-link"><i class="fas fa-users-cog"></i> <span>Manage Users</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('admin.roles') }}" class="nav-link"><i class="fas fa-user-shield"></i> <span>Manage Roles</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('admin.permissions') }}" class="nav-link"><i class="fas fa-key"></i> <span>Manage Permissions</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('admin.system_settings') }}" class="nav-link"><i class="fas fa-cogs"></i> <span>System Settings</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('admin.view_reports') }}" class="nav-link"><i class="fas fa-chart-line"></i> <span>Reports</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('admin.audit_logs') }}" class="nav-link"><i class="fas fa-history"></i> <span>Audit Logs</span></a></li>
+                <li class="nav-item"><a href="{{ url_for('admin.download_audit_log') }}" class="nav-link"><i class="fas fa-history"></i> <span>Audit Logs</span></a></li>
 
                 {% elif current_user.role.lower() == 'service' %}
                 <li class="nav-item"><a href="{{ url_for('service_provider.dashboard') }}" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>

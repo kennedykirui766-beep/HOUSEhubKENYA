@@ -125,7 +125,6 @@ def save_dashboard_order():
 
 
 # Make a booking for a house
-@csrf.exempt
 @tenant_bp.route('/bookings/<int:house_id>')
 @login_required
 def bookings(house_id):

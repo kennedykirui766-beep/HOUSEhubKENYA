@@ -103,7 +103,6 @@ def dashboard():
         earnings_data=earnings_data,
         notifications=notifications
     )
-@csrf.exempt
 @service_provider_bp.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():

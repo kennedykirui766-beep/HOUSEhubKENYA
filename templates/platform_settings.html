@@ -71,20 +71,37 @@
         <form method="POST" action="">
             <div class="form-group">
                 <label for="max_listings">Maximum Listings:</label>
-                <input type="number" id="max_listings" name="max_listings" value="{{ settings.max_listings }}" min="1" required>
+                <input type="number" id="max_listings" name="max_listings" value="{{ settings.max_listings if settings is defined else 10 }}" min="1" required>
             </div>
             <div class="form-group">
                 <label for="default_status">Default House Status:</label>
                 <select id="default_status" name="default_status">
-                    <option value="active" {% if settings.default_status == 'active' %}selected{% endif %}>Active</option>
-                    <option value="inactive" {% if settings.default_status == 'inactive' %}selected{% endif %}>Inactive</option>
+                    <option value="active" {% if settings is defined and settings.default_status == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if settings is defined and settings.default_status == 'inactive' %}selected{% endif %}>Inactive</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>
-                    <input type="checkbox" name="notification_enabled" {% if settings.notification_enabled %}checked{% endif %}>
+                    <input type="checkbox" name="notification_enabled" {% if settings is defined and settings.notification_enabled %}checked{% endif %}>
                     Enable Notifications
                 </label>
+            </div>
+
+            <hr>
+            <h4>Maintenance Mode</h4>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="maintenance_mode" id="maintenance_mode" {% if settings is defined and settings.maintenance_mode %}checked{% endif %}>
+                    Enable Maintenance Mode
+                </label>
+            </div>
+            <div class="form-group">
+                <label for="maintenance_start">Start (local):</label>
+                <input type="datetime-local" id="maintenance_start" name="maintenance_start" value="{{ settings.maintenance_start if settings is defined else '' }}">
+            </div>
+            <div class="form-group">
+                <label for="maintenance_end">End (local):</label>
+                <input type="datetime-local" id="maintenance_end" name="maintenance_end" value="{{ settings.maintenance_end if settings is defined else '' }}">
             </div>
             <button type="submit">Save Changes</button>
         </form>

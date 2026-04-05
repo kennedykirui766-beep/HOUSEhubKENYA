@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Reports</h2>
+  <p>Quick summary:</p>
+  <ul>
+    <li>Total users: {{ stats.total_users if stats and stats.total_users is defined else 'N/A' }}</li>
+    <li>Total properties: {{ stats.total_properties if stats and stats.total_properties is defined else 'N/A' }}</li>
+    <li>Total transactions: {{ stats.total_transactions if stats and stats.total_transactions is defined else 'N/A' }}</li>
+  </ul>
+  <a href="{{ url_for('admin.export_reports') }}" class="btn btn-primary">Back</a>
+</div>
+{% endblock %}

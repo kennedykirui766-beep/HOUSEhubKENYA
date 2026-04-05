@@ -1,8 +1,12 @@
 from flask import Blueprint, render_template, redirect, request, url_for, flash, session
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, login_user, logout_user
 from sqlalchemy import inspect
-from models.models import User, House, SystemUpdateSubscriber
+import logging
+from models.models import User, House, SystemUpdateSubscriber, SystemSetting
 from extensions import db, csrf
+from utils_delete import delete_user_and_dependents
+
+logger = logging.getLogger(__name__)
 from utils_email_2fa import send_system_update_email
 from utils_security import (
     consume_rate_limit,
@@ -77,7 +81,8 @@ def dashboard():
 @admin_bp.route('/system_settings')
 @login_required
 def system_settings():
-    return render_template('admin.system_settings')
+    # Redirect to the main platform settings handler which builds the settings context
+    return redirect(url_for('admin.platform_settings'))
 
 @admin_bp.route('/manage_users')
 @login_required
@@ -90,9 +95,28 @@ def manage_users():
 @login_required
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)
-    db.session.delete(user)
-    db.session.commit()
-    flash("User deleted.")
+
+    # Prevent self-deletion
+    if current_user.id == user.id:
+        flash("You cannot delete your own admin account.", "danger")
+        return redirect(url_for('admin.dashboard'))
+
+    # If 'hard' provided, perform full deletion, else soft-deactivate
+    hard = request.form.get('confirm') == 'hard'
+    if hard:
+        success, error = delete_user_and_dependents(user)
+        if success:
+            logger.info(f"Admin {current_user.id} hard-deleted user {user_id}")
+            flash("User permanently deleted.", "success")
+        else:
+            flash(f"Failed to delete user: {error}", "danger")
+    else:
+        # Soft-delete / deactivate
+        setattr(user, 'is_active', False)
+        db.session.commit()
+        logger.info(f"Admin {current_user.id} deactivated user {user_id}")
+        flash("User deactivated (soft-delete).", "success")
+
     return redirect(url_for('admin.dashboard'))
 
 # --- Manage Properties ---
@@ -107,9 +131,18 @@ def manage_properties():
 @login_required
 def delete_property(house_id):
     house = House.query.get_or_404(house_id)
-    db.session.delete(house)
-    db.session.commit()
-    flash("Property removed.")
+    # If 'hard' confirmation provided, delete; otherwise mark unavailable
+    hard = request.form.get('confirm') == 'hard'
+    if hard:
+        db.session.delete(house)
+        db.session.commit()
+        logger.info(f"Admin {current_user.id} hard-deleted property {house_id}")
+        flash("Property permanently removed.")
+    else:
+        house.available = False
+        db.session.commit()
+        logger.info(f"Admin {current_user.id} marked property {house_id} unavailable (soft)")
+        flash("Property marked unavailable.")
     return redirect(url_for('admin.dashboard'))
 
 # --- Reports ---
@@ -123,10 +156,38 @@ def view_reports():
 @admin_bp.route('/platform_settings',  methods=['GET', 'POST'])
 @login_required
 def platform_settings():
+    # ensure settings table exists
+    if not inspect(db.engine).has_table('system_setting'):
+        db.create_all()
+
+    if request.method == 'POST':
+        # Read values from form
+        max_listings = request.form.get('max_listings', '').strip()
+        default_status = request.form.get('default_status', 'active')
+        notification_enabled = 'notification_enabled' in request.form
+        maintenance_mode = 'maintenance_mode' in request.form
+        maintenance_start = request.form.get('maintenance_start') or ''
+        maintenance_end = request.form.get('maintenance_end') or ''
+
+        # Persist
+        SystemSetting.set('max_listings', str(max_listings))
+        SystemSetting.set('default_status', default_status)
+        SystemSetting.set('notification_enabled', '1' if notification_enabled else '0')
+        SystemSetting.set('maintenance_mode', '1' if maintenance_mode else '0')
+        SystemSetting.set('maintenance_start', maintenance_start)
+        SystemSetting.set('maintenance_end', maintenance_end)
+
+        flash('Platform settings saved.', 'success')
+        return redirect(url_for('admin.platform_settings'))
+
+    # GET: build settings dict from DB
     settings = {
-        "language": "English",
-        "theme": "Light",
-        "maintenance_mode": False
+        'max_listings': SystemSetting.get('max_listings', '10'),
+        'default_status': SystemSetting.get('default_status', 'active'),
+        'notification_enabled': SystemSetting.get('notification_enabled', '1') == '1',
+        'maintenance_mode': SystemSetting.get('maintenance_mode', '0') == '1',
+        'maintenance_start': SystemSetting.get('maintenance_start', ''),
+        'maintenance_end': SystemSetting.get('maintenance_end', ''),
     }
     return render_template('platform_settings.html', settings=settings)
 
@@ -206,6 +267,152 @@ def system_updates():
                 selected_topic=selected_topic,
             )
 
+# --- Role management routes ---
+@admin_bp.route('/roles')
+@login_required
+def roles():
+    from sqlalchemy import inspect
+    from models.models import Role, Permission
+    # ensure tables exist
+    if not inspect(db.engine).has_table('role'):
+        db.create_all()
+    roles = Role.query.order_by(Role.name).all()
+    permissions = Permission.query.order_by(Permission.name).all()
+    return render_template('admin.roles.html', roles=roles, permissions=permissions)
+
+
+@admin_bp.route('/roles/create', methods=['GET', 'POST'])
+@login_required
+def create_role():
+    from models.models import Role, Permission
+    if request.method == 'POST':
+        name = (request.form.get('name') or '').strip()
+        description = (request.form.get('description') or '').strip()
+        perm_ids = request.form.getlist('permissions')
+        if not name:
+            flash('Role name is required.', 'danger')
+            return redirect(url_for('admin.roles'))
+        if Role.query.filter_by(name=name).first():
+            flash('Role with that name already exists.', 'danger')
+            return redirect(url_for('admin.roles'))
+        role = Role(name=name, description=description)
+        for pid in perm_ids:
+            p = Permission.query.get(pid)
+            if p:
+                role.permissions.append(p)
+        db.session.add(role)
+        db.session.commit()
+        flash('Role created.', 'success')
+        return redirect(url_for('admin.roles'))
+    # GET -> show form
+    permissions = Permission.query.order_by(Permission.name).all()
+    return render_template('admin.role_form.html', permissions=permissions, role=None)
+
+
+@admin_bp.route('/roles/<int:role_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_role(role_id):
+    from models.models import Role, Permission
+    role = Role.query.get_or_404(role_id)
+    if request.method == 'POST':
+        role.name = (request.form.get('name') or '').strip()
+        role.description = (request.form.get('description') or '').strip()
+        perm_ids = request.form.getlist('permissions')
+        role.permissions = []
+        for pid in perm_ids:
+            p = Permission.query.get(pid)
+            if p:
+                role.permissions.append(p)
+        db.session.commit()
+        flash('Role updated.', 'success')
+        return redirect(url_for('admin.roles'))
+    permissions = Permission.query.order_by(Permission.name).all()
+    return render_template('admin.role_form.html', role=role, permissions=permissions)
+
+
+@admin_bp.route('/roles/<int:role_id>/delete', methods=['POST'])
+@login_required
+def delete_role(role_id):
+    from models.models import Role
+    role = Role.query.get_or_404(role_id)
+    # prevent deleting core roles maybe
+    db.session.delete(role)
+    db.session.commit()
+    flash('Role deleted.', 'success')
+    return redirect(url_for('admin.roles'))
+
+
+# --- Permission management routes ---
+@admin_bp.route('/permissions')
+@login_required
+def permissions():
+    from sqlalchemy import inspect
+    from models.models import Permission
+    # seed default permissions if none exist
+    if not inspect(db.engine).has_table('permission'):
+        db.create_all()
+    if Permission.query.count() == 0:
+        defaults = [
+            ('manage_users', 'Create/Edit/Delete users'),
+            ('manage_properties', 'Create/Edit/Delete properties'),
+            ('view_reports', 'View reports and exports'),
+            ('manage_roles', 'Create/Edit/Delete roles and permissions'),
+            ('download_audit_log', 'Download audit logs'),
+            ('send_announcements', 'Send platform announcements')
+        ]
+        for name, desc in defaults:
+            db.session.add(Permission(name=name, description=desc))
+        db.session.commit()
+
+    permissions = Permission.query.order_by(Permission.name).all()
+    return render_template('admin.permissions.html', permissions=permissions)
+
+
+@admin_bp.route('/permissions/create', methods=['GET', 'POST'])
+@login_required
+def create_permission():
+    from models.models import Permission
+    if request.method == 'POST':
+        name = (request.form.get('name') or '').strip()
+        description = (request.form.get('description') or '').strip()
+        if not name:
+            flash('Permission name is required.', 'danger')
+            return redirect(url_for('admin.permissions'))
+        if Permission.query.filter_by(name=name).first():
+            flash('Permission already exists.', 'danger')
+            return redirect(url_for('admin.permissions'))
+        p = Permission(name=name, description=description)
+        db.session.add(p)
+        db.session.commit()
+        flash('Permission created.', 'success')
+        return redirect(url_for('admin.permissions'))
+    return render_template('admin.permission_form.html', permission=None)
+
+
+@admin_bp.route('/permissions/<int:perm_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_permission(perm_id):
+    from models.models import Permission
+    p = Permission.query.get_or_404(perm_id)
+    if request.method == 'POST':
+        p.name = (request.form.get('name') or '').strip()
+        p.description = (request.form.get('description') or '').strip()
+        db.session.commit()
+        flash('Permission updated.', 'success')
+        return redirect(url_for('admin.permissions'))
+    return render_template('admin.permission_form.html', permission=p)
+
+
+@admin_bp.route('/permissions/<int:perm_id>/delete', methods=['POST'])
+@login_required
+def delete_permission(perm_id):
+    from models.models import Permission
+    p = Permission.query.get_or_404(perm_id)
+    db.session.delete(p)
+    db.session.commit()
+    flash('Permission deleted.', 'success')
+    return redirect(url_for('admin.permissions'))
+
         sent = 0
         failed = 0
         for sub in recipients:
@@ -245,20 +452,66 @@ def bulk_action():
         return redirect(url_for('admin.dashboard'))
 
     if action == "delete_users":
+        # require explicit confirmation for hard delete
+        confirm_mode = request.form.get('confirm')
+        dry_run = request.form.get('dry_run') == '1'
+        preview = []
         for user_id in ids:
             user = User.query.get(user_id)
-            if user:
-                db.session.delete(user)
+            if not user:
+                continue
+            if confirm_mode == 'hard':
+                preview.append({'id': user.id, 'username': user.username, 'action': 'permanently delete'})
+            else:
+                preview.append({'id': user.id, 'username': user.username, 'action': 'soft-deactivate'})
+
+        if dry_run:
+            return render_template('admin.bulk_preview.html', items=preview, action=action, confirm_mode=confirm_mode)
+        deleted = 0
+        for user_id in ids:
+            user = User.query.get(user_id)
+            if not user:
+                continue
+            if confirm_mode == 'hard':
+                success, error = delete_user_and_dependents(user)
+                if success:
+                    deleted += 1
+                    logger.info(f"Admin {current_user.id} hard-deleted user {user.id}")
+            else:
+                setattr(user, 'is_active', False)
+                deleted += 1
         db.session.commit()
-        flash(f"{len(ids)} user(s) deleted.", "success")
+        flash(f"{deleted} user(s) processed (soft-deactivate or hard-delete).", "success")
 
     elif action == "delete_properties":
+        confirm_mode = request.form.get('confirm')
+        dry_run = request.form.get('dry_run') == '1'
+        preview = []
         for house_id in ids:
             house = House.query.get(house_id)
-            if house:
+            if not house:
+                continue
+            if confirm_mode == 'hard':
+                preview.append({'id': house.id, 'title': getattr(house, 'title', str(house.id)), 'action': 'permanently delete'})
+            else:
+                preview.append({'id': house.id, 'title': getattr(house, 'title', str(house.id)), 'action': 'mark unavailable'})
+
+        if dry_run:
+            return render_template('admin.bulk_preview.html', items=preview, action=action, confirm_mode=confirm_mode)
+        processed = 0
+        for house_id in ids:
+            house = House.query.get(house_id)
+            if not house:
+                continue
+            if confirm_mode == 'hard':
                 db.session.delete(house)
+                logger.info(f"Admin {current_user.id} hard-deleted property {house.id}")
+            else:
+                house.available = False
+                logger.info(f"Admin {current_user.id} marked property {house.id} unavailable (soft)")
+            processed += 1
         db.session.commit()
-        flash(f"{len(ids)} property(ies) deleted.", "success")
+        flash(f"{processed} property(ies) processed.", "success")
 
     else:
         flash("Invalid bulk action.", "danger")
@@ -273,9 +526,17 @@ def user_action(user_id):
     user = User.query.get_or_404(user_id)
 
     if action == "delete":
-        db.session.delete(user)
-        db.session.commit()
-        flash(f"User {user.username} deleted.", "success")
+        # Prevent self-delete
+        if current_user.id == user.id:
+            flash("You cannot delete your own account.", "danger")
+            return redirect(url_for('admin.manage_users'))
+
+        success, error = delete_user_and_dependents(user)
+        if success:
+            logger.info(f"Admin {current_user.id} hard-deleted user {user.id}")
+            flash(f"User {getattr(user, 'name', user.id)} deleted.", "success")
+        else:
+            flash(f"Could not delete user: {error}", "danger")
 
     elif action == "deactivate":
         user.is_active = False
@@ -292,6 +553,50 @@ def user_action(user_id):
 
     return redirect(url_for('admin.manage_users'))
 
+
+# --- Impersonation (read-only) ---
+@admin_bp.route('/impersonate/<int:user_id>', methods=['POST'])
+@login_required
+def impersonate(user_id):
+    if not is_approved_admin(current_user):
+        flash('Access denied.', 'danger')
+        return redirect(url_for('admin.dashboard'))
+
+    target = User.query.get_or_404(user_id)
+    if target.id == current_user.id:
+        flash('You cannot impersonate yourself.', 'warning')
+        return redirect(url_for('admin.manage_users'))
+
+    # Save admin id so we can return to it later
+    session['admin_id'] = current_user.id
+    session['is_impersonating'] = True
+    # Remove admin entry token to avoid accidental admin area access during impersonation
+    session.pop('admin_entry_granted', None)
+
+    login_user(target)
+    flash(f"Now impersonating {getattr(target, 'username', target.id)} (read-only).", 'info')
+    return redirect(url_for('main.index'))
+
+
+@admin_bp.route('/stop_impersonate', methods=['POST'])
+@login_required
+def stop_impersonate():
+    admin_id = session.pop('admin_id', None)
+    session.pop('is_impersonating', None)
+    # Restore admin session if possible
+    if admin_id:
+        admin = User.query.get(admin_id)
+        if admin:
+            login_user(admin)
+            session['admin_entry_granted'] = True
+            flash('Stopped impersonation. You are back as admin.', 'success')
+            return redirect(url_for('admin.dashboard'))
+
+    # Fallback: log out
+    logout_user()
+    flash('Stopped impersonation. Please sign in.', 'info')
+    return redirect(url_for('auth.login'))
+
 # --- Export Reports ---
 @admin_bp.route('/export_reports')
 @login_required
@@ -299,6 +604,48 @@ def export_reports():
     # Placeholder: Later you can generate CSV, Excel, or PDF
     flash("Reports exported successfully (placeholder).", "success")
     return redirect(url_for('admin.view_reports'))
+
+
+@admin_bp.route('/export_financial')
+@login_required
+def export_financial():
+    # Export payments as CSV. Accept optional start/end ISO dates as query params.
+    from models.models import Payment
+    import csv, io
+
+    start = request.args.get('start')
+    end = request.args.get('end')
+
+    q = Payment.query
+    if start:
+        try:
+            from datetime import datetime
+            sdt = datetime.fromisoformat(start)
+            q = q.filter(Payment.date >= sdt)
+        except Exception:
+            pass
+    if end:
+        try:
+            from datetime import datetime
+            edt = datetime.fromisoformat(end)
+            q = q.filter(Payment.date <= edt)
+        except Exception:
+            pass
+
+    payments = q.order_by(Payment.date.desc()).all()
+
+    si = io.StringIO()
+    cw = csv.writer(si)
+    cw.writerow(['id', 'tenant_id', 'tenant_email', 'amount', 'date', 'reference', 'status'])
+    for p in payments:
+        tenant_email = p.tenant.email if getattr(p, 'tenant', None) else ''
+        cw.writerow([p.id, p.tenant_id, tenant_email, float(p.amount or 0), p.date.isoformat() if p.date else '', getattr(p, 'reference', ''), getattr(p, 'status', '')])
+
+    output = si.getvalue().encode('utf-8')
+    return (output, 200, {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': 'attachment; filename="financial_reports.csv"'
+    })
 
 # --- Download Audit Log ---
 @admin_bp.route('/download_audit_log')

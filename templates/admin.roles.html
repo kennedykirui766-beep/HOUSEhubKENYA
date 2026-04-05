@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Manage Roles{% endblock %}
+{% block content %}
+<div class="content-card">
+  <div class="content-card-header">
+    <h3 class="content-card-title">Roles</h3>
+    <a href="{{ url_for('admin.create_role') }}" class="btn btn-primary">Create Role</a>
+  </div>
+  <div class="content-card-body">
+    <table class="custom-table">
+      <thead>
+        <tr><th>Name</th><th>Description</th><th>Permissions</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for role in roles %}
+        <tr>
+          <td>{{ role.name }}</td>
+          <td>{{ role.description or '-' }}</td>
+          <td>
+            {% for p in role.permissions %}
+              <span class="status-badge status-info">{{ p.name }}</span>
+            {% else %}
+              -
+            {% endfor %}
+          </td>
+          <td>
+            <a href="{{ url_for('admin.edit_role', role_id=role.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+            <form action="{{ url_for('admin.delete_role', role_id=role.id) }}" method="POST" style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this role?')">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

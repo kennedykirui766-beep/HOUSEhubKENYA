@@ -1,0 +1,38 @@
+#!/bin/sh
+# Full pre-commit scanner
+# Skips scanning the versioned hooks directory and the installer so the
+# hook file can be versioned safely.
+STAGED=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$STAGED" ] && exit 0
+
+BLOCKED=0
+for f in $STAGED; do
+  case "$f" in
+    .githooks/*|./.githooks/*|scripts/install-git-hooks.sh|./scripts/install-git-hooks.sh)
+      continue
+      ;;
+  esac
+
+  # Block files named .env or containing .env. in their path
+  # Allow `.env.example` files (safe examples) but block other .env variants
+  echo "$f" | grep -Ei '(^|/)(\.env\.example)$' >/dev/null 2>&1 && continue
+  echo "$f" | grep -Ei '(^|/)(\.env)($|[./])' >/dev/null 2>&1 && {
+    echo "Pre-commit blocked: env file staged: $f"
+    BLOCKED=1
+    continue
+  }
+
+  # Scan staged content for common secret patterns
+  if git show :"$f" 2>/dev/null | grep -I -n -E "(SENDGRID|SG\.[A-Za-z0-9_-]{20,}|SECRET_KEY|API_KEY|MAIL_PASSWORD|BEGIN RSA PRIVATE KEY|PRIVATE KEY|PASSWORD=|AKIA[0-9A-Z]{16})" >/dev/null 2>&1; then
+    echo "Pre-commit blocked: potential secret found in $f"
+    git show :"$f" 2>/dev/null | grep -n -E "(SENDGRID|SG\.[A-Za-z0-9_-]{20,}|SECRET_KEY|API_KEY|MAIL_PASSWORD|BEGIN RSA PRIVATE KEY|PRIVATE KEY|PASSWORD=|AKIA[0-9A-Z]{16})" || true
+    BLOCKED=1
+  fi
+done
+
+if [ "$BLOCKED" -ne 0 ]; then
+  echo "Aborting commit. Remove sensitive files or secrets from the staged changes." >&2
+  exit 1
+fi
+
+exit 0

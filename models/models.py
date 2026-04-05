@@ -99,6 +99,44 @@ class User(db.Model, UserMixin):
         return check_password_hash(self.password_hash, password)
 
 
+# --- Role & Permission models (new) ---
+user_roles = db.Table(
+    'user_roles',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+    db.Column('role_id', db.Integer, db.ForeignKey('role.id'), primary_key=True)
+)
+
+role_permissions = db.Table(
+    'role_permissions',
+    db.Column('role_id', db.Integer, db.ForeignKey('role.id'), primary_key=True),
+    db.Column('permission_id', db.Integer, db.ForeignKey('permission.id'), primary_key=True)
+)
+
+
+class Role(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    description = db.Column(db.String(255), nullable=True)
+
+    permissions = db.relationship('Permission', secondary=role_permissions, backref='roles')
+
+    def __repr__(self):
+        return f"<Role {self.name}>"
+
+
+class Permission(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+    description = db.Column(db.String(255), nullable=True)
+
+    def __repr__(self):
+        return f"<Permission {self.name}>"
+
+
+# Add relationship to User (preserve legacy `role` string for compatibility)
+User.roles = db.relationship('Role', secondary=user_roles, backref='users')
+
+
 @event.listens_for(User, 'before_insert')
 def assign_public_id(mapper, connection, target):
     if target.public_id:
@@ -413,3 +451,27 @@ class SystemUpdateSubscriber(db.Model):
     is_active = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+
+class SystemSetting(db.Model):
+    """Simple key/value store for platform settings, including maintenance mode."""
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(100), unique=True, nullable=False, index=True)
+    value = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    @staticmethod
+    def get(key, default=None):
+        s = SystemSetting.query.filter_by(key=key).first()
+        return s.value if s else default
+
+    @staticmethod
+    def set(key, value):
+        s = SystemSetting.query.filter_by(key=key).first()
+        if not s:
+            s = SystemSetting(key=key, value=value)
+            db.session.add(s)
+        else:
+            s.value = value
+        db.session.commit()
