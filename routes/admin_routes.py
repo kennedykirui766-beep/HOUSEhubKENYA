@@ -144,12 +144,16 @@ def set_language():
 @admin_bp.route('/send_announcement', methods=['POST'])
 @login_required
 def send_announcement():
-    message = request.form.get("message")
+    # Accept either 'message' or legacy 'announcement' form key.
+    message = request.form.get("message") or request.form.get("announcement")
     if not message:
         flash("Announcement message cannot be empty.", "danger")
         return redirect(url_for('admin.dashboard'))
 
     # Placeholder logic — later you can extend this to send emails/SMS/notifications
+    # For now just flash a success message to acknowledge receipt.
+    flash("Announcement queued (placeholder).", "success")
+    return redirect(url_for('admin.dashboard'))
 
 
 @admin_bp.route('/system_updates', methods=['GET', 'POST'])

@@ -142,7 +142,7 @@
     <section class="platform-announcement">
       <form action="{{ url_for('admin.send_announcement') }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <textarea name="announcement" placeholder="Enter platform announcement"></textarea>
+        <textarea name="message" placeholder="Enter platform announcement"></textarea>
         <button type="submit" class="btn btn-primary" style="background: #3D8B40; color: white;">Send Announcement</button>
       </form>
     </section>
