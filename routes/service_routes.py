@@ -1,20 +1,16 @@
 from flask import Blueprint, current_app, render_template, request, redirect, url_for, flash, jsonify
-<<<<<<< HEAD
-from flask_login import login_required, current_user
-from models.models import ServiceProvider, ServiceRequest, Appointment, Review, User
-from extensions import db
-=======
 from flask_login import login_required, current_user, logout_user
+
 from models.models import ServiceProvider, ServiceRequest, Appointment, Review, User
-from extensions import db
+
+from extensions import db, csrf
 from utils_delete import delete_user_and_dependents
->>>>>>> 125729340ccf7d4c7f937acd6c30539769345b25
+
 from sqlalchemy import func, extract
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
-from extensions import db, csrf
 
 service_provider_bp = Blueprint('service_provider', __name__, url_prefix='/service_provider')
 
@@ -360,14 +356,8 @@ def download_data():
 @login_required
 def delete_account():
     if request.method == "POST":
-<<<<<<< HEAD
-        user = current_user
-        db.session.delete(user)
-        db.session.commit()
-        flash("Your account has been deleted successfully.", "success")
-        return redirect(url_for("auth.login"))  # redirect to sign-in after deletion
-=======
         success, error = delete_user_and_dependents(current_user)
+
         if success:
             logout_user()
             flash("Your account has been deleted successfully.", "success")
@@ -375,9 +365,7 @@ def delete_account():
         else:
             flash("Could not delete account: " + (error or "internal error"), "danger")
             return redirect(url_for('service_provider.settings'))
->>>>>>> 125729340ccf7d4c7f937acd6c30539769345b25
 
-    # Render shared delete template with back and post URLs
     return render_template(
         "shared/delete_account.html",
         back_url=url_for('service_provider.settings'),

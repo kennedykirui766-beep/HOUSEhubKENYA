@@ -503,37 +503,24 @@ def messages():
 @login_required
 def delete_account():
     if request.method == 'POST':
-<<<<<<< HEAD
-        user = current_user
-        db.session.delete(user)
-        db.session.commit()
-        return redirect(url_for('auth.login'))
-=======
         from utils_delete import delete_user_and_dependents
+        from flask_login import logout_user
 
         success, error = delete_user_and_dependents(current_user)
+
         if success:
-            from flask_login import logout_user
             logout_user()
             flash("Your account has been deleted.", "success")
             return redirect(url_for('auth.login'))
         else:
             flash("Could not delete account: " + (error or "internal error"), "danger")
             return redirect(url_for('landlord.settings'))
->>>>>>> 125729340ccf7d4c7f937acd6c30539769345b25
 
     return render_template(
         'shared/delete_account.html',
         back_url=url_for('landlord.settings'),
         post_url=url_for('landlord.delete_account')
     )
-    # Fetch messages where landlord is involved
-    messages = Message.query.filter(
-        (Message.receiver_id == current_user.id) |
-        (Message.sender_id == current_user.id)
-    ).order_by(Message.timestamp.desc()).all()
-
-    return render_template("landlord/messages.html", messages=messages)
 
 
 # ---------------- Profile ----------------
