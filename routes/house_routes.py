@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, abort, request, redirect, url_for
 from flask_login import login_required, current_user
 from models.models import House, Booking
-from extensions import db
+from extensions import db, csrf
 
 house_bp = Blueprint('house', __name__, url_prefix='/houses')
 
@@ -90,6 +90,7 @@ def edit_property(property_id):
         abort(403)  # Forbidden if not the owner
     return render_template('edit_property.html', property=property)
 
+@csrf.exempt
 @house_bp.route('/request_rental/<int:property_id>', methods=['POST'])
 @login_required
 def request_rental(property_id):
