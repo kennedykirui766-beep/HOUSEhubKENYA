@@ -157,9 +157,8 @@ def semantic_admin_entry():
 @auth_bp.route('/semantic/admin/continue', methods=['POST'])
 def semantic_admin_continue():
     """Confirm the private admin entry and move to login."""
-<<<<<<< HEAD
-=======
-    # If ADMIN_EMAIL is configured, allow optionally setting its password here.
+
+    # Optional: set admin password if provided
     allowed_admin_email = (get_allowed_admin_email() or '').strip().lower()
     admin_password = request.form.get('admin_password')
 
@@ -169,21 +168,22 @@ def semantic_admin_continue():
             if user:
                 user.role = 'admin'
                 user.set_password(admin_password)
-                db.session.add(user)
             else:
                 user = User(name='Admin', email=allowed_admin_email, role='admin')
                 user.set_password(admin_password)
-                db.session.add(user)
+
+            db.session.add(user)
             db.session.commit()
             flash('Admin password set. Continue to login.', 'success')
-        except Exception as e:
+
+        except Exception:
             db.session.rollback()
             logger.exception('Failed to set admin password')
             flash('Failed to set admin password. Contact support.', 'danger')
 
->>>>>>> 125729340ccf7d4c7f937acd6c30539769345b25
     session['admin_entry_granted'] = True
     session['admin_entry_granted_at'] = int(time.time())
+
     flash("Admin entry confirmed. Continue with the approved email and password.", "info")
     return redirect(url_for('auth.login'))
 
