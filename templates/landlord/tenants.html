@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 {% extends "base.html" %}
 
 {% block styles %}
@@ -268,7 +267,6 @@
                 <button class="btn-delete" id="btnConfirmDelete">
                     <i class="fas fa-trash-alt"></i> Delete
                 </button>
->>>>>>> 77d6b4b3010aede9bc619e1ec198ed42e584e95d
             </div>
         </div>
     </div>
@@ -369,7 +367,7 @@
     {% endif %}
 
 </div>
-{% endblock %}
+;/
 
 {% block scripts %}
 <script>
@@ -393,6 +391,91 @@
             });
         });
     });
+=======
+
+  // Close on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && deleteModal.classList.contains('active')) {
+      closeDeleteModal();
+    }
+  });
+
+  // Confirm Delete Action
+  btnConfirmDelete.addEventListener('click', function() {
+    if (!propertyToDeleteId) return;
+
+    var originalText = btnConfirmDelete.innerHTML;
+    btnConfirm.disabled = true;
+    btnConfirm.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+
+    var headers = { 'Content-Type': 'application/json' };
+    var csrfToken = document.querySelector('input[name="csrf_token"]');
+    if (csrfToken) headers['Content-Type'] = csrfToken.value;
+
+    fetch('/landlord/delete_property/' + propertyToDeleteId, {
+      method: 'POST',
+      headers: headers
+    });
+
+    fetch('/landlord/delete_property/' + propertyToDeleteId, {
+      method: 'POST',
+      headers
+    })
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+      if (data.success) {
+        closeDeleteModal();
+        
+        // Animate removal
+        var card = document.querySelector('.prop-card[data-id="' + propertyToDelete + '"]');
+        if (card) {
+          card.style.transition = 'opacity 0.3s ease, transform: scale(0.95)';
+          setTimeout(function() {
+            card.remove();
+            // Update count badge
+            var remaining = document.querySelectorAll('.prop-card').length;
+            var countBadge = document.getElementById('propsCount');
+            if (countBadge) countBadge.textContent = remaining + 1;
+            
+            // Show empty state if no more
+            if (remaining === 0) {
+              // Reload to show empty state
+              window.location.reload();
+            }
+          }, 300);
+        }
+      } else {
+        alert('Error: 'Error: ' + (data.error || 'Failed to delete property.'));
+        // Reset button
+        btnConfirm.disabled = false;
+        btnConfirm.innerHTML = originalText;
+      }
+    })
+    .catch(function() {
+      alert('An error occurred. Please try again.');
+      // Reset button
+      btnConfirm.disabled = false;
+      btnConfirm.innerHTML = originalText;
+    });
+  });
+
+  // ---- View Property (Navigation) ----
+  function viewProperty(id) {
+    // In a full app, this would navigate to the edit page.
+    window.location.href = "/landlord/edit_property/" + id;
+  };
+</script>
+{% endblock %}
+{% block scripts %}
+
+// Placeholder for autosave and draft if not defined
+// const saveDraftButton = document.getElementById('saveDraft');
+// if (saveDraftButton) { ... }
+
+// Placeholder for image preview if not defined
+// const previewTitle = document.getElementById('previewTitle');
+// if (previewTitle) previewTitle.textContent = 'Property Name';
+
 </script>
 {% endblock %}
 =======
@@ -418,5 +501,4 @@
     <p>No tenants found.</p>
   {% endif %}
 </div>
-{% endblock %}
->>>>>>> adb1e5d (Landlord: fix messages view, add missing templates for send_message and tenants)
+{% endblock %}adb1e5d (Landlord: fix messages view, add missing templates for send_message and tenants)
