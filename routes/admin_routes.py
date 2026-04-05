@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, request, url_for, flash,
 from flask_login import login_required, current_user
 from sqlalchemy import inspect
 from models.models import User, House, SystemUpdateSubscriber
-from extensions import db
+from extensions import db, csrf
 from utils_email_2fa import send_system_update_email
 from utils_security import (
     consume_rate_limit,
@@ -144,23 +144,16 @@ def set_language():
 @admin_bp.route('/send_announcement', methods=['POST'])
 @login_required
 def send_announcement():
-<<<<<<< HEAD
-    message = request.form.get("message")
-=======
     # Accept either 'message' or legacy 'announcement' form key.
     message = request.form.get("message") or request.form.get("announcement")
->>>>>>> 125729340ccf7d4c7f937acd6c30539769345b25
+
     if not message:
         flash("Announcement message cannot be empty.", "danger")
         return redirect(url_for('admin.dashboard'))
 
     # Placeholder logic — later you can extend this to send emails/SMS/notifications
-<<<<<<< HEAD
-=======
-    # For now just flash a success message to acknowledge receipt.
     flash("Announcement queued (placeholder).", "success")
     return redirect(url_for('admin.dashboard'))
->>>>>>> 125729340ccf7d4c7f937acd6c30539769345b25
 
 
 @admin_bp.route('/system_updates', methods=['GET', 'POST'])
