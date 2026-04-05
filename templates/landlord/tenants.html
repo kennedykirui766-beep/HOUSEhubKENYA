@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends "base.html" %}
 
 {% block styles %}
@@ -145,6 +146,129 @@
                 </span>
                 <input type="text" id="tenantSearch" class="form-control border-start-0 ps-0" placeholder="Search name or property..." 
                     style="background-color: var(--card-bg); border-color: var(--border-color); color: var(--text-primary);">
+=======
+{% extends 'base.html' %}
+{% block title %}Tenants{% endblock %}
+{% block content %}
+<div class="container">
+  <h1>Tenants</h1>
+  {% if tenants %}
+    <table class="table">
+      <thead><tr><th>Name</th><th>Property</th><th>Booking</th></tr></thead>
+      <tbody>
+        {% for user, booking, house in tenants %}
+        <tr>
+          <td>{{ user.name }}</td>
+          <td>{{ house.title }}</td>
+          <td>{{ booking.start_date }} — {{ booking.end_date }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No tenants found.</p>
+  {% endif %}
+</div>
+{% endblock %}
+                      <div class="prop-detail-value">...</div>
+                    </div>
+                    <div>
+                      <div class="prop-detail-item">
+                      <div class="prop-detail-label">Bathrooms</div>
+                      <div class="prop-detail-value">...</div>
+                    </div>
+                </div>
+              </div>
+
+              <!-- Features -->
+              <div class="prop-detail-section">
+                <div class="prop-detail-section">
+                  <h5 class="prop-detail-title">
+                    <i class="fas fa-star"></i> Features</h5>
+                  </div>
+                  <div>
+                    <div class="prop-detail-tags">
+                      <span class="prop-tag">No features selected</span>
+                  </div>
+              </div>
+
+              <!-- Policies -->
+              <div class="prop-detail-section">
+                <div class="prop-detail-section">
+                  <h5 class="prop-detail-title">
+                    <i class="fas fa-shield-alt"></i> Policies</h5>
+                  </div>
+                  <div class="prop-detail-grid">
+                    <div class="prop-detail-item">
+                      <div class="prop-detail-label">Pets</div>
+                      <div class="prop-value">...</div>
+                    </div>
+                    <div class="prop-detail-item">
+                      <div class="div class="prop-detail-label">Pet Restrictions</div>
+                      <div class="prop-detail-value">...</div>
+                    </div>
+                  </div>
+              </div>
+
+              <!-- Accessibility -->
+              <div class="prop-detail-section">
+                <div class="prop-detail-section">
+                  <h5 class="prop-detail-title">
+                    <i class="fas fa-wheelchair"></i> Accessibility</h5>
+                  </div>
+                  <div class="prop-detail-grid">
+                    <div class="prop-detail-item">
+                      <div class="prop-detail-label">Wheelchair</div>
+                      <div class="prop-detail-value">...</div>
+                    </div>
+                    <div class="prop-detail-item">
+                      <div class="div class="prop-detail-label">Ground Floor</div>
+                      <div class="prop-detail-value">...</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- End Detail Panel -->
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-building"></i>
+          </div>
+          <h3>No Properties Found</h3>
+          <p>You haven't added any properties yet.</h3>
+          <p style="margin-bottom: 1.5rem;">
+            <a href="{{ url_for('landlord.add_property') " class="btn-add-property">
+              <i class="fas fa-plus-circle"></i> Add Property
+            </a>
+          </p>
+        </div>
+
+    </div>
+</div>
+
+<!-- DELETE CONFIRMATION MODAL -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="modal-title">Delete Property?</h3>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete <strong id="modalPropertyName">property name</strong>?</p>
+            <p class="modal-text">
+                <span style="font-size: 0.85rem; color: var(--text-muted);">This action cannot be undone. All associated data will be permanently removed.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+                <button class="btn-delete" id="btnConfirmDelete">
+                    <i class="fas fa-trash-alt"></i> Delete
+                </button>
+>>>>>>> 77d6b4b3010aede9bc619e1ec198ed42e584e95d
             </div>
         </div>
     </div>
@@ -271,3 +395,28 @@
     });
 </script>
 {% endblock %}
+=======
+{% extends 'base.html' %}
+{% block title %}Tenants{% endblock %}
+{% block content %}
+<div class="container">
+  <h1>Tenants</h1>
+  {% if tenants %}
+    <table class="table">
+      <thead><tr><th>Name</th><th>Property</th><th>Booking</th></tr></thead>
+      <tbody>
+        {% for user, booking, house in tenants %}
+        <tr>
+          <td>{{ user.name }}</td>
+          <td>{{ house.title }}</td>
+          <td>{{ booking.start_date }} — {{ booking.end_date }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No tenants found.</p>
+  {% endif %}
+</div>
+{% endblock %}
+>>>>>>> adb1e5d (Landlord: fix messages view, add missing templates for send_message and tenants)

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Send Message{% endblock %}
+{% block content %}
+<div class="container">
+  <h1>Send Message to {{ tenant.name }}</h1>
+  <form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="mb-3">
+      <label for="content">Message</label>
+      <textarea id="content" name="content" class="form-control" rows="5"></textarea>
+    </div>
+    <button class="btn btn-primary" type="submit">Send</button>
+    <a href="{{ url_for('landlord.messages') }}" class="btn btn-secondary">Back</a>
+  </form>
+</div>
+{% endblock %}
