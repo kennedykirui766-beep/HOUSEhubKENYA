@@ -95,10 +95,7 @@
     Switch to {{ 'Swahili' if current_user.language == 'English' else 'English' }}
   </button>
   <form id="language-form" action="{{ url_for('admin.set_language') }}" method="POST">
-<<<<<<< HEAD
-=======
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
->>>>>>> 125729340ccf7d4c7f937acd6c30539769345b25
     <select name="language" onchange="this.form.submit()" value="{{ current_user.language }}">
       <option value="English" {% if current_user.language == 'English' %}selected{% endif %}>English</option>
       <option value="Swahili" {% if current_user.language == 'Swahili' %}selected{% endif %}>Swahili</option>
@@ -143,13 +140,9 @@
 
     <!-- Platform Announcement -->
     <section class="platform-announcement">
-      <form action="{{ url_for('admin.send_announcement') }}" method="POST">
-<<<<<<< HEAD
-        <textarea name="announcement" placeholder="Enter platform announcement"></textarea>
-=======
+            <form action="{{ url_for('admin.send_announcement') }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <textarea name="message" placeholder="Enter platform announcement"></textarea>
->>>>>>> 125729340ccf7d4c7f937acd6c30539769345b25
         <button type="submit" class="btn btn-primary" style="background: #3D8B40; color: white;">Send Announcement</button>
       </form>
     </section>
@@ -159,16 +152,15 @@
       <!-- Users Tab -->
       <div id="users" class="tab-content" style="display: none">
         <h2 style="color: #1A1A1A;">All Users</h2>
-        <form action="{{ url_for('admin.bulk_action') }}" method="POST">
-<<<<<<< HEAD
-=======
+        <form id="users-bulk-form" action="{{ url_for('admin.bulk_action') }}" method="POST">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
->>>>>>> 125729340ccf7d4c7f937acd6c30539769345b25
-          <select name="bulk_action">
+          <select name="action">
             <option value="suspend">Suspend</option>
             <option value="notify">Notify</option>
+            <option value="delete_users">Delete Users</option>
           </select>
-          <button type="submit" class="btn btn-primary" style="background: #3D8B40;">Apply Bulk Action</button>
+          <input type="hidden" name="confirm" value="soft">
+          <button type="button" id="users-bulk-apply" class="btn btn-primary" style="background: #3D8B40;">Apply Bulk Action</button>
           <table class="users-table" style="color: #1A1A1A;">
             <tr>
               <th><input type="checkbox" onclick="toggleAllCheckboxes(this)"></th>
@@ -182,21 +174,18 @@
             </tr>
             {% for user in users %}
             <tr>
-              <td><input type="checkbox" name="bulk_select" value="{{ user.id }}"></td>
+              <td><input type="checkbox" name="ids" value="{{ user.id }}"></td>
               <td>{{ user.name }}</td>
               <td>{{ user.email }}</td>
               <td>{{ user.role }}</td>
-              <td>{{ user.contact }}</td>
-              <td>{{ user.status }}</td>
-              <td>{{ user.last_login | datetimeformat }}</td>
+              <td>{{ user.phone_number or '-' }}</td>
+              <td>{{ 'Active' if getattr(user, 'is_active', True) else 'Inactive' }}</td>
+              <td>{{ getattr(user, 'last_login', '-') | datetimeformat }}</td>
               <td>
                 <form action="{{ url_for('admin.user_action', user_id=user.id) }}" method="POST" style="display: inline;">
-<<<<<<< HEAD
-=======
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
->>>>>>> 125729340ccf7d4c7f937acd6c30539769345b25
-                  <button name="action" value="suspend" style="background: #B22222; color: white;">Suspend</button>
-                  <button name="action" value="reactivate" style="background: #3D8B40; color: white;">Reactivate</button>
+                  <button name="action" value="deactivate" style="background: #B22222; color: white;">Suspend</button>
+                  <button name="action" value="activate" style="background: #3D8B40; color: white;">Reactivate</button>
                 </form>
                 <button onclick="showUserDetails('{{ user.id }}')" style="background: #F5E8C7; color: #1A1A1A;">View</button>
               </td>
@@ -209,16 +198,15 @@
       <!-- Properties Tab -->
       <div id="properties" class="tab-content" style="display: none">
         <h2 style="color: #1A1A1A;">All Properties</h2>
-        <form action="{{ url_for('admin.bulk_action') }}" method="POST">
-<<<<<<< HEAD
-=======
+        <form id="properties-bulk-form" action="{{ url_for('admin.bulk_action') }}" method="POST">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
->>>>>>> 125729340ccf7d4c7f937acd6c30539769345b25
-          <select name="bulk_action">
+          <select name="action">
             <option value="suspend">Suspend</option>
             <option value="notify">Notify</option>
+            <option value="delete_properties">Delete Properties</option>
           </select>
-          <button type="submit" class="btn btn-primary" style="background: #3D8B40;">Apply Bulk Action</button>
+          <input type="hidden" name="confirm" value="soft">
+          <button type="button" id="properties-bulk-apply" class="btn btn-primary" style="background: #3D8B40;">Apply Bulk Action</button>
           <table class="properties-table" style="color: #1A1A1A;">
             <tr>
               <th><input type="checkbox" onclick="toggleAllCheckboxes(this)"></th>
@@ -230,18 +218,16 @@
             </tr>
             {% for house in houses %}
             <tr>
-              <td><input type="checkbox" name="bulk_select" value="{{ house.id }}"></td>
+              <td><input type="checkbox" name="ids" value="{{ house.id }}"></td>
               <td>{{ house.title }}</td>
               <td>{{ house.location }}</td>
-              <td>{{ house.owner.name }}</td>
-              <td>{{ house.status }}</td>
+              <td>{{ house.owner.name if house.owner else '—' }}</td>
+              <td>{{ 'Available' if house.available else 'Rented' }}</td>
               <td>
-                <form action="{{ url_for('admin.delete_property', house_id=house.id) }}" method="POST" style="display: inline;">
-<<<<<<< HEAD
-=======
+                <form id="delete-property-{{ house.id }}" action="{{ url_for('admin.delete_property', house_id=house.id) }}" method="POST" style="display: inline;">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
->>>>>>> 125729340ccf7d4c7f937acd6c30539769345b25
-                  <button type="submit">Remove</button>
+                  <input type="hidden" name="confirm" value="soft">
+                  <button type="button" onclick="confirmFormSubmission('delete-property-{{ house.id }}', 'Mark property unavailable or permanently delete?')">Remove</button>
                 </form>
                 <button onclick="showPropertyDetails('{{ house.id }}')">View</button>
               </td>
@@ -476,7 +462,7 @@
   }
 
   function toggleAllCheckboxes(source) {
-    document.querySelectorAll("input[name='bulk_select']").forEach(checkbox => {
+    document.querySelectorAll("input[name='ids']").forEach(checkbox => {
       checkbox.checked = source.checked;
     });
   }
@@ -545,4 +531,25 @@
   });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% include 'shared/confirm_modal.html' %}
+
+<script>
+  // Bind bulk apply buttons to confirmation modal
+  document.addEventListener('DOMContentLoaded', function(){
+    const usersBulkBtn = document.getElementById('users-bulk-apply');
+    const propsBulkBtn = document.getElementById('properties-bulk-apply');
+    if(usersBulkBtn){
+      usersBulkBtn.addEventListener('click', function(){
+        const form = document.getElementById('users-bulk-form');
+        confirmFormSubmission('users-bulk-form', 'Apply selected bulk action to chosen users? Check "Permanently delete" to hard-delete.');
+      });
+    }
+    if(propsBulkBtn){
+      propsBulkBtn.addEventListener('click', function(){
+        const form = document.getElementById('properties-bulk-form');
+        confirmFormSubmission('properties-bulk-form', 'Apply selected bulk action to chosen properties? Check "Permanently delete" to hard-delete.');
+      });
+    }
+  });
+</script>
 {% endblock %}
