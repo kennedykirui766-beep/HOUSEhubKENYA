@@ -413,25 +413,25 @@ def delete_permission(perm_id):
     flash('Permission deleted.', 'success')
     return redirect(url_for('admin.permissions'))
 
-        sent = 0
-        failed = 0
-        for sub in recipients:
-            if send_system_update_email(sub.email, title, body):
-                sent += 1
-            else:
-                failed += 1
+    sent = 0
+    failed = 0
+    for sub in recipients:
+        if send_system_update_email(sub.email, title, body):
+            sent += 1
+        else:
+            failed += 1
 
-        if sent > 0:
-            flash(f'Update sent to {sent} subscriber(s).', 'success')
-        if failed > 0:
-            flash(f'Failed to deliver to {failed} subscriber(s).', 'warning')
+    if sent > 0:
+        flash(f'Update sent to {sent} subscriber(s).', 'success')
+    if failed > 0:
+        flash(f'Failed to deliver to {failed} subscriber(s).', 'warning')
 
-        return render_template(
-            'system_updates.html',
-            subscribers=subscribers,
-            topic_choices=topic_choices,
-            selected_topic=selected_topic,
-        )
+    return render_template(
+        'system_updates.html',
+        subscribers=subscribers,
+        topic_choices=topic_choices,
+        selected_topic=selected_topic,
+    )
 
     return render_template(
         'system_updates.html',
