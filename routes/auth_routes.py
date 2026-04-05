@@ -62,7 +62,6 @@ def _purge_reserved_admin_email_accounts():
 
 
 # ------------------- LOGIN -------------------
-@csrf.exempt
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     admin_entry_required = bool(session.get('admin_entry_granted'))
@@ -147,13 +146,11 @@ def login():
 
     return render_template("login.html", admin_entry_required=admin_entry_required)
 
-@csrf.exempt
 @auth_bp.route('/semantic/admin')
 def semantic_admin_entry():
     """Private admin entrypoint page."""
     return render_template('semantic_admin_entry.html')
 
-@csrf.exempt
 @auth_bp.route('/semantic/admin/continue', methods=['POST'])
 def semantic_admin_continue():
     """Confirm the private admin entry and move to login."""

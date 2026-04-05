@@ -1,8 +1,12 @@
 from flask import Blueprint, render_template, redirect, request, url_for, flash, session
 from flask_login import login_required, current_user
 from sqlalchemy import inspect
+import logging
 from models.models import User, House, SystemUpdateSubscriber
 from extensions import db, csrf
+from utils_delete import delete_user_and_dependents
+
+logger = logging.getLogger(__name__)
 from utils_email_2fa import send_system_update_email
 from utils_security import (
     consume_rate_limit,
@@ -90,9 +94,28 @@ def manage_users():
 @login_required
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)
-    db.session.delete(user)
-    db.session.commit()
-    flash("User deleted.")
+
+    # Prevent self-deletion
+    if current_user.id == user.id:
+        flash("You cannot delete your own admin account.", "danger")
+        return redirect(url_for('admin.dashboard'))
+
+    # If 'hard' provided, perform full deletion, else soft-deactivate
+    hard = request.form.get('confirm') == 'hard'
+    if hard:
+        success, error = delete_user_and_dependents(user)
+        if success:
+            logger.info(f"Admin {current_user.id} hard-deleted user {user_id}")
+            flash("User permanently deleted.", "success")
+        else:
+            flash(f"Failed to delete user: {error}", "danger")
+    else:
+        # Soft-delete / deactivate
+        setattr(user, 'is_active', False)
+        db.session.commit()
+        logger.info(f"Admin {current_user.id} deactivated user {user_id}")
+        flash("User deactivated (soft-delete).", "success")
+
     return redirect(url_for('admin.dashboard'))
 
 # --- Manage Properties ---
@@ -107,9 +130,18 @@ def manage_properties():
 @login_required
 def delete_property(house_id):
     house = House.query.get_or_404(house_id)
-    db.session.delete(house)
-    db.session.commit()
-    flash("Property removed.")
+    # If 'hard' confirmation provided, delete; otherwise mark unavailable
+    hard = request.form.get('confirm') == 'hard'
+    if hard:
+        db.session.delete(house)
+        db.session.commit()
+        logger.info(f"Admin {current_user.id} hard-deleted property {house_id}")
+        flash("Property permanently removed.")
+    else:
+        house.available = False
+        db.session.commit()
+        logger.info(f"Admin {current_user.id} marked property {house_id} unavailable (soft)")
+        flash("Property marked unavailable.")
     return redirect(url_for('admin.dashboard'))
 
 # --- Reports ---
@@ -245,20 +277,40 @@ def bulk_action():
         return redirect(url_for('admin.dashboard'))
 
     if action == "delete_users":
+        # require explicit confirmation for hard delete
+        confirm_mode = request.form.get('confirm')
+        deleted = 0
         for user_id in ids:
             user = User.query.get(user_id)
-            if user:
-                db.session.delete(user)
+            if not user:
+                continue
+            if confirm_mode == 'hard':
+                success, error = delete_user_and_dependents(user)
+                if success:
+                    deleted += 1
+                    logger.info(f"Admin {current_user.id} hard-deleted user {user.id}")
+            else:
+                setattr(user, 'is_active', False)
+                deleted += 1
         db.session.commit()
-        flash(f"{len(ids)} user(s) deleted.", "success")
+        flash(f"{deleted} user(s) processed (soft-deactivate or hard-delete).", "success")
 
     elif action == "delete_properties":
+        confirm_mode = request.form.get('confirm')
+        processed = 0
         for house_id in ids:
             house = House.query.get(house_id)
-            if house:
+            if not house:
+                continue
+            if confirm_mode == 'hard':
                 db.session.delete(house)
+                logger.info(f"Admin {current_user.id} hard-deleted property {house.id}")
+            else:
+                house.available = False
+                logger.info(f"Admin {current_user.id} marked property {house.id} unavailable (soft)")
+            processed += 1
         db.session.commit()
-        flash(f"{len(ids)} property(ies) deleted.", "success")
+        flash(f"{processed} property(ies) processed.", "success")
 
     else:
         flash("Invalid bulk action.", "danger")
@@ -273,9 +325,17 @@ def user_action(user_id):
     user = User.query.get_or_404(user_id)
 
     if action == "delete":
-        db.session.delete(user)
-        db.session.commit()
-        flash(f"User {user.username} deleted.", "success")
+        # Prevent self-delete
+        if current_user.id == user.id:
+            flash("You cannot delete your own account.", "danger")
+            return redirect(url_for('admin.manage_users'))
+
+        success, error = delete_user_and_dependents(user)
+        if success:
+            logger.info(f"Admin {current_user.id} hard-deleted user {user.id}")
+            flash(f"User {getattr(user, 'name', user.id)} deleted.", "success")
+        else:
+            flash(f"Could not delete user: {error}", "danger")
 
     elif action == "deactivate":
         user.is_active = False

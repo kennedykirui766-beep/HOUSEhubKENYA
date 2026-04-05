@@ -641,6 +641,7 @@ content %}
     </div>
 
     <form id="profileForm" method="POST" action="/update_profile">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="form-row">
         <div class="form-group">
           <label for="name">Full Name</label>
@@ -740,6 +741,7 @@ content %}
       </h3>
     </div>
     <form id="passwordForm" method="POST" action="/change_password">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="form-row">
         <div class="form-group">
           <label for="current_password">Current Password</label>

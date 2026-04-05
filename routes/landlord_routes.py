@@ -382,7 +382,6 @@ from extensions import csrf
 
 from flask import jsonify
 
-@csrf.exempt
 @landlord_bp.route('/delete_property/<int:property_id>', methods=['POST'])
 @login_required
 def delete_property(property_id):
@@ -398,17 +397,24 @@ def delete_property(property_id):
         return jsonify(success=False, error="Not allowed")
 
     try:
-        db.session.delete(house)
-        db.session.commit()
-        return jsonify(success=True)
+        hard = request.form.get('confirm') == 'hard'
+        if hard:
+            db.session.delete(house)
+            db.session.commit()
+            logger.info(f"Landlord {current_user.id} hard-deleted property {house.id}")
+            return jsonify(success=True, message="Property permanently deleted")
+        else:
+            house.available = False
+            db.session.commit()
+            logger.info(f"Landlord {current_user.id} marked property {house.id} unavailable (soft)")
+            return jsonify(success=True, message="Property marked unavailable")
     except Exception as e:
         db.session.rollback()
-        print("DELETE ERROR:", e)  # 👈 very important for debugging
+        logger.exception("DELETE ERROR:")
         return jsonify(success=False, error="Database error")
 
 
 # ---------------- Settings ----------------
-@csrf.exempt
 @landlord_bp.route("/settings", methods=["GET", "POST"])
 @login_required
 def settings():
@@ -533,7 +539,6 @@ def delete_account():
 
 # ---------------- Profile ----------------
 
-@csrf.exempt
 @landlord_bp.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
