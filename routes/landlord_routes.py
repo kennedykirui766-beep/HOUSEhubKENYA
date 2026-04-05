@@ -498,6 +498,13 @@ def messages():
     if current_user.role != "landlord":
         flash("Access denied.", "danger")
         return redirect(url_for("main.index"))
+    # Fetch messages where landlord is involved
+    messages = Message.query.filter(
+        (Message.receiver_id == current_user.id) |
+        (Message.sender_id == current_user.id)
+    ).order_by(Message.timestamp.desc()).all()
+
+    return render_template("landlord/messages.html", messages=messages)
 
 @landlord_bp.route('/delete_account', methods=['GET', 'POST'])
 @login_required
@@ -521,6 +528,10 @@ def delete_account():
         back_url=url_for('landlord.settings'),
         post_url=url_for('landlord.delete_account')
     )
+<<<<<<< HEAD
+=======
+    
+>>>>>>> adb1e5d (Landlord: fix messages view, add missing templates for send_message and tenants)
 
 
 # ---------------- Profile ----------------
