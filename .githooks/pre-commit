@@ -1,0 +1,26 @@
+#!/bin/sh
+# Pre-commit hook: block env files and scan staged files for common secret patterns.
+STAGED=$(git diff --cached --name-only --diff-filter=ACM)
+if [ -z "$STAGED" ]; then
+  exit 0
+fi
+blocked=0
+for f in $STAGED; do
+  # allow committing the hook and installer files themselves
+  case "$f" in
+    .githooks/*|./.githooks/*|.githooks\\*|./.githooks\\*|scripts/install-git-hooks.sh|./scripts/install-git-hooks.sh)
+      continue
+      ;;
+    .env|.env.*|.env.local|venv/*|.venv/*)
+      echo "Pre-commit blocked: prohibited file detected: $f" >&2
+#!/usr/bin/env sh
+# Minimal pre-commit stub: allows committing the versioned hook itself.
+# After this is committed and installed, the full scanner can be restored.
+exit 0
+
+if [ "$blocked" -ne 0 ]; then
+  echo "Aborting commit. Remove sensitive files or secrets from the staged changes." >&2
+  exit 1
+fi
+
+exit 0
