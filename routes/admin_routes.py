@@ -239,6 +239,80 @@ def system_updates():
                 selected_topic=selected_topic,
             )
 
+# --- Role management routes ---
+@admin_bp.route('/roles')
+@login_required
+def roles():
+    from sqlalchemy import inspect
+    from models.models import Role, Permission
+    # ensure tables exist
+    if not inspect(db.engine).has_table('role'):
+        db.create_all()
+    roles = Role.query.order_by(Role.name).all()
+    permissions = Permission.query.order_by(Permission.name).all()
+    return render_template('admin.roles.html', roles=roles, permissions=permissions)
+
+
+@admin_bp.route('/roles/create', methods=['GET', 'POST'])
+@login_required
+def create_role():
+    from models.models import Role, Permission
+    if request.method == 'POST':
+        name = (request.form.get('name') or '').strip()
+        description = (request.form.get('description') or '').strip()
+        perm_ids = request.form.getlist('permissions')
+        if not name:
+            flash('Role name is required.', 'danger')
+            return redirect(url_for('admin.roles'))
+        if Role.query.filter_by(name=name).first():
+            flash('Role with that name already exists.', 'danger')
+            return redirect(url_for('admin.roles'))
+        role = Role(name=name, description=description)
+        for pid in perm_ids:
+            p = Permission.query.get(pid)
+            if p:
+                role.permissions.append(p)
+        db.session.add(role)
+        db.session.commit()
+        flash('Role created.', 'success')
+        return redirect(url_for('admin.roles'))
+    # GET -> show form
+    permissions = Permission.query.order_by(Permission.name).all()
+    return render_template('admin.role_form.html', permissions=permissions, role=None)
+
+
+@admin_bp.route('/roles/<int:role_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_role(role_id):
+    from models.models import Role, Permission
+    role = Role.query.get_or_404(role_id)
+    if request.method == 'POST':
+        role.name = (request.form.get('name') or '').strip()
+        role.description = (request.form.get('description') or '').strip()
+        perm_ids = request.form.getlist('permissions')
+        role.permissions = []
+        for pid in perm_ids:
+            p = Permission.query.get(pid)
+            if p:
+                role.permissions.append(p)
+        db.session.commit()
+        flash('Role updated.', 'success')
+        return redirect(url_for('admin.roles'))
+    permissions = Permission.query.order_by(Permission.name).all()
+    return render_template('admin.role_form.html', role=role, permissions=permissions)
+
+
+@admin_bp.route('/roles/<int:role_id>/delete', methods=['POST'])
+@login_required
+def delete_role(role_id):
+    from models.models import Role
+    role = Role.query.get_or_404(role_id)
+    # prevent deleting core roles maybe
+    db.session.delete(role)
+    db.session.commit()
+    flash('Role deleted.', 'success')
+    return redirect(url_for('admin.roles'))
+
         sent = 0
         failed = 0
         for sub in recipients:
