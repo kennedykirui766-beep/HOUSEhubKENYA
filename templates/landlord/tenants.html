@@ -290,35 +290,36 @@
     <!-- Tenants Grid -->
     {% if tenants %}
     <div class="row g-4" id="tenantList">
-        {% for tenant_user, booking, house in tenants %}
+        <!-- Iterating over the dictionary list passed from the route -->
+        {% for t in tenants %}
         
         <div class="col-12 col-md-6 col-xl-4 tenant-item" 
-             data-name="{{ tenant_user.name.lower() }}" 
-             data-property="{{ house.title.lower() }}">
+             data-name="{{ t['tenant_name'].lower() }}" 
+             data-property="{{ t['house_title'].lower() }}">
             
             <div class="card h-100 tenant-card">
                 <!-- Card Header: Tenant Profile -->
                 <div class="tenant-header">
-                    {% if tenant_user.profile_picture %}
-                        <img src="{{ tenant_user.profile_picture }}" alt="{{ tenant_user.name }}" class="tenant-avatar-lg">
+                    {% if t['profile_picture'] %}
+                        <img src="{{ t['profile_picture'] }}" alt="{{ t['tenant_name'] }}" class="tenant-avatar-lg">
                     {% else %}
                         <div class="tenant-avatar-placeholder">
-                            {{ tenant_user.name[:1]|upper }}
+                            {{ t['tenant_name'][:1]|upper }}
                         </div>
                     {% endif %}
 
                     <div class="tenant-info flex-grow-1">
-                        <h5>{{ tenant_user.name }}</h5>
-                        <p><i class="fas fa-envelope me-1" style="font-size: 0.8rem;"></i> {{ tenant_user.email }}</p>
+                        <h5>{{ t['tenant_name'] }}</h5>
+                        <p><i class="fas fa-envelope me-1" style="font-size: 0.8rem;"></i> {{ t['email'] }}</p>
                         <div class="mt-2">
-                            {% if booking.status == 'active' %}
+                            {% if t['status'] == 'approved' %}
                                 <span class="status-badge status-success"><i class="fas fa-check-circle me-1"></i> Active Lease</span>
-                            {% elif booking.status == 'pending' %}
+                            {% elif t['status'] == 'pending' %}
                                 <span class="status-badge status-warning"><i class="fas fa-clock me-1"></i> Pending</span>
-                            {% elif booking.status == 'expired' %}
-                                <span class="status-badge status-danger"><i class="fas fa-times-circle me-1"></i> Expired</span>
+                            {% elif t['status'] == 'rejected' %}
+                                <span class="status-badge status-danger"><i class="fas fa-times-circle me-1"></i> Rejected</span>
                             {% else %}
-                                <span class="status-badge status-info">{{ booking.status|capitalize }}</span>
+                                <span class="status-badge status-info">{{ t['status']|capitalize }}</span>
                             {% endif %}
                         </div>
                     </div>
@@ -328,41 +329,42 @@
                 <div class="card-body">
                     <div class="property-tag">
                         <i class="fas fa-building"></i>
-                        <span class="text-truncate">{{ house.title }}</span>
+                        <span class="text-truncate">{{ t['house_title'] }}</span>
                     </div>
 
                     <div class="tenant-details-grid">
                         <div class="detail-item">
                             <strong>Move In</strong>
-                            {{ booking.start_date.strftime('%b %d, %Y') if booking.start_date else 'N/A' }}
+                            {{ t['lease_start'].strftime('%b %d, %Y') if t['lease_start'] else 'N/A' }}
                         </div>
                         <div class="detail-item">
                             <strong>Move Out</strong>
-                            {{ booking.end_date.strftime('%b %d, %Y') if booking.end_date else 'Ongoing' }}
+                            {{ t['lease_end'].strftime('%b %d, %Y') if t['lease_end'] else 'Ongoing' }}
                         </div>
                         <div class="detail-item">
                             <strong>Unit/House ID</strong>
-                            #{{ house.id }}
+                            #{{ t['house_id'] }}
                         </div>
                         <div class="detail-item">
                             <strong>Contact</strong>
-                            {{ tenant_user.phone if tenant_user.phone else 'N/A' }}
+                            {{ t['phone'] if t['phone'] else 'N/A' }}
                         </div>
                     </div>
 
                     <!-- Actions -->
                     <div class="tenant-actions">
-                        <!-- UPDATED LEASE BUTTON with booking_id -->
+                        <!-- UPDATED LEASE BUTTON -->
+                        <!-- Mapping dictionary keys to data attributes -->
                         <button type="button" 
                                 class="btn btn-outline-secondary btn-sm-custom"
                                 data-bs-toggle="modal" 
                                 data-bs-target="#leaseModal"
-                                data-booking-id="{{ booking.id }}"
-                                data-tenant-name="{{ tenant_user.name }}"
-                                data-tenant-email="{{ tenant_user.email }}"
-                                data-house-title="{{ house.title }}"
-                                data-house-id="{{ house.id }}"
-                                data-deposit="{{ house.deposit if house.deposit else (house.price if house.price else '0') }}">
+                                data-booking-id="{{ t['booking_id'] }}"
+                                data-tenant-name="{{ t['tenant_name'] }}"
+                                data-tenant-email="{{ t['email'] }}"
+                                data-house-title="{{ t['house_title'] }}"
+                                data-house-id="{{ t['house_id'] }}"
+                                data-deposit="{{ t['rent_amount'] }}">
                             <i class="fas fa-file-contract"></i> Lease
                         </button>
 
