@@ -7,7 +7,7 @@ from extensions import db, csrf
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from extensions import db, csrf
-from models.models import Message, User, House, Booking, Payment, MaintenanceRequest, ServiceProvider, PaymentLink
+from models.models import Message, PaymentLink, User, House, Booking, Payment, MaintenanceRequest, ServiceProvider
 import cloudinary.uploader
 import json
 
@@ -199,14 +199,56 @@ def tenants():
         flash("Access denied.", "danger")
         return redirect(url_for("main.index"))
 
-    tenants = (
-        db.session.query(User, Booking, House)
-        .join(Booking, Booking.tenant_id == User.id)
-        .join(House, Booking.house_id == House.id)
-        .filter(User.role == "tenant", House.owner_id == current_user.id)
+    # Get all houses owned by landlord
+    houses = House.query.filter_by(owner_id=current_user.id).all()
+
+    # Collect all bookings for those houses
+    bookings = (
+        Booking.query
+        .join(House)
+        .filter(House.owner_id == current_user.id)
         .all()
     )
-    return render_template("landlord/tenants.html", tenants=tenants, stats={})
+
+    tenants_data = []
+
+    for booking in bookings:
+        tenant = booking.tenant  # 🔥 via relationship
+        house = booking.house
+
+        tenants_data.append({
+            "tenant_id": tenant.id,
+            "tenant_name": tenant.name,
+            "email": tenant.email,
+            "phone": tenant.phone_number,
+            "profile_picture": tenant.profile_picture,
+
+            "house_id": house.id,
+            "house_title": house.title,
+            "house_location": house.location,
+            "rent_amount": house.rent_amount,
+
+            "booking_id": booking.id,
+            "status": booking.status,
+            "lease_start": booking.lease_start_date,
+            "lease_end": booking.lease_end_date,
+            "created_at": booking.created_at,
+        })
+
+    # Optional: Stats
+    stats = {
+        "total_tenants": len({t["tenant_id"] for t in tenants_data}),
+        "total_bookings": len(tenants_data),
+        "approved": len([b for b in bookings if b.status == "approved"]),
+        "pending": len([b for b in bookings if b.status == "pending"]),
+        "rejected": len([b for b in bookings if b.status == "rejected"]),
+    }
+
+    return render_template(
+        "landlord/tenants.html",
+        tenants=tenants_data,
+        stats=stats
+    )
 
 
 @landlord_bp.route("/api/generate-payment-link", methods=["POST"])
