@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, abort, request, redirect, url_for
 from flask_login import login_required, current_user
-from models.models import House, Booking
+from models.models import House, Booking, User
 from extensions import db, csrf
 
 house_bp = Blueprint('house', __name__, url_prefix='/houses')
@@ -95,14 +95,36 @@ def edit_property(property_id):
 @login_required
 def request_rental(property_id):
     """
-    Handle rental request from a tenant for a specific property.
+    Handle rental request from a tenant for a specific property and fetch tenant data.
     """
     if current_user.role.lower() != 'tenant':
         abort(403)  # Forbidden if not a tenant
+
+    # Get the house
     house = House.query.get_or_404(property_id)
-    if house:
-        booking = Booking(tenant_id=current_user.id, house_id=property_id, status='pending')
-        db.session.add(booking)
-        db.session.commit()
-        return redirect(url_for('tenant.dashboard'))
-    return "Property not found", 404
+
+    # Create booking
+    booking = Booking(
+        tenant_id=current_user.id,
+        house_id=property_id,
+        status='pending'
+    )
+
+    db.session.add(booking)
+    db.session.commit()
+
+    # Fetch full tenant details
+    tenant = User.query.get(current_user.id)
+
+    tenant_data = {
+        "id": tenant.id,
+        "name": tenant.name,
+        "email": tenant.email,
+        "phone": tenant.phone,
+        "role": tenant.role,
+    }
+
+    # You can now use tenant_data (e.g., send notification, log, etc.)
+    print("Tenant Booking Info:", tenant_data)
+
+    return redirect(url_for('tenant.dashboard'))
