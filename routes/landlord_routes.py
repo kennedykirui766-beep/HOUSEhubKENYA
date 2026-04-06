@@ -284,6 +284,53 @@ def api_generate_payment_link():
         "payment_url": payment_url
     })
 
+@csrf.exempt
+@landlord_bp.route("/pay/<string:token>", methods=["GET", "POST"])
+def pay(token):
+    """
+    Public payment page accessed via unique token.
+    """
+
+    # 🔍 Find payment link
+    link = PaymentLink.query.filter_by(token=token).first_or_404()
+
+    # 🚫 Prevent reuse
+    if link.status == "paid":
+        flash("This payment link has already been used.", "warning")
+        return render_template("payments/already_paid.html", link=link)
+
+    # 📝 Handle payment submission
+    if request.method == "POST":
+        phone = request.form.get("phone")
+
+        if not phone:
+            flash("Phone number is required.", "danger")
+            return redirect(request.url)
+
+        try:
+            from datetime import datetime
+
+            # 💰 Simulate payment (replace with M-Pesa later)
+            link.phone = phone
+            link.status = "paid"
+            link.transaction_id = f"TXN-{datetime.utcnow().timestamp()}"
+            link.paid_at = datetime.utcnow()
+
+            # 🔗 OPTIONAL: update booking
+            if link.booking:
+                link.booking.status = "approved"
+
+            db.session.commit()
+
+            flash("Payment successful!", "success")
+            return redirect(url_for("landlord.payment_success", token=token))
+
+        except Exception as e:
+            db.session.rollback()
+            flash("Payment failed. Try again.", "danger")
+
+    return render_template("payments/pay.html", link=link)
+
 # ---------------- Payments ----------------
 @landlord_bp.route("/payments")
 @login_required
