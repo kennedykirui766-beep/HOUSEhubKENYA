@@ -6,7 +6,6 @@ from flask_login import login_required, current_user
 from extensions import db, csrf
 from werkzeug.utils import secure_filename
 from datetime import datetime
-from extensions import db, csrf
 from models.models import Message, PaymentLink, User, House, Booking, Payment, MaintenanceRequest, ServiceProvider
 import cloudinary.uploader
 import json
@@ -192,6 +191,7 @@ def add_property():
     return render_template("landlord/add_property.html", stats={})
 
 # ---------------- Manage Tenants ----------------
+@csrf.exempt
 @landlord_bp.route("/tenants")
 @login_required
 def tenants():
