@@ -7,7 +7,7 @@ from extensions import db, csrf
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from extensions import db, csrf
-from models.models import Message, User, House, Booking, Payment, MaintenanceRequest, ServiceProvider
+from models.models import Message, User, House, Booking, Payment, MaintenanceRequest, ServiceProvider, PaymentLink
 import cloudinary.uploader
 import json
 
@@ -208,6 +208,38 @@ def tenants():
     )
     return render_template("landlord/tenants.html", tenants=tenants, stats={})
 
+
+@landlord_bp.route("/api/generate-payment-link", methods=["POST"])
+@login_required
+def api_generate_payment_link():
+    data = request.get_json()
+    booking_id = data.get("booking_id")
+
+    booking = Booking.query.get_or_404(booking_id)
+
+    if booking.house.owner_id != current_user.id:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    import uuid
+    token = str(uuid.uuid4())
+
+    link = PaymentLink(
+        token=token,
+        landlord_id=current_user.id,
+        house_id=booking.house_id,
+        amount=booking.deposit_amount,
+        status="pending"
+    )
+
+    db.session.add(link)
+    db.session.commit()
+
+    payment_url = url_for("payments.pay", token=token, _external=True)
+
+    return jsonify({
+        "success": True,
+        "payment_url": payment_url
+    })
 
 # ---------------- Payments ----------------
 @landlord_bp.route("/payments")

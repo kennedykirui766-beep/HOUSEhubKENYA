@@ -2,76 +2,81 @@
 
 {% block styles %}
 <style>
-    /* Page Specific Styles for Tenant Cards */
+    /* --- Page Specific Styles --- */
     .tenant-card {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
         border: 1px solid var(--border-color);
+        background-color: var(--card-bg);
+        border-radius: var(--radius-lg);
     }
     
     .tenant-card:hover {
-        transform: translateY(-3px);
-        box-shadow: var(--shadow-lg);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
         border-color: var(--primary-color);
     }
 
     .tenant-header {
-        background-color: var(--sidebar-hover);
-        padding: 1.25rem 1.5rem;
+        background-color: rgba(0, 0, 0, 0.02);
+        padding: 1.5rem;
         border-bottom: 1px solid var(--border-color);
         display: flex;
         align-items: center;
         gap: 1rem;
+        border-top-left-radius: var(--radius-lg);
+        border-top-right-radius: var(--radius-lg);
     }
 
     .tenant-avatar-lg {
-        width: 56px;
-        height: 56px;
+        width: 64px;
+        height: 64px;
         border-radius: 50%;
         object-fit: cover;
-        border: 2px solid var(--card-bg);
+        border: 3px solid var(--card-bg);
         box-shadow: 0 0 0 2px var(--primary-color);
     }
 
     .tenant-avatar-placeholder {
-        width: 56px;
-        height: 56px;
+        width: 64px;
+        height: 64px;
         border-radius: 50%;
         background: var(--gradient-primary);
         color: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.25rem;
-        font-weight: 600;
-        border: 2px solid var(--card-bg);
+        font-size: 1.5rem;
+        font-weight: 700;
+        border: 3px solid var(--card-bg);
         box-shadow: 0 0 0 2px var(--primary-color);
     }
 
     .tenant-info h5 {
         margin: 0;
-        font-size: 1rem;
-        font-weight: 600;
+        font-size: 1.1rem;
+        font-weight: 700;
         color: var(--text-primary);
     }
 
     .tenant-info p {
-        margin: 0.15rem 0 0;
-        font-size: 0.8rem;
+        margin: 0.25rem 0 0;
+        font-size: 0.85rem;
         color: var(--text-secondary);
     }
 
     .property-tag {
         display: inline-flex;
         align-items: center;
-        gap: 0.35rem;
-        padding: 0.4rem 0.75rem;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
         background-color: var(--body-bg);
         border: 1px solid var(--border-color);
         border-radius: var(--radius-md);
-        font-size: 0.8rem;
+        font-size: 0.85rem;
         color: var(--text-primary);
-        margin-bottom: 0.75rem;
+        margin-bottom: 1rem;
         width: 100%;
+        font-weight: 500;
     }
 
     .property-tag i {
@@ -81,50 +86,183 @@
     .tenant-details-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 0.75rem;
-        margin-bottom: 1rem;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
     }
 
     .detail-item {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
         color: var(--text-secondary);
     }
 
     .detail-item strong {
         display: block;
         color: var(--text-primary);
-        margin-bottom: 0.1rem;
+        margin-bottom: 0.2rem;
+        font-weight: 600;
     }
 
     .tenant-actions {
-        padding-top: 1rem;
+        padding-top: 1.25rem;
         border-top: 1px solid var(--border-color);
         display: flex;
-        gap: 0.5rem;
+        gap: 0.75rem;
     }
 
     .btn-sm-custom {
         flex: 1;
-        padding: 0.4rem 0.5rem;
-        font-size: 0.75rem;
-        border-radius: var(--radius-sm);
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+        border-radius: var(--radius-md);
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 0.3rem;
+        gap: 0.4rem;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+    
+    .btn-sm-custom:hover {
+        transform: translateY(-1px);
     }
 
     .empty-state {
         text-align: center;
-        padding: 4rem 1rem;
+        padding: 5rem 1rem;
         color: var(--text-muted);
     }
     
     .empty-state i {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-        opacity: 0.5;
+        font-size: 3.5rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.3;
+        color: var(--primary-color);
     }
+    
+    /* --- Modal Styling (The "Pop Page") --- */
+    .modal-content {
+        border: none;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+
+    .modal-header {
+        padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+        background-color: transparent;
+    }
+
+    .modal-body {
+        padding: 1rem 1.5rem 2rem 1.5rem;
+    }
+
+    .modal-footer {
+        padding: 1rem 1.5rem 1.5rem 1.5rem;
+        border-top: 1px solid var(--border-color);
+        background-color: rgba(0,0,0,0.01);
+    }
+
+    .lease-detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.85rem 0;
+        border-bottom: 1px dashed var(--border-color);
+    }
+    
+    .lease-detail-row:last-child { border-bottom: none; }
+    
+    .lease-label { 
+        color: var(--text-secondary); 
+        font-size: 0.9rem; 
+    }
+    
+    .lease-value { 
+        font-weight: 600; 
+        color: var(--text-primary); 
+        text-align: right;
+    }
+    
+    .lease-highlight { 
+        color: var(--primary-color); 
+        font-size: 1.05rem;
+    }
+
+    /* Step 1: Review Box */
+    .review-box {
+        background: var(--body-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+    }
+    
+    /* Step 2: Success Box */
+    .success-box {
+        animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Generated Link Input Group */
+    .link-input-group {
+        position: relative;
+        display: flex;
+        align-items: stretch;
+    }
+    
+    .link-input-group .form-control {
+        border-right: none;
+        background-color: #f8f9fa;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        color: #555;
+    }
+    
+    .link-input-group .btn {
+        border-left: none;
+        background-color: #fff;
+        border-color: var(--border-color);
+        color: var(--text-secondary);
+        transition: all 0.2s;
+    }
+    
+    .link-input-group .btn:hover {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+    
+    .copy-feedback { 
+        font-size: 0.85rem; 
+        color: #28a745; 
+        font-weight: 600;
+        opacity: 0; 
+        transition: opacity 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 5px;
+    }
+    
+    .copy-feedback.show { opacity: 1; }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 0.25em 0.6em;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .status-success { background-color: #d1e7dd; color: #0f5132; }
+    .status-warning { background-color: #fff3cd; color: #664d03; }
+    .status-danger { background-color: #f8d7da; color: #842029; }
+    .status-info { background-color: #cff4fc; color: #055160; }
+
 </style>
 {% endblock %}
 
@@ -132,14 +270,14 @@
 <div class="container-fluid p-0">
     
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div class="d-flex justify-content-between align-items-center mb-5 flex-wrap gap-3">
         <div>
-            <h4 class="mb-1 fw-bold" style="color: var(--text-primary);">My Tenants</h4>
-            <p class="mb-0 text-muted" style="font-size: 0.9rem;">Manage tenant leases and communications</p>
+            <h3 class="mb-1 fw-bold" style="color: var(--text-primary);">My Tenants</h3>
+            <p class="mb-0 text-muted" style="font-size: 0.95rem;">Manage tenant lease agreements and communications</p>
         </div>
         <div class="d-flex gap-2">
             <!-- Search Input -->
-            <div class="input-group" style="width: 250px;">
+            <div class="input-group" style="width: 280px;">
                 <span class="input-group-text bg-white border-end-0" style="border-color: var(--border-color); background-color: var(--card-bg); color: var(--text-muted);">
                     <i class="fas fa-search"></i>
                 </span>
@@ -158,7 +296,7 @@
              data-name="{{ tenant_user.name.lower() }}" 
              data-property="{{ house.title.lower() }}">
             
-            <div class="card h-100 tenant-card" style="background-color: var(--card-bg);">
+            <div class="card h-100 tenant-card">
                 <!-- Card Header: Tenant Profile -->
                 <div class="tenant-header">
                     {% if tenant_user.profile_picture %}
@@ -171,14 +309,14 @@
 
                     <div class="tenant-info flex-grow-1">
                         <h5>{{ tenant_user.name }}</h5>
-                        <p><i class="fas fa-envelope me-1" style="font-size: 0.7rem;"></i> {{ tenant_user.email }}</p>
-                        <div class="mt-1">
+                        <p><i class="fas fa-envelope me-1" style="font-size: 0.8rem;"></i> {{ tenant_user.email }}</p>
+                        <div class="mt-2">
                             {% if booking.status == 'active' %}
-                                <span class="status-badge status-success">Active Lease</span>
+                                <span class="status-badge status-success"><i class="fas fa-check-circle me-1"></i> Active Lease</span>
                             {% elif booking.status == 'pending' %}
-                                <span class="status-badge status-warning">Pending</span>
+                                <span class="status-badge status-warning"><i class="fas fa-clock me-1"></i> Pending</span>
                             {% elif booking.status == 'expired' %}
-                                <span class="status-badge status-danger">Expired</span>
+                                <span class="status-badge status-danger"><i class="fas fa-times-circle me-1"></i> Expired</span>
                             {% else %}
                                 <span class="status-badge status-info">{{ booking.status|capitalize }}</span>
                             {% endif %}
@@ -214,9 +352,20 @@
 
                     <!-- Actions -->
                     <div class="tenant-actions">
-                        <a href="#" class="btn btn-outline-secondary btn-sm-custom">
+                        <!-- UPDATED LEASE BUTTON with booking_id -->
+                        <button type="button" 
+                                class="btn btn-outline-secondary btn-sm-custom"
+                                data-bs-toggle="modal" 
+                                data-bs-target="#leaseModal"
+                                data-booking-id="{{ booking.id }}"
+                                data-tenant-name="{{ tenant_user.name }}"
+                                data-tenant-email="{{ tenant_user.email }}"
+                                data-house-title="{{ house.title }}"
+                                data-house-id="{{ house.id }}"
+                                data-deposit="{{ house.deposit if house.deposit else (house.price if house.price else '0') }}">
                             <i class="fas fa-file-contract"></i> Lease
-                        </a>
+                        </button>
+
                         <a href="#" class="btn btn-outline-secondary btn-sm-custom">
                             <i class="fas fa-history"></i> History
                         </a>
@@ -245,6 +394,79 @@
     {% endif %}
 
 </div>
+
+<!-- ========== LEASE GENERATION MODAL ========== -->
+<div class="modal fade" id="leaseModal" tabindex="-1" aria-labelledby="leaseModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="leaseModalLabel" style="color: var(--text-primary);">
+                    <i class="fas fa-file-signature me-2" style="color: var(--primary-color);"></i> Lease Agreement
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Step 1: Review Details -->
+                <div id="leaseReviewStep">
+                    <p class="text-muted mb-3" style="font-size: 0.95rem; line-height: 1.5;">
+                        Please confirm the details below to generate a secure signing link for the tenant.
+                    </p>
+                    
+                    <div class="review-box mb-3">
+                        <div class="lease-detail-row">
+                            <span class="lease-label">Tenant Name</span>
+                            <span class="lease-value" id="modalTenantName">...</span>
+                        </div>
+                        <div class="lease-detail-row">
+                            <span class="lease-label">Property Unit</span>
+                            <span class="lease-value" id="modalHouseTitle">...</span>
+                        </div>
+                        <div class="lease-detail-row">
+                            <span class="lease-label">Security Deposit</span>
+                            <span class="lease-value lease-highlight" id="modalDeposit">...</span>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info d-flex align-items-start gap-2" style="font-size: 0.85rem; padding: 0.75rem 1rem; border-radius: var(--radius-md); background-color: #e7f1ff; border-color: #b6d4fe; color: #084298;">
+                        <i class="fas fa-shield-alt mt-1"></i>
+                        <span>The generated link will allow the tenant to review and digitally sign the lease agreement securely.</span>
+                    </div>
+                </div>
+
+                <!-- Step 2: Generated Link (Hidden by default) -->
+                <div id="generatedLinkArea" class="success-box">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <i class="fas fa-check-circle text-success" style="font-size: 4rem; filter: drop-shadow(0 4px 6px rgba(40, 167, 69, 0.25));"></i>
+                        </div>
+                        <h5 class="fw-bold" style="color: var(--text-primary);">Agreement Ready!</h5>
+                        <p class="text-muted small mb-0">Share this secure link with the tenant to complete the signing process.</p>
+                    </div>
+                    
+                    <label class="small text-muted fw-bold mb-1 d-block">SIGNING LINK</label>
+                    <div class="link-input-group mb-2">
+                        <input type="text" class="form-control" id="leaseLinkInput" readonly value="">
+                        <button class="btn" type="button" id="copyLinkBtn" title="Copy to clipboard">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <div class="text-end mt-2">
+                        <span class="copy-feedback" id="copyFeedback"><i class="fas fa-check"></i> Copied!</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer" id="leaseModalFooter">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border: 1px solid var(--border-color); font-weight: 500;">Cancel</button>
+                <button type="button" class="btn btn-primary-custom" id="generateLeaseBtn" style="padding: 0.5rem 1.5rem;">
+                    <i class="fas fa-magic me-2"></i> Confirm & Generate Link
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
@@ -256,17 +478,124 @@
 
         searchInput.addEventListener('input', function(e) {
             const term = e.target.value.toLowerCase();
-
             tenantItems.forEach(item => {
                 const name = item.getAttribute('data-name');
                 const property = item.getAttribute('data-property');
-
                 if (name.includes(term) || property.includes(term)) {
                     item.style.display = 'block';
                 } else {
                     item.style.display = 'none';
                 }
             });
+        });
+
+        // --- Modal Logic ---
+        const leaseModal = document.getElementById('leaseModal');
+        const generateBtn = document.getElementById('generateLeaseBtn');
+        const reviewStep = document.getElementById('leaseReviewStep');
+        const linkArea = document.getElementById('generatedLinkArea');
+        const modalFooter = document.getElementById('leaseModalFooter');
+        const linkInput = document.getElementById('leaseLinkInput');
+        
+        // 🧠 2. Store booking_id in JS
+        let currentBookingId = null;
+
+        // 1. Populate Modal Data when opened
+        leaseModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            
+            // 🧠 Store the ID
+            currentBookingId = button.getAttribute('data-booking-id');
+            
+            // Extract other data
+            const tenantName = button.getAttribute('data-tenant-name');
+            const houseTitle = button.getAttribute('data-house-title');
+            const deposit = button.getAttribute('data-deposit');
+
+            // Update modal DOM
+            document.getElementById('modalTenantName').textContent = tenantName;
+            document.getElementById('modalHouseTitle').textContent = houseTitle;
+            document.getElementById('modalDeposit').textContent = 'Ksh ' + deposit;
+
+            // Reset Modal State to defaults
+            reviewStep.style.display = 'block';
+            linkArea.style.display = 'none';
+            modalFooter.style.display = 'flex'; // Show footer with buttons
+            
+            // Reset button state
+            generateBtn.innerHTML = '<i class="fas fa-magic me-2"></i> Confirm & Generate Link';
+            generateBtn.disabled = false;
+        });
+
+        // 2. Handle Generate Button Click with REAL fetch
+        generateBtn.addEventListener('click', function() {
+            if (!currentBookingId) {
+                console.error("No Booking ID found");
+                alert("Error: Missing booking reference.");
+                return;
+            }
+
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin me-2"></i> Generating...';
+
+            // ⚡ Replace fake JS with REAL fetch
+            fetch("/landlord/api/generate-payment-link", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    booking_id: currentBookingId
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    linkInput.value = data.payment_url;
+
+                    // UI Transition
+                    reviewStep.style.display = 'none';
+                    linkArea.style.display = 'block';
+                    modalFooter.style.display = 'none'; // Hide footer buttons in success state
+                } else {
+                    alert("Error generating link: " + (data.message || "Unknown error"));
+                    generateBtn.disabled = false;
+                    generateBtn.innerHTML = '<i class="fas fa-magic me-2"></i> Confirm & Generate Link';
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Something went wrong. Please check your connection.");
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fas fa-magic me-2"></i> Confirm & Generate Link';
+            });
+        });
+
+        // 3. Handle Copy to Clipboard
+        document.getElementById('copyLinkBtn').addEventListener('click', function() {
+            linkInput.select();
+            linkInput.setSelectionRange(0, 99999); // For mobile devices
+            
+            navigator.clipboard.writeText(linkInput.value).then(() => {
+                const feedback = document.getElementById('copyFeedback');
+                feedback.classList.add('show');
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        });
+
+        // Reset modal completely when hidden
+        leaseModal.addEventListener('hidden.bs.modal', function () {
+            // Wait for fade out animation then reset
+            setTimeout(() => {
+                reviewStep.style.display = 'block';
+                linkArea.style.display = 'none';
+                modalFooter.style.display = 'flex';
+                currentBookingId = null;
+            }, 200);
         });
     });
 </script>

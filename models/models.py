@@ -14,7 +14,7 @@ def generate_public_id(length=10):
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    public_id = db.Column(db.String(32), unique=True, nullable=False, index=True)
+    public_id = db.Column(db.String(32), unique=True, nullable=True, index=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     phone_number = db.Column(db.String(20), unique=True, nullable=True)
@@ -490,3 +490,25 @@ class SystemSetting(db.Model):
             except Exception:
                 pass
             raise
+
+
+class PaymentLink(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    token = db.Column(db.String(100), unique=True, nullable=False)
+
+    landlord_id = db.Column(db.Integer, nullable=False)
+    booking_id = db.Column(db.Integer, nullable=False)
+    house_id = db.Column(db.Integer, nullable=False)
+
+    amount = db.Column(db.Float, nullable=False)
+
+    status = db.Column(db.String(20), default="pending")  
+    # pending, paid, expired
+
+    phone = db.Column(db.String(20))  # who paid
+
+    transaction_id = db.Column(db.String(100))  # M-Pesa receipt
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    paid_at = db.Column(db.DateTime)
