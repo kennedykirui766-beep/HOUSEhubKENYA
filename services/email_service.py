@@ -120,4 +120,6 @@ def send_payment_email(to_email, tenant_name, payment_url, amount):
         return True
     except Exception as e:
         print(f"Error sending email: {e}")
+        print("SENDER_EMAIL:", os.environ.get("SENDER_EMAIL"))
+        print("SENDGRID_API_KEY:", os.environ.get("SENDGRID_API_KEY"))
         return False
