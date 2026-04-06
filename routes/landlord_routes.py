@@ -277,7 +277,7 @@ def api_generate_payment_link():
     db.session.add(link)
     db.session.commit()
 
-    payment_url = url_for("payments.pay", token=token, _external=True)
+    payment_url = url_for("landlord.pay_with_token", token=token, _external=True)
 
     return jsonify({
         "success": True,
