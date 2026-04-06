@@ -291,7 +291,7 @@ def api_generate_payment_link():
         db.session.commit()
 
         payment_url = url_for(
-            "landlord.pay",
+            "landlord.payments",
             token=token,
             _external=True
         )
