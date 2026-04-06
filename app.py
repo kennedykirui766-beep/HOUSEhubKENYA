@@ -11,7 +11,7 @@ if os.environ.get("USE_EVENTLET") == "true":
     eventlet.monkey_patch()
 from flask import Flask, redirect, url_for, flash, render_template, request, session
 from config import Config
-from extensions import db, migrate, login_manager, csrf
+from extensions import db, migrate, login_manager, csrf, mail
 from flask_socketio import SocketIO
 from flask_cors import CORS
 from models.models import User, House, ChatMessage, SupportTicket, SystemSetting
@@ -21,7 +21,6 @@ from datetime import datetime
 import os
 import logging
 from utils_security import is_approved_admin
-
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -56,6 +55,7 @@ def create_app():
     csrf.init_app(app)
     socketio = SocketIO(app, cors_allowed_origins="*")
     CORS(app)
+    mail.init_app(app)
 
     # Exempt Socket.IO routes from CSRF (since chat.html uses WebSocket)
     csrf.exempt('routes.support_routes.support_bp')

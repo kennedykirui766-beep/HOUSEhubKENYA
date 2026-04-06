@@ -3,6 +3,9 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_wtf import CSRFProtect
 from flask_socketio import SocketIO   # 👈 add this
+from flask_mail import Mail
+
+
 
 # Database
 db = SQLAlchemy()
@@ -16,6 +19,8 @@ login_manager.login_view = 'auth.login'  # 👈 should be endpoint, not template
 
 # CSRF protection
 csrf = CSRFProtect()
+
+mail = Mail()
 
 # WebSockets (real-time)
 socketio = SocketIO(cors_allowed_origins="*")  # 👈 now available everywhere

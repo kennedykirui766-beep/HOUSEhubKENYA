@@ -1,4 +1,5 @@
 from flask_mail import Message
+from extensions import mail
 
 def send_payment_email(to_email, tenant_name, payment_url, amount):
     msg = Message(
