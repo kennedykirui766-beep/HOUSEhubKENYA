@@ -508,7 +508,7 @@
             generateBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin me-2"></i> Sending...';
 
             // Fetch to API which handles email sending
-            fetch("/api/generate-payment-link", {
+            fetch("/landlord/api/generate-payment-link", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
