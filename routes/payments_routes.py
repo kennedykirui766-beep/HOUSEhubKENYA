@@ -4,7 +4,7 @@ payments_bp = Blueprint("payments", __name__, url_prefix="/payments")
 
 from flask_login import login_required, current_user
 from flask import render_template, request, redirect, url_for, flash
-from models import PaymentLink, db
+from models.models import PaymentLink, db
 
 @payments_bp.route("/pay/<string:token>", methods=["GET", "POST"])
 @login_required
