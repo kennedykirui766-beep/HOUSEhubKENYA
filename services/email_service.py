@@ -15,5 +15,16 @@ def send_payment_email(to_email, tenant_name, payment_url, amount):
         """
     )
 
-    sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
-    sg.send(message)
+    try:
+        sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
+        response = sg.send(message)
+
+        print("✅ EMAIL SENT")
+        print("STATUS:", response.status_code)
+        print("BODY:", response.body)
+
+    except Exception as e:
+        import traceback
+        print("❌ FULL SENDGRID ERROR:")
+        traceback.print_exc()
+        raise
