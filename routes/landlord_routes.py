@@ -191,7 +191,6 @@ def add_property():
     return render_template("landlord/add_property.html", stats={})
 
 # ---------------- Manage Tenants ----------------
-@csrf.exempt
 @landlord_bp.route("/tenants")
 @login_required
 def tenants():
@@ -251,7 +250,7 @@ def tenants():
         stats=stats
     )
 
-
+@csrf.exempt
 @landlord_bp.route("/api/generate-payment-link", methods=["POST"])
 @login_required
 def api_generate_payment_link():
