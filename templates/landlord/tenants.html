@@ -139,7 +139,7 @@
         color: var(--primary-color);
     }
     
-    /* --- Modal Styling (The "Pop Page") --- */
+    /* --- Modal Styling --- */
     .modal-content {
         border: none;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
@@ -196,9 +196,11 @@
         padding: 1rem;
     }
     
-    /* Step 2: Success Box */
+    /* Step 2: Success Box (Email Sent) */
     .success-box {
         animation: fadeIn 0.5s ease;
+        text-align: center;
+        padding: 1rem 0;
     }
 
     @keyframes fadeIn {
@@ -206,48 +208,17 @@
         to { opacity: 1; transform: translateY(0); }
     }
     
-    /* Generated Link Input Group */
-    .link-input-group {
-        position: relative;
-        display: flex;
-        align-items: stretch;
-    }
-    
-    .link-input-group .form-control {
-        border-right: none;
-        background-color: #f8f9fa;
-        font-family: 'Courier New', monospace;
-        font-size: 0.9rem;
-        color: #555;
-    }
-    
-    .link-input-group .btn {
-        border-left: none;
-        background-color: #fff;
-        border-color: var(--border-color);
-        color: var(--text-secondary);
-        transition: all 0.2s;
-    }
-    
-    .link-input-group .btn:hover {
-        background-color: var(--primary-color);
-        color: white;
-        border-color: var(--primary-color);
-    }
-    
-    .copy-feedback { 
-        font-size: 0.85rem; 
-        color: #28a745; 
+    .sent-email-display {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius-md);
+        display: inline-block;
+        margin-top: 0.5rem;
         font-weight: 600;
-        opacity: 0; 
-        transition: opacity 0.3s;
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 5px;
+        font-size: 0.95rem;
+        border: 1px solid #c8e6c9;
     }
-    
-    .copy-feedback.show { opacity: 1; }
 
     /* Status Badges */
     .status-badge {
@@ -290,7 +261,6 @@
     <!-- Tenants Grid -->
     {% if tenants %}
     <div class="row g-4" id="tenantList">
-        <!-- Iterating over the dictionary list passed from the route -->
         {% for t in tenants %}
         
         <div class="col-12 col-md-6 col-xl-4 tenant-item" 
@@ -354,7 +324,7 @@
                     <!-- Actions -->
                     <div class="tenant-actions">
                         <!-- UPDATED LEASE BUTTON -->
-                        <!-- Mapping dictionary keys to data attributes -->
+                        <!-- Using security_deposit from new route -->
                         <button type="button" 
                                 class="btn btn-outline-secondary btn-sm-custom"
                                 data-bs-toggle="modal" 
@@ -412,7 +382,7 @@
                 <!-- Step 1: Review Details -->
                 <div id="leaseReviewStep">
                     <p class="text-muted mb-3" style="font-size: 0.95rem; line-height: 1.5;">
-                        Please confirm the details below to generate a secure signing link for the tenant.
+                        Confirm the details below to generate and send a secure payment link to the tenant.
                     </p>
                     
                     <div class="review-box mb-3">
@@ -431,38 +401,34 @@
                     </div>
 
                     <div class="alert alert-info d-flex align-items-start gap-2" style="font-size: 0.85rem; padding: 0.75rem 1rem; border-radius: var(--radius-md); background-color: #e7f1ff; border-color: #b6d4fe; color: #084298;">
-                        <i class="fas fa-shield-alt mt-1"></i>
-                        <span>The generated link will allow the tenant to review and digitally sign the lease agreement securely.</span>
+                        <i class="fas fa-envelope-open-text mt-1"></i>
+                        <span>An email containing the payment link will be sent automatically upon generation.</span>
                     </div>
                 </div>
 
-                <!-- Step 2: Generated Link (Hidden by default) -->
+                <!-- Step 2: Email Sent Success (Hidden by default) -->
                 <div id="generatedLinkArea" class="success-box">
-                    <div class="text-center mb-4">
-                        <div class="mb-3">
-                            <i class="fas fa-check-circle text-success" style="font-size: 4rem; filter: drop-shadow(0 4px 6px rgba(40, 167, 69, 0.25));"></i>
-                        </div>
-                        <h5 class="fw-bold" style="color: var(--text-primary);">Agreement Ready!</h5>
-                        <p class="text-muted small mb-0">Share this secure link with the tenant to complete the signing process.</p>
+                    <div class="mb-3">
+                        <i class="fas fa-paper-plane text-success" style="font-size: 4rem; filter: drop-shadow(0 4px 6px rgba(40, 167, 69, 0.25));"></i>
+                    </div>
+                    <h5 class="fw-bold" style="color: var(--text-primary);">Link Sent Successfully!</h5>
+                    <p class="text-muted small mb-2">The secure payment link has been emailed to:</p>
+                    
+                    <div class="sent-email-display">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <span id="emailSentTo">email@example.com</span>
                     </div>
                     
-                    <label class="small text-muted fw-bold mb-1 d-block">SIGNING LINK</label>
-                    <div class="link-input-group mb-2">
-                        <input type="text" class="form-control" id="leaseLinkInput" readonly value="">
-                        <button class="btn" type="button" id="copyLinkBtn" title="Copy to clipboard">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-                    <div class="text-end mt-2">
-                        <span class="copy-feedback" id="copyFeedback"><i class="fas fa-check"></i> Copied!</span>
-                    </div>
+                    <p class="text-muted small mt-3 mb-0">
+                        Please ask the tenant to check their inbox (and spam folder) to complete the deposit payment.
+                    </p>
                 </div>
             </div>
             
             <div class="modal-footer" id="leaseModalFooter">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border: 1px solid var(--border-color); font-weight: 500;">Cancel</button>
                 <button type="button" class="btn btn-primary-custom" id="generateLeaseBtn" style="padding: 0.5rem 1.5rem;">
-                    <i class="fas fa-magic me-2"></i> Confirm & Generate Link
+                    <i class="fas fa-paper-plane me-2"></i> Send Payment Link
                 </button>
             </div>
         </div>
@@ -497,19 +463,20 @@
         const reviewStep = document.getElementById('leaseReviewStep');
         const linkArea = document.getElementById('generatedLinkArea');
         const modalFooter = document.getElementById('leaseModalFooter');
-        const linkInput = document.getElementById('leaseLinkInput');
         
-        // 🧠 2. Store booking_id in JS
+        // Store IDs for API call
         let currentBookingId = null;
+        let currentTenantEmail = null;
 
         // 1. Populate Modal Data when opened
         leaseModal.addEventListener('show.bs.modal', function (event) {
             const button = event.relatedTarget;
             
-            // 🧠 Store the ID
+            // Store Data
             currentBookingId = button.getAttribute('data-booking-id');
+            currentTenantEmail = button.getAttribute('data-tenant-email');
             
-            // Extract other data
+            // Extract display data
             const tenantName = button.getAttribute('data-tenant-name');
             const houseTitle = button.getAttribute('data-house-title');
             const deposit = button.getAttribute('data-deposit');
@@ -522,14 +489,14 @@
             // Reset Modal State to defaults
             reviewStep.style.display = 'block';
             linkArea.style.display = 'none';
-            modalFooter.style.display = 'flex'; // Show footer with buttons
+            modalFooter.style.display = 'flex'; 
             
             // Reset button state
-            generateBtn.innerHTML = '<i class="fas fa-magic me-2"></i> Confirm & Generate Link';
+            generateBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Send Payment Link';
             generateBtn.disabled = false;
         });
 
-        // 2. Handle Generate Button Click with REAL fetch
+        // 2. Handle Generate Button Click (Triggers Email)
         generateBtn.addEventListener('click', function() {
             if (!currentBookingId) {
                 console.error("No Booking ID found");
@@ -538,10 +505,10 @@
             }
 
             generateBtn.disabled = true;
-            generateBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin me-2"></i> Generating...';
+            generateBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin me-2"></i> Sending...';
 
-            // ⚡ Replace fake JS with REAL fetch
-            fetch("/landlord/api/generate-payment-link", {
+            // Fetch to API which handles email sending
+            fetch("/api/generate-payment-link", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -553,50 +520,34 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    linkInput.value = data.payment_url;
-
-                    // UI Transition
+                    // Update UI to show Email Sent State
+                    document.getElementById('emailSentTo').textContent = currentTenantEmail;
+                    
                     reviewStep.style.display = 'none';
                     linkArea.style.display = 'block';
-                    modalFooter.style.display = 'none'; // Hide footer buttons in success state
+                    modalFooter.style.display = 'none'; // Hide footer buttons
                 } else {
                     alert("Error generating link: " + (data.message || "Unknown error"));
                     generateBtn.disabled = false;
-                    generateBtn.innerHTML = '<i class="fas fa-magic me-2"></i> Confirm & Generate Link';
+                    generateBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Send Payment Link';
                 }
             })
             .catch(err => {
                 console.error(err);
                 alert("Something went wrong. Please check your connection.");
                 generateBtn.disabled = false;
-                generateBtn.innerHTML = '<i class="fas fa-magic me-2"></i> Confirm & Generate Link';
-            });
-        });
-
-        // 3. Handle Copy to Clipboard
-        document.getElementById('copyLinkBtn').addEventListener('click', function() {
-            linkInput.select();
-            linkInput.setSelectionRange(0, 99999); // For mobile devices
-            
-            navigator.clipboard.writeText(linkInput.value).then(() => {
-                const feedback = document.getElementById('copyFeedback');
-                feedback.classList.add('show');
-                setTimeout(() => {
-                    feedback.classList.remove('show');
-                }, 2000);
-            }).catch(err => {
-                console.error('Failed to copy: ', err);
+                generateBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Send Payment Link';
             });
         });
 
         // Reset modal completely when hidden
         leaseModal.addEventListener('hidden.bs.modal', function () {
-            // Wait for fade out animation then reset
             setTimeout(() => {
                 reviewStep.style.display = 'block';
                 linkArea.style.display = 'none';
                 modalFooter.style.display = 'flex';
                 currentBookingId = null;
+                currentTenantEmail = null;
             }, 200);
         });
     });
