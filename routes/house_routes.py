@@ -90,6 +90,7 @@ def edit_property(property_id):
         abort(403)  # Forbidden if not the owner
     return render_template('edit_property.html', property=property)
 
+@csrf.exempt
 @house_bp.route('/request_rental/<int:property_id>', methods=['POST'])
 @login_required
 def request_rental(property_id):
