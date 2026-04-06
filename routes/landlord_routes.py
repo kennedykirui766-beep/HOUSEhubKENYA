@@ -268,6 +268,7 @@ def api_generate_payment_link():
     link = PaymentLink(
         token=token,
         landlord_id=current_user.id,
+        booking_id=booking.id,
         house_id=booking.house_id,
         amount=booking.house.security_deposit,
         status="pending"
