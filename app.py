@@ -135,6 +135,9 @@ def create_app():
     from routes.house_routes import house_bp
     from routes.main import main_bp
     from routes.support_routes import support_bp
+    from routes.payments_routes import payments_bp
+
+
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(landlord_bp)
@@ -144,6 +147,7 @@ def create_app():
     app.register_blueprint(house_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(support_bp)
+    app.register_blueprint(payments_bp)
 
     # Routes
     @app.route('/')
