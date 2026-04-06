@@ -269,7 +269,7 @@ def api_generate_payment_link():
         token=token,
         landlord_id=current_user.id,
         house_id=booking.house_id,
-        amount=booking.deposit_amount,
+        amount=booking.house.security_deposit,
         status="pending"
     )
 
