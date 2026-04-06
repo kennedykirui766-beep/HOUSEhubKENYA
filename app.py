@@ -1,6 +1,8 @@
 import os
 
 from dotenv import load_dotenv
+import flask
+from flask_migrate import upgrade
 
 load_dotenv()
 
@@ -248,9 +250,4 @@ app, socketio = create_app()
 
 # Run
 if __name__ == '__main__':
-    with app.app_context():
-        try:
-            db.create_all()  # Create tables if needed
-        except Exception as e:
-            app.logger.error(f"Error creating database tables: {str(e)}")
     socketio.run(app, debug=True, use_reloader=False)
