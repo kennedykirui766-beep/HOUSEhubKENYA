@@ -4,7 +4,7 @@ import os
 
 def send_payment_email(to_email, tenant_name, payment_url, amount):
     message = Mail(
-        from_email="SENDER_EMAIL",
+        from_email=("HouseHub Kenya", os.environ.get("SENDER_EMAIL")),
         to_emails=to_email,
         subject="Deposit Payment Request",
         html_content=f"""
