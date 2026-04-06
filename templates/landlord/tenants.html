@@ -181,6 +181,10 @@
         font-weight: 600; 
         color: var(--text-primary); 
         text-align: right;
+        max-width: 60%; /* Prevent long emails from breaking layout */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
     
     .lease-highlight { 
@@ -390,6 +394,11 @@
                             <span class="lease-label">Tenant Name</span>
                             <span class="lease-value" id="modalTenantName">...</span>
                         </div>
+                        <!-- UPDATED: Added Email Display -->
+                        <div class="lease-detail-row">
+                            <span class="lease-label">Tenant Email</span>
+                            <span class="lease-value" id="modalTenantEmail">...</span>
+                        </div>
                         <div class="lease-detail-row">
                             <span class="lease-label">Property Unit</span>
                             <span class="lease-value" id="modalHouseTitle">...</span>
@@ -483,6 +492,8 @@
 
             // Update modal DOM
             document.getElementById('modalTenantName').textContent = tenantName;
+            // UPDATED: Set Email in the modal review step
+            document.getElementById('modalTenantEmail').textContent = currentTenantEmail;
             document.getElementById('modalHouseTitle').textContent = houseTitle;
             document.getElementById('modalDeposit').textContent = 'Ksh ' + deposit;
 
@@ -508,7 +519,7 @@
             generateBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin me-2"></i> Sending...';
 
             // Fetch to API which handles email sending
-            fetch("/landlord/api/generate-payment-link", {
+            fetch("/api/generate-payment-link", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
