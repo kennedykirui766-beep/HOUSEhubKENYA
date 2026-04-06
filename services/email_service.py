@@ -1,28 +1,19 @@
-from flask_mail import Message
-from extensions import mail
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+import os
 
 def send_payment_email(to_email, tenant_name, payment_url, amount):
-    msg = Message(
+    message = Mail(
+        from_email="kennedykirui76@gmail.com",
+        to_emails=to_email,
         subject="Deposit Payment Request",
-        recipients=[to_email]
+        html_content=f"""
+        <h3>Hello {tenant_name},</h3>
+        <p>You have a deposit payment request.</p>
+        <p><strong>Amount:</strong> KES {amount}</p>
+        <p><a href="{payment_url}">Pay Now</a></p>
+        """
     )
 
-    # ✅ PUT IT HERE (inside the function)
-    msg.html = f"""
-    <h3>Hello {tenant_name},</h3>
-
-    <p>You have a deposit payment request.</p>
-
-    <p><strong>Amount:</strong> KES {amount}</p>
-
-    <p>
-        <a href="{payment_url}" 
-           style="padding:10px 15px; background:#28a745; color:white; text-decoration:none;">
-            Pay Now
-        </a>
-    </p>
-
-    <p>Thank you.</p>
-    """
-
-    mail.send(msg)
+    sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
+    sg.send(message)
