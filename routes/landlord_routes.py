@@ -227,6 +227,7 @@ def tenants():
             "house_title": house.title,
             "house_location": house.location,
             "rent_amount": house.rent_amount,
+            "security_deposit": house.security_deposit,
 
             "booking_id": booking.id,
             "status": booking.status,
