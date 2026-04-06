@@ -10,6 +10,8 @@ from models.models import Message, PaymentLink, User, House, Booking, Payment, M
 import cloudinary.uploader
 import json
 
+from services.email_service import send_payment_email
+
 
 # Logging setup
 logging.basicConfig(level=logging.DEBUG)
@@ -254,82 +256,79 @@ def tenants():
 @landlord_bp.route("/api/generate-payment-link", methods=["POST"])
 @login_required
 def api_generate_payment_link():
-    data = request.get_json()
-    booking_id = data.get("booking_id")
+    try:
+        data = request.get_json()
+        booking_id = data.get("booking_id")
 
-    booking = Booking.query.get_or_404(booking_id)
+        if not booking_id:
+            return jsonify({
+                "success": False,
+                "message": "Missing booking ID"
+            }), 400
 
-    if booking.house.owner_id != current_user.id:
-        return jsonify({"error": "Unauthorized"}), 403
+        booking = Booking.query.get_or_404(booking_id)
 
-    import uuid
-    token = str(uuid.uuid4())
+        # 🚫 Authorization check
+        if booking.house.owner_id != current_user.id:
+            return jsonify({
+                "success": False,
+                "message": "Unauthorized access"
+            }), 403
 
-    link = PaymentLink(
-        token=token,
-        landlord_id=current_user.id,
-        booking_id=booking.id,
-        house_id=booking.house_id,
-        amount=booking.house.security_deposit,
-        status="pending"
-    )
+        import uuid
+        token = str(uuid.uuid4())
 
-    db.session.add(link)
-    db.session.commit()
+        link = PaymentLink(
+            token=token,
+            landlord_id=current_user.id,
+            booking_id=booking.id,
+            house_id=booking.house_id,
+            amount=booking.house.security_deposit,
+            status="pending"
+        )
 
-    payment_url = url_for("landlord.pay", token=token, _external=True)
+        db.session.add(link)
+        db.session.commit()
 
-    return jsonify({
-        "success": True,
-        "payment_url": payment_url
-    })
+        payment_url = url_for(
+            "landlord.pay",
+            token=token,
+            _external=True
+        )
 
-@csrf.exempt
-@landlord_bp.route("/pay/<string:token>", methods=["GET", "POST"])
-def pay(token):
-    """
-    Public payment page accessed via unique token.
-    """
-
-    # 🔍 Find payment link
-    link = PaymentLink.query.filter_by(token=token).first_or_404()
-
-    # 🚫 Prevent reuse
-    if link.status == "paid":
-        flash("This payment link has already been used.", "warning")
-        return render_template("payments/already_paid.html", link=link)
-
-    # 📝 Handle payment submission
-    if request.method == "POST":
-        phone = request.form.get("phone")
-
-        if not phone:
-            flash("Phone number is required.", "danger")
-            return redirect(request.url)
-
+        # ✅ SEND EMAIL
         try:
-            from datetime import datetime
-
-            # 💰 Simulate payment (replace with M-Pesa later)
-            link.phone = phone
-            link.status = "paid"
-            link.transaction_id = f"TXN-{datetime.utcnow().timestamp()}"
-            link.paid_at = datetime.utcnow()
-
-            # 🔗 OPTIONAL: update booking
-            if link.booking:
-                link.booking.status = "approved"
-
-            db.session.commit()
-
-            flash("Payment successful!", "success")
-            return redirect(url_for("landlord.payment_success", token=token))
-
+            send_payment_email(
+                to_email=booking.tenant.email,
+                tenant_name=booking.tenant.name,
+                payment_url=payment_url,
+                amount=link.amount
+            )
         except Exception as e:
-            db.session.rollback()
-            flash("Payment failed. Try again.", "danger")
+            import traceback
+            print("❌ EMAIL FAILED:")
+            traceback.print_exc()
 
-    return render_template("payments/pay.html", link=link)
+            # ❗ Return failure instead of pretending success
+            return jsonify({
+                "success": False,
+                "message": f"Email sending failed: {str(e)}"
+            }), 500
+
+        return jsonify({
+            "success": True,
+            "payment_url": payment_url
+        })
+
+    except Exception as e:
+        import traceback
+        print("❌ API ERROR:")
+        traceback.print_exc()
+
+        return jsonify({
+            "success": False,
+            "message": f"Server error: {str(e)}"
+        }), 500
 
 # ---------------- Payments ----------------
 @landlord_bp.route("/payments")
