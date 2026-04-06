@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 {% extends "base.html" %}
 
 {% block styles %}
@@ -272,28 +271,3 @@
     });
 </script>
 {% endblock %}
-=======
-{% extends 'base.html' %}
-{% block title %}Tenants{% endblock %}
-{% block content %}
-<div class="container">
-  <h1>Tenants</h1>
-  {% if tenants %}
-    <table class="table">
-      <thead><tr><th>Name</th><th>Property</th><th>Booking</th></tr></thead>
-      <tbody>
-        {% for user, booking, house in tenants %}
-        <tr>
-          <td>{{ user.name }}</td>
-          <td>{{ house.title }}</td>
-          <td>{{ booking.start_date }} — {{ booking.end_date }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p>No tenants found.</p>
-  {% endif %}
-</div>
-{% endblock %}
->>>>>>> 44bda37c77b395d89aa8e46aa7551e245eae0f4b
