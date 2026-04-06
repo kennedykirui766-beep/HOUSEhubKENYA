@@ -1,36 +1,112 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container py-5" style="max-width: 500px;">
-    
-    <div class="card shadow-sm border-0 rounded-4 p-4">
-        <h4 class="fw-bold mb-3 text-center">Secure Payment</h4>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            
+            <!-- Flash Messages (Errors/Success/Warnings) -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="mb-4">
+                        {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
 
-        <p class="text-muted text-center mb-4">
-            Complete your deposit payment
-        </p>
+            <!-- Main Payment Card -->
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                
+                <!-- Card Header -->
+                <div class="bg-primary text-white text-center p-4">
+                    <div class="mb-2">
+                        <!-- Lock Icon SVG -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-shield-lock-fill" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M8 0c-.69 0-1.843.265-2.928.56-1.11.3-2.229.655-2.887.87a1.54 1.54 0 0 0-1.044 1.262c-.596 4.477.787 7.795 2.465 9.99a11.775 11.775 0 0 0 2.517 2.453 7.159 7.159 0 0 0 1.048.625c.28.132.581.24.829.24s.548-.108.829-.24a7.158 7.158 0 0 0 1.048-.625 11.777 11.777 0 0 0 2.517-2.453c1.678-2.195 3.061-5.513 2.465-9.99a1.541 1.541 0 0 0-1.044-1.263 62.467 62.467 0 0 0-2.887-.87C9.843.266 8.69 0 8 0zm0 5a1 1 0 0 1 .995.905l.02 2.593 1.704 1.072a1 1 0 0 1-1.072 1.645l-2-1.25A1 1 0 0 1 7 9V6a1 1 0 0 1 1-1z"/>
+                        </svg>
+                    </div>
+                    <h4 class="fw-bold mb-1">Secure Payment</h4>
+                    <p class="mb-0 opacity-75 small">Complete your deposit payment safely</p>
+                </div>
 
-        <div class="mb-3">
-            <strong>Amount:</strong>
-            <span class="text-success fw-bold">KES {{ link.amount }}</span>
-        </div>
+                <div class="card-body p-4 p-md-5">
+                    
+                    <!-- Payment Details -->
+                    <div class="bg-light rounded-3 p-4 mb-4 border">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted fw-medium">Amount to Pay</span>
+                            <span class="badge bg-warning text-dark fw-bold text-uppercase">{{ link.status }}</span>
+                        </div>
+                        <div class="d-flex align-items-baseline">
+                            <span class="h2 mb-0 fw-bold text-success">KES {{ "{:,.2f}".format(link.amount) }}</span>
+                        </div>
+                        {% if link.booking %}
+                        <div class="mt-2 small text-muted border-top pt-2">
+                            Payment for Booking #{{ link.booking.id }}
+                        </div>
+                        {% endif %}
+                    </div>
 
-        <div class="mb-3">
-            <strong>Status:</strong>
-            <span class="badge bg-warning text-dark">{{ link.status }}</span>
-        </div>
+                    <!-- Payment Form -->
+                    <form method="POST" id="paymentForm">
+                        <div class="mb-4">
+                            <label for="phone" class="form-label fw-bold">M-Pesa Phone Number</label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-telephone-fill text-primary" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.676.676 0 0 0-.58-.122l-2.19.547a1.748 1.748 0 0 1-1.657-.459L5.482 8.062a1.748 1.748 0 0 1-.46-1.657l.548-2.19a.678.678 0 0 0-.122-.58L3.654 1.328zM1.884.511a1.745 1.745 0 0 1 2.612.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.678.678 0 0 0 .178.643l2.457 2.457a.678.678 0 0 0 .644.178l2.189-.547a1.745 1.745 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.634 18.634 0 0 1-7.01-4.42 18.634 18.634 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877L1.885.511z"/>
+                                    </svg>
+                                </span>
+                                <input type="tel" 
+                                       class="form-control border-start-0 ps-0" 
+                                       id="phone" 
+                                       name="phone" 
+                                       placeholder="2547XXXXXXXX" 
+                                       pattern="[0-9]*" 
+                                       inputmode="numeric"
+                                       required
+                                       oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                            </div>
+                            <div class="form-text mt-2">A payment prompt will be sent to your phone.</div>
+                        </div>
 
-        <form method="POST">
-            <div class="mb-3">
-                <label class="form-label">Phone Number (M-Pesa)</label>
-                <input type="text" name="phone" class="form-control" placeholder="e.g. 254712345678" required>
+                        <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-3 shadow-sm" id="payButton">
+                            <span id="btnText">Pay Now</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Card Footer -->
+                <div class="bg-light border-top p-3 text-center">
+                    <small class="text-muted d-flex align-items-center justify-content-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-shaded-lock-fill" viewBox="0 0 16 16">
+                            <path d="M10 2a5 5 0 0 0-5 5v3a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2V7a5 5 0 0 0-5-5zm0 2a3 3 0 0 1 3 3v3H7V7a3 3 0 0 1 3-3z"/>
+                        </svg>
+                        256-bit SSL Encrypted Payment
+                    </small>
+                </div>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100">
-                Pay Now
-            </button>
-        </form>
+        </div>
     </div>
-
 </div>
+
+<!-- Script to handle UX improvements -->
+<script>
+    document.getElementById('paymentForm').addEventListener('submit', function() {
+        var btn = document.getElementById('payButton');
+        var btnText = document.getElementById('btnText');
+        
+        // Disable button and show loading state
+        btn.disabled = true;
+        btnText.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-secondary');
+    });
+</script>
 {% endblock %}

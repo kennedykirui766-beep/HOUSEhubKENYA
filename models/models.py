@@ -492,12 +492,16 @@ class SystemSetting(db.Model):
             raise
 
 
+from datetime import datetime, timedelta
+from extensions import db
+
 class PaymentLink(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     token = db.Column(db.String(100), unique=True, nullable=False)
 
     landlord_id = db.Column(db.Integer, nullable=False)
+    tenant_id = db.Column(db.Integer, nullable=True)  # ✅ ADD THIS
     booking_id = db.Column(db.Integer, nullable=False)
     house_id = db.Column(db.Integer, nullable=False)
 
@@ -511,4 +515,16 @@ class PaymentLink(db.Model):
     transaction_id = db.Column(db.String(100))  # M-Pesa receipt
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # ⏳ NEW: expiry
+    expires_at = db.Column(
+        db.DateTime,
+        default=lambda: datetime.utcnow() + timedelta(hours=24)
+    )
+
     paid_at = db.Column(db.DateTime)
+
+    # 🔍 Optional: helper property
+    @property
+    def is_expired(self):
+        return datetime.utcnow() > self.expires_at
