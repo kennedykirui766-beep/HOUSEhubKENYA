@@ -282,6 +282,7 @@ def api_generate_payment_link():
             token=token,
             landlord_id=current_user.id,
             booking_id=booking.id,
+            tenant_id=booking.tenant_id,
             house_id=booking.house_id,
             amount=booking.house.security_deposit,
             status="pending"
@@ -291,7 +292,7 @@ def api_generate_payment_link():
         db.session.commit()
 
         payment_url = url_for(
-            "landlord.payments",
+            "payments.pay",
             token=token,
             _external=True
         )
