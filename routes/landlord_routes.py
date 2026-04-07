@@ -276,6 +276,8 @@ def api_generate_payment_link():
             }), 403
 
         import uuid
+        from datetime import datetime, timedelta  # ✅ ADD THIS
+
         token = str(uuid.uuid4())
 
         link = PaymentLink(
@@ -285,7 +287,8 @@ def api_generate_payment_link():
             tenant_id=booking.tenant_id,
             house_id=booking.house_id,
             amount=booking.house.security_deposit,
-            status="pending"
+            status="pending",
+            expires_at=datetime.utcnow() + timedelta(minutes=10)  # ✅ 10 MIN EXPIRY
         )
 
         db.session.add(link)

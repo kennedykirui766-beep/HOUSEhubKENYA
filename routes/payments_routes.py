@@ -39,6 +39,26 @@ def pay(token):
             flash("Phone number is required.", "danger")
             return redirect(request.url)
 
+        # ✅ CLEAN + NORMALIZE PHONE NUMBER
+        phone = phone.strip()
+
+        # Remove spaces and plus sign
+        phone = phone.replace(" ", "").replace("+", "")
+
+        # 🔄 Convert formats to 254XXXXXXXXX (recommended for M-Pesa)
+        if phone.startswith("0") and len(phone) == 10:
+            phone = "254" + phone[1:]  # 07... → 2547...
+
+        elif phone.startswith("7") and len(phone) == 9:
+            phone = "254" + phone  # 7411... → 2547411...
+
+        elif phone.startswith("254") and len(phone) == 12:
+            pass  # already correct
+
+        else:
+            flash("Enter a valid phone number (e.g. 741117778, 0741117778, or 254741117778).", "danger")
+            return redirect(request.url)
+
         try:
             # 💰 Process payment (simulated)
             link.phone = phone
