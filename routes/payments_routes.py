@@ -44,11 +44,6 @@ def pay(token):
         flash("Previous payment failed. Please try again.", "danger")
         return redirect(url_for("payments.failed", token=token))
 
-    # Only redirect to pending if coming from POST (not fresh email click)
-    #if link.status == "pending" and request.method == "POST":
-        #flash("Payment is already in progress. Please complete on your phone.", "info")
-        #return redirect(url_for("payments.pending", token=token))
-
     # Optional: If user is logged in, verify ownership
     if current_user.is_authenticated:
         if link.tenant_id != current_user.id:
@@ -86,18 +81,26 @@ def pay(token):
             # TRIGGER STK PUSH
             stk_response = stk_push(phone, link.amount)
             print("📲 STK RESPONSE:", stk_response)
-            
-            checkout_request_id = stk_response.get("CheckoutRequestID")
+
+            # ✅ FIX: Proper extraction of CheckoutRequestID
+            checkout_request_id = (
+                stk_response.get("CheckoutRequestID") or
+                stk_response.get("checkout_request_id") or
+                (stk_response.get("response") or {}).get("CheckoutRequestID")
+            )
 
             if not checkout_request_id:
                 raise Exception("Missing CheckoutRequestID from STK response")
 
+            # ✅ SAVE CheckoutRequestID FIRST
             link.checkout_request_id = checkout_request_id
 
             # Save details (DO NOT mark as paid)
             link.phone = phone
             link.transaction_id = f"TXN-{datetime.utcnow().timestamp()}"
-            link.paid_at = datetime.utcnow()
+
+            # ❌ REMOVE THIS (wrong to set before payment)
+            # link.paid_at = datetime.utcnow()
 
             #  Set to pending (wait for callback)
             link.status = "pending"
@@ -111,21 +114,18 @@ def pay(token):
         except Exception as e:
             print(" STK ERROR:", e)
             db.session.rollback()
+
             link.status = "failed"
             db.session.commit()
 
             flash("Payment failed. Try again.", "danger")
 
-    
+    # Final redirects
     if link.status == "paid":
         return redirect(url_for("payments.success", token=token))
 
     if link.status == "failed":
         return redirect(url_for("payments.failed", token=token))
-
-    #if link.status == "pending" and request.method == "POST":
-        #flash("A payment attempt was started. You can retry if you didn’t complete it.", "info")
-        #return redirect(url_for("payments.pending", token=token))
 
     return render_template("payments/pay.html", link=link)
 
