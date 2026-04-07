@@ -33,6 +33,9 @@ def stk_push(phone, amount):
         "Content-Type": "application/json"
     }
 
+    # ✅ USE ENV VARIABLE (FIX)
+    callback_url = os.environ.get("MPESA_CALLBACK_URL")
+
     payload = {
         "BusinessShortCode": shortcode,
         "Password": password,
@@ -42,8 +45,7 @@ def stk_push(phone, amount):
         "PartyA": phone,
         "PartyB": shortcode,
         "PhoneNumber": phone,
-        # ✅ FIXED CALLBACK URL
-        "CallBackURL": "https://yourdomain.com/payments/api/mpesa/callback",
+        "CallBackURL": callback_url,  # ✅ FIXED
         "AccountReference": "HouseHub",
         "TransactionDesc": "Payment"
     }
@@ -51,9 +53,9 @@ def stk_push(phone, amount):
     response = requests.post(stk_url, json=payload, headers=headers)
     res_data = response.json()
 
-    print("📦 STK RESPONSE:", res_data)  # ✅ DEBUG
+    print("📦 STK RESPONSE:", res_data)
 
-    # ✅ Extract CheckoutRequestID for callback mapping
+    # ✅ Extract CheckoutRequestID
     checkout_request_id = res_data.get("CheckoutRequestID")
 
     return {
