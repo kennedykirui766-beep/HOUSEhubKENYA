@@ -219,6 +219,8 @@ def mpesa_callback():
             print("No metadata found in success callback")
 
         return {"ResultCode": 0, "ResultDesc": "Accepted"}
+    
+
 
     except Exception as e:
         import traceback
@@ -229,7 +231,6 @@ def mpesa_callback():
 
 
 @payments_bp.route("/success/<string:token>")
-@login_required
 def success(token):
     link = PaymentLink.query.filter_by(token=token).first_or_404()
 
@@ -257,3 +258,9 @@ def pending(token):
         return redirect(url_for("payments.success", token=token))
 
     return render_template("payments/pending.html", link=link)
+
+@payments_bp.route("/already-paid/<string:token>")
+def already_paid(token):
+    link = PaymentLink.query.filter_by(token=token).first_or_404()
+
+    return render_template("payments/already_paid.html", link=link)

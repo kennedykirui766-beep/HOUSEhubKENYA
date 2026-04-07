@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            
+            <!-- Already Paid Card -->
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-body p-0">
+                    
+                    <!-- Header Section -->
+                    <div class="bg-success text-white text-center p-5 pb-4">
+                        <div class="mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                            </svg>
+                        </div>
+                        <h2 class="fw-bold">Payment Completed</h2>
+                        <p class="opacity-75 mb-0">This transaction has already been processed.</p>
+                    </div>
+
+                    <!-- Details Section -->
+                    <div class="p-4 p-md-5">
+                        
+                        <div class="alert alert-success d-flex align-items-center border-0 shadow-sm mb-4" role="alert">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-info-circle-fill flex-shrink-0 me-2" viewBox="0 0 16 16">
+                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                            </svg>
+                            <div>
+                                You have successfully paid for this item. There is no need to pay again.
+                            </div>
+                        </div>
+
+                        <div class="text-center mb-4">
+                            <p class="text-muted small text-uppercase fw-bold ls-1">Amount Paid</p>
+                            <h1 class="fw-bold text-success mb-0">KES {{ "{:,.2f}".format(link.amount) }}</h1>
+                        </div>
+
+                        <!-- Transaction Details -->
+                        <div class="bg-light rounded-3 p-4 mb-4 border">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <span class="d-block small text-muted">Transaction ID</span>
+                                    <span class="fw-mono font-monospace text-dark">{{ link.transaction_id }}</span>
+                                </div>
+                                <div class="col-6 border-top pt-3">
+                                    <span class="d-block small text-muted">Date Paid</span>
+                                    <span class="fw-bold text-dark">
+                                        {{ link.paid_at.strftime('%d %b %Y') if link.paid_at else 'N/A' }}
+                                    </span>
+                                </div>
+                                <div class="col-6 border-top pt-3 text-md-end">
+                                    <span class="d-block small text-muted">Time</span>
+                                    <span class="fw-bold text-dark">
+                                        {{ link.paid_at.strftime('%I:%M %p') if link.paid_at else 'N/A' }}
+                                    </span>
+                                </div>
+                                {% if link.booking %}
+                                <div class="col-12 border-top pt-3 mt-1">
+                                    <span class="d-block small text-muted">Booking Reference</span>
+                                    <span class="fw-bold text-dark">#{{ link.booking.id }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('tenant.dashboard') }}" class="btn btn-success btn-lg rounded-3 fw-bold shadow-sm">
+                                Go to Dashboard
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
