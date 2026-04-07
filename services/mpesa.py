@@ -45,7 +45,7 @@ def stk_push(phone, amount):
         "PartyA": phone,
         "PartyB": shortcode,
         "PhoneNumber": phone,
-        "CallBackURL": callback_url,  # ✅ FIXED
+        "CallBackURL": callback_url,
         "AccountReference": "HouseHub",
         "TransactionDesc": "Payment"
     }
@@ -58,9 +58,17 @@ def stk_push(phone, amount):
     # ✅ Extract CheckoutRequestID
     checkout_request_id = res_data.get("CheckoutRequestID")
 
+    # 🚨 IMPORTANT FIX: SAVE TO DATABASE
+    if checkout_request_id:
+        link = PaymentLink.query.filter_by(phone=phone).order_by(PaymentLink.id.desc()).first()
+
+        if link:
+            link.checkout_request_id = checkout_request_id
+            db.session.commit()
+            print("✅ CheckoutRequestID saved:", checkout_request_id)
+
     return {
         "response": res_data,
         "checkout_request_id": checkout_request_id
     }
-
 
