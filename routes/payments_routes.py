@@ -238,7 +238,27 @@ def success(token):
         flash("Unauthorized access.", "danger")
         return redirect(url_for("tenant.dashboard"))
 
-    return render_template("payments/success.html", link=link)
+    # ✅ Convert time to East Africa Time (EAT)
+    import pytz
+    from datetime import timezone
+
+    eat = pytz.timezone("Africa/Nairobi")  # EAT timezone
+
+    created_at_eat = None
+    if link.created_at:
+        # Ensure datetime is timezone-aware (assume UTC if naive)
+        if link.created_at.tzinfo is None:
+            created_at_utc = link.created_at.replace(tzinfo=timezone.utc)
+        else:
+            created_at_utc = link.created_at
+
+        created_at_eat = created_at_utc.astimezone(eat)
+
+    return render_template(
+        "payments/success.html",
+        link=link,
+        created_at_eat=created_at_eat  # pass converted time
+    )
 
 @payments_bp.route("/failed/<string:token>")
 def failed(token):
