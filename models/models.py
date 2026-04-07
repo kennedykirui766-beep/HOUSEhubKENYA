@@ -2,7 +2,7 @@ from extensions import db
 from flask_login import UserMixin
 from sqlalchemy import event, func, select
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+from datetime import datetime, timedelta
 import secrets
 import string
 
@@ -490,10 +490,7 @@ class SystemSetting(db.Model):
             except Exception:
                 pass
             raise
-
-
-from datetime import datetime, timedelta
-from extensions import db
+        
 
 class PaymentLink(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -515,6 +512,7 @@ class PaymentLink(db.Model):
     transaction_id = db.Column(db.String(100))  # M-Pesa receipt
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    checkout_request_id = db.Column(db.String(100), nullable=True)
 
     # ⏳ NEW: expiry
     expires_at = db.Column(
