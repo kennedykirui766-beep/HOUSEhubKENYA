@@ -249,4 +249,8 @@ def failed(token):
 def pending(token):
     link = PaymentLink.query.filter_by(token=token).first_or_404()
 
+    # ✅ Match the actual status you're setting in callback
+    if link.status == "paid":
+        return redirect(url_for("payments.success", token=token))
+
     return render_template("payments/pending.html", link=link)
