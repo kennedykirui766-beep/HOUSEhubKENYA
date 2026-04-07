@@ -122,6 +122,7 @@ def pay(token):
 
     return render_template("payments/pay.html", link=link)
 
+@csrf.exempt
 @payments_bp.route("/api/mpesa/callback", methods=["POST"])
 def mpesa_callback():
     from datetime import datetime
