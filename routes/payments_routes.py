@@ -7,14 +7,13 @@ from flask import render_template, request, redirect, url_for, flash
 from models.models import PaymentLink, db
 
 @payments_bp.route("/pay/<string:token>", methods=["GET", "POST"])
-@login_required
 def pay(token):
     # 🔍 Get payment link
     link = PaymentLink.query.filter_by(token=token).first_or_404()
 
     from datetime import datetime
 
-    # ⏳ CHECK EXPIRY FIRST
+    # ⏳ Check expiry
     if link.expires_at < datetime.utcnow():
         link.status = "expired"
         db.session.commit()
@@ -22,15 +21,16 @@ def pay(token):
         flash("This payment link has expired.", "danger")
         return render_template("payments/expired.html", link=link)
 
-    # 🔐 Ensure this payment belongs to logged-in tenant
-    if link.tenant_id != current_user.id:
-        flash("Unauthorized access to this payment link.", "danger")
-        return redirect(url_for("tenant.dashboard"))
-
     # 🚫 Prevent reuse
     if link.status == "paid":
         flash("This payment link has already been used.", "warning")
         return render_template("payments/already_paid.html", link=link)
+
+    # 🧠 Optional: If user is logged in, verify ownership
+    if current_user.is_authenticated:
+        if link.tenant_id != current_user.id:
+            flash("Unauthorized access to this payment link.", "danger")
+            return redirect(url_for("tenant.dashboard"))
 
     if request.method == "POST":
         phone = request.form.get("phone")
@@ -40,7 +40,7 @@ def pay(token):
             return redirect(request.url)
 
         try:
-            # 💰 Simulated payment
+            # 💰 Process payment (simulated)
             link.phone = phone
             link.status = "paid"
             link.transaction_id = f"TXN-{datetime.utcnow().timestamp()}"
