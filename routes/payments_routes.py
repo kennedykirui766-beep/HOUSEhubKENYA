@@ -252,11 +252,14 @@ def pending(token):
 
     print("Current status:", link.status)  # 🔍 debug
 
-    # ✅ MATCH your callback status
+    # ✅ If already paid → redirect to success (or already_paid page)
     if link.status == "paid":
         print("Redirecting to success page")
-        return redirect(url_for("payments.success", token=token))
+        return redirect(url_for("payments.already_paid", token=token))
+        # OR if you prefer:
+        # return redirect(url_for("payments.success", token=token))
 
+    # ⏳ Still pending
     return render_template("payments/pending.html", link=link)
 
 @payments_bp.route("/already-paid/<string:token>")
