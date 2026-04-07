@@ -30,13 +30,20 @@
 
                         <div class="bg-light rounded-3 p-4 mb-4">
                             <div class="row g-3">
-                                <div class="col-6">
+                                <div class="col-12">
                                     <span class="d-block small text-muted">Transaction ID</span>
                                     <span class="fw-bold text-dark">{{ link.transaction_id }}</span>
                                 </div>
+                                <div class="col-6">
+                                    <span class="d-block small text-muted">Date & Time (EAT)</span>
+                                    <!-- Updated to use created_at_eat passed from the route -->
+                                    <span class="fw-bold text-dark">
+                                        {{ created_at_eat.strftime('%d %b %Y, %H:%M') if created_at_eat else 'N/A' }}
+                                    </span>
+                                </div>
                                 <div class="col-6 text-md-end">
-                                    <span class="d-block small text-muted">Date</span>
-                                    <span class="fw-bold text-dark">{{ link.paid_at.strftime('%d %b %Y, %H:%M') if link.paid_at else 'Just now' }}</span>
+                                    <span class="d-block small text-muted">Status</span>
+                                    <span class="badge bg-success">Verified</span>
                                 </div>
                                 {% if link.booking %}
                                 <div class="col-12 border-top pt-3 mt-1">
