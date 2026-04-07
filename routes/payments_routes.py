@@ -6,6 +6,7 @@ from flask_login import login_required, current_user
 from flask import render_template, request, redirect, url_for, flash
 from models.models import PaymentLink, db
 from extensions import db, csrf
+from services.mpesa import stk_push
 
 @csrf.exempt
 @payments_bp.route("/pay/<string:token>", methods=["GET", "POST"])
@@ -62,26 +63,116 @@ def pay(token):
             return redirect(request.url)
 
         try:
+            # 💳 🚀 TRIGGER STK PUSH (ADDED — not replacing your logic)
+            stk_response = stk_push(phone, link.amount)
+            print("📲 STK RESPONSE:", stk_response)
+
+            # ⚠️ IMPORTANT: Do NOT mark as paid yet
+            # Payment will be confirmed via callback
+
             # 💰 Process payment (simulated)
             link.phone = phone
-            link.status = "paid"
             link.transaction_id = f"TXN-{datetime.utcnow().timestamp()}"
             link.paid_at = datetime.utcnow()
 
-            # ✅ Update booking
-            if link.booking:
-                link.booking.status = "approved"
+            # ❗ We keep status pending until callback confirms
+            link.status = "pending"
+
+            # ❗ DO NOT approve booking here yet
+            # if link.booking:
+            #     link.booking.status = "approved"
 
             db.session.commit()
 
-            flash("Payment successful!", "success")
-            return redirect(url_for("payments.success", token=token))
+            flash("📲 STK Push sent. Enter your M-Pesa PIN to complete payment.", "success")
+
+            return redirect(url_for("payments.pay", token=token))
 
         except Exception as e:
             db.session.rollback()
             flash("Payment failed. Try again.", "danger")
 
     return render_template("payments/pay.html", link=link)
+
+@payments_bp.route("/api/mpesa/callback", methods=["POST"])
+def mpesa_callback():
+    from datetime import datetime
+
+    data = request.get_json()
+    print("📩 MPESA CALLBACK RECEIVED:", data)
+
+    try:
+        # ✅ SAFER ACCESS
+        result = data.get("Body", {}).get("stkCallback", {})
+
+        # 🧠 Extract important details
+        merchant_request_id = result.get("MerchantRequestID")
+        checkout_request_id = result.get("CheckoutRequestID")
+        result_code = result.get("ResultCode")
+        result_desc = result.get("ResultDesc")
+
+        print("🔎 Result Code:", result_code)
+        print("📝 Description:", result_desc)
+
+        # ❗ Guard
+        if not checkout_request_id:
+            print("⚠️ Missing CheckoutRequestID")
+            return {"ResultCode": 0, "ResultDesc": "Accepted"}
+
+        # 🔍 Find payment link
+        link = PaymentLink.query.filter_by(checkout_request_id=checkout_request_id).first()
+
+        if not link:
+            print("⚠️ Payment link not found for this callback")
+            return {"ResultCode": 0, "ResultDesc": "Accepted"}
+
+        # ✅ SUCCESSFUL PAYMENT
+        if result_code == 0:
+            print("✅ Payment successful")
+
+            metadata = result.get("CallbackMetadata", {}).get("Item", [])
+
+            # Extract transaction details
+            amount = None
+            mpesa_code = None
+            phone = None
+
+            for item in metadata:
+                if item["Name"] == "Amount":
+                    amount = item["Value"]
+                elif item["Name"] == "MpesaReceiptNumber":
+                    mpesa_code = item["Value"]
+                elif item["Name"] == "PhoneNumber":
+                    phone = item["Value"]
+
+            # ✅ Update database
+            link.status = "paid"
+            link.transaction_id = mpesa_code
+            link.phone = phone
+            link.paid_at = datetime.utcnow()
+
+            if link.booking:
+                link.booking.status = "approved"
+
+            db.session.commit()
+
+            print("💾 Payment saved successfully")
+
+        else:
+            # ❌ FAILED PAYMENT
+            print("❌ Payment failed")
+
+            link.status = "failed"
+            db.session.commit()
+
+        return {"ResultCode": 0, "ResultDesc": "Accepted"}
+
+    except Exception as e:
+        import traceback
+        print("❌ CALLBACK ERROR:")
+        traceback.print_exc()
+
+        return {"ResultCode": 0, "ResultDesc": "Accepted"}
 
 
 @payments_bp.route("/success/<string:token>")
