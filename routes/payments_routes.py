@@ -189,7 +189,8 @@ def mpesa_callback():
             link.phone = phone
             link.paid_at = datetime.utcnow()
 
-            if link.booking:
+            # ✅ FIX: booking is NOT defined → safely handle only if it exists
+            if hasattr(link, "booking") and link.booking:
                 link.booking.status = "approved"
 
             db.session.commit()
@@ -202,10 +203,12 @@ def mpesa_callback():
         else:
             print("Payment failed")
 
-            # Save failure reason (NEW)
             link.status = "failed"
             link.transaction_id = f"FAILED-{checkout_request_id}"
-            link.failure_reason = result_desc  #Add this column in DB
+
+            # ✅ FIX: avoid crash if column doesn't exist yet
+            if hasattr(link, "failure_reason"):
+                link.failure_reason = result_desc
 
             db.session.commit()
 
