@@ -44,8 +44,8 @@ def pay(token):
         flash("Previous payment failed. Please try again.", "danger")
         return redirect(url_for("payments.failed", token=token))
 
-    #  ADD: Redirect if already pending
-    if link.status == "pending":
+    # Only redirect to pending if coming from POST (not fresh email click)
+    if link.status == "pending" and request.method == "POST":
         flash("Payment is already in progress. Please complete on your phone.", "info")
         return redirect(url_for("payments.pending", token=token))
 
@@ -116,7 +116,8 @@ def pay(token):
     if link.status == "failed":
         return redirect(url_for("payments.failed", token=token))
 
-    if link.status == "pending":
+    if link.status == "pending" and request.method == "POST":
+        flash("A payment attempt was started. You can retry if you didn’t complete it.", "info")
         return redirect(url_for("payments.pending", token=token))
 
     return render_template("payments/pay.html", link=link)
