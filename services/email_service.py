@@ -1,10 +1,13 @@
 from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
+from sendgrid.helpers.mail import Mail, Email
 import os
 
 def send_payment_email(to_email, tenant_name, payment_url, amount):
     message = Mail(
-        from_email=("HouseHub Kenya", os.environ.get("SENDER_EMAIL")),
+        from_email=Email(
+            email=os.environ.get("SENDER_EMAIL"),
+            name="HouseHub Kenya"
+        ),
         to_emails=to_email,
         subject="Deposit Payment Request",
         html_content=f"""
@@ -19,12 +22,14 @@ def send_payment_email(to_email, tenant_name, payment_url, amount):
         sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
         response = sg.send(message)
 
-        print("✅ EMAIL SENT")
-        print("STATUS:", response.status_code)
-        print("BODY:", response.body)
+        print("✅ EMAIL SENT", response.status_code)
 
     except Exception as e:
         import traceback
         print("❌ FULL SENDGRID ERROR:")
         traceback.print_exc()
+
+        if hasattr(e, 'body'):
+            print("❌ SENDGRID RESPONSE BODY:", e.body)
+
         raise
