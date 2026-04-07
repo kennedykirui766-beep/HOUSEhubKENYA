@@ -86,6 +86,13 @@ def pay(token):
             # TRIGGER STK PUSH
             stk_response = stk_push(phone, link.amount)
             print("📲 STK RESPONSE:", stk_response)
+            
+            checkout_request_id = stk_response.get("CheckoutRequestID")
+
+            if not checkout_request_id:
+                raise Exception("Missing CheckoutRequestID from STK response")
+
+            link.checkout_request_id = checkout_request_id
 
             # Save details (DO NOT mark as paid)
             link.phone = phone
