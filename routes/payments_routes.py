@@ -45,9 +45,9 @@ def pay(token):
         return redirect(url_for("payments.failed", token=token))
 
     # Only redirect to pending if coming from POST (not fresh email click)
-    if link.status == "pending" and request.method == "POST":
-        flash("Payment is already in progress. Please complete on your phone.", "info")
-        return redirect(url_for("payments.pending", token=token))
+    #if link.status == "pending" and request.method == "POST":
+        #flash("Payment is already in progress. Please complete on your phone.", "info")
+        #return redirect(url_for("payments.pending", token=token))
 
     # Optional: If user is logged in, verify ownership
     if current_user.is_authenticated:
@@ -116,9 +116,9 @@ def pay(token):
     if link.status == "failed":
         return redirect(url_for("payments.failed", token=token))
 
-    if link.status == "pending" and request.method == "POST":
-        flash("A payment attempt was started. You can retry if you didn’t complete it.", "info")
-        return redirect(url_for("payments.pending", token=token))
+    #if link.status == "pending" and request.method == "POST":
+        #flash("A payment attempt was started. You can retry if you didn’t complete it.", "info")
+        #return redirect(url_for("payments.pending", token=token))
 
     return render_template("payments/pay.html", link=link)
 
