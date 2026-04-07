@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            
+            <!-- Success Card -->
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-body p-0">
+                    
+                    <!-- Header Section -->
+                    <div class="bg-success text-white text-center p-5 pb-4">
+                        <div class="mb-3 animate-bounce">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                            </svg>
+                        </div>
+                        <h2 class="fw-bold">Payment Successful!</h2>
+                        <p class="opacity-75 mb-0">Your transaction has been completed.</p>
+                    </div>
+
+                    <!-- Details Section -->
+                    <div class="p-4 p-md-5">
+                        
+                        <div class="text-center mb-5">
+                            <p class="text-muted small text-uppercase fw-bold ls-1">Amount Paid</p>
+                            <h1 class="fw-bold text-success mb-0">KES {{ "{:,.2f}".format(link.amount) }}</h1>
+                        </div>
+
+                        <div class="bg-light rounded-3 p-4 mb-4">
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <span class="d-block small text-muted">Transaction ID</span>
+                                    <span class="fw-bold text-dark">{{ link.transaction_id }}</span>
+                                </div>
+                                <div class="col-6 text-md-end">
+                                    <span class="d-block small text-muted">Date</span>
+                                    <span class="fw-bold text-dark">{{ link.paid_at.strftime('%d %b %Y, %H:%M') if link.paid_at else 'Just now' }}</span>
+                                </div>
+                                {% if link.booking %}
+                                <div class="col-12 border-top pt-3 mt-1">
+                                    <span class="d-block small text-muted">Reference</span>
+                                    <span class="fw-bold text-dark">Booking #{{ link.booking.id }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('tenant.dashboard') }}" class="btn btn-outline-success btn-lg rounded-3 fw-bold">
+                                Return to Dashboard
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    .animate-bounce {
+        animation: bounce 1s infinite;
+    }
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+</style>
+{% endblock %}
