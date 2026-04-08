@@ -231,16 +231,16 @@ def mpesa_callback():
 
 
 @payments_bp.route("/success/<string:token>")
-@login_required
 def success(token):
     link = PaymentLink.query.filter_by(token=token).first_or_404()
 
-    # ✅ Use tenant_id instead of link.booking
-    if link.tenant_id != current_user.id:
-        flash("Unauthorized access.", "danger")
-        return redirect(url_for("tenant.dashboard"))
+    # 🔐 Optional: If user is logged in, restrict access
+    if current_user.is_authenticated:
+        if link.tenant_id != current_user.id:
+            flash("Unauthorized access.", "danger")
+            return redirect(url_for("tenant.dashboard"))
 
-    # ✅ Convert time to East Africa Time (EAT)
+    # 🌍 Convert time to East Africa Time (EAT)
     import pytz
     from datetime import timezone
 
@@ -260,7 +260,7 @@ def success(token):
         link=link,
         created_at_eat=created_at_eat
     )
-
+    
 @payments_bp.route("/failed/<string:token>")
 def failed(token):
     link = PaymentLink.query.filter_by(token=token).first_or_404()
