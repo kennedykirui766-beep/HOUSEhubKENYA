@@ -240,6 +240,16 @@ def success(token):
             flash("Unauthorized access.", "danger")
             return redirect(url_for("main.index"))
 
+        # 🎯 Determine dashboard based on role
+        if current_user.role == "tenant":
+            dashboard_url = url_for("tenant.dashboard")
+        elif current_user.role == "landlord":
+            dashboard_url = url_for("landlord.dashboard")
+        else:
+            dashboard_url = url_for("main.index")
+    else:
+        dashboard_url = url_for("main.index")
+
     # 🌍 Convert time to East Africa Time (EAT)
     import pytz
     from datetime import timezone
@@ -258,7 +268,8 @@ def success(token):
     return render_template(
         "payments/success.html",
         link=link,
-        created_at_eat=created_at_eat
+        created_at_eat=created_at_eat,
+        dashboard_url=dashboard_url  # ✅ pass to template
     )
     
 @payments_bp.route("/failed/<string:token>")
