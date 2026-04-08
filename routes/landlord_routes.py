@@ -335,6 +335,8 @@ def api_generate_payment_link():
         }), 500
 
 # ---------------- Payments ----------------
+from datetime import datetime
+
 @landlord_bp.route("/payments")
 @login_required
 def payments():
@@ -343,13 +345,15 @@ def payments():
         return redirect(url_for("main.index"))
 
     payments = (
-        db.session.query(Payment, User, House)
-        .join(User, Payment.tenant_id == User.id)
-        .join(Booking, Booking.tenant_id == User.id)
-        .join(House, Booking.house_id == House.id)
-        .filter(House.owner_id == current_user.id)
+        db.session.query(PaymentLink, User, House)
+        .join(User, PaymentLink.tenant_id == User.id)
+        .join(House, PaymentLink.house_id == House.id)
+        .filter(PaymentLink.landlord_id == current_user.id)
+        .filter(PaymentLink.status.in_(["paid", "pending"]))
+        .order_by(PaymentLink.created_at.desc())
         .all()
     )
+
     return render_template("landlord/payments.html", payments=payments, stats={})
 
 

@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark">Payment History</h2>
+            <p class="text-muted mb-0">Track tenant deposits and transactions.</p>
+        </div>
+        <a href="{{ url_for('landlord.dashboard') }}" class="btn btn-outline-secondary rounded-3">
+            Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Summary Stats (Calculated dynamically) -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-success bg-opacity-10 border-success border-opacity-25">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-success text-white rounded-3 p-3 me-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-wallet2" viewBox="0 0 16 16">
+                                <path d="M12.136.326A1.5 1.5 0 0 1 14 1.78V3h.5A1.5 1.5 0 0 1 16 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 13.5v-9a1.5 1.5 0 0 1 1.432-1.499L12.136.326zM5.562 3H13V1.78a.5.5 0 0 0-.621-.484L5.562 3zM1.5 4a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-13z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-muted small text-uppercase fw-bold mb-1">Total Collected</p>
+                            <h4 class="fw-bold mb-0 text-success">
+                                KES 
+                                {% set total = payments | selectattr('0.status', 'equalto', 'paid') | map(attribute='0.amount') | sum %}
+                                {{ "{:,.2f}".format(total) }}
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-warning bg-opacity-10 border-warning border-opacity-25">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-warning text-dark rounded-3 p-3 me-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-hourglass-split" viewBox="0 0 16 16">
+                                <path d="M2.5 15a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.07c.262-.125.555-.225.872-.29.285-.06.592-.09.91-.09h.5c.318 0 .625.03.91.09.317.065.61.165.872.29A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1h-11zm2-13v1c0 .537.12 1.045.337 1.5.216.453.524.86.912 1.187.389.328.852.584 1.367.752.514.168 1.07.252 1.645.252h.5c.575 0 1.13-.084 1.645-.252.515-.168.978-.424 1.367-.752.388-.327.696-.734.912-1.187.217-.455.337-.963.337-1.5V2H4.5z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-muted small text-uppercase fw-bold mb-1">Pending Payments</p>
+                            <h4 class="fw-bold mb-0 text-warning">
+                                {{ payments | selectattr('0.status', 'equalto', 'pending') | list | length }}
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payments Table Card -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-white border-0 py-3">
+            <h5 class="fw-bold mb-0">Recent Transactions</h5>
+        </div>
+        <div class="card-body p-0">
+            
+            {% if payments %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th scope="col" class="ps-4">Tenant</th>
+                            <th scope="col">Property</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Status</th>
+                            <th scope="col" class="text-end pe-4">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment, tenant, house in payments %}
+                        <tr>
+                            <!-- Tenant Info -->
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold me-3" style="width: 40px; height: 40px; font-size: 14px;">
+                                        {{ tenant.name[0]|upper if tenant.name else 'U' }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ tenant.name }}</div>
+                                        <div class="small text-muted">{{ tenant.email }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            
+                            <!-- Property Info -->
+                            <td>
+                                <span class="fw-medium text-dark">{{ house.title if house.title else 'N/A' }}</span>
+                            </td>
+
+                            <!-- Date -->
+                            <td>
+                                <span class="text-muted">
+                                    {{ payment.created_at.strftime('%d %b, %Y') }}
+                                    <br class="d-md-none">
+                                    <small class="text-muted">{{ payment.created_at.strftime('%I:%M %p') }}</small>
+                                </span>
+                            </td>
+
+                            <!-- Amount -->
+                            <td>
+                                <span class="fw-bold text-dark">KES {{ "{:,.2f}".format(payment.amount) }}</span>
+                            </td>
+
+                            <!-- Status Badge -->
+                            <td>
+                                {% if payment.status == 'paid' %}
+                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">Paid</span>
+                                {% elif payment.status == 'pending' %}
+                                    <span class="badge bg-warning bg-opacity-10 text-dark rounded-pill px-3 py-2">Pending</span>
+                                {% else %}
+                                    <span class="badge bg-secondary rounded-pill px-3 py-2">{{ payment.status }}</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Action -->
+                            <td class="text-end pe-4">
+                                {% if payment.status == 'paid' %}
+                                <a href="{{ url_for('payments.success', token=payment.token) }}" class="btn btn-sm btn-light text-primary fw-bold" target="_blank">
+                                    View Receipt
+                                </a>
+                                {% else %}
+                                <span class="text-muted small fst-italic">Waiting...</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            
+            <!-- Empty State -->
+            <div class="text-center py-5">
+                <div class="mb-3 text-muted">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-inbox" viewBox="0 0 16 16">
+                        <path d="M4.98 4a.5.5 0 0 0-.39.188L1.54 8H6a.5.5 0 0 1 .5.5 1.5 1.5 0 1 0 3 0A.5.5 0 0 1 10 8h4.46l-3.05-3.812A.5.5 0 0 0 11.02 4H4.98zm9.954 5H10.45a2.5 2.5 0 0 1-4.9 0H1.066l.32 2.562a.5.5 0 0 0 .497.438h12.234a.5.5 0 0 0 .496-.438L14.933 9zM3.809 3.563A1.5 1.5 0 0 1 4.981 3h6.038a1.5 1.5 0 0 1 1.172.563l3.7 4.625a.5.5 0 0 1 .105.374l-.39 3.124A1.5 1.5 0 0 1 14.117 13H1.883a1.5 1.5 0 0 1-1.489-1.314l-.39-3.124a.5.5 0 0 1 .106-.374l3.7-4.625z"/>
+                    </svg>
+                </div>
+                <h5 class="fw-bold">No Payments Found</h5>
+                <p class="text-muted">You haven't received any deposits or pending payments yet.</p>
+            </div>
+            
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
