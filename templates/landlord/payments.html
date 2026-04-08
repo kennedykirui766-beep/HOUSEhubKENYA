@@ -4,18 +4,20 @@
 <div class="container py-5">
     
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
-            <h2 class="fw-bold text-dark">Payment History</h2>
-            <p class="text-muted mb-0">Track tenant deposits and transactions.</p>
+            <h2 class="fw-bold text-dark">Payment Overview</h2>
+            <p class="text-muted mb-0">Track all tenant transactions and deposits.</p>
         </div>
         <a href="{{ url_for('landlord.dashboard') }}" class="btn btn-outline-secondary rounded-3">
             Back to Dashboard
         </a>
     </div>
 
-    <!-- Summary Stats (Calculated dynamically) -->
+    <!-- Summary Stats Row -->
     <div class="row g-4 mb-4">
+        
+        <!-- 1. Total Collected -->
         <div class="col-md-6 col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 h-100 bg-success bg-opacity-10 border-success border-opacity-25">
                 <div class="card-body">
@@ -28,8 +30,7 @@
                         <div>
                             <p class="text-muted small text-uppercase fw-bold mb-1">Total Collected</p>
                             <h4 class="fw-bold mb-0 text-success">
-                                KES 
-                                {{ "{:,.2f}".format(stats.total_collected) }}
+                                KES {{ "{:,.2f}".format(stats.total_collected) }}
                             </h4>
                         </div>
                     </div>
@@ -37,6 +38,7 @@
             </div>
         </div>
         
+        <!-- 2. Pending Count -->
         <div class="col-md-6 col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 h-100 bg-warning bg-opacity-10 border-warning border-opacity-25">
                 <div class="card-body">
@@ -49,19 +51,43 @@
                         <div>
                             <p class="text-muted small text-uppercase fw-bold mb-1">Pending Payments</p>
                             <h4 class="fw-bold mb-0 text-warning">
-                                {{ payments | selectattr('0.status', 'equalto', 'pending') | list | length }}
+                                {{ stats.pending_count }} 
+                                <span class="fs-6 text-muted fw-normal">Transactions</span>
                             </h4>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- 3. Total Transactions (Optional Extra) -->
+        <div class="col-md-6 col-lg-4 d-none d-lg-block">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-primary bg-opacity-10 border-primary border-opacity-25">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary text-white rounded-3 p-3 me-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list-ul" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-muted small text-uppercase fw-bold mb-1">Total Records</p>
+                            <h4 class="fw-bold mb-0 text-primary">
+                                {{ payments | length }}
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Payments Table Card -->
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-        <div class="card-header bg-white border-0 py-3">
-            <h5 class="fw-bold mb-0">Recent Transactions</h5>
+        <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0">Transaction History</h5>
+            <!-- Optional: Filter buttons could go here -->
         </div>
         <div class="card-body p-0">
             
@@ -89,7 +115,7 @@
                                     </div>
                                     <div>
                                         <div class="fw-bold text-dark">{{ tenant.name }}</div>
-                                        <div class="small text-muted">{{ tenant.email }}</div>
+                                        <div class="small text-muted text-truncate" style="max-width: 150px;">{{ tenant.email }}</div>
                                     </div>
                                 </div>
                             </td>
@@ -119,22 +145,27 @@
                                     <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">Paid</span>
                                 {% elif payment.status == 'pending' %}
                                     <span class="badge bg-warning bg-opacity-10 text-dark rounded-pill px-3 py-2">Pending</span>
+                                {% elif payment.status == 'failed' %}
+                                    <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3 py-2">Failed</span>
+                                {% elif payment.status == 'expired' %}
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2">Expired</span>
                                 {% else %}
-                                    <span class="badge bg-secondary rounded-pill px-3 py-2">{{ payment.status }}</span>
+                                    <span class="badge bg-light text-dark border rounded-pill px-3 py-2">{{ payment.status|capitalize }}</span>
                                 {% endif %}
                             </td>
 
                             <!-- Action -->
                             <td class="text-end pe-4">
-                                {% if payment.transaction_id %}
-                                    <a href="{{ url_for('payments.success', token=payment.token) }}" 
-                                    class="btn btn-sm btn-success btn-sm" target="_blank">
-                                        View Receipt
-                                    </a>
+                                {% if payment.status == 'paid' %}
+                                <a href="{{ url_for('payments.success', token=payment.token) }}" class="btn btn-sm btn-light text-primary fw-bold shadow-sm" target="_blank">
+                                    Receipt
+                                </a>
                                 {% elif payment.status == 'pending' %}
-                                    <span class="text-warning small">Pending Payment</span>
+                                <button class="btn btn-sm btn-light text-muted" disabled title="Waiting for M-Pesa">
+                                    Waiting
+                                </button>
                                 {% else %}
-                                    <span class="text-muted small fst-italic">Expired</span>
+                                <span class="text-muted small text-decoration-underline fst-italic cursor-pointer" onclick="location.reload()">Refresh</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -151,8 +182,8 @@
                         <path d="M4.98 4a.5.5 0 0 0-.39.188L1.54 8H6a.5.5 0 0 1 .5.5 1.5 1.5 0 1 0 3 0A.5.5 0 0 1 10 8h4.46l-3.05-3.812A.5.5 0 0 0 11.02 4H4.98zm9.954 5H10.45a2.5 2.5 0 0 1-4.9 0H1.066l.32 2.562a.5.5 0 0 0 .497.438h12.234a.5.5 0 0 0 .496-.438L14.933 9zM3.809 3.563A1.5 1.5 0 0 1 4.981 3h6.038a1.5 1.5 0 0 1 1.172.563l3.7 4.625a.5.5 0 0 1 .105.374l-.39 3.124A1.5 1.5 0 0 1 14.117 13H1.883a1.5 1.5 0 0 1-1.489-1.314l-.39-3.124a.5.5 0 0 1 .106-.374l3.7-4.625z"/>
                     </svg>
                 </div>
-                <h5 class="fw-bold">No Payments Found</h5>
-                <p class="text-muted">You haven't received any deposits or pending payments yet.</p>
+                <h5 class="fw-bold">No Transactions Found</h5>
+                <p class="text-muted">No payment history available for your properties yet.</p>
             </div>
             
             {% endif %}
