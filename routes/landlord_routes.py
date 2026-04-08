@@ -349,7 +349,6 @@ def payments():
         .join(User, PaymentLink.tenant_id == User.id)
         .join(House, PaymentLink.house_id == House.id)
         .filter(PaymentLink.landlord_id == current_user.id)
-        .filter(PaymentLink.status.in_(["paid", "pending"]))
         .order_by(PaymentLink.created_at.desc())
         .all()
     )
