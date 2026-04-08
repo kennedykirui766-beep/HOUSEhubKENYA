@@ -29,8 +29,7 @@
                             <p class="text-muted small text-uppercase fw-bold mb-1">Total Collected</p>
                             <h4 class="fw-bold mb-0 text-success">
                                 KES 
-                                {% set total = payments | selectattr('0.status', 'equalto', 'paid') | map(attribute='0.amount') | sum %}
-                                {{ "{:,.2f}".format(total) }}
+                                {{ "{:,.2f}".format(stats.total_collected) }}
                             </h4>
                         </div>
                     </div>

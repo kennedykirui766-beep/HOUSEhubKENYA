@@ -353,7 +353,26 @@ def payments():
         .all()
     )
 
-    return render_template("landlord/payments.html", payments=payments, stats={})
+    # ✅ Calculate stats in Python
+    total_collected = sum(
+        payment.amount
+        for payment, tenant, house in payments
+        if payment.status == "paid"
+    )
+
+    pending_count = sum(
+        1 for payment, tenant, house in payments
+        if payment.status == "pending"
+    )
+
+    return render_template(
+        "landlord/payments.html",
+        payments=payments,
+        stats={
+            "total_collected": total_collected,
+            "pending_count": pending_count
+        }
+    )
 
 
 # ---------------- Maintenance Requests ----------------
