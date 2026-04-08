@@ -234,11 +234,11 @@ def mpesa_callback():
 def success(token):
     link = PaymentLink.query.filter_by(token=token).first_or_404()
 
-    # 🔐 Optional: If user is logged in, restrict access
+    # 🔐 Allow both tenant and landlord
     if current_user.is_authenticated:
-        if link.tenant_id != current_user.id:
+        if current_user.id not in [link.tenant_id, link.landlord_id]:
             flash("Unauthorized access.", "danger")
-            return redirect(url_for("tenant.dashboard"))
+            return redirect(url_for("main.index"))
 
     # 🌍 Convert time to East Africa Time (EAT)
     import pytz
