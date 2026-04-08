@@ -35,9 +35,7 @@ def pay(token):
         return render_template("payments/expired.html", link=link)
 
     # Prevent reuse
-    #  Only set to pending if not already completed
-    if link.status not in ["paid", "failed"]:
-        link.status = "pending"
+    if link.status == "paid":
         flash("This payment link has already been used.", "warning")
         return render_template("payments/already_paid.html", link=link)
 
