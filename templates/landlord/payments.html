@@ -6,8 +6,8 @@
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
-            <h2 class="fw-bold text-dark">Payment Overview</h2>
-            <p class="text-muted mb-0">Track all tenant transactions and deposits.</p>
+            <h2 class="fw-bold text-dark">Payment History</h2>
+            <p class="text-muted mb-0">Track tenant deposits and transactions.</p>
         </div>
         <a href="{{ url_for('landlord.dashboard') }}" class="btn btn-outline-secondary rounded-3">
             Back to Dashboard
@@ -17,7 +17,7 @@
     <!-- Summary Stats Row -->
     <div class="row g-4 mb-4">
         
-        <!-- 1. Total Collected -->
+        <!-- 1. Total Collected (Money) -->
         <div class="col-md-6 col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 h-100 bg-success bg-opacity-10 border-success border-opacity-25">
                 <div class="card-body">
@@ -38,7 +38,7 @@
             </div>
         </div>
         
-        <!-- 2. Pending Count -->
+        <!-- 2. Pending Transactions (Count) -->
         <div class="col-md-6 col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 h-100 bg-warning bg-opacity-10 border-warning border-opacity-25">
                 <div class="card-body">
@@ -49,10 +49,9 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-muted small text-uppercase fw-bold mb-1">Pending Payments</p>
+                            <p class="text-muted small text-uppercase fw-bold mb-1">Pending Transactions</p>
                             <h4 class="fw-bold mb-0 text-warning">
-                                {{ stats.pending_count }} 
-                                <span class="fs-6 text-muted fw-normal">Transactions</span>
+                                {{ stats.pending_count }}
                             </h4>
                         </div>
                     </div>
@@ -60,7 +59,7 @@
             </div>
         </div>
 
-        <!-- 3. Total Transactions (Optional Extra) -->
+        <!-- 3. Total Records (Optional visual balance) -->
         <div class="col-md-6 col-lg-4 d-none d-lg-block">
             <div class="card border-0 shadow-sm rounded-4 h-100 bg-primary bg-opacity-10 border-primary border-opacity-25">
                 <div class="card-body">
@@ -80,13 +79,12 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     <!-- Payments Table Card -->
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
         <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
-            <h5 class="fw-bold mb-0">Transaction History</h5>
+            <h5 class="fw-bold mb-0">Recent Transactions</h5>
             <!-- Optional: Filter buttons could go here -->
         </div>
         <div class="card-body p-0">
@@ -156,16 +154,15 @@
 
                             <!-- Action -->
                             <td class="text-end pe-4">
-                                {% if payment.status == 'paid' %}
-                                <a href="{{ url_for('payments.success', token=payment.token) }}" class="btn btn-sm btn-light text-primary fw-bold shadow-sm" target="_blank">
-                                    Receipt
-                                </a>
+                                {% if payment.transaction_id %}
+                                    <a href="{{ url_for('payments.success', token=payment.token) }}" 
+                                    class="btn btn-sm btn-success text-white shadow-sm" target="_blank">
+                                        View Receipt
+                                    </a>
                                 {% elif payment.status == 'pending' %}
-                                <button class="btn btn-sm btn-light text-muted" disabled title="Waiting for M-Pesa">
-                                    Waiting
-                                </button>
+                                    <span class="text-warning small fw-bold">Processing...</span>
                                 {% else %}
-                                <span class="text-muted small text-decoration-underline fst-italic cursor-pointer" onclick="location.reload()">Refresh</span>
+                                    <span class="text-muted small">—</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -182,8 +179,8 @@
                         <path d="M4.98 4a.5.5 0 0 0-.39.188L1.54 8H6a.5.5 0 0 1 .5.5 1.5 1.5 0 1 0 3 0A.5.5 0 0 1 10 8h4.46l-3.05-3.812A.5.5 0 0 0 11.02 4H4.98zm9.954 5H10.45a2.5 2.5 0 0 1-4.9 0H1.066l.32 2.562a.5.5 0 0 0 .497.438h12.234a.5.5 0 0 0 .496-.438L14.933 9zM3.809 3.563A1.5 1.5 0 0 1 4.981 3h6.038a1.5 1.5 0 0 1 1.172.563l3.7 4.625a.5.5 0 0 1 .105.374l-.39 3.124A1.5 1.5 0 0 1 14.117 13H1.883a1.5 1.5 0 0 1-1.489-1.314l-.39-3.124a.5.5 0 0 1 .106-.374l3.7-4.625z"/>
                     </svg>
                 </div>
-                <h5 class="fw-bold">No Transactions Found</h5>
-                <p class="text-muted">No payment history available for your properties yet.</p>
+                <h5 class="fw-bold">No Payments Found</h5>
+                <p class="text-muted">You haven't received any deposits or pending payments yet.</p>
             </div>
             
             {% endif %}
