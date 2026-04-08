@@ -127,12 +127,15 @@
 
                             <!-- Action -->
                             <td class="text-end pe-4">
-                                {% if payment.status == 'paid' %}
-                                <a href="{{ url_for('payments.success', token=payment.token) }}" class="btn btn-sm btn-light text-primary fw-bold" target="_blank">
-                                    View Receipt
-                                </a>
+                                {% if payment.transaction_id %}
+                                    <a href="{{ url_for('payments.success', token=payment.token) }}" 
+                                    class="btn btn-sm btn-success btn-sm" target="_blank">
+                                        View Receipt
+                                    </a>
+                                {% elif payment.status == 'pending' %}
+                                    <span class="text-warning small">Pending Payment</span>
                                 {% else %}
-                                <span class="text-muted small fst-italic">Waiting...</span>
+                                    <span class="text-muted small fst-italic">Expired</span>
                                 {% endif %}
                             </td>
                         </tr>
