@@ -231,10 +231,12 @@ def mpesa_callback():
 
 
 @payments_bp.route("/success/<string:token>")
+@login_required
 def success(token):
     link = PaymentLink.query.filter_by(token=token).first_or_404()
 
-    if link.booking.tenant_id != current_user.id:
+    # ✅ Use tenant_id instead of link.booking
+    if link.tenant_id != current_user.id:
         flash("Unauthorized access.", "danger")
         return redirect(url_for("tenant.dashboard"))
 
@@ -242,11 +244,10 @@ def success(token):
     import pytz
     from datetime import timezone
 
-    eat = pytz.timezone("Africa/Nairobi")  # EAT timezone
+    eat = pytz.timezone("Africa/Nairobi")
 
     created_at_eat = None
     if link.created_at:
-        # Ensure datetime is timezone-aware (assume UTC if naive)
         if link.created_at.tzinfo is None:
             created_at_utc = link.created_at.replace(tzinfo=timezone.utc)
         else:
@@ -257,7 +258,7 @@ def success(token):
     return render_template(
         "payments/success.html",
         link=link,
-        created_at_eat=created_at_eat  # pass converted time
+        created_at_eat=created_at_eat
     )
 
 @payments_bp.route("/failed/<string:token>")
