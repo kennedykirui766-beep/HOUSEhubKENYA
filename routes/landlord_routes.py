@@ -200,10 +200,6 @@ def tenants():
         flash("Access denied.", "danger")
         return redirect(url_for("main.index"))
 
-    # Get all houses owned by landlord
-    houses = House.query.filter_by(owner_id=current_user.id).all()
-
-    # Collect all bookings for those houses
     bookings = (
         Booking.query
         .join(House)
@@ -214,30 +210,50 @@ def tenants():
     tenants_data = []
 
     for booking in bookings:
-        tenant = booking.tenant  # 🔥 via relationship
+        tenant = booking.tenant
         house = booking.house
 
+        # 🔍 Get latest payment link for this booking
+        payment_link = (
+            PaymentLink.query
+            .filter_by(
+                booking_id=booking.id,
+                tenant_id=tenant.id,
+                house_id=house.id
+            )
+            .order_by(PaymentLink.created_at.desc())
+            .first()
+        )
+
         tenants_data.append({
+            # 👤 Tenant info
             "tenant_id": tenant.id,
             "tenant_name": tenant.name,
             "email": tenant.email,
             "phone": tenant.phone_number,
             "profile_picture": tenant.profile_picture,
 
+            # 🏠 House info
             "house_id": house.id,
             "house_title": house.title,
             "house_location": house.location,
             "rent_amount": house.rent_amount,
             "security_deposit": house.security_deposit,
 
+            # 📋 Booking info
             "booking_id": booking.id,
             "status": booking.status,
             "lease_start": booking.lease_start_date,
             "lease_end": booking.lease_end_date,
             "created_at": booking.created_at,
+
+            # 💳 Payment info (NEW)
+            "payment_status": payment_link.status if payment_link else "no-link",
+            "amount_paid": payment_link.amount if payment_link else 0,
+            "transaction_id": payment_link.transaction_id if payment_link else None,
+            "paid_at": payment_link.paid_at if payment_link else None,
         })
 
-    # Optional: Stats
     stats = {
         "total_tenants": len({t["tenant_id"] for t in tenants_data}),
         "total_bookings": len(tenants_data),
