@@ -231,6 +231,7 @@ def mpesa_callback():
 
 
 @payments_bp.route("/success/<string:token>")
+@login_required
 def success(token):
     link = PaymentLink.query.filter_by(token=token).first_or_404()
 
