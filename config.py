@@ -20,6 +20,8 @@ class Config:
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_pre_ping": True,
         "pool_recycle": 300,
+        "pool_size": 5,
+        "max_overflow": 10,
     }
     
     # ========== EMAIL CONFIGURATION ==========

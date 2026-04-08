@@ -35,7 +35,9 @@ def pay(token):
         return render_template("payments/expired.html", link=link)
 
     # Prevent reuse
-    if link.status == "paid":
+
+    if link.status not in ["paid", "failed"]:
+        link.status = "pending"
         flash("This payment link has already been used.", "warning")
         return render_template("payments/already_paid.html", link=link)
 
@@ -161,6 +163,9 @@ def mpesa_callback():
         if not link:
             print("Payment link not found for this callback")
             return {"ResultCode": 0, "ResultDesc": "Accepted"}
+        
+        db.session.refresh(link)
+        print("AFTER COMMIT STATUS:", link.status)
 
         # =========================
         # SUCCESSFUL PAYMENT
@@ -268,7 +273,10 @@ def failed(token):
 
 @payments_bp.route("/pending/<string:token>")
 def pending(token):
-    link = PaymentLink.query.filter_by(token=token).first_or_404()
+    link = db.session.query(PaymentLink).filter_by(token=token).first_or_404()
+
+    # ✅ Expire session cache to force DB reload
+    db.session.expire_all()
 
     print("Current status:", link.status)  # 🔍 debug
 
