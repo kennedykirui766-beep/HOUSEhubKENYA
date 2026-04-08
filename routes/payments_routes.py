@@ -164,8 +164,6 @@ def mpesa_callback():
             print("Payment link not found for this callback")
             return {"ResultCode": 0, "ResultDesc": "Accepted"}
         
-        db.session.refresh(link)
-        print("AFTER COMMIT STATUS:", link.status)
 
         # =========================
         # SUCCESSFUL PAYMENT
