@@ -68,7 +68,7 @@ class User(db.Model, UserMixin):
         lazy=True
     )
     payments = db.relationship('Payment', backref='tenant', lazy=True)
-    maintenance_requests = db.relationship('MaintenanceRequest', backref='tenant', lazy=True)
+    maintenance_requests = db.relationship('MaintenanceRequest',back_populates='tenant',lazy=True)
     notifications = db.relationship('Notification', backref='tenant', lazy=True)
     events = db.relationship('Event', backref='tenant', lazy=True)
 
@@ -306,8 +306,7 @@ class MaintenanceRequest(db.Model):
     date_submitted = db.Column(db.DateTime, default=db.func.current_timestamp())
 
     # Relationships (optional but powerful)
-    tenant = db.relationship('User')
-    house = db.relationship('House')
+    tenant = db.relationship('User', back_populates='maintenance_requests')
 
 
 class Notification(db.Model):
