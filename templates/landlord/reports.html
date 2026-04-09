@@ -1,0 +1,472 @@
+{% extends "base.html" %}
+
+{% block title %}Landlord Reports - HomeHub{% endblock %}
+
+{% block styles %}
+<style>
+  :root {
+    --primary-color: #4f46e5;
+    --primary-light: #e0e7ff;
+    --secondary-color: #64748b;
+    --success-color: #10b981;
+    --success-light: #d1fae5;
+    --warning-color: #f59e0b;
+    --warning-light: #fef3c7;
+    --danger-color: #ef4444;
+    --bg-light: #f3f4f6;
+    --card-bg: #ffffff;
+  }
+
+  .reports-page {
+    background-color: var(--bg-light);
+    min-height: 100vh;
+    padding-bottom: 2rem;
+  }
+
+  /* Header Section */
+  .reports-header {
+    background-color: var(--card-bg);
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .reports-title h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+  }
+
+  .reports-title p {
+    color: var(--secondary-color);
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
+  }
+
+  /* KPI Cards */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .kpi-card {
+    background: var(--card-bg);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
+
+  .kpi-info h3 {
+    font-size: 0.85rem;
+    color: var(--secondary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .kpi-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.2;
+  }
+
+  .kpi-sub {
+    font-size: 0.85rem;
+    color: var(--secondary-color);
+    margin-top: 0.25rem;
+  }
+
+  .kpi-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+
+  .bg-indigo-light { background-color: var(--primary-light); color: var(--primary-color); }
+  .bg-green-light { background-color: var(--success-light); color: var(--success-color); }
+  .bg-orange-light { background-color: var(--warning-light); color: var(--warning-color); }
+  .bg-blue-light { background-color: #dbeafe; color: #2563eb; }
+
+  /* Circular Chart (Occupancy) */
+  .circular-chart-container {
+    position: relative;
+    width: 56px;
+    height: 56px;
+  }
+  
+  .circular-chart {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(var(--success-color) 0% {{ stats.occupancy_rate }}%, #e5e7eb {{ stats.occupancy_rate }}% 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .circular-chart::after {
+    content: "";
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    background: var(--card-bg);
+    border-radius: 50%;
+  }
+
+  .circular-chart i {
+    position: absolute;
+    z-index: 2;
+    font-size: 1.2rem;
+    color: #111827;
+  }
+
+  /* Section Layouts */
+  .reports-section-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .section-card {
+    background: var(--card-bg);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid #e5e7eb;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+  }
+
+  /* Stats Grid inside cards */
+  .inner-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stat-label {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+  }
+
+  /* Simple Bar Chart Visualization */
+  .bar-chart-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .bar-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--secondary-color);
+    font-weight: 500;
+  }
+
+  .bar-bg {
+    width: 100%;
+    height: 10px;
+    background-color: #f3f4f6;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 1s ease-in-out;
+  }
+
+  .bar-fill.success { background-color: var(--success-color); }
+  .bar-fill.danger { background-color: var(--danger-color); }
+
+  /* Responsive */
+  @media (max-width: 992px) {
+    .reports-section-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .kpi-grid {
+      grid-template-columns: 1fr;
+    }
+    .reports-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reports-page">
+  
+  <!-- Header -->
+  <div class="container-fluid px-4">
+    <div class="reports-header">
+      <div class="reports-title">
+        <h2>Financial & Performance Report</h2>
+        <p>Overview of your revenue, occupancy, and booking activities.</p>
+      </div>
+      <div>
+        <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">
+          <i class="fas fa-print me-2"></i> Print Report
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Container -->
+  <div class="container-fluid px-4">
+    
+    <!-- Top KPI Cards Row -->
+    <div class="kpi-grid">
+      <!-- Total Revenue -->
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <h3>Total Revenue</h3>
+          <div class="kpi-value">KES {{ "{:,.2f}".format(stats.total_revenue) }}</div>
+          <div class="kpi-sub">Lifetime earnings</div>
+        </div>
+        <div class="kpi-icon bg-indigo-light">
+          <i class="fas fa-wallet"></i>
+        </div>
+      </div>
+
+      <!-- Monthly Revenue -->
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <h3>Monthly Revenue</h3>
+          <div class="kpi-value">KES {{ "{:,.2f}".format(stats.monthly_revenue) }}</div>
+          <div class="kpi-sub">Current month</div>
+        </div>
+        <div class="kpi-icon bg-green-light">
+          <i class="fas fa-chart-line"></i>
+        </div>
+      </div>
+
+      <!-- Occupancy Rate -->
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <h3>Occupancy Rate</h3>
+          <div class="kpi-value">{{ stats.occupancy_rate }}%</div>
+          <div class="kpi-sub">{{ stats.occupied }} / {{ stats.total_properties }} units</div>
+        </div>
+        <div class="circular-chart-container">
+          <div class="circular-chart">
+            <!-- Empty center for ring effect -->
+          </div>
+          <i class="fas fa-home"></i>
+        </div>
+      </div>
+
+      <!-- Total Properties -->
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <h3>Total Properties</h3>
+          <div class="kpi-value">{{ stats.total_properties }}</div>
+          <div class="kpi-sub">Under management</div>
+        </div>
+        <div class="kpi-icon bg-blue-light">
+          <i class="fas fa-building"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Middle Section Grid -->
+    <div class="reports-section-grid">
+      
+      <!-- Left Column: Tenants & Bookings -->
+      <div class="section-card">
+        <div class="section-header">
+          <h3 class="section-title">Operational Metrics</h3>
+        </div>
+        
+        <div class="inner-stats-grid">
+          <!-- Tenants -->
+          <div class="stat-item">
+            <span class="stat-label">Total Active Tenants</span>
+            <div class="stat-number text-primary">
+              <i class="fas fa-users me-2 text-secondary"></i>{{ stats.total_tenants }}
+            </div>
+            <small class="text-muted mt-1">Unique tenant records</small>
+          </div>
+
+          <!-- Pending Bookings -->
+          <div class="stat-item">
+            <span class="stat-label">Pending Bookings</span>
+            <div class="stat-number text-warning">
+              <i class="fas fa-clock me-2 text-secondary"></i>{{ stats.pending_bookings }}
+            </div>
+            <small class="text-muted mt-1">Requires action</small>
+          </div>
+        </div>
+
+        <!-- Visual Divider / Additional Info -->
+        <div class="mt-4 pt-4 border-top">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small">Booking Efficiency</span>
+                    <h5 class="mb-0 fw-bold mt-1">High Demand</h5>
+                </div>
+                <div class="text-end">
+                    {% if stats.pending_bookings > 0 %}
+                        <span class="badge bg-warning bg-opacity-10 text-warning px-3 py-2 rounded-pill">Action Needed</span>
+                    {% else %}
+                        <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill">All Clear</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Payment Breakdown -->
+      <div class="section-card">
+        <div class="section-header">
+          <h3 class="section-title">Payment Status</h3>
+        </div>
+
+        <div class="bar-chart-container">
+          
+          <!-- Paid Payments -->
+          <div class="bar-group">
+            <div class="bar-label">
+              <span>Paid Transactions</span>
+              <span class="fw-bold text-success">{{ stats.paid_payments }}</span>
+            </div>
+            <div class="bar-bg">
+              <!-- Calculate percentage for bar width relative to total payments -->
+              {% set total_payments_count = stats.paid_payments + stats.expired_payments %}
+              {% set paid_pct = (stats.paid_payments / total_payments_count * 100) if total_payments_count > 0 else 0 %}
+              
+              <div class="bar-fill success" style="width: {{ paid_pct }}%;"></div>
+            </div>
+            <small class="text-muted" style="font-size: 0.75rem;">{{ "%.1f"|format(paid_pct) }}% of total links</small>
+          </div>
+
+          <!-- Expired Payments -->
+          <div class="bar-group">
+            <div class="bar-label">
+              <span>Expired/Failed Links</span>
+              <span class="fw-bold text-danger">{{ stats.expired_payments }}</span>
+            </div>
+            <div class="bar-bg">
+              {% set expired_pct = (stats.expired_payments / total_payments_count * 100) if total_payments_count > 0 else 0 %}
+              <div class="bar-fill danger" style="width: {{ expired_pct }}%;"></div>
+            </div>
+            <small class="text-muted" style="font-size: 0.75rem;">{{ "%.1f"|format(expired_pct) }}% of total links</small>
+          </div>
+
+        </div>
+
+        <div class="mt-4 text-center">
+            <p class="text-muted small mb-0">Payment links not completed within the validity period.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Detailed Summary Table (Mockup for structure) -->
+    <div class="section-card mt-4">
+        <div class="section-header">
+            <h3 class="section-title">Summary Overview</h3>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-3">Metric</th>
+                        <th>Value</th>
+                        <th class="text-end">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="ps-3 fw-medium">Total Revenue (All Time)</td>
+                        <td>KES {{ "{:,.2f}".format(stats.total_revenue) }}</td>
+                        <td class="text-end"><span class="badge bg-success bg-opacity-10 text-success">Active</span></td>
+                    </tr>
+                    <tr>
+                        <td class="ps-3 fw-medium">Monthly Revenue (This Month)</td>
+                        <td>KES {{ "{:,.2f}".format(stats.monthly_revenue) }}</td>
+                        <td class="text-end"><span class="badge bg-primary bg-opacity-10 text-primary">Current</span></td>
+                    </tr>
+                    <tr>
+                        <td class="ps-3 fw-medium">Occupancy Rate</td>
+                        <td>{{ stats.occupancy_rate }}%</td>
+                        <td class="text-end">
+                            {% if stats.occupancy_rate > 80 %}
+                                <span class="badge bg-success bg-opacity-10 text-success">Excellent</span>
+                            {% elif stats.occupancy_rate > 50 %}
+                                <span class="badge bg-warning bg-opacity-10 text-warning">Moderate</span>
+                            {% else %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger">Low</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
