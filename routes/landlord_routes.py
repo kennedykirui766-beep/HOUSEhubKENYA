@@ -861,3 +861,34 @@ def delete_image(image_name):
         flash("Image not found", "danger")
 
     return redirect(request.referrer or url_for('landlord.dashboard'))
+
+@landlord_bp.route("/bookings")
+@login_required
+def bookings():
+    if current_user.role != "landlord":
+        flash("Access denied.", "danger")
+        return redirect(url_for("main.index"))
+
+    # 📋 Get all bookings for houses owned by landlord
+    bookings = (
+        db.session.query(Booking, User, House)
+        .join(User, Booking.tenant_id == User.id)
+        .join(House, Booking.house_id == House.id)
+        .filter(House.owner_id == current_user.id)
+        .order_by(Booking.created_at.desc())
+        .all()
+    )
+
+    # 📊 Stats (optional but useful)
+    stats = {
+        "total": len(bookings),
+        "pending": len([b for b, u, h in bookings if b.status == "pending"]),
+        "approved": len([b for b, u, h in bookings if b.status == "approved"]),
+        "rejected": len([b for b, u, h in bookings if b.status == "rejected"]),
+    }
+
+    return render_template(
+        "landlord/bookings.html",
+        bookings=bookings,
+        stats=stats
+    )
