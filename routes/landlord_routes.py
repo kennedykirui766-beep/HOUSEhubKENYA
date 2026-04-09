@@ -446,17 +446,16 @@ def maintenance():
         flash("Access denied.", "danger")
         return redirect(url_for("main.index"))
 
-    # 🔥 Correct query (NO unnecessary Booking join)
     requests = (
         db.session.query(MaintenanceRequest, User, House)
         .join(User, MaintenanceRequest.tenant_id == User.id)
-        .join(House, MaintenanceRequest.house_id == House.id)
+        .join(Booking, MaintenanceRequest.booking_id == Booking.id)  # ✅ REQUIRED
+        .join(House, Booking.house_id == House.id)                  # ✅ REQUIRED
         .filter(House.owner_id == current_user.id)
         .order_by(MaintenanceRequest.created_at.desc())
         .all()
     )
 
-    # 📊 Stats (optional but useful)
     stats = {
         "total": len(requests),
         "pending": len([r for r, u, h in requests if r.status == "pending"]),
