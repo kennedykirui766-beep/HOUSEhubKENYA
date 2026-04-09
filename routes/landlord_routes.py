@@ -470,13 +470,73 @@ def service_providers():
 
 
 # ---------------- Reports ----------------
+from datetime import datetime
+from sqlalchemy import func
+
 @landlord_bp.route("/reports")
 @login_required
 def reports():
     if current_user.role != "landlord":
         flash("Access denied.", "danger")
         return redirect(url_for("main.index"))
-    return render_template("landlord/reports.html", stats={})
+
+    now = datetime.utcnow()
+
+    # 💰 Total revenue
+    total_revenue = db.session.query(func.sum(PaymentLink.amount)).filter(
+        PaymentLink.landlord_id == current_user.id,
+        PaymentLink.status == "paid"
+    ).scalar() or 0
+
+    # 💰 Monthly revenue
+    monthly_revenue = db.session.query(func.sum(PaymentLink.amount)).filter(
+        PaymentLink.landlord_id == current_user.id,
+        PaymentLink.status == "paid",
+        func.extract('month', PaymentLink.paid_at) == now.month,
+        func.extract('year', PaymentLink.paid_at) == now.year
+    ).scalar() or 0
+
+    # 🏠 Properties
+    total_properties = House.query.filter_by(owner_id=current_user.id).count()
+
+    # 📋 Bookings
+    bookings = (
+        Booking.query
+        .join(House)
+        .filter(House.owner_id == current_user.id)
+        .all()
+    )
+
+    occupied = len([b for b in bookings if b.status == "approved"])
+    pending = len([b for b in bookings if b.status == "pending"])
+
+    occupancy_rate = (occupied / total_properties * 100) if total_properties else 0
+
+    # 👥 Tenants
+    total_tenants = len(set([b.tenant_id for b in bookings]))
+
+    # 💳 Payments breakdown
+    paid_count = PaymentLink.query.filter_by(
+        landlord_id=current_user.id, status="paid"
+    ).count()
+
+    expired_count = PaymentLink.query.filter_by(
+        landlord_id=current_user.id, status="expired"
+    ).count()
+
+    stats = {
+        "total_revenue": total_revenue,
+        "monthly_revenue": monthly_revenue,
+        "total_properties": total_properties,
+        "occupied": occupied,
+        "occupancy_rate": round(occupancy_rate, 1),
+        "pending_bookings": pending,
+        "total_tenants": total_tenants,
+        "paid_payments": paid_count,
+        "expired_payments": expired_count
+    }
+
+    return render_template("landlord/reports.html", stats=stats)
 
 
 # ---------------- Edit Property ----------------
