@@ -296,10 +296,18 @@ class Payment(db.Model):
 
 class MaintenanceRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+
     tenant_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    house_id = db.Column(db.Integer, db.ForeignKey('house.id'))  # ✅ ADD THIS
+
     issue = db.Column(db.String(200), nullable=False)
-    status = db.Column(db.String(20), default='Open')
+    status = db.Column(db.String(20), default='pending')
+
     date_submitted = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+    # Relationships (optional but powerful)
+    tenant = db.relationship('User')
+    house = db.relationship('House')
 
 
 class Notification(db.Model):

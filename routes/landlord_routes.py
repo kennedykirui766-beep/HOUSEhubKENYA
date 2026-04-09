@@ -449,10 +449,9 @@ def maintenance():
     requests = (
         db.session.query(MaintenanceRequest, User, House)
         .join(User, MaintenanceRequest.tenant_id == User.id)
-        .join(Booking, MaintenanceRequest.booking_id == Booking.id)  # ✅ REQUIRED
-        .join(House, Booking.house_id == House.id)                  # ✅ REQUIRED
+        .join(House, MaintenanceRequest.house_id == House.id)
         .filter(House.owner_id == current_user.id)
-        .order_by(MaintenanceRequest.created_at.desc())
+        .order_by(MaintenanceRequest.date_submitted.desc())
         .all()
     )
 
