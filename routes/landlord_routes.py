@@ -21,6 +21,9 @@ logger = logging.getLogger(__name__)
 landlord_bp = Blueprint("landlord", __name__, url_prefix="/landlord")
 
 # ---------------- Landlord Dashboard ----------------
+from datetime import datetime
+from sqlalchemy import func
+
 @landlord_bp.route("/dashboard")
 @login_required
 def dashboard():
@@ -28,7 +31,19 @@ def dashboard():
         flash("Access denied.", "danger")
         return redirect(url_for("main.index"))
 
+    # 🏠 All houses
     houses = House.query.filter_by(owner_id=current_user.id).all()
+    total_properties = len(houses)
+
+    # 📋 Bookings for landlord's houses
+    bookings = (
+        Booking.query
+        .join(House)
+        .filter(House.owner_id == current_user.id)
+        .all()
+    )
+
+    # 👥 Tenants (existing logic)
     tenants = (
         db.session.query(User, Booking, House)
         .join(Booking, Booking.tenant_id == User.id)
@@ -36,7 +51,55 @@ def dashboard():
         .filter(User.role == "tenant", House.owner_id == current_user.id)
         .all()
     )
-    return render_template("landlord/dashboard.html", houses=houses, tenants=tenants, stats={})
+
+    # ✅ Occupied houses (approved bookings)
+    occupied_count = len([b for b in bookings if b.status == "approved"])
+
+    occupancy_rate = (
+        (occupied_count / total_properties) * 100
+        if total_properties > 0 else 0
+    )
+
+    # 💰 Monthly revenue (only PAID payments this month)
+    now = datetime.utcnow()
+
+    monthly_revenue = db.session.query(func.sum(PaymentLink.amount)).filter(
+        PaymentLink.landlord_id == current_user.id,
+        PaymentLink.status == "paid",
+        func.extract('month', PaymentLink.paid_at) == now.month,
+        func.extract('year', PaymentLink.paid_at) == now.year
+    ).scalar() or 0
+
+    # ⏳ Pending booking requests
+    pending_requests = len([b for b in bookings if b.status == "pending"])
+
+    # 💳 Recent payments (last 5)
+    recent_payments = (
+        db.session.query(PaymentLink, User, House)
+        .join(User, PaymentLink.tenant_id == User.id)
+        .join(House, PaymentLink.house_id == House.id)
+        .filter(PaymentLink.landlord_id == current_user.id)
+        .order_by(PaymentLink.created_at.desc())
+        .limit(5)
+        .all()
+    )
+
+    # 📊 Stats dictionary
+    stats = {
+        "total_properties": total_properties,
+        "occupied": occupied_count,
+        "occupancy_rate": round(occupancy_rate, 1),
+        "monthly_revenue": monthly_revenue,
+        "pending_requests": pending_requests
+    }
+
+    return render_template(
+        "landlord/dashboard.html",
+        houses=houses,
+        tenants=tenants,
+        recent_payments=recent_payments,
+        stats=stats
+    )
 
 
 # ---------------- Manage Properties ----------------

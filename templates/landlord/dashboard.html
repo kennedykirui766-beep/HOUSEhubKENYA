@@ -222,21 +222,6 @@
     word-break: break-word;
   }
 
-  /* ========== MAP ========== */
-  .dash-map {
-    height: 340px;
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    margin-bottom: 1.75rem;
-    border: 1px solid var(--border-color);
-    background-color: var(--card-bg);
-  }
-
-  .dash-map #map {
-    height: 100%;
-    width: 100%;
-  }
-
   /* ========== CONTENT GRID ========== */
   .dash-content-grid {
     display: grid;
@@ -886,9 +871,6 @@
     .dash-profile-info {
       display: none;
     }
-    .dash-map {
-      height: 280px;
-    }
   }
 
   @media (max-width: 767px) {
@@ -919,9 +901,6 @@
     }
     .dash-stat-content h3 {
       font-size: 0.7rem;
-    }
-    .dash-map {
-      height: 240px;
     }
     .dash-chat-window {
       width: calc(100vw - 48px);
@@ -999,6 +978,7 @@
   <div class="dash-topbar-right">
     <a href="{{ url_for('landlord.messages') }}" class="dash-notif-btn" aria-label="View notifications">
       <i class="fas fa-bell"></i>
+      <!-- Assuming notifications might exist, or remove this badge logic if not passed -->
       {% if notifications %}
       <span class="dash-notif-badge">{{ notifications|length }}</span>
       {% endif %}
@@ -1055,24 +1035,20 @@
     </div>
     <div class="dash-stat-content">
       <h3>Monthly Revenue</h3>
-      <div class="dash-stat-value">KES {{ stats.monthly_revenue }}</div>
+      <div class="dash-stat-value">KES {{ "{:,.2f}".format(stats.monthly_revenue) }}</div>
     </div>
   </div>
 
   <div class="dash-stat-card">
     <div class="dash-stat-icon warning">
-      <i class="fas fa-tools"></i>
+      <!-- Changed icon to reflect bookings -->
+      <i class="fas fa-calendar-check"></i>
     </div>
     <div class="dash-stat-content">
-      <h3>Pending Requests</h3>
-      <div class="dash-stat-value">{{ maintenance_requests|length }}</div>
+      <h3>Pending Bookings</h3>
+      <div class="dash-stat-value">{{ stats.pending_requests }}</div>
     </div>
   </div>
-</div>
-
-<!-- Map Section -->
-<div class="dash-map">
-  <div id="map"></div>
 </div>
 
 <!-- Content Grid -->
@@ -1091,7 +1067,6 @@
     <div class="dash-card-body">
       {% if houses %}
         {% for property in houses[:3] %}
-        <!-- Added data-id for JS reference -->
         <div class="dash-list-item" data-id="{{ property.id }}">
           <div class="dash-list-top">
             <div class="dash-list-info">
@@ -1100,8 +1075,9 @@
                 <i class="fas fa-map-marker-alt"></i> {{ property.address }}
               </p>
             </div>
-            <span class="dash-badge {% if property.tenant %}dash-badge-occupied{% else %}dash-badge-vacant{% endif %}">
-              {% if property.tenant %}Occupied{% else %}Vacant{% endif %}
+            <!-- Logic for occupied/vacant status on dashboard -->
+            <span class="dash-badge {% if property.status == 'occupied' %}dash-badge-occupied{% else %}dash-badge-vacant{% endif %}">
+              {{ property.status|capitalize }}
             </span>
           </div>
           <div class="dash-list-specs">
@@ -1112,7 +1088,6 @@
             <a href="{{ url_for('landlord.edit_property', property_id=property.id) }}" class="btn-dash-outline">
               <i class="fas fa-edit"></i> Edit
             </a>
-            <!-- Updated onclick to call openDeleteModal -->
             <button onclick="openDeleteModal({{ property.id }}, '{{ property.title|replace("'", "\\'") }}')" class="btn-dash-danger">
               <i class="fas fa-trash"></i> Delete
             </button>
@@ -1152,15 +1127,19 @@
             </tr>
           </thead>
           <tbody>
-            {% for payment in recent_payments %}
+            {% for payment, user, house in recent_payments %}
             <tr>
-              <td class="td-name">{{ payment.tenant_name }}</td>
-              <td>KES {{ payment.amount }}</td>
+              <td class="td-name">{{ user.name }}</td>
+              <td>KES {{ "{:,.2f}".format(payment.amount) }}</td>
               <td>
                 <span class="dash-badge dash-badge-{{ payment.status.lower().replace(' ', '-') }}">
-                  {{ payment.status }}
+                  {{ payment.status|capitalize }}
                 </span>
               </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3" class="text-center p-4 text-muted">No recent payments</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -1187,7 +1166,7 @@
             <div class="dash-list-info">
               <h4 class="dash-list-title">{{ user.name }}</h4>
               <p class="dash-list-subtitle">
-                <i class="fas fa-map-marker-alt"></i> {{ house.location if house else 'No property assigned' }}
+                <i class="fas fa-map-marker-alt"></i> {{ house.address if house else 'No property assigned' }}
               </p>
             </div>
             <a href="{{ url_for('landlord.send_message', tenant_id=user.id) }}" class="btn-dash-primary">
@@ -1205,37 +1184,41 @@
     </div>
   </div>
 
-  <!-- Maintenance Requests Card -->
+  <!-- Pending Booking Requests Card (Replaces Maintenance) -->
   <div class="dash-card">
     <div class="dash-card-header">
       <h3 class="dash-card-title">
-        <i class="fas fa-tools"></i> Maintenance Requests
+        <i class="fas fa-calendar-check"></i> Pending Bookings
       </h3>
-      <a href="{{ url_for('landlord.maintenance') }}" class="dash-card-action">
+      <a href="{{ url_for('landlord.bookings') }}" class="dash-card-action">
         View All <i class="fas fa-arrow-right"></i>
       </a>
     </div>
     <div class="dash-card-body">
-      {% if maintenance_requests %}
-        {% for request in maintenance_requests[:3] %}
+      {% set pending_bookings = bookings | selectattr('status', 'equalto', 'pending') | list %}
+      
+      {% if pending_bookings %}
+        {% for booking in pending_bookings[:3] %}
         <div class="dash-list-item">
           <div class="dash-list-top">
             <div class="dash-list-info">
-              <h4 class="dash-list-title">{{ request.title }}</h4>
+              <h4 class="dash-list-title">Booking Request #{{ booking.id }}</h4>
               <p class="dash-list-subtitle">
-                <i class="fas fa-map-marker-alt"></i> {{ request.property.address if request.property else 'N/A' }}
+                <i class="fas fa-home"></i> {{ booking.house.title if booking.house else 'Unknown Property' }}
               </p>
             </div>
-            <span class="dash-badge dash-badge-{{ request.status.lower().replace(' ', '-') if request.status else 'pending' }}">
-              {{ request.status }}
-            </span>
+            <span class="dash-badge dash-badge-pending">Pending</span>
+          </div>
+          <div class="dash-list-actions">
+            <a href="#" class="btn-dash-primary">Approve</a>
+            <a href="#" class="btn-dash-danger">Reject</a>
           </div>
         </div>
         {% endfor %}
       {% else %}
         <div class="dash-empty">
           <i class="fas fa-check-circle"></i>
-          <p>No pending maintenance requests.</p>
+          <p>No pending booking requests.</p>
         </div>
       {% endif %}
     </div>
@@ -1291,52 +1274,6 @@
 
 {% block scripts %}
 <script>
-  // ---- Map Initialization ----
-  function initDashboardMap() {
-    const mapDiv = document.getElementById('map');
-    if (!mapDiv) return;
-
-    const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-
-    const mapStyles = isDark ? [
-      { elementType: 'geometry', stylers: [{ color: '#1e293b' }] },
-      { elementType: 'labels.text.stroke', stylers: [{ color: '#1e293b' }] },
-      { elementType: 'labels.text.fill', stylers: [{ color: '#94a3b8' }] },
-      { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#334155' }] },
-      { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0f172a' }] },
-      { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#1e293b' }] },
-      { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#1e293b' }] }
-    ] : [];
-
-    const map = new google.maps.Map(mapDiv, {
-      zoom: 12,
-      center: { lat: -1.286389, lng: 36.817223 },
-      styles: mapStyles
-    });
-
-    {% for property in houses %}
-      {% if property.lat and property.lng %}
-        new google.maps.Marker({
-          position: { lat: {{ property.lat }}, lng: {{ property.lng }} },
-          map: map,
-          title: "{{ property.title }}",
-          icon: {
-            url: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="%236366f1"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>'),
-            scaledSize: new google.maps.Size(32, 32)
-          }
-        });
-      {% endif %}
-    {% endfor %}
-
-    // Fix map rendering after layout settles
-    setTimeout(() => mapDiv.scrollIntoView ? google.maps.event.trigger(map, 'resize') : null, 500);
-  }
-
-  // Init if Google Maps already loaded
-  if (window.google && window.google.maps) {
-    initDashboardMap();
-  }
-
   // ---- Chat ----
   function toggleChat() {
     document.getElementById('chatBox').classList.toggle('active');
@@ -1422,7 +1359,7 @@
       if (data.success) {
         // Close modal
         closeDeleteModal();
-        // Reload page to update stats and map
+        // Reload page to update stats
         window.location.reload();
       } else {
         alert('Error: ' + (data.error || 'Failed to delete property'));
@@ -1439,7 +1376,4 @@
     });
   });
 </script>
-
-<!-- Google Maps (loaded after our script so callback works) -->
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCCGkhU-aZlUelsOQypH5jTjkf5lIRBL7Y&callback=initDashboardMap" async defer></script>
 {% endblock %}
