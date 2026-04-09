@@ -1,0 +1,428 @@
+{% extends "base.html" %}
+
+{% block title %}Maintenance Management - HomeHub{% endblock %}
+
+{% block styles %}
+<style>
+  :root {
+    --primary-color: #4f46e5;
+    --primary-light: #e0e7ff;
+    --secondary-color: #64748b;
+    --success-color: #10b981;
+    --success-light: #d1fae5;
+    --warning-color: #f59e0b;
+    --warning-light: #fef3c7;
+    --info-color: #3b82f6;
+    --info-light: #dbeafe;
+    --bg-body: #f3f4f6;
+    --card-bg: #ffffff;
+  }
+
+  body {
+    background-color: var(--bg-body);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: #1f2937;
+  }
+
+  /* Page Header */
+  .page-header {
+    background-color: var(--card-bg);
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .page-title h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: #111827;
+  }
+
+  .page-title p {
+    color: var(--secondary-color);
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
+  }
+
+  /* Stats Cards */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-card {
+    background: var(--card-bg);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
+
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    flex-shrink: 0;
+  }
+
+  .stat-info h3 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--secondary-color);
+    margin: 0 0 0.25rem 0;
+    font-weight: 600;
+  }
+
+  .stat-number {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+  }
+
+  /* Content Grid */
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+  }
+
+  .card-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    color: #111827;
+  }
+
+  /* Visual Analytics Bars */
+  .analytics-section {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .bar-group {
+    margin-bottom: 1rem;
+  }
+
+  .bar-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .progress-bg {
+    height: 10px;
+    background-color: #f3f4f6;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.5s ease-out;
+  }
+
+  /* Table Styling */
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 0;
+  }
+
+  .table th {
+    background-color: #f9fafb;
+    color: var(--secondary-color);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .table td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: middle;
+    font-size: 0.95rem;
+    color: #374151;
+  }
+
+  .table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .table tr:hover {
+    background-color: #f9fafb;
+  }
+
+  /* Badges */
+  .badge-pill {
+    padding: 0.35em 0.85em;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .badge-pending { background-color: var(--warning-light); color: #b45309; }
+  .badge-progress { background-color: var(--info-light); color: #1e40af; }
+  .badge-completed { background-color: var(--success-light); color: #065f46; }
+
+  .text-truncate-custom {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Icon Colors */
+  .text-primary { color: var(--primary-color); }
+  .text-success { color: var(--success-color); }
+  .text-warning { color: var(--warning-color); }
+  .text-info { color: var(--info-color); }
+  .text-muted { color: var(--secondary-color); }
+
+  /* Utilities */
+  .bg-indigo-light { background-color: var(--primary-light); color: var(--primary-color); }
+  .bg-orange-light { background-color: var(--warning-light); color: var(--warning-color); }
+  .bg-blue-light { background-color: var(--info-light); color: var(--info-color); }
+  .bg-green-light { background-color: var(--success-light); color: var(--success-color); }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-3">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-title">
+      <h2>Maintenance Requests</h2>
+      <p>Manage repairs, track status, and coordinate with tenants.</p>
+    </div>
+    <div>
+        <!-- Placeholder for a "Create Request" button if needed later -->
+        <button class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i> New Request
+        </button>
+    </div>
+  </div>
+
+  <!-- Stats Overview -->
+  <div class="stats-grid">
+    <!-- Total Requests -->
+    <div class="stat-card">
+      <div class="stat-icon bg-indigo-light">
+        <i class="fas fa-clipboard-list"></i>
+      </div>
+      <div class="stat-info">
+        <h3>Total Requests</h3>
+        <p class="stat-number">{{ stats.total }}</p>
+      </div>
+    </div>
+
+    <!-- Pending -->
+    <div class="stat-card">
+      <div class="stat-icon bg-orange-light">
+        <i class="fas fa-clock"></i>
+      </div>
+      <div class="stat-info">
+        <h3>Pending</h3>
+        <p class="stat-number">{{ stats.pending }}</p>
+      </div>
+    </div>
+
+    <!-- In Progress -->
+    <div class="stat-card">
+      <div class="stat-icon bg-blue-light">
+        <i class="fas fa-tools"></i>
+      </div>
+      <div class="stat-info">
+        <h3>In Progress</h3>
+        <p class="stat-number">{{ stats.in_progress }}</p>
+      </div>
+    </div>
+
+    <!-- Completed -->
+    <div class="stat-card">
+      <div class="stat-icon bg-green-light">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="stat-info">
+        <h3>Completed</h3>
+        <p class="stat-number">{{ stats.completed }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visual Status Analytics (Substitutes for Charts) -->
+  <div class="card analytics-section">
+    <h5 class="mb-3">Request Status Distribution</h5>
+    
+    <!-- Pending Bar -->
+    {% if stats.total > 0 %}
+        {% set pending_pct = (stats.pending / stats.total * 100) %}
+        <div class="bar-group">
+            <div class="bar-label">
+                <span>Pending</span>
+                <span class="text-warning">{{ stats.pending }} ({{ "%.0f"|format(pending_pct) }}%)</span>
+            </div>
+            <div class="progress-bg">
+                <div class="progress-fill bg-warning" style="width: {{ pending_pct }}%; background-color: var(--warning-color);"></div>
+            </div>
+        </div>
+
+        <!-- In Progress Bar -->
+        {% set progress_pct = (stats.in_progress / stats.total * 100) %}
+        <div class="bar-group">
+            <div class="bar-label">
+                <span>In Progress</span>
+                <span class="text-info">{{ stats.in_progress }} ({{ "%.0f"|format(progress_pct) }}%)</span>
+            </div>
+            <div class="progress-bg">
+                <div class="progress-fill bg-info" style="width: {{ progress_pct }}%; background-color: var(--info-color);"></div>
+            </div>
+        </div>
+
+        <!-- Completed Bar -->
+        {% set completed_pct = (stats.completed / stats.total * 100) %}
+        <div class="bar-group">
+            <div class="bar-label">
+                <span>Completed</span>
+                <span class="text-success">{{ stats.completed }} ({{ "%.0f"|format(completed_pct) }}%)</span>
+            </div>
+            <div class="progress-bg">
+                <div class="progress-fill bg-success" style="width: {{ completed_pct }}%; background-color: var(--success-color);"></div>
+            </div>
+        </div>
+    {% else %}
+        <p class="text-muted text-center py-3">No data to display.</p>
+    {% endif %}
+  </div>
+
+  <!-- Requests Table -->
+  <div class="card">
+    <div class="card-header">
+      <h5 class="card-title">Active & History</h5>
+      <div class="input-group" style="width: 250px;">
+        <span class="input-group-text bg-white border-end-0">
+            <i class="fas fa-search text-muted"></i>
+        </span>
+        <input type="text" class="form-control border-start-0 ps-0" placeholder="Search requests...">
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Property</th>
+            <th>Tenant</th>
+            <th>Issue</th>
+            <th>Status</th>
+            <th class="text-end">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if requests %}
+            {% for req, user, house in requests %}
+            <tr>
+              <td>
+                <div class="fw-bold">{{ req.created_at.strftime('%d %b %Y') }}</div>
+                <div class="small text-muted">{{ req.created_at.strftime('%I:%M %p') }}</div>
+              </td>
+              <td>
+                <div class="fw-bold text-dark">{{ house.title }}</div>
+                <div class="small text-muted text-truncate-custom" style="max-width: 150px;">{{ house.address }}</div>
+              </td>
+              <td>
+                <div class="d-flex align-items-center">
+                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-size: 0.8rem; color: var(--primary-color);">
+                        {{ user.name[0]|upper }}
+                    </div>
+                    <span>{{ user.name }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="fw-medium">{{ req.title }}</div>
+                <div class="small text-muted text-truncate-custom" style="max-width: 200px;">{{ req.description[:50] }}...</div>
+              </td>
+              <td>
+                {% if req.status == 'pending' %}
+                    <span class="badge badge-pill badge-pending">Pending</span>
+                {% elif req.status == 'in_progress' %}
+                    <span class="badge badge-pill badge-progress">In Progress</span>
+                {% elif req.status == 'completed' %}
+                    <span class="badge badge-pill badge-completed">Completed</span>
+                {% else %}
+                    <span class="badge badge-pill bg-secondary text-white">{{ req.status|capitalize }}</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-light text-primary fw-bold">View</button>
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="6" class="text-center py-5">
+                <div class="text-muted">
+                    <i class="fas fa-tools fa-3x mb-3" style="opacity: 0.3;"></i>
+                    <p class="mb-0">No maintenance requests found.</p>
+                </div>
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

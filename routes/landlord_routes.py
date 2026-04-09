@@ -446,15 +446,29 @@ def maintenance():
         flash("Access denied.", "danger")
         return redirect(url_for("main.index"))
 
+    # 🔥 Correct query (NO unnecessary Booking join)
     requests = (
         db.session.query(MaintenanceRequest, User, House)
         .join(User, MaintenanceRequest.tenant_id == User.id)
-        .join(Booking, Booking.tenant_id == User.id)
-        .join(House, Booking.house_id == House.id)
+        .join(House, MaintenanceRequest.house_id == House.id)
         .filter(House.owner_id == current_user.id)
+        .order_by(MaintenanceRequest.created_at.desc())
         .all()
     )
-    return render_template("landlord/maintenance.html", requests=requests, stats={})
+
+    # 📊 Stats (optional but useful)
+    stats = {
+        "total": len(requests),
+        "pending": len([r for r, u, h in requests if r.status == "pending"]),
+        "in_progress": len([r for r, u, h in requests if r.status == "in_progress"]),
+        "completed": len([r for r, u, h in requests if r.status == "completed"]),
+    }
+
+    return render_template(
+        "landlord/maintenance.html",
+        requests=requests,
+        stats=stats
+    )
 
 
 # ---------------- Service Providers ----------------
