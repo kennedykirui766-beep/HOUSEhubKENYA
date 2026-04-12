@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+
+{% block title %}Pay Rent{% endblock %}
+
+{% block styles %}
+<style>
+    :root {
+        --primary-color: #4361ee;
+        --primary-hover: #3a0ca3;
+        --secondary-color: #7209b7;
+        --success-color: #10b981;
+        --danger-color: #ef4444;
+        --bg-light: #f8f9fa;
+        --text-dark: #212529;
+        --text-muted: #6c757d;
+        --border-color: #e9ecef;
+        --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        --radius-lg: 16px;
+        --radius-md: 10px;
+    }
+
+    .payment-wrapper {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .payment-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+
+    .card-header-custom {
+        background: linear-gradient(135deg, var(--success-color), #059669);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .card-header-custom h2 {
+        font-weight: 700;
+        margin: 0;
+        font-size: 1.75rem;
+    }
+    
+    .card-header-custom p {
+        margin-top: 0.5rem;
+        opacity: 0.9;
+        font-size: 0.95rem;
+    }
+
+    .card-body {
+        padding: 2.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background-color: #fcfcfc;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
+        outline: none;
+        background-color: white;
+    }
+
+    /* Rent Display Box */
+    .rent-display {
+        background-color: #ecfdf5;
+        border: 1px solid #d1fae5;
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s;
+    }
+
+    .rent-label {
+        color: #065f46;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .rent-amount {
+        color: #047857;
+        font-size: 2.5rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .currency {
+        font-size: 1.25rem;
+        vertical-align: super;
+        margin-right: 2px;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 0.8rem 2rem;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-success {
+        background-color: var(--success-color);
+        color: white;
+        width: 100%;
+    }
+
+    .btn-success:hover {
+        background-color: #059669;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+    }
+
+    .btn-secondary {
+        background-color: #e5e7eb;
+        color: var(--text-dark);
+    }
+
+    .btn-secondary:hover {
+        background-color: #d1d5db;
+    }
+
+    /* Alert Styling */
+    .alert-custom {
+        padding: 1rem 1.5rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 2rem;
+        border-left: 5px solid;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .alert-info { background-color: #eff6ff; border-color: #3b82f6; color: #1e40af; }
+    .alert-success { background-color: #ecfdf5; border-color: #10b981; color: #065f46; }
+    .alert-warning { background-color: #fffbeb; border-color: #f59e0b; color: #92400e; }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-muted);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .card-body { padding: 1.5rem; }
+        .rent-amount { font-size: 2rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="payment-wrapper">
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert-custom alert-{{ category }}">
+                    <span>{{ message }}</span>
+                    <button onclick="this.parentElement.style.display='none'" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:inherit;">&times;</button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if bookings %}
+    <div class="payment-card">
+        <div class="card-header-custom">
+            <h2>Pay Rent</h2>
+            <p>Select your property and the month you wish to pay for.</p>
+        </div>
+
+        <div class="card-body">
+            <form method="POST" id="rentForm">
+                {{ csrf_token() }}
+
+                <div class="row">
+                    <!-- Left Column: Selection -->
+                    <div class="col-lg-7">
+                        
+                        <!-- Property Selection -->
+                        <div class="mb-4">
+                            <label for="houseSelect" class="form-label">Select Property / Booking</label>
+                            <select name="house_id" id="houseSelect" class="form-select" required onchange="updateRentAmount()">
+                                <option value="" disabled selected>-- Choose your property --</option>
+                                {% for booking in bookings %}
+                                    <option value="{{ booking.house.id }}" data-rent="{{ booking.house.rent_amount }}" data-name="{{ booking.house.name }}">
+                                        {{ booking.house.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted" style="font-size: 0.85rem;">Only approved bookings are listed.</small>
+                        </div>
+
+                        <!-- Month Selection -->
+                        <div class="mb-4">
+                            <label for="payment_month" class="form-label">Payment For Month</label>
+                            <input type="month" name="payment_month" id="payment_month" class="form-control" required>
+                        </div>
+
+                        <!-- Optional Notes (Not used in route logic, but good for UI) -->
+                        <div class="mb-4">
+                            <label for="notes" class="form-label">Reference / Notes (Optional)</label>
+                            <textarea name="notes" id="notes" class="form-control" rows="3" placeholder="E.g., Rent for January 2024..."></textarea>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Column: Summary -->
+                    <div class="col-lg-5">
+                        <div class="rent-display">
+                            <span class="rent-label">Total Amount Due</span>
+                            <div class="rent-amount">
+                                <span class="currency">KES</span> <span id="displayAmount">0.00</span>
+                            </div>
+                            <div id="propertyNameDisplay" style="margin-top:0.5rem; font-size:0.9rem; color:#6b7280; height: 1.2em;">
+                                <!-- Property name appears here -->
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info d-flex align-items-center" style="background:#f0f9ff; border-color:#bae6fd; color:#0369a1; font-size:0.9rem;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px; flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                            <span>Payments will be processed with a status of "Pending" until verified.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4" style="border-top: 1px dashed var(--border-color);">
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="{{ url_for('tenant.dashboard') }}" class="btn btn-secondary">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                        Confirm Payment
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <div class="payment-card">
+        <div class="empty-state">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:1rem;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <h3>No Active Properties</h3>
+            <p>You do not have any approved bookings to pay rent for.</p>
+            <a href="{{ url_for('tenant.dashboard') }}" class="btn btn-secondary mt-3">Return to Dashboard</a>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Set default month to next month (convenience)
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateInput = document.getElementById('payment_month');
+        if (dateInput) {
+            const today = new Date();
+            const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1);
+            const yyyy = nextMonth.getFullYear();
+            const mm = String(nextMonth.getMonth() + 1).padStart(2, '0');
+            dateInput.value = `${yyyy}-${mm}`;
+        }
+    });
+
+    function updateRentAmount() {
+        const select = document.getElementById('houseSelect');
+        const display = document.getElementById('displayAmount');
+        const propNameDisplay = document.getElementById('propertyNameDisplay');
+        
+        // Get the selected option
+        const selectedOption = select.options[select.selectedIndex];
+
+        if (selectedOption.value) {
+            const rent = selectedOption.getAttribute('data-rent');
+            const name = selectedOption.getAttribute('data-name');
+            
+            // Format currency (assuming simple number, add commas)
+            const formattedRent = Number(rent).toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+            display.textContent = formattedRent;
+            propNameDisplay.textContent = name;
+        } else {
+            display.textContent = "0.00";
+            propNameDisplay.textContent = "";
+        }
+    }
+</script>
+{% endblock %}

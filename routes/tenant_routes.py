@@ -327,7 +327,7 @@ def pay_rent():
         flash("Rent payment submitted!", "success")
         return redirect(url_for('tenant.dashboard'))
 
-    return render_template('pay_rent.html', bookings=bookings)
+    return render_template('tenant/pay_rent.html', bookings=bookings)
 
 
 
