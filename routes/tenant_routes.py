@@ -433,7 +433,7 @@ def all_bookings():
             "house": {
                 "name": b.house.title,
                 "location": b.house.location,
-                "images": b.house.images  # if exists
+                "images": b.house.image_urls  # if exists
             }
         }
         for b in bookings
