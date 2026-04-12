@@ -256,30 +256,59 @@ def announcements():
 
 
 
+from datetime import datetime
+
 @tenant_bp.route('/submit_request', methods=['GET', 'POST'])
 @login_required
 def submit_request():
+
+    # Get tenant's approved/active bookings
+    bookings = Booking.query.filter_by(
+        tenant_id=current_user.id,
+        status='approved'
+    ).all()
+
     if request.method == 'POST':
         issue = request.form.get('issue')
-        if not issue:
-            flash("Please describe the issue before submitting.", "danger")
+        house_id = request.form.get('house_id')
+
+        if not issue or not house_id:
+            flash("Please select a house and describe the issue.", "danger")
             return redirect(url_for('tenant.submit_request'))
 
+        house = House.query.get_or_404(house_id)
+
+        # -------------------------
+        # CREATE MAINTENANCE REQUEST
+        # -------------------------
         request_obj = MaintenanceRequest(
             tenant_id=current_user.id,
+            house_id=house.id,  # ✅ make sure this exists in model
             issue=issue,
             status="Open",
             date_submitted=datetime.utcnow()
         )
+
         db.session.add(request_obj)
+
+        # -------------------------
+        # SEND MESSAGE TO LANDLORD
+        # -------------------------
+        message = Message(
+            sender_id=current_user.id,
+            receiver_id=house.owner.id,  # landlord
+            content=f"New maintenance request for {house.name}: {issue}"
+        )
+
+        db.session.add(message)
+
         db.session.commit()
 
-        flash("Maintenance request submitted successfully!", "success")
+        flash("Maintenance request sent to landlord!", "success")
         return redirect(url_for('tenant.dashboard'))
 
-    return render_template('submit_request.html')
+    return render_template('tenant/submit_request.html', bookings=bookings)
 
-from datetime import datetime
 
 @tenant_bp.route('/pay_rent', methods=['GET', 'POST'])
 @login_required
