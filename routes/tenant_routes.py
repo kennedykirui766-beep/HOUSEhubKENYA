@@ -429,7 +429,7 @@ def all_bookings():
             "id": b.id,
             "status": b.status,
             "created_at": b.created_at,
-            "amount": b.rent_amount,
+            "amount": b.house.rent_amount,
             "house": {
                 "name": b.house.title,
                 "location": b.house.location,
