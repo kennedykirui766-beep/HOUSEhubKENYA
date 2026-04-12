@@ -429,9 +429,9 @@ def all_bookings():
             "id": b.id,
             "status": b.status,
             "created_at": b.created_at,
-            "amount": b.amount,
+            "amount": b.rent_amount,
             "house": {
-                "name": b.house.name,
+                "name": b.house.title,
                 "location": b.house.location,
                 "images": b.house.images  # if exists
             }
