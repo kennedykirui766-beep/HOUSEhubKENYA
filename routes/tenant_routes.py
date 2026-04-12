@@ -423,7 +423,20 @@ def book_house(house_id):
 @login_required
 def all_bookings():
     bookings = Booking.query.filter_by(tenant_id=current_user.id).all()
-    return render_template('tenant/tenant_bookings.html', bookings=bookings)
+
+    bookings_data = [
+        {
+            "id": b.id,
+            "house_id": b.house_id,
+            "status": b.status,
+        }
+        for b in bookings
+    ]
+
+    return render_template(
+        'tenant/tenant_bookings.html',
+        bookings=bookings_data
+    )
 
 
 @tenant_bp.route('/messages')
