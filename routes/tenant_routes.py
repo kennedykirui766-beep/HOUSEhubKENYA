@@ -212,29 +212,56 @@ def properties():
         is_guest=is_guest
     )
 
-
 @tenant_bp.route('/upload_document', methods=['GET', 'POST'])
 @login_required
 def upload_document():
+
     if request.method == 'POST':
+
         if 'document' not in request.files:
             flash("No file part", "danger")
             return redirect(request.url)
 
         file = request.files['document']
+
         if file.filename == '':
             flash("No file selected", "danger")
             return redirect(request.url)
 
-        if file:
-            filename = secure_filename(file.filename)
-            upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
-            os.makedirs(upload_folder, exist_ok=True)
-            file.save(os.path.join(upload_folder, filename))
-            flash("Document uploaded successfully!", "success")
-            return redirect(url_for('tenant.dashboard'))
+        try:
+            # -------------------------
+            # UPLOAD TO CLOUDINARY
+            # -------------------------
+            upload_result = cloudinary.uploader.upload(
+                file,
+                resource_type="auto",  # supports pdf, images, etc.
+                folder="homehub/documents"
+            )
 
-    return render_template('upload_document.html')
+            file_url = upload_result.get("secure_url")
+
+            # -------------------------
+            # SAVE TO DATABASE
+            # -------------------------
+            new_doc = Document(
+                tenant_id=current_user.id,
+                name=secure_filename(file.filename),
+                file_url=file_url,
+                uploaded_at=datetime.utcnow()
+            )
+
+            db.session.add(new_doc)
+            db.session.commit()
+
+            flash("Document uploaded successfully!", "success")
+            return redirect(url_for('tenant.documents'))
+
+        except Exception as e:
+            print(e)
+            flash("Upload failed. Try again.", "danger")
+            return redirect(request.url)
+
+    return render_template('tenant/upload_document.html')
 
 # routes/tenant_routes.py
 
