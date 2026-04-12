@@ -288,9 +288,14 @@ class ServiceProvider(db.Model):
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     tenant_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    house_id = db.Column(db.Integer, db.ForeignKey('house.id'))  # ✅ ADD THIS
+
     amount = db.Column(db.Float, nullable=False)
+    payment_month = db.Column(db.String(20), nullable=False)  # ✅ ADD THIS
+
     date = db.Column(db.Date, nullable=False)
     due_date = db.Column(db.Date)
+
     status = db.Column(db.String(20), default='Pending')
 
 

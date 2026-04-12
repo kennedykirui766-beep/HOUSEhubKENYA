@@ -279,23 +279,55 @@ def submit_request():
 
     return render_template('submit_request.html')
 
+from datetime import datetime
+
 @tenant_bp.route('/pay_rent', methods=['GET', 'POST'])
 @login_required
 def pay_rent():
+
+    # Only approved bookings
+    bookings = Booking.query.filter_by(
+        tenant_id=current_user.id,
+        status='approved'
+    ).all()
+
     if request.method == 'POST':
-        amount = request.form.get('amount')
+
+        house_id = request.form.get('house_id')
+        payment_month = request.form.get('payment_month')
+
+        house = House.query.get_or_404(house_id)
+
+        # ✅ Get rent from house
+        amount = house.rent_amount
+
+        # ✅ Prevent duplicate payments
+        existing = Payment.query.filter_by(
+            tenant_id=current_user.id,
+            house_id=house_id,
+            payment_month=payment_month
+        ).first()
+
+        if existing:
+            flash("You already paid for this month!", "warning")
+            return redirect(url_for('tenant.pay_rent'))
+
         payment = Payment(
             tenant_id=current_user.id,
+            house_id=house.id,
             amount=amount,
-            date=datetime.utcnow(),
+            payment_month=payment_month,
+            date=datetime.utcnow().date(),
             status='Pending'
         )
+
         db.session.add(payment)
         db.session.commit()
+
         flash("Rent payment submitted!", "success")
         return redirect(url_for('tenant.dashboard'))
 
-    return render_template('pay_rent.html')
+    return render_template('pay_rent.html', bookings=bookings)
 
 
 
