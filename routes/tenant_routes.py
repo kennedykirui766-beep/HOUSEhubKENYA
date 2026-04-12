@@ -428,7 +428,7 @@ def all_bookings():
         {
             "id": b.id,
             "status": b.status,
-            "house_name": b.house.name,
+            "house_name": b.house.title,
             "location": b.house.location,
             "date_booked": b.created_at.strftime("%Y-%m-%d %H:%M")
         }
