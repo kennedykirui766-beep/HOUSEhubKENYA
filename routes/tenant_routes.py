@@ -427,8 +427,10 @@ def all_bookings():
     bookings_data = [
         {
             "id": b.id,
-            "house_id": b.house_id,
             "status": b.status,
+            "house_name": b.house.name,
+            "location": b.house.location,
+            "date_booked": b.created_at.strftime("%Y-%m-%d %H:%M")
         }
         for b in bookings
     ]
