@@ -265,11 +265,62 @@ def upload_document():
 
 # routes/tenant_routes.py
 
-@tenant_bp.route('/documents', methods=['GET'])
+import cloudinary.uploader
+from datetime import datetime
+from flask import request, flash, redirect, url_for
+
+@tenant_bp.route('/documents', methods=['GET', 'POST'])
 @login_required
 def documents():
-    # Fetch documents belonging to the logged-in tenant
-    tenant_documents = Document.query.filter_by(tenant_id=current_user.id).all()
+
+    if request.method == 'POST':
+
+        file = request.files.get('document')
+        doc_name = request.form.get('name')
+
+        if not file or file.filename == "":
+            flash("Please select a file to upload.", "danger")
+            return redirect(url_for('tenant.documents'))
+
+        try:
+            # -------------------------
+            # UPLOAD TO CLOUDINARY
+            # -------------------------
+            upload_result = cloudinary.uploader.upload(
+                file,
+                resource_type="auto",  # allows pdf, images, etc.
+                folder="homehub/documents"
+            )
+
+            file_url = upload_result.get("secure_url")
+
+            # -------------------------
+            # SAVE TO DATABASE
+            # -------------------------
+            new_doc = Document(
+                tenant_id=current_user.id,
+                name=doc_name if doc_name else file.filename,
+                file_url=file_url,
+                uploaded_at=datetime.utcnow()
+            )
+
+            db.session.add(new_doc)
+            db.session.commit()
+
+            flash("Document uploaded successfully!", "success")
+
+        except Exception as e:
+            print(e)
+            flash("Upload failed. Try again.", "danger")
+
+        return redirect(url_for('tenant.documents'))
+
+    # -------------------------
+    # FETCH DOCUMENTS
+    # -------------------------
+    tenant_documents = Document.query.filter_by(
+        tenant_id=current_user.id
+    ).all()
 
     return render_template('documents.html', documents=tenant_documents)
 
