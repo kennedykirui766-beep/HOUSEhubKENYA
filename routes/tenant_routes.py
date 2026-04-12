@@ -428,9 +428,13 @@ def all_bookings():
         {
             "id": b.id,
             "status": b.status,
-            "house_name": b.house.title,
-            "location": b.house.location,
-            "date_booked": b.created_at.strftime("%Y-%m-%d %H:%M")
+            "created_at": b.created_at,
+            "amount": b.amount,
+            "house": {
+                "name": b.house.name,
+                "location": b.house.location,
+                "images": b.house.images  # if exists
+            }
         }
         for b in bookings
     ]
