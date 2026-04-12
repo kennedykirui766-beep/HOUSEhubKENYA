@@ -21,6 +21,9 @@ from models.models import (
 
 from extensions import db, csrf
 from utils_delete import delete_user_and_dependents
+import cloudinary.uploader
+from flask import request, flash, redirect, url_for
+from werkzeug.security import generate_password_hash
 
 
 
@@ -295,10 +298,68 @@ def pay_rent():
     return render_template('pay_rent.html')
 
 
-@tenant_bp.route('/profile')
+
+
+@tenant_bp.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    return render_template('profile.html', tenant=current_user)
+    user = current_user
+
+    if request.method == 'POST':
+
+        # ----------------------
+        # BASIC INFO UPDATE
+        # ----------------------
+        user.name = request.form.get('name')
+        user.email = request.form.get('email')
+        user.phone_number = request.form.get('phone_number')
+        user.address = request.form.get('address')
+        user.bio = request.form.get('bio')
+        user.business_name = request.form.get('business_name')
+        user.language = request.form.get('language')
+
+        # ----------------------
+        # NOTIFICATIONS
+        # ----------------------
+        user.email_notifications = True if request.form.get('email_notifications') == 'on' else False
+        user.message_alerts = True if request.form.get('message_alerts') == 'on' else False
+
+        # ----------------------
+        # PROFILE PICTURE UPLOAD (CLOUDINARY)
+        # ----------------------
+        if 'profile_picture' in request.files:
+            file = request.files['profile_picture']
+
+            if file and file.filename != "":
+
+                # Upload to Cloudinary
+                upload_result = cloudinary.uploader.upload(
+                    file,
+                    folder="homehub/profile_pictures"
+                )
+
+                # Save secure URL
+                user.profile_picture = upload_result.get("secure_url")
+
+        # ----------------------
+        # PASSWORD CHANGE
+        # ----------------------
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+
+        if new_password:
+            if new_password == confirm_password:
+                user.set_password(new_password)
+            else:
+                flash("Passwords do not match!", "danger")
+                return redirect(url_for('tenant.profile'))
+
+        db.session.commit()
+
+        flash("Profile updated successfully!", "success")
+        return redirect(url_for('tenant.profile'))
+
+    return render_template('profile.html', tenant=user)
 
 
 @tenant_bp.route('/delete_account', methods=['GET', 'POST'])
