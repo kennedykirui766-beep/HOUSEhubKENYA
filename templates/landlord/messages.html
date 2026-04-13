@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Messages - HomeHub{% endblock %}
+{% block title %}Chat - HomeHub{% endblock %}
 
 {% block styles %}
 <style>
@@ -24,7 +24,7 @@
   .msg-page {
     padding: 0;
     background-color: var(--wa-app-bg);
-    height: calc(100vh - var(--header-height, 60px)); /* Adjust based on your nav height */
+    height: calc(100vh - var(--header-height, 60px));
     overflow: hidden;
     display: flex;
     justify-content: center;
@@ -43,7 +43,7 @@
 
   /* ========== SIDEBAR (Conversation List) ========== */
   .chat-sidebar {
-    width: 350px; /* Default width */
+    width: 350px;
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--wa-border-color);
@@ -152,12 +152,10 @@
     display: flex;
     flex-direction: column;
     background-color: var(--wa-chat-bg);
-    /* Subtle WhatsApp Pattern */
     background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
     position: relative;
   }
 
-  /* Default Placeholder State */
   .chat-placeholder {
     display: flex;
     flex-direction: column;
@@ -169,7 +167,6 @@
     border-bottom: 6px solid var(--wa-primary-green);
   }
 
-  /* Chat Header */
   .chat-view-header {
     padding: 10px 16px;
     background-color: var(--wa-header-bg);
@@ -182,7 +179,7 @@
   }
 
   .btn-back {
-    display: none; /* Hidden on desktop */
+    display: none;
     background: none;
     border: none;
     font-size: 1.2rem;
@@ -223,13 +220,12 @@
     gap: 4px;
   }
 
-  /* Online Status Dot */
   .status-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: #8696a0; /* Default offline color */
-    display: none; /* Hidden by default */
+    background-color: #8696a0;
+    display: none;
   }
   .status-dot.online {
     background-color: var(--wa-primary-green);
@@ -282,7 +278,6 @@
     border-top-left-radius: 0;
   }
 
-  /* Bubble Tails (CSS Triangles) */
   .msg-bubble.sent::before {
     content: "";
     position: absolute;
@@ -329,8 +324,12 @@
 
   .msg-check {
     font-size: 0.7rem;
-    color: #53bdeb;
   }
+  
+  /* Tick Colors */
+  .tick-single { color: #999; }
+  .tick-double-grey { color: #999; }
+  .tick-double-blue { color: #53bdeb; }
 
   /* Input Area */
   .chat-input-area {
@@ -378,57 +377,22 @@
     color: var(--wa-primary-green);
   }
 
-  /* ========== EMPTY STATES ========== */
   .no-conversations {
     text-align: center;
     padding: 2rem;
     color: var(--wa-text-secondary);
   }
 
-  /* ========== SCROLLBAR ========== */
-  ::-webkit-scrollbar {
-    width: 6px !important;
-    height: 6px !important;
-  }
-  ::-webkit-scrollbar-thumb {
-    background-color: rgba(0,0,0,0.2);
-    border-radius: 3px;
-  }
-  ::-webkit-scrollbar-track {
-    background: hsla(0,0%,100%,0.1);
-  }
+  ::-webkit-scrollbar { width: 6px !important; height: 6px !important; }
+  ::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.2); border-radius: 3px; }
+  ::-webkit-scrollbar-track { background: hsla(0,0%,100%,0.1); }
 
-  /* ========== RESPONSIVE ========== */
   @media (max-width: 767px) {
-    .msg-page {
-      height: calc(100vh - 50px);
-    }
-    
-    .chat-sidebar {
-      width: 100%;
-      position: absolute;
-      height: 100%;
-      left: 0;
-      top: 0;
-    }
-
-    .chat-main {
-      width: 100%;
-      position: absolute;
-      height: 100%;
-      left: 100%;
-      top: 0;
-      transition: transform 0.3s ease;
-      z-index: 20;
-    }
-
-    body.chat-active .chat-main {
-      transform: translateX(-100%);
-    }
-    
-    .btn-back {
-      display: block;
-    }
+    .msg-page { height: calc(100vh - 50px); }
+    .chat-sidebar { width: 100%; position: absolute; height: 100%; left: 0; top: 0; }
+    .chat-main { width: 100%; position: absolute; height: 100%; left: 100%; top: 0; transition: transform 0.3s ease; z-index: 20; }
+    body.chat-active .chat-main { transform: translateX(-100%); }
+    .btn-back { display: block; }
   }
 </style>
 {% endblock %}
@@ -436,46 +400,50 @@
 {% block content %}
 <script>
   // Data Injection
+  // Note: The route now passes ISO strings, fixing the strftime error.
   window.rawMessages = {{ messages | tojson }};
   window.currentUser = {{ current_user.id | tojson }};
+  
+  // Inject the landlord (user) data passed from the route
+  window.landlord = {{ user | tojson }};
 </script>
 
 <div class="msg-page">
   <div class="container-fluid" style="height: 100%;">
     <div class="chat-container">
       
-      <!-- SIDEBAR: List of Conversations -->
+      <!-- SIDEBAR -->
       <aside class="chat-sidebar" id="chatSidebar">
         <div class="sidebar-header">
           <h3>Chats</h3>
           <div style="display: flex; gap: 15px; color: var(--wa-text-secondary);">
-            <i class="fas fa-circle-notch" style="cursor: pointer;"></i>
-            <i class="fas fa-comment-alt" style="cursor: pointer;"></i>
-            <i class="fas fa-ellipsis-v" style="cursor: pointer;"></i>
+            <a href="/tenant/messages" style="color: inherit; text-decoration: none;" title="Back to Inbox">
+              <i class="fas fa-inbox"></i>
+            </a>
+            <i class="fas fa-ellipsis-v"></i>
           </div>
         </div>
 
         <div class="chat-list" id="conversationList">
-          <!-- Conversations will be injected here by JS -->
-          <div class="no-conversations">Loading chats...</div>
+          <!-- Since this route is specific to one landlord, the sidebar will only show this chat -->
+          <!-- Or you could implement a separate fetch to show all other landlords here -->
+          <div class="no-conversations">Select a chat</div>
         </div>
       </aside>
 
       <!-- MAIN: Chat Window -->
       <main class="chat-main" id="chatMain">
         
-        <!-- Default Placeholder (Shown when no chat selected) -->
+        <!-- Placeholder -->
         <div class="chat-placeholder" id="chatPlaceholder">
-          <!-- House Avatar Icon -->
           <div style="width: 150px; height: 150px; background-color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
             <i class="fas fa-home" style="font-size: 4rem; color: #d1d7db;"></i>
           </div>
-          
           <h2 style="color: #41525d; font-weight: 300; margin-bottom: 0.5rem;">HomeHub Messages</h2>
-          <p style="color: #667781; font-size: 0.9rem;">Select a conversation to start chatting.</p>
+          <p style="color: #667781; font-size: 0.9rem;">Loading chat...</p>
         </div>
 
-        <!-- Active Chat View (Hidden by default) -->
+        <!-- Active Chat View -->
         <div id="activeChatView" style="display: none; flex-direction: column; height: 100%;">
           
           <!-- Chat Header -->
@@ -485,7 +453,7 @@
             </button>
             <div class="header-avatar" id="headerAvatar">?</div>
             <div class="header-info">
-              <div class="header-name" id="headerName">Tenant Name</div>
+              <div class="header-name" id="headerName">Landlord</div>
               <div class="header-status">
                 <span class="status-dot" id="headerStatusDot"></span>
                 <span id="headerStatusText">offline</span>
@@ -493,7 +461,6 @@
             </div>
             <div style="color: var(--wa-text-secondary); display: flex; gap: 20px;">
               <i class="fas fa-search"></i>
-              <i class="fas fa-paperclip"></i>
               <i class="fas fa-ellipsis-v"></i>
             </div>
           </header>
@@ -528,11 +495,9 @@
     // Data References
     let rawMessages = window.rawMessages || [];
     const currentUserId = window.currentUser;
+    const landlordData = window.landlord || {}; // Data about the person we are chatting with
     
     // UI Elements
-    const conversationListEl = document.getElementById('conversationList');
-    const chatPlaceholder = document.getElementById('chatPlaceholder');
-    const activeChatView = document.getElementById('activeChatView');
     const messagesArea = document.getElementById('messagesArea');
     const headerName = document.getElementById('headerName');
     const headerAvatar = document.getElementById('headerAvatar');
@@ -542,166 +507,46 @@
     const btnSend = document.getElementById('btnSend');
     const btnBackMobile = document.getElementById('btnBackMobile');
 
-    let activeConversationId = null;
-    let onlinePollingInterval = null;
+    let landlordOnline = landlordData.is_online || false;
+    let pollingInterval = null;
 
-    // --- HELPER: GET CSRF TOKEN ---
-    function getCSRFToken() {
-      const meta = document.querySelector('meta[name="csrf-token"]');
-      if (meta) return meta.getAttribute('content');
-      const input = document.querySelector('input[name="csrf_token"]');
-      if (input) return input.value;
-      return '';
-    }
-
-    // --- 1. PROCESS DATA: Group messages by "Other User" ---
-    function groupMessagesByUser(messages) {
-      const groups = {};
-      
-      messages.forEach(msg => {
-        const isSent = msg.sender_id === currentUserId;
-        // Robustly find other user ID, handling both object and flat ID
-        const otherId = isSent ? (msg.receiver_id || msg.receiver?.id) : (msg.sender_id || msg.sender?.id);
-        const otherName = isSent ? (msg.receiver_name || msg.receiver?.name) : (msg.sender_name || msg.sender?.name);
-        const otherImg = isSent ? (msg.receiver?.profile_image) : (msg.sender?.profile_image);
-
-        if (!groups[otherId]) {
-          groups[otherId] = {
-            id: otherId,
-            name: otherName || "User",
-            avatar: otherImg,
-            messages: [],
-            lastMsg: "",
-            lastTime: ""
-          };
-        }
-        groups[otherId].messages.push(msg);
-      });
-
-      // Sort messages within each group by time
-      Object.values(groups).forEach(group => {
-        group.messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-        
-        // Set last message info for sidebar preview
-        const last = group.messages[group.messages.length - 1];
-        group.lastMsg = last.content;
-        group.lastTime = formatTimeShort(last.timestamp);
-      });
-
-      // Return as array sorted by most recent message
-      return Object.values(groups).sort((a, b) => {
-        const dateA = new Date(a.messages[a.messages.length-1].timestamp);
-        const dateB = new Date(b.messages[b.messages.length-1].timestamp);
-        return dateB - dateA;
-      });
-    }
-
-    // --- 2. RENDER SIDEBAR ---
-    function renderSidebar() {
-      const conversations = groupMessagesByUser(rawMessages);
-      conversationListEl.innerHTML = '';
-
-      if (conversations.length === 0) {
-        conversationListEl.innerHTML = `
-          <div class="no-conversations">
-            <i class="far fa-comments" style="font-size: 2rem; margin-bottom: 10px;"></i><br>
-            No messages yet.<br>Start a conversation!
-          </div>`;
-        return;
+    // --- 1. INITIALIZE CHAT ---
+    function initChat() {
+      // Since this route is specific to one landlord, we auto-open the chat
+      if (landlordData) {
+        const conversation = {
+          id: landlordData.id,
+          name: landlordData.name,
+          avatar: landlordData.profile_image,
+          messages: rawMessages
+        };
+        openChat(conversation);
       }
-
-      conversations.forEach(conv => {
-        const item = document.createElement('div');
-        item.className = 'chat-item';
-        item.dataset.id = conv.id;
-        item.onclick = () => openChat(conv);
-        
-        const initials = conv.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
-        const avatarHtml = conv.avatar 
-          ? `<img src="${conv.avatar}" class="chat-avatar" alt="${conv.name}">`
-          : `<div class="chat-avatar" style="background: #00a884;">${initials}</div>`;
-
-        item.innerHTML = `
-          ${avatarHtml}
-          <div class="chat-info">
-            <div class="chat-top-row">
-              <span class="chat-name">${conv.name}</span>
-              <span class="chat-time">${conv.lastTime}</span>
-            </div>
-            <div class="chat-preview">
-              <i class="fas fa-check-double msg-check" style="font-size: 0.7rem; color: #53bdeb;"></i>
-              ${truncate(conv.lastMsg, 35)}
-            </div>
-          </div>
-        `;
-        conversationListEl.appendChild(item);
-      });
     }
 
-    // --- 3. ONLINE STATUS POLLING ---
-    function updateOnlineStatusUI(isOnline, lastSeen) {
-      if (isOnline) {
-        headerStatusDot.classList.add('online');
-        headerStatusText.innerText = "online";
-        headerStatusText.style.color = "var(--wa-primary-green)";
+    // --- 2. TICK LOGIC (The Core Requirement) ---
+    function getTickIcon(msg, isUserOnline) {
+      // Logic:
+      // 1. If read -> Blue Double
+      // 2. Else if Online -> Grey Double
+      // 3. Else -> Grey Single
+      
+      // NOTE: 'is_read' must be included in your route's JSON response
+      if (msg.is_read) {
+        return '<i class="fas fa-check-double tick-double-blue"></i>';
+      } else if (isUserOnline) {
+        return '<i class="fas fa-check-double tick-double-grey"></i>';
       } else {
-        headerStatusDot.classList.remove('online');
-        headerStatusText.innerText = lastSeen ? `last seen ${lastSeen}` : "offline";
-        headerStatusText.style.color = "var(--wa-text-secondary)";
+        return '<i class="fas fa-check tick-single"></i>';
       }
     }
 
-    function startOnlinePolling(userId) {
-      // Clear existing interval
-      if (onlinePollingInterval) clearInterval(onlinePollingInterval);
-
-      // Initial check
-      checkOnlineStatus(userId);
-
-      // Poll every 5 seconds
-      onlinePollingInterval = setInterval(() => {
-        checkOnlineStatus(userId);
-      }, 5000);
-    }
-
-    function checkOnlineStatus(userId) {
-      // 
-      // NOTE: You need a backend route to support this.
-      // Example Route: @landlord_bp.route('/check_online/<int:user_id>')
-      // Returns: {"is_online": true, "last_seen": "2 mins ago"}
-      //
-      
-      // Attempting to fetch status (Uncomment this when backend is ready)
-      /*
-      fetch(`/landlord/check_online/${userId}`)
-        .then(r => r.json())
-        .then(data => {
-          updateOnlineStatusUI(data.is_online, data.last_seen);
-        })
-        .catch(err => console.log("Online status polling not implemented on backend"));
-      */
-      
-      // Placeholder logic: Just check if user object in memory has is_online (if available)
-      // This is a fallback if the route isn't set up yet.
-      const conv = groupMessagesByUser(rawMessages).find(c => c.id == userId);
-      if(conv && conv.is_online) {
-         updateOnlineStatusUI(true, null);
-      }
-    }
-
-    // --- 4. OPEN CHAT ---
+    // --- 3. OPEN CHAT ---
     function openChat(conversation) {
-      activeConversationId = conversation.id;
-      
       // UI Updates
-      chatPlaceholder.style.display = 'none';
-      activeChatView.style.display = 'flex';
+      document.getElementById('chatPlaceholder').style.display = 'none';
+      document.getElementById('activeChatView').style.display = 'flex';
       document.body.classList.add('chat-active');
-
-      // Highlight active item
-      document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
-      const activeItem = document.querySelector(`.chat-item[data-id="${conversation.id}"]`);
-      if(activeItem) activeItem.classList.add('active');
 
       // Set Header Info
       headerName.textContent = conversation.name;
@@ -713,18 +558,28 @@
         headerAvatar.innerHTML = initials;
       }
 
-      // Start Polling for Online Status
-      startOnlinePolling(conversation.id);
+      // Update Online Status UI immediately
+      updateOnlineStatusUI(landlordOnline);
 
       // Render Messages
+      renderMessages(conversation.messages);
+
+      // Start Polling for Status (Online/Read)
+      startPolling(conversation.id);
+    }
+
+    // --- 4. RENDER MESSAGES ---
+    function renderMessages(messages) {
       messagesArea.innerHTML = '';
       let lastDate = null;
 
-      conversation.messages.forEach(msg => {
+      // Sort by time
+      messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+      messages.forEach(msg => {
         const isSent = msg.sender_id === currentUserId;
         const msgDate = new Date(msg.timestamp).toLocaleDateString();
         
-        // Add Date Divider if changed
         if (msgDate !== lastDate) {
           const divider = document.createElement('div');
           divider.style.cssText = "text-align: center; margin: 10px 0; color: #fff; background: rgba(225,245,254,0.9); padding: 5px 12px; border-radius: 8px; align-self: center; font-size: 0.8rem; box-shadow: 0 1px 2px rgba(0,0,0,0.1);";
@@ -733,24 +588,34 @@
           lastDate = msgDate;
         }
 
-        appendMessageBubble(msg.content, isSent, formatTimeAMPM(msg.timestamp));
+        appendMessageBubble(msg, isSent);
       });
 
       scrollToBottom();
     }
 
-    // --- 5. APPEND MESSAGE BUBBLE ---
-    function appendMessageBubble(text, isSent, time) {
+    function appendMessageBubble(msg, isSent) {
       const row = document.createElement('div');
       row.className = `msg-row ${isSent ? 'sent' : 'received'}`;
-      
-      const checkIcon = isSent ? `<i class="fas fa-check-double msg-check"></i>` : '';
+      row.dataset.id = msg.id; // Store ID to update ticks later
+
+      // Time formatting
+      const d = new Date(msg.timestamp);
+      let hours = d.getHours();
+      const minutes = d.getMinutes().toString().padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      const timeStr = hours + ':' + minutes + ' ' + ampm;
+
+      // Get Ticks
+      const checkIcon = isSent ? getTickIcon(msg, landlordOnline) : '';
 
       row.innerHTML = `
         <div class="msg-bubble">
-          ${text}
+          ${msg.content}
           <div class="msg-meta">
-            <span class="msg-time">${time}</span>
+            <span class="msg-time">${timeStr}</span>
             ${checkIcon}
           </div>
         </div>
@@ -759,98 +624,154 @@
       scrollToBottom();
     }
 
-    // --- 6. SEND MESSAGE LOGIC (UPDATED) ---
+    // --- 5. ONLINE STATUS & POLLING ---
+    function updateOnlineStatusUI(isOnline, lastSeen) {
+      landlordOnline = isOnline; // Update global state
+      if (isOnline) {
+        headerStatusDot.classList.add('online');
+        headerStatusText.innerText = "online";
+        headerStatusText.style.color = "var(--wa-primary-green)";
+      } else {
+        headerStatusDot.classList.remove('online');
+        headerStatusText.innerText = lastSeen ? `last seen ${lastSeen}` : "offline";
+        headerStatusText.style.color = "var(--wa-text-secondary)";
+      }
+      
+      // Refresh message ticks based on new online status
+      refreshMessageTicks();
+    }
+
+    function refreshMessageTicks() {
+      // Find all sent messages and update their tick icons
+      const sentRows = document.querySelectorAll('.msg-row.sent');
+      sentRows.forEach(row => {
+        // Find the original message data from rawMessages by ID
+        const msgId = parseInt(row.dataset.id);
+        const msg = rawMessages.find(m => m.id === msgId);
+        if (msg) {
+          const newTickHtml = getTickIcon(msg, landlordOnline);
+          const meta = row.querySelector('.msg-meta');
+          if (meta) {
+            // Remove old tick icon if exists, append new one
+            const oldTick = meta.querySelector('.msg-check, .tick-single, .tick-double-grey, .tick-double-blue');
+            if (oldTick) oldTick.remove();
+            meta.insertAdjacentHTML('beforeend', newTickHtml);
+          }
+        }
+      });
+    }
+
+    function startPolling(chatId) {
+      if (pollingInterval) clearInterval(pollingInterval);
+      
+      // Initial Check
+      checkStatus(chatId);
+
+      // Poll every 5 seconds
+      pollingInterval = setInterval(() => {
+        checkStatus(chatId);
+      }, 5000);
+    }
+
+    function checkStatus(chatId) {
+      // You need a backend route for this. Example:
+      // GET /tenant/check_status/<landlord_id> 
+      // Returns: { "is_online": true, "last_seen": "2 mins ago", "messages_read": [1, 2, 3] }
+      
+      // Placeholder logic for now:
+      // 1. Fetch updates (Mocking here)
+      // fetch(`/tenant/check_status/${chatId}`)
+      //   .then(r => r.json())
+      //   .then(data => {
+      //      updateOnlineStatusUI(data.is_online, data.last_seen);
+      //      
+      //      // If messages_read list is returned, update local rawMessages and re-render ticks
+      //      if(data.messages_read) {
+      //         data.messages_read.forEach(readId => {
+      //            const m = rawMessages.find(m => m.id === readId);
+      //            if(m) m.is_read = true;
+      //         });
+      //         refreshMessageTicks();
+      //      }
+      //   });
+    }
+
+    // --- 6. SEND MESSAGE LOGIC ---
     function sendMessage() {
       const text = messageInput.value.trim();
-      if (!text || !activeConversationId) return;
+      if (!text) return;
 
-      // 1. Add to UI immediately (Optimistic UI)
-      const now = new Date();
-      const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-      
-      appendMessageBubble(text, true, timeStr);
+      // Optimistic UI
+      const tempMsg = {
+        id: Date.now(), // Temporary ID
+        sender_id: currentUserId,
+        content: text,
+        timestamp: new Date().toISOString(),
+        is_read: false
+      };
+      rawMessages.push(tempMsg);
+      appendMessageBubble(tempMsg, true);
       messageInput.value = '';
-      messageInput.focus();
-
-      // 2. Send to Backend (AJAX)
-      fetch('/landlord/send_message', {
+      
+      // Send to Backend (POST to current URL as per route)
+      fetch(window.location.href, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRFToken': getCSRFToken() // Crucial for Flask/WTF
+          'X-CSRFToken': getCSRFToken()
         },
         body: JSON.stringify({
-          receiver_id: activeConversationId,
           content: text
         })
       })
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          // Optional: Refresh sidebar to show new message preview
-          // For a truly realtime app without WebSockets, we often append the message
-          // to our local rawMessages array and re-render sidebar.
-          const tempMsg = {
-            sender_id: currentUserId,
-            receiver_id: activeConversationId,
-            content: text,
-            timestamp: now.toISOString(),
-            // Sender/Receiver names would ideally come from the active conversation object
-            sender_name: "Me", 
-            receiver_name: headerName.textContent 
-          };
-          rawMessages.push(tempMsg);
-          renderSidebar();
+          // Update temp message with real data from server
+          const realMsg = data.message;
+          const index = rawMessages.findIndex(m => m.id === tempMsg.id);
+          if (index !== -1) {
+            rawMessages[index] = realMsg;
+            // Re-render specific row or just update ID
+            const row = document.querySelector(`.msg-row[data-id="${tempMsg.id}"]`);
+            if(row) row.dataset.id = realMsg.id;
+          }
         } else {
-          alert("Failed to send message.");
-          // Remove the optimistic bubble? For now we leave it but user knows it failed.
+          alert("Failed to send.");
         }
       })
-      .catch(error => {
-        console.error('Error:', error);
-        alert("An error occurred while sending.");
+      .catch(err => {
+        console.error(err);
+        alert("Error sending message");
       });
     }
 
-    // --- UTILS ---
+    function getCSRFToken() {
+      const meta = document.querySelector('meta[name="csrf-token"]');
+      if (meta) return meta.getAttribute('content');
+      const input = document.querySelector('input[name="csrf_token"]');
+      if (input) return input.value;
+      return '';
+    }
+
     function scrollToBottom() {
       messagesArea.scrollTop = messagesArea.scrollHeight;
     }
 
-    function formatTimeShort(timestamp) {
-      const d = new Date(timestamp);
-      return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
-    }
-
-    function formatTimeAMPM(timestamp) {
-      const d = new Date(timestamp);
-      let hours = d.getHours();
-      const minutes = d.getMinutes().toString().padStart(2, '0');
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      hours = hours % 12;
-      hours = hours ? hours : 12; 
-      return hours + ':' + minutes + ' ' + ampm;
-    }
-
-    function truncate(str, n){
-      return (str.length > n) ? str.substr(0, n-1) + '&hellip;' : str;
-    }
-
-    // --- EVENT LISTENERS ---
+    // Event Listeners
     btnSend.addEventListener('click', sendMessage);
-    
     messageInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') sendMessage();
     });
-
+    
     btnBackMobile.addEventListener('click', () => {
       document.body.classList.remove('chat-active');
-      activeConversationId = null;
-      clearInterval(onlinePollingInterval); // Stop polling when leaving chat
+      clearInterval(pollingInterval);
+      window.location.href = "/tenant/messages"; // Go back to inbox
     });
 
-    // Initialize
-    renderSidebar();
+    // Init
+    initChat();
   });
 </script>
 {% endblock %}

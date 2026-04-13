@@ -758,22 +758,78 @@ def contact_providers():
 @tenant_bp.route('/chat/<int:landlord_id>', methods=['GET', 'POST'])
 @login_required
 def chat(landlord_id):
-    if request.method == 'POST':
-        message = Message(
-            sender_id=current_user.id,
-            receiver_id=landlord_id,
-            content=request.form['message']
-        )
-        db.session.add(message)
-        db.session.commit()
+    from datetime import datetime
 
+    # =========================
+    # SEND MESSAGE (AJAX SUPPORT)
+    # =========================
+    if request.method == 'POST':
+        try:
+            # ✅ Support BOTH form and JSON
+            data = request.get_json(silent=True)
+
+            if data:
+                content = data.get("content")
+            else:
+                content = request.form.get("message")
+
+            if not content:
+                return {"success": False, "error": "Empty message"}, 400
+
+            message = Message(
+                sender_id=current_user.id,
+                receiver_id=landlord_id,
+                content=content,
+                timestamp=datetime.utcnow()
+            )
+
+            db.session.add(message)
+            db.session.commit()
+
+            # ✅ Return JSON for fetch()
+            return {
+                "success": True,
+                "message": {
+                    "content": message.content,
+                    "timestamp": message.timestamp.isoformat(),
+                    "sender_id": message.sender_id
+                }
+            }
+
+        except Exception as e:
+            db.session.rollback()
+            print("Chat send error:", e)
+            return {"success": False}, 500
+
+    # =========================
+    # FETCH MESSAGES
+    # =========================
     messages = Message.query.filter(
         ((Message.sender_id == current_user.id) & (Message.receiver_id == landlord_id)) |
         ((Message.sender_id == landlord_id) & (Message.receiver_id == current_user.id))
     ).order_by(Message.timestamp.asc()).all()
 
     landlord = User.query.get(landlord_id)
-    return render_template('chat.html', messages=messages, user=landlord)
+
+    # ✅ Convert to JSON-safe format
+    messages_data = []
+    for msg in messages:
+        messages_data.append({
+            "id": msg.id,
+            "sender_id": msg.sender_id,
+            "receiver_id": msg.receiver_id,
+            "content": msg.content,
+            "timestamp": msg.timestamp.isoformat(),
+
+            "sender_name": msg.sender.name if msg.sender else "Unknown",
+            "receiver_name": msg.receiver.name if msg.receiver else "Unknown"
+        })
+
+    return render_template(
+        'chat.html',
+        messages=messages_data,
+        user=landlord
+    )
 
 
 # routes/tenant_routes.py
