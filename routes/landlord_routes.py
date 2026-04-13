@@ -854,43 +854,65 @@ def profile():
     return render_template("landlord/profile.html", stats={})
 
 
-@landlord_bp.route("/messages/compose", methods=["GET", "POST"])
+from flask import jsonify, request
+from datetime import datetime
+
+# --- GET MESSAGES FOR SPECIFIC CHAT ---
+@landlord_bp.route('/get_messages/<int:other_user_id>')
 @login_required
-def compose_message():
+def get_messages(other_user_id):
+    """
+    Returns JSON list of messages between current user and other_user_id
+    """
+    messages = Message.query.filter(
+        ((Message.sender_id == current_user.id) & (Message.receiver_id == other_user_id)) |
+        ((Message.sender_id == other_user_id) & (Message.receiver_id == current_user.id))
+    ).order_by(Message.timestamp.asc()).all()
+    
+    message_list = []
+    for msg in messages:
+        message_list.append({
+            'id': msg.id,
+            'sender_id': msg.sender_id,
+            'receiver_id': msg.receiver_id,
+            'content': msg.content,
+            'timestamp': msg.timestamp.isoformat() if msg.timestamp else None,
+            'is_read': msg.is_read
+        })
+        
+    return jsonify(message_list)
+
+
+# --- SEND MESSAGE ---
+@landlord_bp.route('/send_message', methods=['POST'])
+@login_required
+def send_message():
+    """
+    Handles sending a message via AJAX/Fetch
+    """
+    receiver_id = request.form.get('receiver_id')
+    content = request.form.get('content')
+
+    if not receiver_id or not content:
+        return jsonify({'success': False, 'error': 'Missing data'}), 400
+
     try:
-        if request.method == "POST":
-            recipient_id = request.form.get("recipient_id")
-            subject = request.form.get("subject")
-            body = request.form.get("body")
-
-            # Validation
-            if not recipient_id or not subject or not body:
-                flash("All fields are required.", "danger")
-                return redirect(url_for("landlord.compose_message"))
-
-            # Create message
-            message = Message(
-                sender_id=current_user.id,
-                recipient_id=recipient_id,
-                subject=subject,
-                body=body,
-                timestamp=datetime.utcnow(),
-                is_read=False
-            )
-
-            db.session.add(message)
-            db.session.commit()
-
-            flash("Message sent successfully.", "success")
-            return redirect(url_for("landlord.messages"))
-
-        return render_template("compose_message.html")
-
+        new_message = Message(
+            sender_id=current_user.id,
+            receiver_id=int(receiver_id),
+            content=content,
+            timestamp=datetime.utcnow(),
+            is_read=False
+        )
+        
+        db.session.add(new_message)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message_id': new_message.id})
+        
     except Exception as e:
         db.session.rollback()
-        flash("Error sending message. Try again.", "danger")
-        print("Compose message error:", e)
-        return redirect(url_for("landlord.messages"))
+        return jsonify({'success': False, 'error': str(e)}), 500
     
     
 @landlord_bp.route('/send_message/<int:tenant_id>', methods=['GET', 'POST'])
