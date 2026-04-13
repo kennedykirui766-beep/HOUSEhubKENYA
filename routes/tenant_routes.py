@@ -3,11 +3,12 @@ import base64
 from datetime import datetime
 from io import BytesIO
 import json
-from operator import or_
 import os
 
 from flask import Blueprint, current_app, flash, jsonify, render_template, request, redirect, url_for
 from flask_login import login_required, current_user, logout_user
+from sqlalchemy import or_
+from sqlalchemy.orm import joinedload
 
 import pyotp
 import qrcode as qr_code
@@ -22,7 +23,6 @@ from models.models import (
 from extensions import db, csrf
 from utils_delete import delete_user_and_dependents
 import cloudinary.uploader
-from flask import request, flash, redirect, url_for
 from werkzeug.security import generate_password_hash
 from flask_wtf import FlaskForm
 from wtforms import TextAreaField, SelectField
@@ -37,10 +37,24 @@ def safe_datetime(val):
         return None
     if isinstance(val, datetime):
         return val
-    try:
-        return datetime.fromisoformat(val)
-    except Exception:
+    if isinstance(val, str):
+        try:
+            return datetime.fromisoformat(val)
+        except ValueError:
+            pass
+    return None
+
+
+def serialize_timestamp(val):
+    if val is None:
         return None
+    if isinstance(val, datetime):
+        return val.isoformat()
+    if isinstance(val, str):
+        parsed = safe_datetime(val)
+        return parsed.isoformat() if parsed else val
+    return None
+
 
 tenant_bp = Blueprint('tenant', __name__, url_prefix='/tenant')
 
@@ -154,14 +168,6 @@ def bookings(house_id):
     db.session.add(booking)
     db.session.commit()
     return redirect(url_for('tenant.dashboard'))
-
-import json
-from sqlalchemy import or_
-from sqlalchemy.orm import joinedload
-
-from sqlalchemy.orm import joinedload
-from sqlalchemy import or_
-import json
 
 @tenant_bp.route("/properties", methods=['GET'])
 def properties():
@@ -689,7 +695,7 @@ def messages():
                 "sender_id": msg.sender_id,
                 "receiver_id": msg.receiver_id,
                 "content": msg.content,
-                "timestamp": msg.timestamp.isoformat() if msg.timestamp else None,
+                "timestamp": serialize_timestamp(msg.timestamp),
 
                 # 👇 IMPORTANT: include user info
                 "sender": {

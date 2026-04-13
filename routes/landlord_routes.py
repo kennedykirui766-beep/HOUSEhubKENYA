@@ -17,11 +17,34 @@ from services.email_service import send_payment_email
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+
+def safe_datetime(val):
+    if val is None:
+        return None
+    if isinstance(val, datetime):
+        return val
+    if isinstance(val, str):
+        try:
+            return datetime.fromisoformat(val)
+        except ValueError:
+            pass
+    return None
+
+
+def serialize_timestamp(val):
+    if val is None:
+        return None
+    if isinstance(val, datetime):
+        return val.isoformat()
+    if isinstance(val, str):
+        parsed = safe_datetime(val)
+        return parsed.isoformat() if parsed else val
+    return None
+
 # Blueprint setup
 landlord_bp = Blueprint("landlord", __name__, url_prefix="/landlord")
 
 # ---------------- Landlord Dashboard ----------------
-from datetime import datetime
 from sqlalchemy import func
 
 @landlord_bp.route("/dashboard")
@@ -801,7 +824,7 @@ def messages():
             "sender_id": m.sender_id,
             "receiver_id": m.receiver_id,
             "content": m.content,   # or m.message depending on your model
-            "timestamp": m.timestamp.isoformat() if m.timestamp else None,
+            "timestamp": serialize_timestamp(m.timestamp),
 
             # Optional: sender name (VERY useful in UI)
             "sender_name": m.sender.name if hasattr(m, "sender") and m.sender else "Unknown",
@@ -810,7 +833,8 @@ def messages():
 
     return render_template(
         "landlord/messages.html",
-        messages=messages_data
+        messages=messages_data,
+        user=current_user
     )
 
 @landlord_bp.route('/delete_account', methods=['GET', 'POST'])
