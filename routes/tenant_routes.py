@@ -680,7 +680,10 @@ def messages():
         return redirect(url_for("auth.login"))
 
     try:
-        tenant_messages = Message.query.filter(
+        tenant_messages = Message.query.options(
+            joinedload(Message.sender),
+            joinedload(Message.receiver)
+        ).filter(
             or_(
                 Message.sender_id == current_user.id,
                 Message.receiver_id == current_user.id
