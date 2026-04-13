@@ -789,3 +789,13 @@ def view_receipt(id):
     ).first_or_404()
 
     return render_template('tenant/receipt.html', payment=payment)
+
+@tenant_bp.route('/request/<int:id>')
+@login_required
+def view_request(id):
+    req = MaintenanceRequest.query.filter_by(
+        id=id,
+        tenant_id=current_user.id
+    ).first_or_404()
+
+    return render_template('tenant/view_request.html', request=req)
