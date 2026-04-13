@@ -391,7 +391,7 @@
               </td>
               <td>
                 <div class="fw-medium">{{ req.title }}</div>
-                <div class="small text-muted text-truncate-custom" style="max-width: 200px;">{{ req.description[:50] }}...</div>
+                <div class="small text-muted text-truncate-custom" style="max-width: 200px;">{{ (req.issue or '')[:50] }}...</div>
               </td>
               <td>
                 {% if req.status == 'pending' %}
