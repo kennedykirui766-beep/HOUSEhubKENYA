@@ -129,10 +129,12 @@
           {% set is_sent = (message.sender_id == current_user.id) %}
           {% set other_user = message.receiver if is_sent else message.sender %}
           
+          <!-- UPDATED: Using data-attributes instead of inline arguments -->
           <div class="contact-item" 
-               onclick="openChat('{{ other_user.id }}', '{{ other_user.name }}', '{{ other_user.profile_image or '' }}')"
+               onclick="openChat(this)"
                data-user-id="{{ other_user.id }}"
                data-user-name="{{ other_user.name }}"
+               data-user-image="{{ other_user.profile_image or '' }}"
                id="contact-{{ other_user.id }}">
             
             <img src="{{ other_user.profile_image or url_for('static', filename='images/default_avatar.png') }}" 
@@ -205,8 +207,13 @@
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
-  // 2. Open Chat
-  function openChat(userId, userName, userImage) {
+  // 2. Open Chat (UPDATED to read data-attributes)
+  function openChat(element) {
+    // Read data from the clicked element
+    const userId = element.getAttribute('data-user-id');
+    const userName = element.getAttribute('data-user-name');
+    const userImage = element.getAttribute('data-user-image');
+    
     currentChatUserId = userId;
     
     // UI Updates
@@ -226,8 +233,7 @@
 
     // Highlight Active
     document.querySelectorAll('.contact-item').forEach(item => item.classList.remove('active'));
-    const activeItem = document.querySelector(`.contact-item[data-user-id="${userId}"]`);
-    if(activeItem) activeItem.classList.add('active');
+    element.classList.add('active');
 
     // Load Messages
     loadMessages(userId);
@@ -255,7 +261,7 @@
       })
       .catch(err => {
         console.error(err);
-        msgArea.innerHTML = '<div style="text-align:center; padding:20px; color:red;">Failed to load messages.</div>';
+        msgArea.innerHTML = '<div style="text-align:center; padding:20px; color:red;">Failed to load messages. Check console.</div>';
       });
   }
 
@@ -314,7 +320,6 @@
     .then(r => r.json())
     .then(data => {
         if(!data.success) alert("Send failed");
-        // If successful, sidebar update logic could go here
     })
     .catch(err => console.error(err));
   });
@@ -333,7 +338,7 @@
   document.getElementById('searchContacts').addEventListener('keyup', function(e) {
     const term = e.target.value.toLowerCase();
     document.querySelectorAll('.contact-item').forEach(contact => {
-        contact.style.display = contact.dataset.userName.toLowerCase().includes(term) ? 'flex' : 'none';
+        contact.style.display = contact.getAttribute('data-user-name').toLowerCase().includes(term) ? 'flex' : 'none';
     });
   });
 

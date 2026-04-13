@@ -998,3 +998,30 @@ def bookings():
         bookings=bookings,
         stats=stats
     )
+    
+from flask import jsonify, request
+# Ensure Message model is imported
+
+@landlord_bp.route('/get_messages/<int:other_user_id>')
+@login_required
+def get_messages(other_user_id):
+    """
+    Returns JSON list of messages between current user and other_user_id
+    """
+    messages = Message.query.filter(
+        ((Message.sender_id == current_user.id) & (Message.receiver_id == other_user_id)) |
+        ((Message.sender_id == other_user_id) & (Message.receiver_id == current_user.id))
+    ).order_by(Message.timestamp.asc()).all()
+    
+    message_list = []
+    for msg in messages:
+        message_list.append({
+            'id': msg.id,
+            'sender_id': msg.sender_id,
+            'receiver_id': msg.receiver_id,
+            'content': msg.content,
+            'timestamp': msg.timestamp.isoformat() if msg.timestamp else None,
+            'is_read': msg.is_read
+        })
+        
+    return jsonify(message_list)    
