@@ -12,6 +12,27 @@ from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 
+
+def safe_datetime(val):
+    if val is None:
+        return None
+    if isinstance(val, datetime):
+        return val
+    if isinstance(val, str):
+        try:
+            return datetime.fromisoformat(val)
+        except ValueError:
+            pass
+    return None
+
+
+def safe_strftime(val, format_str):
+    dt = safe_datetime(val)
+    if dt:
+        return dt.strftime(format_str)
+    return None
+
+
 service_provider_bp = Blueprint('service_provider', __name__, url_prefix='/service_provider')
 
 @service_provider_bp.route('/dashboard')
@@ -75,7 +96,7 @@ def dashboard():
     # Get data for the last 30 days
     for i in range(30, 0, -1):
         date = datetime.now() - timedelta(days=i)
-        earnings_labels.append(date.strftime('%b %d'))
+        earnings_labels.append(safe_strftime(date, '%b %d'))
         
         daily_earnings = db.session.query(
             func.sum(ServiceRequest.amount)
@@ -222,7 +243,7 @@ def earnings_data():
         # Get data for the last 7 days
         for i in range(7, 0, -1):
             date = datetime.now() - timedelta(days=i)
-            labels.append(date.strftime('%a'))
+            labels.append(safe_strftime(date, '%a'))
             
             daily_earnings = db.session.query(
                 func.sum(ServiceRequest.amount)
@@ -238,7 +259,7 @@ def earnings_data():
         # Get data for the last 30 days
         for i in range(30, 0, -1):
             date = datetime.now() - timedelta(days=i)
-            labels.append(date.strftime('%b %d'))
+            labels.append(safe_strftime(date, '%b %d'))
             
             daily_earnings = db.session.query(
                 func.sum(ServiceRequest.amount)
@@ -254,7 +275,7 @@ def earnings_data():
         # Get data for the last 12 months
         for i in range(12, 0, -1):
             date = datetime.now() - timedelta(days=30*i)
-            labels.append(date.strftime('%b %Y'))
+            labels.append(safe_strftime(date, '%b %Y'))
             
             monthly_earnings = db.session.query(
                 func.sum(ServiceRequest.amount)

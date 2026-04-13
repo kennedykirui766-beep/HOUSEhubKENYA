@@ -41,6 +41,14 @@ def serialize_timestamp(val):
         return parsed.isoformat() if parsed else val
     return None
 
+
+def safe_strftime(val, format_str):
+    dt = safe_datetime(val)
+    if dt:
+        return dt.strftime(format_str)
+    return None
+
+
 # Blueprint setup
 landlord_bp = Blueprint("landlord", __name__, url_prefix="/landlord")
 
@@ -672,7 +680,7 @@ def edit_property(property_id):
         house.image_list = []
 
     house.availability_date_str = (
-        house.availability_date.strftime("%Y-%m-%d")
+        safe_strftime(house.availability_date, "%Y-%m-%d")
         if house.availability_date else ""
     )
 
