@@ -779,7 +779,7 @@ def settings():
 
 
 # ---------------- Messages ----------------
-@csrf.exempt
+
 @landlord_bp.route("/messages")
 @login_required
 def messages():
@@ -939,6 +939,7 @@ def get_messages(other_user_id):
 
 
 # --- SEND MESSAGE ---
+@csrf.exempt
 @landlord_bp.route('/send_message', methods=['POST'])
 @login_required
 def send_message():
