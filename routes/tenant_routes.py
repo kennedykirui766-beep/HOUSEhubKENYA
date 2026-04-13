@@ -343,7 +343,7 @@ from datetime import datetime
 @login_required
 def submit_request():
 
-    # Get tenant's approved/active bookings
+    # Get tenant's approved bookings
     bookings = Booking.query.filter_by(
         tenant_id=current_user.id,
         status='approved'
@@ -357,14 +357,16 @@ def submit_request():
             flash("Please select a house and describe the issue.", "danger")
             return redirect(url_for('tenant.submit_request'))
 
-        house = House.query.get_or_404(house_id)
+        # Validate house safely
+        house = House.query.get(house_id)
+        if not house:
+            flash("Selected property not found.", "danger")
+            return redirect(url_for('tenant.submit_request'))
 
-        # -------------------------
-        # CREATE MAINTENANCE REQUEST
-        # -------------------------
+        # Create maintenance request
         request_obj = MaintenanceRequest(
             tenant_id=current_user.id,
-            house_id=house.id,  # ✅ make sure this exists in model
+            house_id=house.id,
             issue=issue,
             status="Open",
             date_submitted=datetime.utcnow()
@@ -372,16 +374,16 @@ def submit_request():
 
         db.session.add(request_obj)
 
-        # -------------------------
-        # SEND MESSAGE TO LANDLORD
-        # -------------------------
-        message = Message(
-            sender_id=current_user.id,
-            receiver_id=house.owner.id,  # landlord
-            content=f"New maintenance request for {house.name}: {issue}"
-        )
+        # Get landlord safely
+        landlord = User.query.get(house.owner_id)
 
-        db.session.add(message)
+        if landlord:
+            message = Message(
+                sender_id=current_user.id,
+                receiver_id=landlord.id,
+                content=f"New maintenance request for {house.title}: {issue}"
+            )
+            db.session.add(message)
 
         db.session.commit()
 
