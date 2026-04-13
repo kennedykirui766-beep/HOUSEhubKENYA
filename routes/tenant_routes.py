@@ -819,7 +819,7 @@ def chat(landlord_id):
             "sender_id": msg.sender_id,
             "receiver_id": msg.receiver_id,
             "content": msg.content,
-            "timestamp": msg.timestamp.isoformat(),
+            "timestamp": msg.timestamp.isoformat() if hasattr(msg.timestamp, "isoformat") else str(msg.timestamp),
 
             "sender_name": msg.sender.name if msg.sender else "Unknown",
             "receiver_name": msg.receiver.name if msg.receiver else "Unknown"
