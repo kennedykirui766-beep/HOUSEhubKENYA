@@ -839,10 +839,18 @@ def messages():
             "receiver_name": m.receiver.name if hasattr(m, "receiver") and m.receiver else "Unknown"
         })
 
+    user_data = {
+        "id": current_user.id,
+        "name": current_user.name,
+        "email": current_user.email,
+        "role": current_user.role,
+        "profile_picture": getattr(current_user, "profile_picture", None)
+    }
+
     return render_template(
-        "landlord/messages.html",
+        'landlord/messages.html',
         messages=messages_data,
-        user=current_user._get_current_object()
+        user=user_data
     )
 
 @landlord_bp.route('/delete_account', methods=['GET', 'POST'])
