@@ -28,7 +28,19 @@ from flask_wtf import FlaskForm
 from wtforms import TextAreaField, SelectField
 from wtforms.validators import DataRequired
 
-
+def safe_datetime(val):
+    """
+    Ensures value is always a datetime or safely convertible.
+    Prevents: 'str object has no attribute strftime'
+    """
+    if val is None:
+        return None
+    if isinstance(val, datetime):
+        return val
+    try:
+        return datetime.fromisoformat(val)
+    except Exception:
+        return None
 
 tenant_bp = Blueprint('tenant', __name__, url_prefix='/tenant')
 
@@ -78,7 +90,11 @@ def dashboard():
     ).order_by(Payment.due_date.asc()).first()
 
     # Payment chart data
-    payment_labels = [p.date.strftime('%b %Y') for p in payments]
+    payment_labels = [
+        safe_datetime(p.date).strftime('%b %Y')
+        if safe_datetime(p.date) else ""
+        for p in payments
+    ]
     payment_data = [p.amount for p in payments]
     dashboard_order = []
     if current_user.dashboard_order:
@@ -819,7 +835,7 @@ def chat(landlord_id):
             "sender_id": msg.sender_id,
             "receiver_id": msg.receiver_id,
             "content": msg.content,
-            "timestamp": msg.timestamp.isoformat() if hasattr(msg.timestamp, "isoformat") else str(msg.timestamp),
+            "timestamp": msg.timestamp.isoformat() if msg.timestamp else None,
 
             "sender_name": msg.sender.name if msg.sender else "Unknown",
             "receiver_name": msg.receiver.name if msg.receiver else "Unknown"
