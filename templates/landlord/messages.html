@@ -173,12 +173,6 @@
     color: var(--wa-text-secondary);
     border-bottom: 6px solid var(--wa-primary-green);
   }
-  
-  .chat-placeholder img {
-    width: 200px;
-    margin-bottom: 2rem;
-    opacity: 0.6;
-  }
 
   /* Chat Header */
   .chat-view-header {
@@ -470,12 +464,13 @@
         
         <!-- Default Placeholder (Shown when no chat selected) -->
         <div class="chat-placeholder" id="chatPlaceholder">
-          <!-- Generic illustration or FontAwesome icon -->
-          <div style="font-size: 5rem; color: #d1d7db; margin-bottom: 1rem;">
-            <i class="fab fa-whatsapp"></i>
+          <!-- House Avatar Icon -->
+          <div style="width: 150px; height: 150px; background-color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+            <i class="fas fa-home" style="font-size: 4rem; color: #d1d7db;"></i>
           </div>
-          <h2 style="color: #41525d; font-weight: 300; margin-bottom: 0.5rem;">HomeHub Web</h2>
-          <p style="color: #667781; font-size: 0.9rem;">Send and receive messages with tenants securely.</p>
+          
+          <h2 style="color: #41525d; font-weight: 300; margin-bottom: 0.5rem;">HomeHub Messages</h2>
+          <p style="color: #667781; font-size: 0.9rem;">Select a conversation to start chatting.</p>
         </div>
 
         <!-- Active Chat View (Hidden by default) -->
@@ -551,10 +546,9 @@
         const isSent = msg.sender_id === currentUserId;
         // The user object structure might vary based on your backend serialization
         // Assuming msg.sender and msg.receiver are objects or IDs
-        const otherUser = isSent ? msg.receiver : msg.sender;
-        const otherId = otherUser.id || otherUser; // Handle both object and ID
-        const otherName = otherUser.name || "Unknown";
-        const otherImg = otherUser.profile_image || null;
+        const otherId = isSent ? msg.receiver_id : msg.sender_id;
+        const otherName = isSent ? msg.receiver_name : msg.sender_name;
+        const otherImg = null; // unless you send profile_picture later
 
         if (!groups[otherId]) {
           groups[otherId] = {
