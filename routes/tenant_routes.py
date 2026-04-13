@@ -658,7 +658,6 @@ def messages():
         return redirect(url_for("auth.login"))
 
     try:
-        # ✅ Use receiver_id (NOT recipient_id)
         tenant_messages = Message.query.filter(
             or_(
                 Message.sender_id == current_user.id,
@@ -666,14 +665,37 @@ def messages():
             )
         ).order_by(Message.timestamp.desc()).all()
 
-        return render_template("tenant/messages.html", messages=tenant_messages)
+        # ✅ CONVERT TO JSON-SERIALIZABLE FORMAT
+        messages_data = []
+        for msg in tenant_messages:
+            messages_data.append({
+                "id": msg.id,
+                "sender_id": msg.sender_id,
+                "receiver_id": msg.receiver_id,
+                "content": msg.content,
+                "timestamp": msg.timestamp.isoformat() if msg.timestamp else None,
+
+                # 👇 IMPORTANT: include user info
+                "sender": {
+                    "id": msg.sender.id,
+                    "name": msg.sender.name,
+                    "profile_image": getattr(msg.sender, "profile_picture", None)
+                } if msg.sender else None,
+
+                "receiver": {
+                    "id": msg.receiver.id,
+                    "name": msg.receiver.name,
+                    "profile_image": getattr(msg.receiver, "profile_picture", None)
+                } if msg.receiver else None
+            })
+
+        return render_template("tenant/messages.html", messages=messages_data)
 
     except Exception as e:
         db.session.rollback()
         print("Error loading messages:", e)
         flash("Unable to load messages.", "danger")
         return redirect(url_for("tenant.dashboard"))
-
 
 @tenant_bp.route('/compose_message', methods=['GET', 'POST'])
 @login_required
