@@ -779,7 +779,7 @@ def settings():
 
 
 # ---------------- Messages ----------------
-
+@csrf.exempt
 @landlord_bp.route("/messages")
 @login_required
 def messages():
@@ -942,32 +942,33 @@ def get_messages(other_user_id):
 @landlord_bp.route('/send_message', methods=['POST'])
 @login_required
 def send_message():
-    """
-    Handles sending a message via AJAX/Fetch
-    """
-    receiver_id = request.form.get('receiver_id')
-    content = request.form.get('content')
+    from datetime import datetime
+
+    data = request.get_json()
+
+    receiver_id = data.get("receiver_id")
+    content = data.get("content")
 
     if not receiver_id or not content:
-        return jsonify({'success': False, 'error': 'Missing data'}), 400
+        return {"success": False, "error": "Missing data"}, 400
 
     try:
-        new_message = Message(
+        message = Message(
             sender_id=current_user.id,
-            receiver_id=int(receiver_id),
+            receiver_id=receiver_id,
             content=content,
-            timestamp=datetime.utcnow(),
-            is_read=False
+            timestamp=datetime.utcnow()
         )
-        
-        db.session.add(new_message)
+
+        db.session.add(message)
         db.session.commit()
-        
-        return jsonify({'success': True, 'message_id': new_message.id})
-        
+
+        return {"success": True}
+
     except Exception as e:
         db.session.rollback()
-        return jsonify({'success': False, 'error': str(e)}), 500
+        print("Error:", e)
+        return {"success": False}, 500
 
 @landlord_bp.route("/delete_image/<image_name>", methods=["POST"])
 @login_required

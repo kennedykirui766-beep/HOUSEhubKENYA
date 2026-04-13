@@ -146,11 +146,6 @@
     gap: 4px;
   }
 
-  .chat-preview.unread {
-    font-weight: 600;
-    color: var(--wa-text-primary);
-  }
-
   /* ========== MAIN CHAT AREA ========== */
   .chat-main {
     flex: 1;
@@ -223,6 +218,22 @@
   .header-status {
     font-size: 0.8rem;
     color: var(--wa-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* Online Status Dot */
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #8696a0; /* Default offline color */
+    display: none; /* Hidden by default */
+  }
+  .status-dot.online {
+    background-color: var(--wa-primary-green);
+    display: block;
   }
 
   /* Messages Area */
@@ -281,8 +292,7 @@
     height: 0;
     border: 8px solid transparent;
     border-top-color: var(--wa-outgoing-bg);
-    border-right-color: var(--wa-outgoing-bg); /* Adjust blend */
-    /* Simplified tail logic for robustness */
+    border-right-color: var(--wa-outgoing-bg);
     border-left: 0;
     border-bottom: 0;
   }
@@ -319,7 +329,7 @@
 
   .msg-check {
     font-size: 0.7rem;
-    color: #53bdeb; /* Blue ticks */
+    color: #53bdeb;
   }
 
   /* Input Area */
@@ -391,7 +401,7 @@
   /* ========== RESPONSIVE ========== */
   @media (max-width: 767px) {
     .msg-page {
-      height: calc(100vh - 50px); /* Assume smaller mobile nav */
+      height: calc(100vh - 50px);
     }
     
     .chat-sidebar {
@@ -412,15 +422,10 @@
       z-index: 20;
     }
 
-    /* State: Chat Open */
     body.chat-active .chat-main {
       transform: translateX(-100%);
     }
     
-    body.chat-active .chat-sidebar {
-      /* Optional: Hide sidebar completely or keep underneath */
-    }
-
     .btn-back {
       display: block;
     }
@@ -429,11 +434,8 @@
 {% endblock %}
 
 {% block content %}
-<!-- 
-  We inject raw message data into a JS variable so we can group them 
-  into conversations on the client side without changing the backend logic yet.
--->
 <script>
+  // Data Injection
   window.rawMessages = {{ messages | tojson }};
   window.currentUser = {{ current_user.id | tojson }};
 </script>
@@ -484,7 +486,10 @@
             <div class="header-avatar" id="headerAvatar">?</div>
             <div class="header-info">
               <div class="header-name" id="headerName">Tenant Name</div>
-              <div class="header-status">online</div>
+              <div class="header-status">
+                <span class="status-dot" id="headerStatusDot"></span>
+                <span id="headerStatusText">offline</span>
+              </div>
             </div>
             <div style="color: var(--wa-text-secondary); display: flex; gap: 20px;">
               <i class="fas fa-search"></i>
@@ -521,7 +526,7 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     // Data References
-    const rawMessages = window.rawMessages || [];
+    let rawMessages = window.rawMessages || [];
     const currentUserId = window.currentUser;
     
     // UI Elements
@@ -531,29 +536,39 @@
     const messagesArea = document.getElementById('messagesArea');
     const headerName = document.getElementById('headerName');
     const headerAvatar = document.getElementById('headerAvatar');
+    const headerStatusDot = document.getElementById('headerStatusDot');
+    const headerStatusText = document.getElementById('headerStatusText');
     const messageInput = document.getElementById('messageInput');
     const btnSend = document.getElementById('btnSend');
     const btnBackMobile = document.getElementById('btnBackMobile');
 
     let activeConversationId = null;
+    let onlinePollingInterval = null;
+
+    // --- HELPER: GET CSRF TOKEN ---
+    function getCSRFToken() {
+      const meta = document.querySelector('meta[name="csrf-token"]');
+      if (meta) return meta.getAttribute('content');
+      const input = document.querySelector('input[name="csrf_token"]');
+      if (input) return input.value;
+      return '';
+    }
 
     // --- 1. PROCESS DATA: Group messages by "Other User" ---
     function groupMessagesByUser(messages) {
       const groups = {};
       
       messages.forEach(msg => {
-        // Determine who the 'other' person is
         const isSent = msg.sender_id === currentUserId;
-        // The user object structure might vary based on your backend serialization
-        // Assuming msg.sender and msg.receiver are objects or IDs
-        const otherId = isSent ? msg.receiver_id : msg.sender_id;
-        const otherName = isSent ? msg.receiver_name : msg.sender_name;
-        const otherImg = null; // unless you send profile_picture later
+        // Robustly find other user ID, handling both object and flat ID
+        const otherId = isSent ? (msg.receiver_id || msg.receiver?.id) : (msg.sender_id || msg.sender?.id);
+        const otherName = isSent ? (msg.receiver_name || msg.receiver?.name) : (msg.sender_name || msg.sender?.name);
+        const otherImg = isSent ? (msg.receiver?.profile_image) : (msg.sender?.profile_image);
 
         if (!groups[otherId]) {
           groups[otherId] = {
             id: otherId,
-            name: otherName,
+            name: otherName || "User",
             avatar: otherImg,
             messages: [],
             lastMsg: "",
@@ -598,9 +613,9 @@
       conversations.forEach(conv => {
         const item = document.createElement('div');
         item.className = 'chat-item';
+        item.dataset.id = conv.id;
         item.onclick = () => openChat(conv);
         
-        // Initials for avatar if no image
         const initials = conv.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
         const avatarHtml = conv.avatar 
           ? `<img src="${conv.avatar}" class="chat-avatar" alt="${conv.name}">`
@@ -623,18 +638,70 @@
       });
     }
 
-    // --- 3. OPEN CHAT ---
+    // --- 3. ONLINE STATUS POLLING ---
+    function updateOnlineStatusUI(isOnline, lastSeen) {
+      if (isOnline) {
+        headerStatusDot.classList.add('online');
+        headerStatusText.innerText = "online";
+        headerStatusText.style.color = "var(--wa-primary-green)";
+      } else {
+        headerStatusDot.classList.remove('online');
+        headerStatusText.innerText = lastSeen ? `last seen ${lastSeen}` : "offline";
+        headerStatusText.style.color = "var(--wa-text-secondary)";
+      }
+    }
+
+    function startOnlinePolling(userId) {
+      // Clear existing interval
+      if (onlinePollingInterval) clearInterval(onlinePollingInterval);
+
+      // Initial check
+      checkOnlineStatus(userId);
+
+      // Poll every 5 seconds
+      onlinePollingInterval = setInterval(() => {
+        checkOnlineStatus(userId);
+      }, 5000);
+    }
+
+    function checkOnlineStatus(userId) {
+      // 
+      // NOTE: You need a backend route to support this.
+      // Example Route: @landlord_bp.route('/check_online/<int:user_id>')
+      // Returns: {"is_online": true, "last_seen": "2 mins ago"}
+      //
+      
+      // Attempting to fetch status (Uncomment this when backend is ready)
+      /*
+      fetch(`/landlord/check_online/${userId}`)
+        .then(r => r.json())
+        .then(data => {
+          updateOnlineStatusUI(data.is_online, data.last_seen);
+        })
+        .catch(err => console.log("Online status polling not implemented on backend"));
+      */
+      
+      // Placeholder logic: Just check if user object in memory has is_online (if available)
+      // This is a fallback if the route isn't set up yet.
+      const conv = groupMessagesByUser(rawMessages).find(c => c.id == userId);
+      if(conv && conv.is_online) {
+         updateOnlineStatusUI(true, null);
+      }
+    }
+
+    // --- 4. OPEN CHAT ---
     function openChat(conversation) {
       activeConversationId = conversation.id;
       
       // UI Updates
       chatPlaceholder.style.display = 'none';
       activeChatView.style.display = 'flex';
-      document.body.classList.add('chat-active'); // Mobile slide
+      document.body.classList.add('chat-active');
 
-      // Highlight in Sidebar
+      // Highlight active item
       document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
-      // (In a real app, match specific element, for now we skip exact DOM match logic for simplicity)
+      const activeItem = document.querySelector(`.chat-item[data-id="${conversation.id}"]`);
+      if(activeItem) activeItem.classList.add('active');
 
       // Set Header Info
       headerName.textContent = conversation.name;
@@ -645,6 +712,9 @@
         headerAvatar.style.background = '#00a884';
         headerAvatar.innerHTML = initials;
       }
+
+      // Start Polling for Online Status
+      startOnlinePolling(conversation.id);
 
       // Render Messages
       messagesArea.innerHTML = '';
@@ -669,7 +739,7 @@
       scrollToBottom();
     }
 
-    // --- 4. APPEND MESSAGE BUBBLE ---
+    // --- 5. APPEND MESSAGE BUBBLE ---
     function appendMessageBubble(text, isSent, time) {
       const row = document.createElement('div');
       row.className = `msg-row ${isSent ? 'sent' : 'received'}`;
@@ -689,7 +759,7 @@
       scrollToBottom();
     }
 
-    // --- 5. SEND MESSAGE LOGIC ---
+    // --- 6. SEND MESSAGE LOGIC (UPDATED) ---
     function sendMessage() {
       const text = messageInput.value.trim();
       if (!text || !activeConversationId) return;
@@ -703,21 +773,43 @@
       messageInput.focus();
 
       // 2. Send to Backend (AJAX)
-      // Note: You need a backend route to accept this. 
-      // For this demo, we'll just simulate the success.
-      /* 
       fetch('/landlord/send_message', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCSRFToken() // Crucial for Flask/WTF
+        },
         body: JSON.stringify({
           receiver_id: activeConversationId,
           content: text
         })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Optional: Refresh sidebar to show new message preview
+          // For a truly realtime app without WebSockets, we often append the message
+          // to our local rawMessages array and re-render sidebar.
+          const tempMsg = {
+            sender_id: currentUserId,
+            receiver_id: activeConversationId,
+            content: text,
+            timestamp: now.toISOString(),
+            // Sender/Receiver names would ideally come from the active conversation object
+            sender_name: "Me", 
+            receiver_name: headerName.textContent 
+          };
+          rawMessages.push(tempMsg);
+          renderSidebar();
+        } else {
+          alert("Failed to send message.");
+          // Remove the optimistic bubble? For now we leave it but user knows it failed.
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert("An error occurred while sending.");
       });
-      */
-     
-     // Show Toast Notification (Simulated)
-     showToast("Message sent");
     }
 
     // --- UTILS ---
@@ -744,22 +836,6 @@
       return (str.length > n) ? str.substr(0, n-1) + '&hellip;' : str;
     }
 
-    function showToast(msg) {
-      // Simple toast creation
-      const toast = document.createElement('div');
-      toast.style.cssText = `
-        position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-        background: rgba(0,0,0,0.8); color: white; padding: 8px 16px; border-radius: 20px;
-        font-size: 0.9rem; z-index: 2000; animation: fadein 0.3s;
-      `;
-      toast.innerText = msg;
-      document.body.appendChild(toast);
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => toast.remove(), 300);
-      }, 2000);
-    }
-
     // --- EVENT LISTENERS ---
     btnSend.addEventListener('click', sendMessage);
     
@@ -770,7 +846,7 @@
     btnBackMobile.addEventListener('click', () => {
       document.body.classList.remove('chat-active');
       activeConversationId = null;
-      // Optional: clear activeChatView after transition
+      clearInterval(onlinePollingInterval); // Stop polling when leaving chat
     });
 
     // Initialize
