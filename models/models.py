@@ -303,8 +303,8 @@ class MaintenanceRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     tenant_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    house_id = db.Column(db.Integer, db.ForeignKey('house.id'))  # ✅ ADD THIS
-
+    house_id = db.Column(db.Integer, db.ForeignKey('house.id'))
+    description = db.Column(db.Text, nullable=False)
     issue = db.Column(db.String(200), nullable=False)
     status = db.Column(db.String(20), default='pending')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
