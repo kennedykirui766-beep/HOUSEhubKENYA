@@ -24,6 +24,9 @@ from utils_delete import delete_user_and_dependents
 import cloudinary.uploader
 from flask import request, flash, redirect, url_for
 from werkzeug.security import generate_password_hash
+from flask_wtf import FlaskForm
+from wtforms import TextAreaField, SelectField
+from wtforms.validators import DataRequired
 
 
 
@@ -325,22 +328,11 @@ def documents():
     return render_template('documents.html', documents=tenant_documents)
 
 
-@tenant_bp.route('/announcements')
-@login_required
-def announcements():
-    # TODO: fetch announcements from DB when you add a model
-    return render_template('tenant/announcements.html')
-
-
-
-
-from datetime import datetime
-
 @tenant_bp.route('/submit_request', methods=['GET', 'POST'])
 @login_required
 def submit_request():
 
-    # Get tenant's approved/active bookings
+    # Get tenant's approved bookings
     bookings = Booking.query.filter_by(
         tenant_id=current_user.id,
         status='approved'
@@ -354,14 +346,16 @@ def submit_request():
             flash("Please select a house and describe the issue.", "danger")
             return redirect(url_for('tenant.submit_request'))
 
-        house = House.query.get_or_404(house_id)
+        # Validate house safely
+        house = House.query.get(house_id)
+        if not house:
+            flash("Selected property not found.", "danger")
+            return redirect(url_for('tenant.submit_request'))
 
-        # -------------------------
-        # CREATE MAINTENANCE REQUEST
-        # -------------------------
+        # Create maintenance request
         request_obj = MaintenanceRequest(
             tenant_id=current_user.id,
-            house_id=house.id,  # ✅ make sure this exists in model
+            house_id=house.id,
             issue=issue,
             status="Open",
             date_submitted=datetime.utcnow()
@@ -369,16 +363,16 @@ def submit_request():
 
         db.session.add(request_obj)
 
-        # -------------------------
-        # SEND MESSAGE TO LANDLORD
-        # -------------------------
-        message = Message(
-            sender_id=current_user.id,
-            receiver_id=house.owner.id,  # landlord
-            content=f"New maintenance request for {house.name}: {issue}"
-        )
+        # Get landlord safely
+        landlord = User.query.get(house.owner_id)
 
-        db.session.add(message)
+        if landlord:
+            message = Message(
+                sender_id=current_user.id,
+                receiver_id=landlord.id,
+                content=f"New maintenance request for {house.title}: {issue}"
+            )
+            db.session.add(message)
 
         db.session.commit()
 
