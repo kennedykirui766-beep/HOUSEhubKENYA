@@ -4,7 +4,7 @@ payments_bp = Blueprint("payments", __name__, url_prefix="/payments")
 
 from flask_login import login_required, current_user
 from flask import render_template, request, redirect, url_for, flash
-from models.models import PaymentLink, db
+from models.models import Booking, House, Payment, PaymentLink, db
 from extensions import db, csrf
 from services.mpesa import stk_push
 
@@ -183,22 +183,110 @@ def mpesa_callback():
                 elif item["Name"] == "PhoneNumber":
                     phone = item["Value"]
 
-            # Update database
+            # -------------------------
+            # UPDATE PAYMENT LINK
+            # -------------------------
             link.status = "paid"
             link.transaction_id = mpesa_code
             link.phone = phone
             link.paid_at = datetime.utcnow()
 
-            # ✅ FIX: booking is NOT defined → safely handle only if it exists
+            # =========================
+            # EXISTING LOGIC (KEEP)
+            # =========================
             if hasattr(link, "booking") and link.booking:
                 link.booking.status = "approved"
+
+            # =========================
+            # 🔥 NEW LOGIC (SAFE ADDITION)
+            # =========================
+            try:
+                booking = None
+                house = None
+
+                # Get booking safely
+                if hasattr(link, "booking") and link.booking:
+                    booking = link.booking
+                elif hasattr(link, "booking_id"):
+                    booking = Booking.query.get(link.booking_id)
+
+                # Get house safely
+                if hasattr(link, "house_id"):
+                    house = House.query.get(link.house_id)
+
+                # Only proceed if both exist
+                if booking and house:
+                    print("Booking & House found")
+
+                    # Prevent double allocation
+                    if hasattr(house, "is_occupied") and not house.is_occupied:
+
+                        # Only assign if it's DEPOSIT (important)
+                        if hasattr(link, "payment_type"):
+                            is_deposit = link.payment_type == "deposit"
+                        else:
+                            # fallback: assume first payment = deposit
+                            is_deposit = True
+
+                        if is_deposit:
+                            print("Processing deposit ownership...")
+
+                            # Assign house to tenant
+                            if hasattr(house, "is_occupied"):
+                                house.is_occupied = True
+
+                            if hasattr(house, "available"):
+                                house.available = False
+
+                            if hasattr(house, "tenant_id"):
+                                house.tenant_id = booking.tenant_id
+
+                            # Ensure booking approved
+                            booking.status = "approved"
+
+                            print("House successfully assigned to tenant")
+
+                        else:
+                            print("This is rent payment, not deposit")
+
+                    else:
+                        print("House already occupied")
+
+                else:
+                    print("Booking or House missing, skipping ownership logic")
+
+            except Exception as inner_error:
+                print("Ownership logic failed:", inner_error)
+
+            # =========================
+            # OPTIONAL: SAVE PAYMENT RECORD
+            # =========================
+            try:
+                payment = Payment(
+                    tenant_id=booking.tenant_id if booking else None,
+                    amount=amount if amount else link.amount,
+                    date=datetime.utcnow().date(),
+                    status="Completed"
+                )
+
+                # Safe optional fields
+                if hasattr(payment, "house_id") and house:
+                    payment.house_id = house.id
+
+                if hasattr(payment, "payment_month"):
+                    payment.payment_month = None  # deposit
+
+                db.session.add(payment)
+
+            except Exception as pay_error:
+                print("Payment save skipped:", pay_error)
 
             db.session.commit()
 
             print("Payment saved successfully")
 
         # =========================
-        # FAILED PAYMENT (NEW IMPROVEMENT)
+        # FAILED PAYMENT
         # =========================
         else:
             print("Payment failed")
@@ -206,7 +294,6 @@ def mpesa_callback():
             link.status = "failed"
             link.transaction_id = f"FAILED-{checkout_request_id}"
 
-            # ✅ FIX: avoid crash if column doesn't exist yet
             if hasattr(link, "failure_reason"):
                 link.failure_reason = result_desc
 
@@ -219,8 +306,6 @@ def mpesa_callback():
             print("No metadata found in success callback")
 
         return {"ResultCode": 0, "ResultDesc": "Accepted"}
-    
-
 
     except Exception as e:
         import traceback
