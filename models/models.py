@@ -307,6 +307,7 @@ class MaintenanceRequest(db.Model):
 
     issue = db.Column(db.String(200), nullable=False)
     status = db.Column(db.String(20), default='pending')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     date_submitted = db.Column(db.DateTime, default=db.func.current_timestamp())
 
