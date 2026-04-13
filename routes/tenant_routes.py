@@ -773,3 +773,14 @@ def settings():
 def view_notifications():
     # Fetch notifications
     return render_template('tenant/notifications.html')
+
+
+@tenant_bp.route('/receipt/<int:id>')
+@login_required
+def view_receipt(id):
+    payment = Payment.query.filter_by(
+        id=id,
+        tenant_id=current_user.id
+    ).first_or_404()
+
+    return render_template('tenant/receipt.html', payment=payment)
