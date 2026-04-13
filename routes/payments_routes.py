@@ -198,40 +198,44 @@ def mpesa_callback():
                 link.booking.status = "approved"
 
             # =========================
-            # 🔥 NEW LOGIC (SAFE ADDITION)
+            # 🔥 FORCE booking_id LOGIC (NEW FIX)
             # =========================
-            try:
-                booking = None
-                house = None
+            booking = None
+            house = None
 
-                # Get booking safely
-                if hasattr(link, "booking") and link.booking:
-                    booking = link.booking
-                elif hasattr(link, "booking_id"):
+            try:
+                print("DEBUG booking_id:", getattr(link, "booking_id", None))
+                print("DEBUG house_id:", getattr(link, "house_id", None))
+
+                # ALWAYS fetch booking using booking_id
+                if hasattr(link, "booking_id") and link.booking_id:
                     booking = Booking.query.get(link.booking_id)
 
-                # Get house safely
-                if hasattr(link, "house_id"):
+                # Fetch house
+                if hasattr(link, "house_id") and link.house_id:
                     house = House.query.get(link.house_id)
 
-                # Only proceed if both exist
+                if booking:
+                    print(f"Booking found: {booking.id}")
+                    booking.status = "approved"   # 🔥 FORCE UPDATE
+                else:
+                    print("Booking NOT FOUND")
+
                 if booking and house:
                     print("Booking & House found")
 
                     # Prevent double allocation
                     if hasattr(house, "is_occupied") and not house.is_occupied:
 
-                        # Only assign if it's DEPOSIT (important)
+                        # Only assign if deposit
                         if hasattr(link, "payment_type"):
                             is_deposit = link.payment_type == "deposit"
                         else:
-                            # fallback: assume first payment = deposit
-                            is_deposit = True
+                            is_deposit = True  # fallback
 
                         if is_deposit:
                             print("Processing deposit ownership...")
 
-                            # Assign house to tenant
                             if hasattr(house, "is_occupied"):
                                 house.is_occupied = True
 
@@ -240,9 +244,6 @@ def mpesa_callback():
 
                             if hasattr(house, "tenant_id"):
                                 house.tenant_id = booking.tenant_id
-
-                            # Ensure booking approved
-                            booking.status = "approved"
 
                             print("House successfully assigned to tenant")
 
@@ -269,7 +270,6 @@ def mpesa_callback():
                     status="Completed"
                 )
 
-                # Safe optional fields
                 if hasattr(payment, "house_id") and house:
                     payment.house_id = house.id
 
