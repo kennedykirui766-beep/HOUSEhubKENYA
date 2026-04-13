@@ -786,13 +786,32 @@ def messages():
     if current_user.role != "landlord":
         flash("Access denied.", "danger")
         return redirect(url_for("main.index"))
-    # Fetch messages where landlord is involved
+
+    # Fetch messages
     messages = Message.query.filter(
         (Message.receiver_id == current_user.id) |
         (Message.sender_id == current_user.id)
     ).order_by(Message.timestamp.desc()).all()
 
-    return render_template("landlord/messages.html", messages=messages)
+    # ✅ Convert to JSON-serializable format
+    messages_data = []
+    for m in messages:
+        messages_data.append({
+            "id": m.id,
+            "sender_id": m.sender_id,
+            "receiver_id": m.receiver_id,
+            "content": m.content,   # or m.message depending on your model
+            "timestamp": m.timestamp.isoformat() if m.timestamp else None,
+
+            # Optional: sender name (VERY useful in UI)
+            "sender_name": m.sender.name if hasattr(m, "sender") and m.sender else "Unknown",
+            "receiver_name": m.receiver.name if hasattr(m, "receiver") and m.receiver else "Unknown"
+        })
+
+    return render_template(
+        "landlord/messages.html",
+        messages=messages_data
+    )
 
 @landlord_bp.route('/delete_account', methods=['GET', 'POST'])
 @login_required
