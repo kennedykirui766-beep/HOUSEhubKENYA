@@ -842,7 +842,7 @@ def messages():
     return render_template(
         "landlord/messages.html",
         messages=messages_data,
-        user=current_user
+        user=current_user._get_current_object()
     )
 
 @landlord_bp.route('/delete_account', methods=['GET', 'POST'])

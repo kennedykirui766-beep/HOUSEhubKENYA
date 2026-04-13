@@ -56,6 +56,13 @@ def serialize_timestamp(val):
     return None
 
 
+def safe_strftime(val, format_str):
+    dt = safe_datetime(val)
+    if dt:
+        return dt.strftime(format_str)
+    return None
+
+
 tenant_bp = Blueprint('tenant', __name__, url_prefix='/tenant')
 
 @tenant_bp.route('/dashboard')
@@ -105,8 +112,7 @@ def dashboard():
 
     # Payment chart data
     payment_labels = [
-        safe_datetime(p.date).strftime('%b %Y')
-        if safe_datetime(p.date) else ""
+        safe_strftime(p.date, '%b %Y') or ""
         for p in payments
     ]
     payment_data = [p.amount for p in payments]
@@ -816,7 +822,7 @@ def chat(landlord_id):
                 "success": True,
                 "message": {
                     "content": message.content,
-                    "timestamp": message.timestamp.isoformat(),
+                    "timestamp": serialize_timestamp(message.timestamp),
                     "sender_id": message.sender_id
                 }
             }
@@ -844,7 +850,7 @@ def chat(landlord_id):
             "sender_id": msg.sender_id,
             "receiver_id": msg.receiver_id,
             "content": msg.content,
-            "timestamp": msg.timestamp.isoformat() if msg.timestamp else None,
+            "timestamp": serialize_timestamp(msg.timestamp),
 
             "sender_name": msg.sender.name if msg.sender else "Unknown",
             "receiver_name": msg.receiver.name if msg.receiver else "Unknown"
