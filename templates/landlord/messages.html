@@ -4,44 +4,60 @@
 
 {% block styles %}
 <style>
-  :root {
-    --chat-bg: #efeae2; 
-    --my-msg-bg: #d9fdd3;
-    --their-msg-bg: #ffffff;
-    --chat-sidebar-width: 380px;
-    --primary-color: #008069;
-    --border-color: #e9edef;
-    --text-primary: #111b21;
-    --text-muted: #667781;
-    --success-color: #00a884;
-  }
-
+  /* 
+   * SCOPED STYLES 
+   * We scope variables to .chat-container to avoid breaking the 
+   * global theme (Navbar, Sidebar) defined in base.html 
+   */
   .chat-container {
+    /* Chat Specific Variables */
+    --chat-bg: #efeae2; 
+    --chat-bg-dark: #0b141a;
+    --my-msg-bg: #d9fdd3;
+    --my-msg-bg-dark: #005c4b;
+    --their-msg-bg: #ffffff;
+    --their-msg-bg-dark: #202c33;
+    --chat-sidebar-width: 380px;
+    --chat-primary: #008069;
+    --chat-border: #e9edef;
+    --chat-border-dark: #2a3942;
+    
+    /* Layout */
     display: grid;
     grid-template-columns: var(--chat-sidebar-width) 1fr;
-    height: calc(100vh - 80px);
+    
+    /* 
+     * Height Calculation: 
+     * 100vh minus Navbar height (64px) minus Main Top Padding (1.5rem = 24px)
+     * We also force the main tag to have no padding for this specific view.
+     */
+    height: calc(100vh - var(--navbar-height) - 24px); 
+    
     background: white;
-    border-radius: 0;
+    border-radius: 0; 
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    box-shadow: var(--shadow-sm);
     border: 1px solid var(--border-color);
-    max-width: 1600px;
-    margin: 0 auto;
+    margin-left: -1.5rem; /* Counteract base.html main padding */
+    margin-right: -1.5rem;
+    max-width: calc(100% + 3rem);
     position: relative;
   }
 
+  /* ========== SIDEBAR (CONTACT LIST) ========== */
   .chat-sidebar {
-    border-right: 1px solid var(--border-color);
+    border-right: 1px solid var(--chat-border);
     display: flex;
     flex-direction: column;
     background: white;
     height: 100%;
     z-index: 5;
+    width: 100%;
   }
 
   .sidebar-header {
     padding: 1rem;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--chat-border);
     background: #f0f2f5;
     display: flex;
     justify-content: space-between;
@@ -49,96 +65,391 @@
     height: 60px;
   }
 
-  .search-box { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border-color); height: 50px; display: flex; align-items: center; }
-  .search-input { width: 100%; padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border-color); background: white; font-size: 0.9rem; }
+  .sidebar-header h2 {
+    font-size: 1.25rem;
+    margin: 0;
+    color: var(--text-primary);
+  }
 
-  .contact-list { overflow-y: auto; flex: 1; }
-  
+  .search-box {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--chat-border);
+    height: 50px;
+    display: flex;
+    align-items: center;
+    background: white;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--chat-border);
+    background: white;
+    font-size: 0.9rem;
+  }
+
+  .contact-list {
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  /* Contact Item */
   .contact-item {
-    display: flex; padding: 0.8rem 1rem; cursor: pointer; border-bottom: 1px solid #f0f2f5; transition: background 0.2s; align-items: center;
+    display: flex;
+    padding: 0.8rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f2f5;
+    transition: background 0.2s;
+    align-items: center;
   }
-  .contact-item:hover { background-color: #f5f6f6; }
-  .contact-item.active { background-color: #f0f2f5; border-left: 4px solid var(--primary-color); }
 
-  .contact-avatar { width: 49px; height: 49px; border-radius: 50%; object-fit: cover; margin-right: 1rem; background-color: #dfe5e7; }
-  .contact-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
-  .contact-top { display: flex; justify-content: space-between; margin-bottom: 0.25rem; }
-  .contact-name { font-weight: 500; color: var(--text-primary); font-size: 1.05rem; }
-  .contact-time { font-size: 0.75rem; color: var(--text-muted); }
-  .contact-preview { font-size: 0.85rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .contact-item:hover {
+    background-color: #f5f6f6;
+  }
 
-  /* Chat Area */
+  .contact-item.active {
+    background-color: #f0f2f5;
+    border-left: 4px solid var(--chat-primary);
+  }
+
+  .contact-avatar {
+    width: 49px;
+    height: 49px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 1rem;
+    background-color: #dfe5e7;
+  }
+
+  .contact-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .contact-top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.25rem;
+  }
+
+  .contact-name {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 1.05rem;
+  }
+
+  .contact-time {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+
+  .contact-preview {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  /* ========== MAIN CHAT AREA ========== */
   .chat-main {
-    display: flex; flex-direction: column; background-color: var(--chat-bg);
+    display: flex;
+    flex-direction: column;
+    background-color: var(--chat-bg);
+    /* Beige pattern */
     background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.08' fill-rule='evenodd'/%3E%3C/svg%3E");
-    height: 100%; position: relative;
+    height: 100%;
+    position: relative;
   }
 
-  .chat-header { padding: 0.5rem 1rem; background: #f0f2f5; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; z-index: 10; height: 60px; }
-  .chat-header-info { display: flex; align-items: center; flex: 1; cursor: pointer; }
-  .chat-avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 1rem; object-fit: cover; }
-  .chat-details { display: flex; flex-direction: column; justify-content: center; }
-  .chat-name { font-weight: 600; color: var(--text-primary); font-size: 1rem; line-height: 1.2; }
-  .chat-status { font-size: 0.75rem; color: var(--text-muted); }
+  /* Chat Header */
+  .chat-header {
+    padding: 0.5rem 1rem;
+    background: #f0f2f5;
+    border-bottom: 1px solid var(--chat-border);
+    display: flex;
+    align-items: center;
+    z-index: 10;
+    height: 60px;
+  }
 
-  .chat-messages { flex: 1; padding: 1rem 5%; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
-  
+  .chat-header-info {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    cursor: pointer;
+  }
+
+  .chat-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 1rem;
+    object-fit: cover;
+  }
+
+  .chat-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .chat-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  .chat-status {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+
+  .btn-back-mobile {
+    display: none;
+    margin-right: 0.5rem;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    cursor: pointer;
+  }
+
+  /* Messages Area */
+  .chat-messages {
+    flex: 1;
+    padding: 1rem 5%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
   .message-bubble {
-    max-width: 65%; padding: 0.4rem 0.6rem; border-radius: 7.5px; position: relative; font-size: 0.9rem; line-height: 1.4;
-    box-shadow: 0 1px 0.5px rgba(0,0,0,0.13); word-wrap: break-word; margin-bottom: 4px;
+    max-width: 65%;
+    padding: 0.4rem 0.6rem;
+    border-radius: 7.5px;
+    position: relative;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
+    word-wrap: break-word;
+    margin-bottom: 4px;
   }
-  .message-bubble.received { align-self: flex-start; background-color: var(--their-msg-bg); border-top-left-radius: 0; }
-  .message-bubble.sent { align-self: flex-end; background-color: var(--my-msg-bg); border-top-right-radius: 0; }
 
-  .msg-meta { display: flex; justify-content: flex-end; align-items: center; font-size: 0.65rem; color: #667781; margin-top: 2px; gap: 4px; float: right; margin-left: 8px; }
+  .message-bubble.received {
+    align-self: flex-start;
+    background-color: var(--their-msg-bg);
+    border-top-left-radius: 0;
+    color: var(--text-primary);
+  }
+
+  .message-bubble.sent {
+    align-self: flex-end;
+    background-color: var(--my-msg-bg);
+    border-top-right-radius: 0;
+    color: #111b21;
+  }
   
-  .chat-input-area { background: #f0f2f5; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.8rem; z-index: 10; }
-  .chat-input { flex: 1; padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid white; background: white; font-family: inherit; resize: none; height: 42px; line-height: 22px; }
-  .btn-send { background: var(--success-color); color: white; border: none; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; flex-shrink: 0; }
+  .msg-meta {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    font-size: 0.65rem;
+    color: rgba(0,0,0,0.45);
+    margin-top: 2px;
+    gap: 4px;
+    float: right;
+    margin-left: 8px;
+  }
+  
+  .msg-meta i { font-size: 0.6rem; }
+
+  /* Input Area */
+  .chat-input-area {
+    background: #f0f2f5;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    z-index: 10;
+  }
+
+  .chat-input {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    border: 1px solid white;
+    background: white;
+    font-family: inherit;
+    resize: none;
+    height: 42px;
+    line-height: 22px;
+    max-height: 100px;
+  }
+
+  .chat-input:focus { outline: none; }
+
+  .btn-send {
+    background: var(--chat-primary);
+    color: white;
+    border: none;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.1s;
+    flex-shrink: 0;
+  }
+
   .btn-send:hover { background: #008f6f; }
+  .btn-send:active { transform: scale(0.95); }
 
-  .no-chat-selected { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; background-color: #f0f2f5; border-bottom: 6px solid #25d366; color: #41525d; text-align: center; }
+  /* Placeholder State */
+  .no-chat-selected {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background-color: #f0f2f5;
+    border-bottom: 6px solid #25d366;
+    color: #41525d;
+    text-align: center;
+  }
+
+  /* ========== DARK MODE OVERRIDES (Inherits from base.html) ========== */
+  [data-bs-theme="dark"] .chat-container {
+    background: #111b21;
+    border-color: var(--chat-border-dark);
+  }
+
+  [data-bs-theme="dark"] .chat-sidebar,
+  [data-bs-theme="dark"] .sidebar-header,
+  [data-bs-theme="dark"] .search-box,
+  [data-bs-theme="dark"] .search-input,
+  [data-bs-theme="dark"] .chat-header,
+  [data-bs-theme="dark"] .chat-input-area {
+    background-color: #202c33;
+    border-color: var(--chat-border-dark);
+    color: #e9edef;
+  }
+
+  [data-bs-theme="dark"] .contact-item {
+    border-bottom-color: #2a3942;
+    color: #e9edef;
+  }
+
+  [data-bs-theme="dark"] .contact-item:hover { background-color: #2a3942; }
+  [data-bs-theme="dark"] .contact-item.active { background-color: #2a3942; border-left-color: #00a884; }
+
+  [data-bs-theme="dark"] .chat-main {
+    background-color: var(--chat-bg-dark);
+    /* Update pattern opacity for dark mode */
+    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+  }
+
+  [data-bs-theme="dark"] .message-bubble.sent {
+    background-color: var(--my-msg-bg-dark);
+    color: #e9edef;
+  }
+
+  [data-bs-theme="dark"] .message-bubble.received {
+    background-color: var(--their-msg-bg-dark);
+    color: #e9edef;
+  }
   
-  .btn-back-mobile { display: none; margin-right: 0.5rem; background: none; border: none; font-size: 1.2rem; color: var(--text-primary); cursor: pointer; }
+  [data-bs-theme="dark"] .msg-meta { color: rgba(255,255,255,0.4); }
+  [data-bs-theme="dark"] .no-chat-selected { background-color: #202c33; color: #8696a0; }
 
-  @media (max-width: 992px) {
-    .chat-container { height: calc(100vh - 60px); grid-template-columns: 1fr; }
-    .chat-main { position: fixed; top: 60px; left: 0; width: 100%; height: calc(100% - 60px); transform: translateX(100%); transition: transform 0.3s ease-in-out; z-index: 100; border-left: 1px solid #ddd; }
-    .chat-container.show-chat .chat-main { transform: translateX(0); }
-    .btn-back-mobile { display: block; }
+  /* ========== RESPONSIVE ========== */
+  @media (max-width: 991.98px) {
+    /* Reset main padding for mobile so chat takes full width */
+    main {
+        padding: 0 !important;
+    }
+    
+    .chat-container {
+      margin: 0;
+      height: calc(100vh - var(--navbar-height));
+      grid-template-columns: 1fr;
+      border-radius: 0;
+      border: none;
+    }
+
+    .chat-main {
+      position: fixed;
+      top: var(--navbar-height);
+      left: 0;
+      width: 100%;
+      height: calc(100vh - var(--navbar-height));
+      transform: translateX(100%);
+      transition: transform 0.3s ease-in-out;
+      /* Higher than base sidebar (1050) */
+      z-index: 1060; 
+      border-left: 1px solid #ddd;
+    }
+
+    .chat-container.show-chat .chat-main {
+      transform: translateX(0);
+    }
+
+    .btn-back-mobile {
+      display: block;
+    }
+    
+    /* Hide sidebar when chat is open on mobile */
+    .chat-container.show-chat .chat-sidebar {
+        display: none;
+    }
   }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="chat-container" id="chatContainer">
-  <!-- Sidebar -->
+  
+  <!-- LEFT SIDEBAR: CONTACTS -->
   <div class="chat-sidebar">
     <div class="sidebar-header">
       <h2>Chats</h2>
-      <a href="{{ url_for('landlord.compose_message') }}" class="btn text-primary">
+      <a href="{{ url_for('landlord.compose_message') }}" class="btn btn-light text-primary" title="New Message">
         <i class="fas fa-plus-circle fa-lg"></i>
       </a>
     </div>
+    
     <div class="search-box">
-      <input type="text" class="search-input" placeholder="Search chats..." id="searchContacts">
+      <input type="text" class="search-input" placeholder="Search or start new chat" id="searchContacts">
     </div>
+
     <div class="contact-list" id="contactList">
       {% if messages %}
         {% for message in messages %}
           {% set is_sent = (message.sender_id == current_user.id) %}
           {% set other_user = message.receiver if is_sent else message.sender %}
           
-          <!-- UPDATED: Using data-attributes instead of inline arguments -->
           <div class="contact-item" 
-               onclick="openChat(this)"
+               onclick="openChat('{{ other_user.id }}', '{{ other_user.name }}', '{{ other_user.profile_image }}')"
                data-user-id="{{ other_user.id }}"
                data-user-name="{{ other_user.name }}"
-               data-user-image="{{ other_user.profile_image or '' }}"
                id="contact-{{ other_user.id }}">
             
-            <img src="{{ other_user.profile_image or url_for('static', filename='images/default_avatar.png') }}" 
-                 class="contact-avatar" alt="{{ other_user.name }}">
+            <!-- Cloudinary Profile Image -->
+            <img src="{{ other_user.profile_image if other_user.profile_image else url_for('static', filename='images/default_avatar.png') }}" 
+                 class="contact-avatar" 
+                 alt="{{ other_user.name }}"
+                 onerror="this.src='{{ url_for('static', filename='images/default_avatar.png') }}'">
             
             <div class="contact-info">
               <div class="contact-top">
@@ -146,35 +457,51 @@
                 <span class="contact-time">{{ message.timestamp.strftime('%H:%M') }}</span>
               </div>
               <div class="contact-preview">
-                {% if is_sent %}<i class="fas fa-check-double text-muted"></i> {% endif %}
+                {% if is_sent %}
+                  <i class="fas fa-check-double text-muted"></i> You:
+                {% endif %}
                 <span>{{ message.content }}</span>
               </div>
             </div>
           </div>
         {% endfor %}
       {% else %}
-        <div style="padding: 2rem; text-align: center; color: var(--text-muted);">
+        <div style="padding: 2rem; text-align: center; color: var(--text-secondary);">
           <p>No messages yet.</p>
+          <a href="{{ url_for('landlord.tenants') }}" class="btn btn-sm btn-outline-primary mt-2">View Tenants</a>
         </div>
       {% endif %}
     </div>
   </div>
 
-  <!-- Chat Area -->
+  <!-- RIGHT MAIN: CHAT VIEW -->
   <div class="chat-main" id="chatMain">
+    
+    <!-- Header -->
     <div class="chat-header">
-      <button class="btn-back-mobile" onclick="closeChat()"><i class="fas fa-arrow-left"></i></button>
+      <button class="btn-back-mobile" onclick="closeChat()">
+        <i class="fas fa-arrow-left"></i>
+      </button>
       
       <div class="chat-header-info">
+        <!-- Cloudinary Image in Header -->
         <img src="" id="currentChatAvatar" class="chat-avatar" style="display:none;" alt="Profile">
         <div class="chat-details">
           <div class="chat-name" id="currentChatName">Select a chat</div>
           <div class="chat-status" id="currentChatStatus"></div>
         </div>
       </div>
+      
+      <div style="margin-left: auto;">
+         <button class="btn btn-sm text-muted" title="View Details" onclick="alert('Profile details coming soon')">
+           <i class="fas fa-info-circle"></i>
+         </button>
+      </div>
     </div>
 
+    <!-- Messages Area -->
     <div class="chat-messages" id="messageArea">
+      <!-- Default Placeholder -->
       <div class="no-chat-selected" id="noChatPlaceholder">
         <i class="fas fa-comments fa-4x mb-3" style="opacity: 0.2;"></i>
         <h3>HomeHub Messages</h3>
@@ -182,6 +509,7 @@
       </div>
     </div>
 
+    <!-- Input Area -->
     <div class="chat-input-area" id="inputArea" style="display: none;">
       <form id="messageForm" style="display: flex; width: 100%; gap: 0.8rem; align-items: center;">
         <input type="hidden" name="receiver_id" id="receiverIdInput">
@@ -191,88 +519,108 @@
         </button>
       </form>
     </div>
+
   </div>
+
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
   let currentChatUserId = null;
-  const myUserId = {{ current_user.id }};
   
-  // 1. Format Time Helper
-  function formatTime(isoString) {
-    if(!isoString) return "";
-    const date = new Date(isoString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
+  // DOM Elements
+  const chatContainer = document.getElementById('chatContainer');
+  const messageArea = document.getElementById('messageArea');
+  const noChatPlaceholder = document.getElementById('noChatPlaceholder');
+  const inputArea = document.getElementById('inputArea');
+  const chatName = document.getElementById('currentChatName');
+  const chatAvatar = document.getElementById('currentChatAvatar');
+  const chatStatus = document.getElementById('currentChatStatus');
+  const messageForm = document.getElementById('messageForm');
+  const messageInput = document.getElementById('messageInput');
+  const sendBtn = document.getElementById('sendBtn');
 
-  // 2. Open Chat (UPDATED to read data-attributes)
-  function openChat(element) {
-    // Read data from the clicked element
-    const userId = element.getAttribute('data-user-id');
-    const userName = element.getAttribute('data-user-name');
-    const userImage = element.getAttribute('data-user-image');
-    
+  // 1. Open Chat Function
+  function openChat(userId, userName, userImage) {
     currentChatUserId = userId;
     
     // UI Updates
-    document.getElementById('currentChatName').textContent = userName;
-    document.getElementById('currentChatStatus').textContent = "Online"; 
-    const avatar = document.getElementById('currentChatAvatar');
-    avatar.src = userImage || "{{ url_for('static', filename='images/default_avatar.png') }}";
-    avatar.style.display = "block";
+    chatName.textContent = userName;
+    chatStatus.textContent = "Click here for contact info"; 
+    
+    // Handle Cloudinary Image or Fallback
+    if(userImage && userImage.trim() !== '') {
+        chatAvatar.src = userImage;
+        chatAvatar.style.display = "block";
+    } else {
+        chatAvatar.src = "{{ url_for('static', filename='images/default_avatar.png') }}";
+        chatAvatar.style.display = "block";
+    }
     
     // Toggle Views
-    document.getElementById('noChatPlaceholder').style.display = "none";
-    document.getElementById('inputArea').style.display = "flex";
-    document.getElementById('messageArea').innerHTML = ""; 
+    noChatPlaceholder.style.display = "none";
+    inputArea.style.display = "flex";
+    messageArea.innerHTML = ""; 
 
-    // Mobile Slide
-    document.getElementById('chatContainer').classList.add('show-chat');
+    // Mobile Slide Effect
+    chatContainer.classList.add('show-chat');
 
-    // Highlight Active
-    document.querySelectorAll('.contact-item').forEach(item => item.classList.remove('active'));
-    element.classList.add('active');
+    // Highlight Active Contact
+    document.querySelectorAll('.contact-item').forEach(item => {
+      item.classList.remove('active');
+      if(item.dataset.userId == userId) {
+        item.classList.add('active');
+      }
+    });
 
-    // Load Messages
+    // Load Real Messages
     loadMessages(userId);
   }
 
-  // 3. Load Messages (Fetch)
-  function loadMessages(userId) {
-    const msgArea = document.getElementById('messageArea');
-    msgArea.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Loading...</div>';
+  // 2. Close Chat (Mobile)
+  function closeChat() {
+    chatContainer.classList.remove('show-chat');
+    setTimeout(() => {
+        currentChatUserId = null;
+        document.querySelectorAll('.contact-item').forEach(item => item.classList.remove('active'));
+    }, 300);
+  }
 
-    // NOTE: Ensure you have the route /landlord/get_messages/<id> in your Flask app
+  // 3. Load Messages from Server
+  function loadMessages(userId) {
+    messageArea.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Loading messages...</div>';
+
     fetch(`/landlord/get_messages/${userId}`)
       .then(response => {
-        if (!response.ok) throw new Error("Network error");
+        if (!response.ok) throw new Error("Network response was not ok");
         return response.json();
       })
       .then(data => {
-        msgArea.innerHTML = ""; // Clear loading
+        messageArea.innerHTML = ""; 
         if (data.length === 0) {
-            msgArea.innerHTML = '<div style="text-align:center; padding:20px; color:#888; font-size:0.9rem;">Say hello!</div>';
+            messageArea.innerHTML = '<div style="text-align:center; padding:20px; color:#888; font-size:0.9rem;">No messages in this conversation yet. Say hello!</div>';
         } else {
-            data.forEach(msg => appendMessageToUI(msg));
+            data.forEach(msg => {
+                appendMessageToUI(msg);
+            });
         }
         scrollToBottom();
       })
-      .catch(err => {
-        console.error(err);
-        msgArea.innerHTML = '<div style="text-align:center; padding:20px; color:red;">Failed to load messages. Check console.</div>';
+      .catch(error => {
+        console.error('Error loading messages:', error);
+        messageArea.innerHTML = '<div style="text-align:center; padding:20px; color:red;">Could not load messages.</div>';
       });
   }
 
-  // 4. Append to DOM
+  // 4. Append Message to DOM
   function appendMessageToUI(msg) {
-    const isMe = msg.sender_id === myUserId;
+    const isMe = msg.sender_id === {{ current_user.id }};
+    
     const div = document.createElement('div');
     div.className = `message-bubble ${isMe ? 'sent' : 'received'}`;
     
-    // Handle timestamp (backend can send 'timestamp' string or object)
-    const timeStr = formatTime(msg.timestamp || msg.created_at);
+    const timeStr = msg.timestamp_formatted || msg.timestamp; 
     const checkIcon = isMe ? '<i class="fas fa-check-double text-primary"></i>' : '';
     
     div.innerHTML = `
@@ -281,70 +629,83 @@
         ${timeStr} ${checkIcon}
       </div>
     `;
-    document.getElementById('messageArea').appendChild(div);
+    
+    messageArea.appendChild(div);
   }
 
-  // 5. Send Message
-  document.getElementById('messageForm').addEventListener('submit', function(e) {
+  // 5. Send Message Logic
+  messageForm.addEventListener('submit', function(e) {
     e.preventDefault();
-    const input = document.getElementById('messageInput');
-    const content = input.value.trim();
+    const content = messageInput.value.trim();
 
     if (!content || !currentChatUserId) return;
 
-    // Optimistic UI
+    // A. Optimistic UI Update
     const tempMsg = {
-        sender_id: myUserId,
+        id: Date.now(),
+        sender_id: {{ current_user.id }},
         content: content,
-        timestamp: new Date().toISOString()
+        timestamp_formatted: "Sending..." 
     };
+    
     appendMessageToUI(tempMsg);
     scrollToBottom();
-    input.value = "";
-    input.focus();
+    messageInput.value = ""; 
+    sendBtn.disabled = true; 
 
-    // Real Send
+    // B. Send to Server
     const formData = new FormData();
     formData.append('receiver_id', currentChatUserId);
     formData.append('content', content);
     
-    // Get CSRF
-    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                 document.querySelector('input[name="csrf_token"]')?.value;
-    if(csrf) formData.append('csrf_token', csrf);
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if(csrfToken) formData.append('csrf_token', csrfToken);
 
     fetch('/landlord/send_message', {
         method: 'POST',
         body: formData
     })
-    .then(r => r.json())
+    .then(response => response.json())
     .then(data => {
-        if(!data.success) alert("Send failed");
+        if (data.success) {
+            console.log("Message sent");
+        } else {
+            alert("Failed to send: " + (data.error || "Unknown error"));
+        }
     })
-    .catch(err => console.error(err));
-  });
-
-  function closeChat() {
-    document.getElementById('chatContainer').classList.remove('show-chat');
-    setTimeout(() => { currentChatUserId = null; }, 300);
-  }
-
-  function scrollToBottom() {
-    const area = document.getElementById('messageArea');
-    area.scrollTop = area.scrollHeight;
-  }
-
-  // Search
-  document.getElementById('searchContacts').addEventListener('keyup', function(e) {
-    const term = e.target.value.toLowerCase();
-    document.querySelectorAll('.contact-item').forEach(contact => {
-        contact.style.display = contact.getAttribute('data-user-name').toLowerCase().includes(term) ? 'flex' : 'none';
+    .catch(err => {
+        console.error("Error:", err);
+        alert("Connection error");
+    })
+    .finally(() => {
+        sendBtn.disabled = false;
     });
   });
 
-  // Enter to send
-  document.getElementById('messageInput').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') document.getElementById('messageForm').dispatchEvent(new Event('submit'));
+  function scrollToBottom() {
+    messageArea.scrollTop = messageArea.scrollHeight;
+  }
+
+  // 6. Search Filter
+  document.getElementById('searchContacts').addEventListener('keyup', function(e) {
+      const term = e.target.value.toLowerCase();
+      const contacts = document.querySelectorAll('.contact-item');
+      contacts.forEach(contact => {
+          const name = contact.dataset.userName.toLowerCase();
+          if(name.includes(term)) {
+              contact.style.display = 'flex';
+          } else {
+              contact.style.display = 'none';
+          }
+      });
+  });
+
+  // Handle Enter key
+  messageInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      messageForm.dispatchEvent(new Event('submit'));
+    }
   });
 </script>
 {% endblock %}

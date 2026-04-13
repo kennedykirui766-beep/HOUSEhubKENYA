@@ -892,9 +892,6 @@ def compose_message():
         print("Compose message error:", e)
         return redirect(url_for("landlord.messages"))
     
-    
-from flask import jsonify, request
-from datetime import datetime
 
 # --- GET MESSAGES FOR SPECIFIC CHAT ---
 @landlord_bp.route('/get_messages/<int:other_user_id>')

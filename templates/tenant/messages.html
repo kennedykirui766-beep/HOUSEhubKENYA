@@ -4,24 +4,46 @@
 
 {% block styles %}
 <style>
-  :root {
-    --wa-header-bg: #00a884;
+  /* 
+   * SCOPED VARIABLES 
+   * We use .wa-container to scope variables to prevent leaking into base.html 
+   */
+  .wa-container {
+    /* Theme Colors */
+    --wa-header-bg: #f0f2f5;
     --wa-bg: #efeae2;
+    --wa-sidebar-bg: #ffffff;
     --wa-incoming-bg: #ffffff;
     --wa-outgoing-bg: #d9fdd3;
-    --wa-sidebar-width: 400px;
+    --wa-text-primary: #111b21;
+    --wa-text-secondary: #667781;
+    --wa-border: #e9edef;
+    --wa-accent: #00a884;
     --wa-primary: #008069;
+    
+    /* Layout Dimensions */
+    --wa-sidebar-width: 400px;
+    --wa-header-height: 60px;
   }
 
   /* ========== MAIN CONTAINER ========== */
   .wa-container {
     display: grid;
     grid-template-columns: var(--wa-sidebar-width) 1fr;
-    height: calc(100vh - 80px); /* Adjust based on navbar height */
+    
+    /* 
+     * Height Logic:
+     * 100vh - Navbar Height (64px) - Main Padding Top/Bottom (1.5rem * 2 = 48px)
+     */
+    height: calc(100vh - var(--navbar-height) - 48px); 
+    
     background: #fff;
-    box-shadow: var(--card-shadow);
-    max-width: 1400px;
-    margin: 2rem auto 4rem;
+    box-shadow: var(--shadow-sm);
+    
+    /* Counteract base.html main padding to make it look like a full app */
+    margin: -1.5rem; 
+    max-width: calc(100% + 3rem);
+    
     border-radius: 0; 
     overflow: hidden;
     position: relative;
@@ -29,8 +51,8 @@
 
   /* ========== LEFT SIDEBAR (CONTACTS) ========== */
   .wa-sidebar {
-    background: white;
-    border-right: 1px solid #e9edef;
+    background: var(--wa-sidebar-bg);
+    border-right: 1px solid var(--wa-border);
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -38,9 +60,9 @@
   }
 
   .wa-header {
-    background: #f0f2f5;
+    background: var(--wa-header-bg);
     padding: 10px 16px;
-    height: 60px;
+    height: var(--wa-header-height);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -60,17 +82,17 @@
     gap: 1.5rem;
     color: #54656f;
   }
-
-  .wa-header-icons i { cursor: pointer; font-size: 1.1rem; }
+  .wa-header-icons i { cursor: pointer; font-size: 1.1rem; transition: color 0.2s; }
+  .wa-header-icons i:hover { color: var(--text-primary); }
 
   .wa-search-bar {
     background: white;
     padding: 8px 12px;
-    border-bottom: 1px solid #e9edef;
+    border-bottom: 1px solid var(--wa-border);
   }
 
   .wa-search-input {
-    background: #f0f2f5;
+    background: var(--wa-header-bg);
     border: none;
     border-radius: 8px;
     padding: 8px 32px 8px 12px;
@@ -113,7 +135,7 @@
 
   .wa-contact-info {
     flex: 1;
-    border-bottom: 1px solid #e9edef;
+    border-bottom: 1px solid var(--wa-border);
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -129,13 +151,13 @@
 
   .wa-contact-name {
     font-size: 1.05rem;
-    color: #111b21;
+    color: var(--wa-text-primary);
     font-weight: 400;
   }
 
   .wa-contact-time {
     font-size: 0.75rem;
-    color: #667781;
+    color: var(--wa-text-secondary);
   }
 
   .wa-contact-bottom {
@@ -146,14 +168,13 @@
 
   .wa-contact-preview {
     font-size: 0.85rem;
-    color: #667781;
+    color: var(--wa-text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     width: 90%;
   }
 
-  /* Unread Dot */
   .wa-unread-badge {
     background: #25d366;
     color: white;
@@ -178,11 +199,10 @@
     position: relative;
   }
 
-  /* Chat Header */
   .wa-chat-header {
-    background: #f0f2f5;
+    background: var(--wa-header-bg);
     padding: 10px 16px;
-    height: 60px;
+    height: var(--wa-header-height);
     display: flex;
     align-items: center;
     border-left: 1px solid #d1d7db;
@@ -215,16 +235,15 @@
 
   .wa-chat-name {
     font-size: 1rem;
-    color: #111b21;
+    color: var(--wa-text-primary);
     font-weight: 500;
   }
 
   .wa-chat-status {
     font-size: 0.75rem;
-    color: #667781;
+    color: var(--wa-text-secondary);
   }
 
-  /* Messages Container */
   .wa-messages-container {
     flex: 1;
     padding: 20px 60px;
@@ -249,12 +268,14 @@
     align-self: flex-start;
     background: var(--wa-incoming-bg);
     border-top-left-radius: 0;
+    color: var(--wa-text-primary);
   }
 
   .wa-msg-bubble.outgoing {
     align-self: flex-end;
     background: var(--wa-outgoing-bg);
     border-top-right-radius: 0;
+    color: var(--wa-text-primary);
   }
 
   .wa-msg-meta {
@@ -268,11 +289,8 @@
     gap: 3px;
   }
 
-  .wa-msg-meta i { font-size: 0.6rem; }
-
-  /* Chat Input Footer */
   .wa-chat-footer {
-    background: #f0f2f5;
+    background: var(--wa-header-bg);
     min-height: 62px;
     display: flex;
     align-items: center;
@@ -310,11 +328,8 @@
     transition: color 0.2s;
   }
   
-  .wa-send-btn.send-active {
-    color: var(--wa-primary);
-  }
+  .wa-send-btn.send-active { color: var(--wa-primary); }
 
-  /* Empty State (Desktop) */
   .wa-empty-chat {
     display: flex;
     flex-direction: column;
@@ -327,46 +342,90 @@
     padding: 2rem;
   }
 
-  /* ========== MODAL (Reused) ========== */
+  /* Modal */
   .modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.5);
-    z-index: 2000;
+    z-index: 2000; /* High z-index to sit above chat area */
     display: flex; align-items: center; justify-content: center;
     opacity: 0; pointer-events: none; transition: 0.3s;
   }
   .modal-overlay.active { opacity: 1; pointer-events: auto; }
   .modal-box {
-    background: white; padding: 1.5rem; border-radius: 8px;
-    width: 90%; max-width: 350px;
+    background: var(--card-bg); 
+    color: var(--text-primary);
+    padding: 1.5rem; 
+    border-radius: var(--radius-md);
+    width: 90%; 
+    max-width: 350px;
   }
-  .modal-actions { margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 10px; }
-  .btn { padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; }
-  .btn-cancel { background: #e9edef; color: #111b21; }
-  .btn-danger { background: #ef4444; color: white; }
+
+  /* ========== DARK MODE OVERRIDES ========== */
+  [data-bs-theme="dark"] .wa-container {
+    --wa-header-bg: #202c33;
+    --wa-bg: #0b141a;
+    --wa-sidebar-bg: #111b21;
+    --wa-incoming-bg: #202c33;
+    --wa-outgoing-bg: #005c4b;
+    --wa-text-primary: #e9edef;
+    --wa-text-secondary: #8696a0;
+    --wa-border: #2a3942;
+  }
+
+  [data-bs-theme="dark"] .wa-header,
+  [data-bs-theme="dark"] .wa-search-bar,
+  [data-bs-theme="dark"] .wa-chat-header,
+  [data-bs-theme="dark"] .wa-chat-footer {
+    border-bottom-color: var(--wa-border);
+    border-left-color: var(--wa-border);
+  }
+
+  [data-bs-theme="dark"] .wa-contact { border-bottom-color: var(--wa-border); }
+  [data-bs-theme="dark"] .wa-contact:hover { background-color: #202c33; }
+  
+  [data-bs-theme="dark"] .wa-input-box { background: #2a3942; }
+  [data-bs-theme="dark"] .wa-input { color: white; background: transparent; }
+  [data-bs-theme="dark"] .wa-search-input { background: #202c33; color: white; }
+  
+  [data-bs-theme="dark"] .wa-msg-meta { color: rgba(255,255,255,0.4); }
+  [data-bs-theme="dark"] .wa-empty-chat { background: #202c33; color: #8696a0; }
 
   /* ========== RESPONSIVE ========== */
-  @media (max-width: 992px) {
+  @media (max-width: 991.98px) {
+    /* Full height on mobile, ignore main padding */
     .wa-container {
-      margin: 1rem 0; height: calc(100vh - 120px);
+      margin: 0; 
+      height: calc(100vh - var(--navbar-height));
       grid-template-columns: 1fr;
-      border-radius: 0; max-width: 100%;
+      max-width: 100%;
+      border-radius: 0;
     }
+
     .wa-chat-area {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      transform: translateX(100%); transition: transform 0.3s ease;
-      z-index: 20;
+      position: absolute; 
+      top: 0; left: 0; width: 100%; height: 100%;
+      transform: translateX(100%); 
+      transition: transform 0.3s ease;
+      /* Higher than base sidebar (1050) */
+      z-index: 1060; 
+      border-left: 1px solid var(--wa-border);
     }
+    
     .wa-chat-area.active { transform: translateX(0); }
     .wa-back-btn { display: block; }
     .wa-messages-container { padding: 10px 15px; }
+    
+    /* Hide sidebar on mobile when chat is active */
+    .wa-container.show-chat .wa-sidebar {
+        display: none;
+    }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="wa-container">
+<div class="wa-container" id="waContainer">
   
   <!-- LEFT SIDEBAR -->
   <div class="wa-sidebar">
@@ -431,7 +490,7 @@
           {% endif %}
         {% endfor %}
       {% else %}
-        <div style="padding: 2rem; text-align: center; color: #667781;">
+        <div style="padding: 2rem; text-align: center; color: var(--text-secondary);">
           No recent chats.
           <br>
           <a href="{{ url_for('tenant.properties') }}" class="btn btn-sm btn-outline-primary mt-2">Find a Property</a>
@@ -445,9 +504,9 @@
     
     <!-- Default Empty State -->
     <div class="wa-empty-chat" id="emptyChatState">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/150px-WhatsApp.svg.png" style="opacity:0.3; margin-bottom:1rem;">
-      <h2 style="color:#41525d; font-weight:300;">HomeHub Chat</h2>
-      <p style="color:#667781;">Select a contact to start messaging.</p>
+      <i class="fas fa-comments fa-4x mb-3" style="opacity:0.2;"></i>
+      <h2 style="font-weight:300;">HomeHub Chat</h2>
+      <p>Select a contact to start messaging.</p>
     </div>
 
     <!-- Active Chat Interface (Hidden initially) -->
@@ -465,7 +524,6 @@
         <div class="wa-header-icons">
           <i class="fas fa-video"></i>
           <i class="fas fa-phone"></i>
-          <i class="fas fa-search"></i>
           <i class="fas fa-ellipsis-v"></i>
         </div>
       </div>
@@ -496,9 +554,9 @@
 <div class="modal-overlay" id="deleteModal">
   <div class="modal-box">
     <h4>Delete Message?</h4>
-    <p style="color:#667781; margin: 10px 0;">This will remove the message from this chat.</p>
+    <p style="color:var(--text-secondary); margin: 10px 0;">This will remove the message from this chat.</p>
     <div class="modal-actions">
-      <button class="btn btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
       <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
     </div>
   </div>
@@ -520,6 +578,7 @@
   const messagesContainer = document.getElementById('messagesContainer');
   const messageInput = document.getElementById('messageInput');
   const sendBtn = document.getElementById('sendBtn');
+  const waContainer = document.getElementById('waContainer');
   
   // --- LOAD CHAT ---
   function loadChat(userId, userName, userImage) {
@@ -541,6 +600,7 @@
 
     // Mobile Slide
     chatArea.classList.add('active');
+    waContainer.classList.add('show-chat');
 
     // Fetch Messages from Server
     messagesContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Loading chat...</div>';
@@ -558,6 +618,7 @@
 
   function closeChat() {
     chatArea.classList.remove('active');
+    waContainer.classList.remove('show-chat');
     setTimeout(() => {
         activeChatUserId = null;
         document.querySelectorAll('.wa-contact').forEach(el => el.classList.remove('active'));
