@@ -24,3 +24,17 @@ mail = Mail()
 
 # WebSockets (real-time)
 socketio = SocketIO(cors_allowed_origins="*")  # 👈 now available everywhere
+from flask_sqlalchemy import SQLAlchemy
+from flask_socketio import SocketIO
+from flask_migrate import Migrate
+from flask_login import LoginManager
+from flask_wtf import CSRFProtect
+from flask_mail import Mail
+
+db = SQLAlchemy()
+migrate = Migrate()
+login_manager = LoginManager()
+csrf = CSRFProtect()
+mail = Mail()
+
+socketio = SocketIO(cors_allowed_origins="*")

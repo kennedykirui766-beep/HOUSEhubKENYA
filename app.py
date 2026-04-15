@@ -3,7 +3,6 @@ import os
 from dotenv import load_dotenv
 import flask
 from flask_migrate import upgrade
-import events.chat_events
 
 load_dotenv()
 
@@ -54,7 +53,7 @@ def create_app():
     migrate.init_app(app, db)
     login_manager.init_app(app)
     csrf.init_app(app)
-    socketio = SocketIO(app, cors_allowed_origins="*")
+    from extensions import db, migrate, login_manager, csrf, mail, socketio
     CORS(app)
     mail.init_app(app)
 
@@ -273,8 +272,12 @@ def create_app():
 
     return app, socketio
 
+
 # Create app and socketio
 app, socketio = create_app()
+
+with app.app_context():
+    import events.chat_events
 
 # Run
 if __name__ == '__main__':
