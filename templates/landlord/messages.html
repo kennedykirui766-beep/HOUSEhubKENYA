@@ -313,13 +313,13 @@
   @media (max-width: 768px) {
     body.mobile-chat-open { overflow: hidden; }
 
-    /* FIX: Hide the Global Support Chat Button on mobile to prevent collision */
+    /* FIX: Hide Global Support Chat Button on mobile */
     .chat-support-btn {
       display: none !important;
     }
 
     .chat-app-wrapper {
-      /* FIXED: Start BELOW the navbar (64px is the navbar height) */
+      /* FIXED: Start BELOW navbar (64px is navbar height) */
       top: var(--navbar-height); 
       bottom: 0; 
       left: 0; 
@@ -635,13 +635,33 @@
       els.messagesArea.scrollTop = els.messagesArea.scrollHeight;
       renderList();
 
-      fetch(window.location.href, {
+      // UPDATE: Use specific route /landlord/send_message
+      fetch('/landlord/send_message', {
         method: 'POST',
         headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken()},
         body: JSON.stringify({ content: text, receiver_id: state.activeChatId })
       })
       .then(res => res.json())
-      .then(data => { if(!data.success) alert("Failed"); })
+      .then(data => {
+        if (data.success && data.message) {
+          // Update local state with the real message from server
+          const realMsg = data.message;
+          const convo = state.conversations[state.activeChatId];
+          
+          // Find the temp message (last one added) and update it
+          const tempMsgIndex = convo.messages.length - 1;
+          if (convo.messages[tempMsgIndex].id === tempMsg.id) {
+            convo.messages[tempMsgIndex] = realMsg;
+            // Re-render to show real timestamp/ID
+            renderMessages(convo.messages);
+            renderList();
+          }
+        } else {
+          // Handle error returned by route
+          const errorMsg = data.error || "Failed to send message";
+          alert(errorMsg);
+        }
+      })
       .catch(e => console.error(e));
     }
 

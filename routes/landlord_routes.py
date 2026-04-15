@@ -1008,18 +1008,29 @@ def send_message():
             sender_id=current_user.id,
             receiver_id=receiver_id,
             content=content,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
+            is_read=False   # 👈 important
         )
 
         db.session.add(message)
         db.session.commit()
 
-        return {"success": True}
+        return {
+            "success": True,
+            "message": {
+                "id": message.id,
+                "sender_id": message.sender_id,
+                "receiver_id": message.receiver_id,
+                "content": message.content,
+                "timestamp": message.timestamp.isoformat(),  # 👈 critical
+                "is_read": message.is_read
+            }
+        }
 
     except Exception as e:
         db.session.rollback()
         print("Error:", e)
-        return {"success": False}, 500
+        return {"success": False, "error": str(e)}, 500
 
 @landlord_bp.route("/delete_image/<image_name>", methods=["POST"])
 @login_required
