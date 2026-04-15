@@ -1593,7 +1593,11 @@
         {% endfor %} 
       {% else %}
         <div class="no-properties text-center py-5">
-          <i class="fas fa-home fa-3x" style="color: var(--text-muted); opacity: 0.5;"></i>
+          {% if APP_LOGO_URL %}
+            <img src="{{ APP_LOGO_URL }}" alt="HomeHub Logo" style="height:56px; opacity:0.6;">
+          {% else %}
+            <i class="fas fa-home fa-3x" style="color: var(--text-muted); opacity: 0.5;"></i>
+          {% endif %}
           <h3 class="mt-3" style="color: var(--text-primary);">No Properties Available</h3>
           <p>Check back later for new listings.</p>
         </div>
