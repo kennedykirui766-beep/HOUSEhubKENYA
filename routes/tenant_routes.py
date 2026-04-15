@@ -65,6 +65,9 @@ def safe_strftime(val, format_str):
 
 tenant_bp = Blueprint('tenant', __name__, url_prefix='/tenant')
 
+# Track online users (user_id -> connection info)
+online_users = set()
+
 @tenant_bp.route('/dashboard')
 @login_required
 def dashboard():
@@ -814,15 +817,24 @@ def send_message():
         return {"success": False, "error": "Missing data"}, 400
 
     try:
+        # 1. CREATE MESSAGE (always SENT first)
         message = Message(
             sender_id=current_user.id,
             receiver_id=receiver_id,
             content=content,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
+            delivered_at=None,
+            is_read=False
         )
 
         db.session.add(message)
         db.session.commit()
+
+        # 2. DELIVERY LOGIC (ONLY if user is online)
+        # (temporary check — later replaced by SocketIO event)
+        if receiver_id in online_users:
+            message.delivered_at = datetime.utcnow()
+            db.session.commit()
 
         return {
             "success": True,
@@ -831,7 +843,9 @@ def send_message():
                 "sender_id": message.sender_id,
                 "receiver_id": message.receiver_id,
                 "content": message.content,
-                "timestamp": message.timestamp.isoformat()
+                "timestamp": message.timestamp.isoformat(),
+                "delivered_at": message.delivered_at.isoformat() if message.delivered_at else None,
+                "is_read": message.is_read
             }
         }
 
@@ -840,6 +854,33 @@ def send_message():
         print("Send error:", e)
         return {"success": False}, 500
 
+@tenant_bp.route('/mark_delivered/<int:msg_id>', methods=['POST'])
+@login_required
+def mark_delivered(msg_id):
+    msg = Message.query.get(msg_id)
+
+    if msg and msg.receiver_id == current_user.id:
+        msg.delivered_at = datetime.utcnow()
+        db.session.commit()
+
+    return {"success": True}
+
+@tenant_bp.route('/mark_read/<int:landlord_id>', methods=['POST'])
+@login_required
+def mark_read(landlord_id):
+
+    messages = Message.query.filter(
+        Message.sender_id == landlord_id,
+        Message.receiver_id == current_user.id,
+        Message.is_read == False
+    ).all()
+
+    for msg in messages:
+        msg.is_read = True
+        msg.read_at = datetime.utcnow()
+
+    db.session.commit()
+    return {"success": True}
 
 # routes/tenant_routes.py
 

@@ -4,7 +4,7 @@
 
 {% block styles %}
 <style>
-  /* ---1. VARIABLES --- */
+  /* --- 1. VARIABLES --- */
   :root {
     --wa-bg-app: #d1d7db;
     --wa-bg-sidebar: #ffffff;
@@ -21,7 +21,7 @@
   /* --- 2. CHAT CONTAINER --- */
   .chat-app-wrapper {
     display: flex;
-    height: 85vh;
+    height: 85vh; /* Fixed height for desktop */
     min-height: 600px;
     background-color: var(--wa-bg-app);
     width: 100%;
@@ -541,20 +541,23 @@
         const isMe = msg.sender_id === state.currentUserId;
         // Determine 'other' user (Landlord)
         const otherId = isMe ? msg.receiver_id : msg.sender_id;
-        const otherInfo = msg.other_user; // Provided by /messages route
+        const otherInfo = isMe ? (msg.receiver || {name: "Landlord", profile_image: null}) 
+                                    : (msg.sender || {name: "Landlord", profile_image: null});
 
         if (!state.conversations[otherId]) {
           state.conversations[otherId] = {
             id: otherId,
             name: otherInfo.name || "Landlord",
-            avatar: otherInfo.avatar,
+            avatar: otherInfo.profile_image,
             messages: [],
             lastMsgTime: msg.timestamp
           };
         }
 
-        // Ensure is_read property exists
+        // Safety defaults for new fields
+        if (typeof msg.delivered_at === 'undefined') msg.delivered_at = null;
         if (typeof msg.is_read === 'undefined') msg.is_read = false;
+        
         state.conversations[otherId].messages.push(msg);
 
         if (new Date(msg.timestamp) > new Date(state.conversations[otherId].lastMsgTime)) {
@@ -563,10 +566,18 @@
       });
     }
 
-    // --- TICK LOGIC ---
+    // --- TICK LOGIC (UPDATED) ---
     function getTickHtml(msg) {
-      if (msg.is_read) return '<i class="fas fa-check-double tick tick-blue"></i>';
-      return '<i class="fas fa-check tick tick-grey"></i>';
+      // 1. If not delivered -> Single Grey Tick
+      if (!msg.delivered_at) {
+        return '<i class="fas fa-check tick tick-grey"></i>';
+      }
+      // 2. If not read -> Double Grey Tick
+      if (!msg.is_read) {
+        return '<i class="fas fa-check-double tick tick-grey"></i>';
+      }
+      // 3. Otherwise -> Double Blue Tick
+      return '<i class="fas fa-check-double tick tick-blue"></i>';
     }
 
     // --- RENDER LIST ---
@@ -626,6 +637,23 @@
         : `<div style="width:100%; height:100%; background:#00a884; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white;">${initials}</div>`;
 
       renderMessages(convo.messages);
+
+      // NEW: Mark as read when opening chat
+      fetch('/tenant/mark_read/' + id, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken()}
+      })
+      .then(res => res.json())
+      .then(data => {
+        if(data.success) {
+          // Optimistically update UI to show read status immediately
+          const activeConvo = state.conversations[id];
+          activeConvo.messages.forEach(m => m.is_read = true);
+          renderMessages(activeConvo.messages);
+          renderList();
+        }
+      })
+      .catch(e => console.error("Mark read error:", e));
     }
 
     function renderMessages(messages) {
@@ -655,8 +683,7 @@
       row.className = `msg-row ${isMe ? 'sent' : 'received'}`;
       
       const timeStr = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-      let tickHtml = '';
-      if (isMe) tickHtml = getTickHtml(msg);
+      const tickHtml = isMe ? getTickHtml(msg) : '';
 
       row.innerHTML = `
         <div class="bubble">
@@ -670,7 +697,7 @@
       els.messagesArea.appendChild(row);
     }
 
-    // --- SEND MESSAGE (UPDATED) ---
+    // --- SEND ---
     function sendMessage() {
       const text = els.input.value.trim();
       if (!text || !state.activeChatId) return;
@@ -681,6 +708,7 @@
         receiver_id: state.activeChatId,
         content: text,
         timestamp: new Date().toISOString(),
+        delivered_at: null,
         is_read: false,
         // Temporary mock object
         sender: {name: "Me", profile_image: null},
@@ -693,7 +721,6 @@
       els.messagesArea.scrollTop = els.messagesArea.scrollHeight;
       renderList();
 
-      // UPDATE: Use specific route /tenant/send_message
       fetch('/tenant/send_message', {
         method: 'POST',
         headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken()},
@@ -702,23 +729,19 @@
       .then(res => res.json())
       .then(data => {
         if (data.success && data.message) {
-          // Update local state with real message from server
+          // Update local state with real message from server (includes delivered_at)
           const realMsg = data.message;
           const convo = state.conversations[state.activeChatId];
           
-          // Find the temp message (last one added) and update it
+          // Find the temp message and update it
           const tempMsgIndex = convo.messages.length - 1;
           if (convo.messages[tempMsgIndex].id === tempMsg.id) {
-            // Ensure is_read is defaulted to false if backend doesn't send it
-            realMsg.is_read = typeof realMsg.is_read === 'undefined' ? false : realMsg.is_read;
-            
             convo.messages[tempMsgIndex] = realMsg;
-            // Re-render to show real timestamp/ID
+            // Re-render to show real timestamp and delivery status
             renderMessages(convo.messages);
             renderList();
           }
         } else {
-          // Handle error returned by route
           const errorMsg = data.error || "Failed to send message";
           alert(errorMsg);
         }
@@ -750,7 +773,6 @@
       const msgs = state.conversations[state.activeChatId].messages;
       if(msgs.length > 0) {
         const lastMsgId = msgs[msgs.length - 1].id;
-        // Store ID on confirm button for use
         document.getElementById('btnConfirmDelete').dataset.msgId = lastMsgId;
         els.deleteModal.classList.add('active');
       }

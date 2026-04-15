@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 import flask
 from flask_migrate import upgrade
+import events.chat_events
 
 load_dotenv()
 
