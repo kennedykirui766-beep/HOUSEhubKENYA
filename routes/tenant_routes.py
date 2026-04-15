@@ -795,7 +795,8 @@ def contact_providers():
         service_providers=service_providers
     )
 
-# Chat with landlord
+# Chat with 
+@csrf.exempt
 @tenant_bp.route('/send_message', methods=['POST'])
 @login_required
 def send_message():
