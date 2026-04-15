@@ -9,23 +9,28 @@ load_dotenv()
 if os.environ.get("USE_EVENTLET") == "true":
     import eventlet
     eventlet.monkey_patch()
+
 from flask import Flask, redirect, url_for, flash, render_template, request, session
 from config import Config
-from extensions import db, migrate, login_manager, csrf, mail
-from flask_socketio import SocketIO
+
+# ✅ FIX: import socketio from extensions ONLY (single source of truth)
+from extensions import db, migrate, login_manager, csrf, mail, socketio
+
 from flask_cors import CORS
 from models.models import User, House, ChatMessage, SupportTicket, SystemSetting
 from flask_login import login_required, current_user
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
-import os
 import logging
+
 from utils_security import is_approved_admin
+
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
-    
-    # Ensure critical configurations are set. Secret values must be provided via environment or Config.
+
+    # Ensure critical configurations are set
     app.config['SQLALCHEMY_DATABASE_URI'] = (
         app.config.get('SQLALCHEMY_DATABASE_URI')
         or os.environ.get('DATABASE_URL')
@@ -33,8 +38,8 @@ def create_app():
     )
     app.config['UPLOAD_FOLDER'] = app.config.get('UPLOAD_FOLDER', 'static/images')
     app.config['CHAT_UPLOAD_FOLDER'] = app.config.get('CHAT_UPLOAD_FOLDER', 'static/uploads/chat')
-    app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}  # For chat file uploads
-    app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB file size limit
+    app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
+    app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # Setup logging
@@ -45,22 +50,27 @@ def create_app():
     print("UPLOAD_FOLDER =", app.config['UPLOAD_FOLDER'])
     print("CHAT_UPLOAD_FOLDER =", app.config['CHAT_UPLOAD_FOLDER'])
 
-    # Create chat upload directory
+    # Create upload folder
     os.makedirs(app.config['CHAT_UPLOAD_FOLDER'], exist_ok=True)
 
-    # Init extensions
+    # =========================
+    # INIT EXTENSIONS (FIXED)
+    # =========================
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
     csrf.init_app(app)
-    from extensions import db, migrate, login_manager, csrf, mail, socketio
-    CORS(app)
     mail.init_app(app)
+    socketio.init_app(app, cors_allowed_origins="*")  # ✅ FIXED HERE
 
-    # Exempt Socket.IO routes from CSRF (since chat.html uses WebSocket)
+    CORS(app)
+
+    # CSRF exempt (your existing logic)
     csrf.exempt('routes.support_routes.support_bp')
 
-    # Login manager configuration
+    # =========================
+    # LOGIN MANAGER
+    # =========================
     @login_manager.user_loader
     def load_user(user_id):
         try:
@@ -69,18 +79,22 @@ def create_app():
             logger.error(f"Error loading user {user_id}: {str(e)}")
             return None
 
-    # Jinja filters
+    # =========================
+    # JINJA FILTERS (UNCHANGED)
+    # =========================
     def timeago(value):
-        """Format datetime into 'time ago' string with localization (English/Swahili)."""
         if not isinstance(value, datetime):
             return value
+
         lang = getattr(current_user, "language", "en") if current_user.is_authenticated else "en"
         now = datetime.utcnow()
         diff = now - value
+
         seconds = diff.total_seconds()
         minutes = divmod(seconds, 60)[0]
         hours = divmod(seconds, 3600)[0]
         days = divmod(seconds, 86400)[0]
+
         if lang == "sw":
             if seconds < 60:
                 return "sasa hivi"
@@ -117,32 +131,39 @@ def create_app():
                 return f"{int(days // 365)} year(s) ago"
 
     def datetimeformat(value, format="%Y-%m-%d %H:%M"):
-        """Format datetime into a standard string (default: 2025-08-27 14:30)."""
         if not isinstance(value, datetime):
             return value
         return value.strftime(format)
 
-    # Register filters
     app.jinja_env.filters['timeago'] = timeago
     app.jinja_env.filters['datetimeformat'] = datetimeformat
 
-    # Inject commonly used settings into templates
+    # =========================
+    # CONTEXT PROCESSOR
+    # =========================
     @app.context_processor
     def inject_app_settings():
         try:
             from flask import url_for
             logo = app.config.get('APP_LOGO', 'images/homehub.jpg')
-            # If APP_LOGO is an absolute URL (Cloudinary or other CDN), use it directly.
-            if isinstance(logo, str) and (logo.startswith('http://') or logo.startswith('https://') or logo.startswith('//')):
+
+            if isinstance(logo, str) and (
+                logo.startswith('http://')
+                or logo.startswith('https://')
+                or logo.startswith('//')
+            ):
                 logo_url = logo
             else:
                 logo_url = url_for('static', filename=logo)
+
         except Exception:
             logo_url = '/static/images/homehub.jpg'
-        # Provide both the raw config value and the resolved URL for templates and services.
+
         return dict(APP_LOGO=logo, APP_LOGO_URL=logo_url)
 
-    # Blueprints
+    # =========================
+    # BLUEPRINTS
+    # =========================
     from routes.auth_routes import auth_bp
     from routes.landlord_routes import landlord_bp
     from routes.tenant_routes import tenant_bp
@@ -152,8 +173,6 @@ def create_app():
     from routes.main import main_bp
     from routes.support_routes import support_bp
     from routes.payments_routes import payments_bp
-
-
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(landlord_bp)
@@ -165,7 +184,9 @@ def create_app():
     app.register_blueprint(support_bp)
     app.register_blueprint(payments_bp)
 
-    # Routes
+    # =========================
+    # ROUTES (UNCHANGED)
+    # =========================
     @app.route('/')
     def root():
         logger.info("Redirecting to index page")
@@ -183,51 +204,58 @@ def create_app():
 
     @app.route('/favicon.ico')
     def favicon():
-        # Serve or redirect to the configured logo for favicon.
         logo = app.config.get('APP_LOGO', 'images/logo.png')
-        if isinstance(logo, str) and (logo.startswith('http://') or logo.startswith('https://') or logo.startswith('//')):
+
+        if isinstance(logo, str) and (
+            logo.startswith('http://')
+            or logo.startswith('https://')
+            or logo.startswith('//')
+        ):
             return redirect(logo)
+
         try:
             return app.send_static_file(logo)
         except Exception:
             return app.send_static_file('images/logo.png')
-    
+
     @app.teardown_appcontext
     def shutdown_session(exception=None):
         if exception:
             db.session.rollback()
         db.session.remove()
 
-    # Central portal for role-based redirect
     @app.route('/portal')
     @login_required
     def portal():
         role = current_user.role.lower()
         logger.info(f"User {current_user.id} accessing portal with role: {role}")
+
         if role == 'admin':
             if not is_approved_admin(current_user):
                 flash("Access denied. Admins only.", "danger")
                 return redirect(url_for('auth.logout'))
             return redirect(url_for('admin.manage_users'))
+
         elif role == 'landlord':
             return redirect(url_for('landlord.dashboard'))
+
         elif role == 'tenant':
             return redirect(url_for('tenant.dashboard'))
+
         elif role == 'service_provider':
-            return redirect(url_for('service_provider.service_list')) 
+            return redirect(url_for('service_provider.service_list'))
+
         else:
-            logger.warning(f"Unrecognized role for user {current_user.id}: {role}")
             flash("Unrecognized role. Contact system administrator.", "danger")
             return redirect(url_for('auth.logout'))
 
-    # --- Maintenance mode enforcement ---
     @app.before_request
     def check_maintenance():
-        # Allow static, socket, and admin endpoints for admins.
         try:
             mode = SystemSetting.get('maintenance_mode', '0') == '1'
             start = SystemSetting.get('maintenance_start', '')
             end = SystemSetting.get('maintenance_end', '')
+
             scheduled = False
             if start and end:
                 try:
@@ -242,43 +270,48 @@ def create_app():
             if not (mode or scheduled):
                 return None
 
-            # allow admins to access site
             if current_user.is_authenticated and is_approved_admin(current_user):
                 return None
 
-            # allow access to static assets and auth endpoints
-            if request.path.startswith('/static') or request.endpoint in ('auth.login', 'auth.signup', 'auth.semantic_admin_entry'):
+            if request.path.startswith('/static') or request.endpoint in (
+                'auth.login', 'auth.signup', 'auth.semantic_admin_entry'
+            ):
                 return None
 
-            # admin blueprint should still be accessible to admins
             if request.endpoint and str(request.endpoint).startswith('admin.'):
                 return None
 
-            # otherwise show maintenance page
             return render_template('maintenance.html'), 503
+
         except Exception as e:
-            # Rollback any failed transaction so subsequent queries are not blocked
             try:
                 db.session.rollback()
             except Exception:
                 pass
+
             app.logger.error(f"Error checking maintenance mode: {e}")
-            # If admin started impersonation, prevent state-changing requests (read-only impersonation)
+
             if session.get('is_impersonating'):
-                if request.method not in ('GET', 'HEAD', 'OPTIONS') and request.endpoint not in ('admin.stop_impersonate', 'auth.logout'):
-                    return ("Action disabled while impersonating. Stop impersonation to make changes.", 403)
+                if request.method not in ('GET', 'HEAD', 'OPTIONS'):
+                    return ("Action disabled while impersonating.", 403)
 
             return None
 
     return app, socketio
 
 
-# Create app and socketio
+# =========================
+# CREATE APP
+# =========================
 app, socketio = create_app()
 
+# IMPORTANT: socket events
 with app.app_context():
     import events.chat_events
 
-# Run
+
+# =========================
+# RUN
+# =========================
 if __name__ == '__main__':
     socketio.run(app, debug=True, use_reloader=False)
