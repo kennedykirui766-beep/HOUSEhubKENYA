@@ -65,6 +65,9 @@ class Config:
         os.path.join(os.getcwd(), "static/images")
     )
 
+    # Official logo filename relative to `static/` (canonical: 'images/logo.png')
+    APP_LOGO = os.environ.get('APP_LOGO', 'images/logo.png')
+
     CHAT_UPLOAD_FOLDER = os.environ.get(
         "CHAT_UPLOAD_FOLDER",
         os.path.join(os.path.dirname(os.path.abspath(__file__)), "static/uploads/chat")
