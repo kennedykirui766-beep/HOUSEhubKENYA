@@ -25,12 +25,12 @@
     height: 100%;
     margin: 0;
     background-color: var(--app-bg);
-    overflow: hidden; /* Prevent body scroll, handle inside containers */
+    overflow: hidden; 
   }
 
   .main-container {
     display: flex;
-    height: calc(100vh - 60px); /* Adjust based on your navbar height */
+    height: calc(100vh - 60px); 
     max-width: 1600px;
     margin: 0 auto;
     background: #fff;
@@ -41,9 +41,10 @@
 
   /* --- SIDEBAR (LEFT PANEL) --- */
   .sidebar {
-    width: 30%;
-    min-width: 300px;
-    max-width: 450px;
+    /* INCREASED WIDTH */
+    width: 35%; 
+    min-width: 320px;
+    max-width: 500px; 
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--border-color);
@@ -136,48 +137,50 @@
 
   .conv-info {
     flex: 1;
-    min-width: 0;
+    min-width: 0; /* Crucial for text-overflow to work in flexbox */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .conv-top {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 3px;
+    margin-bottom: 4px;
+    align-items: center;
   }
 
+  /* FIX OVERLAP: Ensure name doesn't push time off, use ellipsis */
   .conv-name {
     font-size: 1.05rem;
     color: var(--text-primary);
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Truncates long names */
+    margin-right: 10px;
   }
 
   .conv-time {
     font-size: 0.75rem;
     color: var(--text-secondary);
+    flex-shrink: 0; /* Prevent time from shrinking */
   }
 
   .conv-preview {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     font-size: 0.85rem;
     color: var(--text-secondary);
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-overflow: ellipsis; /* Truncates long messages */
   }
-  
-  .unread-badge {
-    background-color: #25d366;
-    color: white;
-    font-size: 0.7rem;
-    font-weight: bold;
-    padding: 2px 6px;
-    border-radius: 12px;
-    margin-left: 5px;
-    flex-shrink: 0;
-    display: none; /* Hidden by default */
-  }
+
+  /* Tick colors for sidebar preview */
+  .tick-icon { font-size: 0.7rem; margin-right: 3px; }
+  .tick-blue { color: #53bdeb; }
+  .tick-grey { color: #8696a0; }
 
   /* --- CHAT AREA (RIGHT PANEL) --- */
   .chat-area {
@@ -323,10 +326,13 @@
   }
 
   .msg-check {
-    font-size: 0.7rem;
-    color: #53bdeb; /* Blue ticks */
+    font-size: 0.75rem;
   }
   
+  /* Tick Colors */
+  .check-blue { color: #53bdeb; }
+  .check-grey { color: #8696a0; }
+
   /* Input Footer */
   .chat-footer {
     min-height: 62px;
@@ -374,7 +380,7 @@
     .main-container {
       position: relative;
       width: 100vw;
-      height: calc(100vh - 50px); /* Assuming mobile header is smaller */
+      height: calc(100vh - 50px);
     }
 
     .sidebar {
@@ -391,14 +397,13 @@
       position: absolute;
       top: 0; left: 0;
       height: 100%;
-      transform: translateX(100%); /* Hidden off-screen right */
+      transform: translateX(100%);
       transition: transform 0.3s ease-in-out;
       z-index: 10;
     }
 
-    /* State: Chat Active */
     body.chat-active .sidebar {
-      transform: translateX(-20%); /* Parallax effect */
+      transform: translateX(-20%);
       opacity: 0.5;
     }
     
@@ -407,7 +412,7 @@
     }
 
     .back-btn { display: block; }
-    .empty-state { display: none; } /* Never show empty state on mobile, go straight to list */
+    .empty-state { display: none; }
   }
 </style>
 {% endblock %}
@@ -468,7 +473,13 @@
           <div style="font-weight: 600; color: var(--text-primary);" id="headerName">Tenant Name</div>
           <div style="font-size: 0.75rem; color: var(--text-secondary);" id="headerStatus">online</div>
         </div>
-        <div style="color: var(--text-secondary); margin-left: auto; display: flex; gap: 20px;">
+        
+        <!-- SIMULATION BUTTON (Remove in production) -->
+        <button id="simToggleBtn" style="margin-left:auto; border:none; background:none; color:var(--text-secondary); cursor:pointer; font-size:0.8rem;">
+          <i class="fas fa-wifi"></i> Simulate Online
+        </button>
+
+        <div style="color: var(--text-secondary); margin-left: 10px; display: flex; gap: 20px;">
           <i class="fas fa-search"></i>
           <i class="fas fa-ellipsis-v"></i>
         </div>
@@ -500,8 +511,11 @@
     // 1. STATE MANAGEMENT
     const state = {
       currentUserId: window.currentUser.id,
-      conversations: {}, // Map of tenantId -> { info, messages[] }
-      activeChatId: null
+      conversations: {},
+      activeChatId: null,
+      // Mocking online status of the selected tenant for demonstration
+      // In production, this comes from WebSockets or API polling
+      isRecipientOnline: false 
     };
 
     // 2. DOM ELEMENTS
@@ -513,24 +527,22 @@
       activeInterface: document.getElementById('activeChatInterface'),
       headerName: document.getElementById('headerName'),
       headerAvatar: document.getElementById('headerAvatar'),
+      headerStatus: document.getElementById('headerStatus'),
       messagesList: document.getElementById('messagesList'),
       input: document.getElementById('messageInput'),
       sendBtn: document.getElementById('sendBtn'),
       backBtn: document.getElementById('backButton'),
-      body: document.body
+      body: document.body,
+      simBtn: document.getElementById('simToggleBtn')
     };
 
-    // 3. DATA PROCESSING (Group raw messages by Tenant)
+    // 3. DATA PROCESSING
     function processData() {
       window.rawMessages.forEach(msg => {
-        // Determine the 'Other' person (Tenant)
-        // If sender is me, other is receiver. If receiver is me, other is sender.
         const isMe = msg.sender_id === state.currentUserId;
         const otherId = isMe ? msg.receiver_id : msg.sender_id;
-        
-        // Use the 'other_user' data passed from backend
         const otherInfo = msg.other_user;
-
+        
         if (!state.conversations[otherId]) {
           state.conversations[otherId] = {
             id: otherId,
@@ -541,21 +553,34 @@
           };
         }
         
-        // Add message
+        // Ensure is_read property exists (default false if not provided by backend)
+        if (typeof msg.is_read === 'undefined') msg.is_read = false;
+        
         state.conversations[otherId].messages.push(msg);
         
-        // Update last message time (for sorting)
         if (new Date(msg.timestamp) > new Date(state.conversations[otherId].lastMsgTime)) {
           state.conversations[otherId].lastMsgTime = msg.timestamp;
         }
       });
     }
 
+    // --- TICK LOGIC CORE ---
+    function getTickHtml(msg, isOnline) {
+      // 1. If Message is Read -> Double Blue
+      if (msg.is_read) {
+        return '<i class="fas fa-check-double check-blue"></i>';
+      }
+      // 2. If Recipient is Online -> Double Grey
+      if (isOnline) {
+        return '<i class="fas fa-check-double check-grey"></i>';
+      }
+      // 3. If Recipient is Offline -> Single Grey
+      return '<i class="fas fa-check check-grey"></i>';
+    }
+
     // 4. RENDER SIDEBAR
     function renderSidebar() {
       els.list.innerHTML = '';
-      
-      // Convert object to array and sort by time desc
       const sortedConvos = Object.values(state.conversations).sort((a, b) => 
         new Date(b.lastMsgTime) - new Date(a.lastMsgTime)
       );
@@ -571,25 +596,30 @@
         div.className = `conversation-item ${state.activeChatId === convo.id ? 'active' : ''}`;
         div.onclick = () => loadChat(convo.id);
 
-        // Avatar logic
         const initials = convo.name ? convo.name.charAt(0).toUpperCase() : '?';
         const avatarHtml = convo.avatar 
           ? `<img src="${convo.avatar}" alt="Avatar">` 
           : `<span>${initials}</span>`;
 
-        // Time formatting
         const timeStr = new Date(lastMsg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        // Get tick icon for the sidebar preview (assuming online state if it's the active chat)
+        const isThisRecipientOnline = (state.activeChatId === convo.id) ? state.isRecipientOnline : false;
+        // Note: In a real app, you'd track online status for ALL users in a separate object
+        const tickIcon = (lastMsg.sender_id === state.currentUserId) 
+          ? getTickHtml(lastMsg, isThisRecipientOnline) 
+          : '';
 
         div.innerHTML = `
           <div class="avatar">${avatarHtml}</div>
           <div class="conv-info">
             <div class="conv-top">
-              <span class="conv-name">${convo.name}</span>
+              <span class="conv-name" title="${convo.name}">${convo.name}</span>
               <span class="conv-time">${timeStr}</span>
             </div>
             <div class="conv-preview">
-              <span>${lastMsg.sender_id === state.currentUserId ? '<i class="fas fa-check-double" style="font-size:0.7rem; color:#53bdeb; margin-right:3px;"></i>' : ''} 
-              ${lastMsg.content}</span>
+              <span>${tickIcon}</span>
+              <span>${lastMsg.content}</span>
             </div>
           </div>
         `;
@@ -602,11 +632,14 @@
       state.activeChatId = tenantId;
       const convo = state.conversations[tenantId];
       
-      // UI Updates
-      renderSidebar(); // To update 'active' class
+      // Reset mock online status for this new chat
+      state.isRecipientOnline = false; 
+      updateOnlineStatusUI();
+
+      renderSidebar(); 
       els.emptyState.style.display = 'none';
       els.activeInterface.style.display = 'flex';
-      els.body.classList.add('chat-active'); // Triggers mobile slide
+      els.body.classList.add('chat-active');
 
       // Header
       els.headerName.textContent = convo.name;
@@ -615,9 +648,12 @@
         ? `<img src="${convo.avatar}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`
         : `<div style="width:100%; height:100%; background:#00a884; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">${initials}</div>`;
 
-      // Messages
+      renderMessages(convo.messages);
+    }
+
+    function renderMessages(messages) {
       els.messagesList.innerHTML = '';
-      convo.messages.forEach(msg => renderBubble(msg));
+      messages.forEach(msg => renderBubble(msg));
       scrollToBottom();
     }
 
@@ -628,13 +664,19 @@
       row.className = `msg-row ${isMe ? 'sent' : 'received'}`;
       
       const timeStr = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      
+      // Logic: Only show ticks if I sent it
+      let tickHtml = '';
+      if (isMe) {
+        tickHtml = getTickHtml(msg, state.isRecipientOnline);
+      }
 
       row.innerHTML = `
         <div class="bubble">
           ${msg.content}
           <div class="msg-meta">
             <span class="msg-time">${timeStr}</span>
-            ${isMe ? '<i class="fas fa-check-double msg-check"></i>' : ''}
+            ${tickHtml}
           </div>
         </div>
       `;
@@ -646,24 +688,22 @@
       const text = els.input.value.trim();
       if (!text || !state.activeChatId) return;
 
-      // Optimistic Update
       const tempMsg = {
         id: Date.now(),
         sender_id: state.currentUserId,
         receiver_id: state.activeChatId,
         content: text,
         timestamp: new Date().toISOString(),
-        other_user: state.conversations[state.activeChatId] // temp ref
+        is_read: false,
+        other_user: state.conversations[state.activeChatId] 
       };
 
-      // Update local state
       state.conversations[state.activeChatId].messages.push(tempMsg);
       
-      // Update UI
       renderBubble(tempMsg);
       els.input.value = '';
       scrollToBottom();
-      renderSidebar(); // Update preview text
+      renderSidebar(); 
 
       // API Call
       fetch(window.location.href, {
@@ -673,15 +713,31 @@
       })
       .then(res => res.json())
       .then(data => {
-        if(!data.success) {
-          // Revert or show error
-          console.error("Failed to send");
-        }
+        if(!data.success) console.error("Failed to send");
       })
       .catch(e => console.error(e));
     }
 
-    // Utilities
+    // 8. UI HELPERS
+    function updateOnlineStatusUI() {
+      if (state.isRecipientOnline) {
+        els.headerStatus.textContent = "online";
+        els.headerStatus.style.color = "var(--primary-green)";
+        els.simBtn.innerHTML = '<i class="fas fa-wifi"></i> Go Offline';
+        els.simBtn.style.color = "var(--primary-green)";
+      } else {
+        els.headerStatus.textContent = "offline";
+        els.headerStatus.style.color = "var(--text-secondary)";
+        els.simBtn.innerHTML = '<i class="fas fa-wifi" style="color:#ccc"></i> Go Online';
+        els.simBtn.style.color = "var(--text-secondary)";
+      }
+      // Re-render messages to update ticks based on new online status
+      if (state.activeChatId) {
+        renderMessages(state.conversations[state.activeChatId].messages);
+        renderSidebar(); // Update sidebar preview too
+      }
+    }
+
     function scrollToBottom() {
       els.messagesList.scrollTop = els.messagesList.scrollHeight;
     }
@@ -695,16 +751,15 @@
     els.input.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
     
     els.backBtn.addEventListener('click', () => {
-      els.body.classList.remove('chat-active'); // Slide back on mobile
+      els.body.classList.remove('chat-active');
       state.activeChatId = null;
       setTimeout(() => {
         els.activeInterface.style.display = 'none';
         els.emptyState.style.display = 'flex';
-        renderSidebar(); // Remove active highlight
-      }, 300); // Wait for transition
+        renderSidebar();
+      }, 300);
     });
 
-    // Search Filter (Simple Client Side)
     els.search.addEventListener('input', (e) => {
       const term = e.target.value.toLowerCase();
       const items = els.list.querySelectorAll('.conversation-item');
@@ -712,6 +767,12 @@
         const name = item.querySelector('.conv-name').textContent.toLowerCase();
         item.style.display = name.includes(term) ? 'flex' : 'none';
       });
+    });
+
+    // SIMULATION: Toggle Online Status to demonstrate ticks
+    els.simBtn.addEventListener('click', () => {
+      state.isRecipientOnline = !state.isRecipientOnline;
+      updateOnlineStatusUI();
     });
 
     // Init
