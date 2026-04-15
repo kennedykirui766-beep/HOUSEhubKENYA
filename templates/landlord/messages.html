@@ -4,78 +4,66 @@
 
 {% block styles %}
 <style>
-  /* --- 1. RESET & VARIABLES --- */
+  /* --- 1. VARIABLES --- */
   :root {
-    --app-bg: #d1d7db;
-    --sidebar-bg: #ffffff;
-    --chat-bg: #efeae2; /* WhatsApp Doodle BG color */
-    --header-bg: #f0f2f5;
-    --border-color: #e9edef;
-    --text-primary: #111b21;
-    --text-secondary: #667781;
-    --primary-green: #00a884;
-    --outgoing-bubble: #d9fdd3;
-    --incoming-bubble: #ffffff;
-    --input-bg: #ffffff;
-    --nav-height: 60px; /* Adjust based on your actual navbar height */
+    --wa-bg-app: #d1d7db;
+    --wa-bg-sidebar: #ffffff;
+    --wa-bg-chat: #efeae2;
+    --wa-bg-header: #f0f2f5;
+    --wa-primary: #00a884;
+    --wa-bubble-out: #d9fdd3;
+    --wa-bubble-in: #ffffff;
+    --wa-text-primary: #111b21;
+    --wa-text-secondary: #667781;
+    --wa-border: #e9edef;
   }
 
-  body {
-    margin: 0;
-    padding: 0;
-    background-color: var(--app-bg);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    height: 100vh;
-    overflow: hidden; /* Prevent body scroll */
-  }
-
-  /* --- 2. MAIN CONTAINER --- */
-  .main-wrapper {
+  /* --- 2. CHAT CONTAINER (Fits inside Base Layout) --- */
+  /* We give this a fixed height to ensure the input bar is always visible */
+  .chat-app-wrapper {
     display: flex;
-    height: calc(100vh - var(--nav-height));
-    max-width: 1920px;
-    margin: 0 auto;
-    background-color: #fff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    position: relative;
+    height: 85vh; /* Occupies 85% of screen height */
+    min-height: 600px; /* Minimum height for smaller screens */
+    background-color: var(--wa-bg-app);
+    width: 100%;
+    border-radius: 4px; /* Slight rounding to fit inside a container */
     overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    position: relative;
   }
 
-  /* --- 3. SIDEBAR (LEFT) --- */
-  .sidebar {
-    width: 30%; /* Relative width */
-    min-width: 320px;
-    max-width: 450px; /* Cap width for very large screens */
+  /* --- 3. LEFT SIDEBAR (LIST OF TENANTS) --- */
+  .chat-sidebar {
+    width: 30%;
+    min-width: 300px;
+    max-width: 400px;
+    background-color: var(--wa-bg-sidebar);
+    border-right: 1px solid var(--wa-border);
     display: flex;
     flex-direction: column;
-    border-right: 1px solid var(--border-color);
-    background-color: var(--sidebar-bg);
     flex-shrink: 0;
     z-index: 10;
-    transition: transform 0.3s ease-in-out;
   }
 
   .sidebar-header {
     height: 60px;
-    background-color: var(--header-bg);
+    background-color: var(--wa-bg-header);
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 10px 16px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--wa-border);
     flex-shrink: 0;
   }
 
-  .user-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: #dfe5e7;
+  .sidebar-title {
+    font-weight: 600;
+    color: var(--wa-text-primary);
   }
 
-  .search-bar-container {
-    padding: 10px;
-    border-bottom: 1px solid var(--border-color);
+  .search-box {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--wa-border);
   }
 
   .search-input {
@@ -83,17 +71,17 @@
     background-color: #f0f2f5;
     border: none;
     border-radius: 8px;
-    padding: 8px 12px 8px 35px; /* room for icon */
+    padding: 8px 12px 8px 36px; /* Space for icon */
     font-size: 0.9rem;
     position: relative;
-    outline: none;
   }
   
   .search-icon {
     position: absolute;
-    left: 20px;
-    top: 24px; /* Adjust based on padding */
+    left: 22px;
+    top: 20px;
     color: #54656f;
+    font-size: 0.9rem;
     pointer-events: none;
   }
 
@@ -102,16 +90,13 @@
     overflow-y: auto;
   }
 
-  /* Individual Chat Item */
   .chat-item {
     display: flex;
-    padding: 0 15px;
-    height: 72px;
-    cursor: pointer;
-    border-bottom: 1px solid var(--border-color);
     align-items: center;
+    padding: 12px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--wa-border);
     transition: background 0.2s;
-    position: relative;
   }
 
   .chat-item:hover { background-color: #f5f6f6; }
@@ -127,7 +112,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    color: white;
     font-weight: bold;
     overflow: hidden;
   }
@@ -138,88 +123,80 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-width: 0; /* Essential for ellipsis */
+    min-width: 0; /* Crucial for text truncation */
   }
 
-  .chat-top {
+  .info-top {
     display: flex;
     justify-content: space-between;
     margin-bottom: 3px;
-    align-items: center;
   }
 
   .chat-name {
-    font-size: 1.05rem;
-    color: var(--text-primary);
+    font-weight: 500;
+    color: var(--wa-text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-weight: 500;
   }
 
   .chat-time {
     font-size: 0.75rem;
-    color: var(--text-secondary);
+    color: var(--wa-text-secondary);
   }
 
-  .chat-bottom {
+  .info-bottom {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     font-size: 0.85rem;
-    color: var(--text-secondary);
+    color: var(--wa-text-secondary);
   }
 
-  .last-message {
+  .last-msg {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    display: flex;
-    align-items: center;
   }
-  
-  .tick-preview { margin-right: 3px; font-size: 0.75rem; }
 
-  /* --- 4. CHAT AREA (RIGHT) --- */
-  .chat-area {
+  /* --- 4. RIGHT CHAT AREA --- */
+  .chat-main {
     flex: 1;
     display: flex;
     flex-direction: column;
-    background-color: var(--chat-bg);
+    background-color: var(--wa-bg-chat);
     /* WhatsApp Doodle Background */
     background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.08' fill-rule='evenodd'/%3E%3C/svg%3E");
     position: relative;
   }
 
   /* Empty State */
-  .empty-state {
+  .chat-placeholder {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     height: 100%;
     text-align: center;
-    border-bottom: 6px solid var(--primary-green);
+    border-bottom: 6px solid #43c960;
     background: #f0f2f5;
   }
 
-  /* Active Chat Components */
-  .chat-header {
+  /* Active Chat Header */
+  .chat-view-header {
     height: 60px;
     padding: 0 16px;
-    background-color: var(--header-bg);
+    background-color: var(--wa-bg-header);
     display: flex;
     align-items: center;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--wa-border);
     flex-shrink: 0;
-    z-index: 5;
   }
 
   .back-btn {
     display: none; /* Hidden on desktop */
     border: none;
-    background: transparent;
-    color: var(--text-secondary);
+    background: none;
+    color: var(--wa-text-secondary);
     font-size: 1.2rem;
     margin-right: 10px;
     cursor: pointer;
@@ -232,9 +209,9 @@
     margin-right: 10px;
   }
 
-  /* Message List */
-  .messages-container {
-    flex: 1;
+  /* Messages List */
+  .messages-scroll-area {
+    flex: 1; /* Takes available space */
     overflow-y: auto;
     padding: 20px 5%;
     display: flex;
@@ -242,14 +219,15 @@
     gap: 2px;
   }
 
-  .message-row {
+  /* Bubbles */
+  .msg-row {
     display: flex;
     margin-bottom: 10px;
     width: 100%;
   }
 
-  .message-row.sent { justify-content: flex-end; }
-  .message-row.received { justify-content: flex-start; }
+  .msg-row.sent { justify-content: flex-end; }
+  .msg-row.received { justify-content: flex-start; }
 
   .bubble {
     max-width: 65%;
@@ -263,16 +241,16 @@
   }
 
   .bubble.sent {
-    background-color: var(--outgoing-bubble);
+    background-color: var(--wa-bubble-out);
     border-top-right-radius: 0;
   }
 
   .bubble.received {
-    background-color: var(--incoming-bubble);
+    background-color: var(--wa-bubble-in);
     border-top-left-radius: 0;
   }
 
-  .bubble-meta {
+  .meta {
     float: right;
     margin-left: 10px;
     margin-top: 4px;
@@ -281,30 +259,29 @@
     gap: 3px;
   }
 
-  .msg-time { font-size: 0.7rem; color: rgba(0,0,0,0.45); }
-  .msg-tick { font-size: 0.75rem; }
+  .time { font-size: 0.7rem; color: rgba(0,0,0,0.45); }
+  .tick { font-size: 0.75rem; }
 
   .tick-blue { color: #53bdeb; }
   .tick-grey { color: #8696a0; }
 
-  /* --- 5. INPUT FOOTER (FIXED Z-INDEX) --- */
-  .chat-footer {
-    background-color: var(--header-bg);
-    padding: 5px 16px;
+  /* --- 5. INPUT AREA (FIXED AT BOTTOM) --- */
+  .chat-input-footer {
+    background-color: var(--wa-bg-header);
+    padding: 10px 16px;
     display: flex;
     align-items: center;
-    z-index: 20; /* Higher z-index to ensure it stays on top */
-    position: relative;
+    z-index: 50; /* Ensure it's on top */
   }
 
-  .footer-icons {
+  .footer-icon {
     color: #54656f;
     font-size: 1.5rem;
-    margin-right: 10px;
+    margin-right: 15px;
     cursor: pointer;
   }
 
-  .input-box-wrapper {
+  .input-wrapper {
     flex: 1;
     background-color: #fff;
     border-radius: 8px;
@@ -313,7 +290,7 @@
     align-items: center;
   }
 
-  .chat-input {
+  .chat-text-input {
     width: 100%;
     border: none;
     outline: none;
@@ -328,55 +305,50 @@
     font-size: 1.5rem;
     margin-left: 10px;
     cursor: pointer;
-    transition: color 0.2s;
   }
-  .send-btn:hover { color: var(--primary-green); }
+  .send-btn:hover { color: var(--wa-primary); }
 
-  /* --- 6. RESPONSIVE / MOBILE FIXES --- */
+  /* --- 6. RESPONSIVE / MOBILE --- */
   @media (max-width: 768px) {
-    .main-wrapper {
-      position: relative;
-      width: 100vw;
-      /* Use dynamic viewport height to prevent address bar hiding the footer */
-      height: calc(100dvh - 50px); 
+    .chat-app-wrapper {
+      height: 100dvh; /* Full mobile viewport height */
+      min-height: 100vh;
+      border-radius: 0;
+      position: fixed; /* Fixes to the screen */
+      top: 0; left: 0;
+      z-index: 9999; /* Above base nav */
     }
+    
+    /* Make sure body doesn't scroll behind it */
+    body.mobile-chat-open { overflow: hidden; }
 
-    .sidebar {
+    .chat-sidebar {
       width: 100%;
-      max-width: 100%;
+      max-width: none;
       position: absolute;
       top: 0; left: 0;
       height: 100%;
       z-index: 5;
     }
 
-    .chat-area {
+    .chat-main {
       width: 100%;
       position: absolute;
       top: 0; left: 0;
       height: 100%;
       z-index: 10;
-      transform: translateX(100%); /* Start off-screen */
+      transform: translateX(100%); /* Hidden right */
       transition: transform 0.3s ease-in-out;
     }
 
-    /* State: Chat Active */
-    body.chat-open .sidebar {
-      transform: translateX(-20%); /* Parallax effect */
-    }
-    
-    body.chat-open .chat-area {
+    .chat-placeholder { display: none; } /* No placeholder on mobile */
+
+    body.chat-active .chat-main {
       transform: translateX(0);
     }
 
     .back-btn { display: block; }
-    .empty-state { display: none; }
   }
-
-  /* Scrollbar Styling */
-  ::-webkit-scrollbar { width: 6px !important; }
-  ::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.2); border-radius: 3px; }
-
 </style>
 {% endblock %}
 
@@ -387,12 +359,13 @@
   window.currentUser = {{ user | tojson }};
 </script>
 
-<div class="main-wrapper">
+<!-- Main App Wrapper -->
+<div class="chat-app-wrapper" id="chatWrapper">
   
   <!-- LEFT: Sidebar -->
-  <aside class="sidebar">
+  <aside class="chat-sidebar">
     <div class="sidebar-header">
-      <div class="user-avatar" style="font-weight: 600; color: var(--text-primary);">Chats</div>
+      <span class="sidebar-title">Chats</span>
       <div style="color: #54656f; display: flex; gap: 20px; font-size: 1.2rem;">
         <i class="fas fa-circle-notch"></i>
         <i class="fas fa-comment-alt"></i>
@@ -400,60 +373,60 @@
       </div>
     </div>
 
-    <div class="search-bar-container">
+    <div class="search-box">
       <i class="fas fa-search search-icon"></i>
       <input type="text" class="search-input" placeholder="Search or start new chat" id="searchInput">
     </div>
 
     <div class="chat-list" id="chatList">
-      <!-- Populated by JS -->
+      <!-- Filled by JS -->
     </div>
   </aside>
 
   <!-- RIGHT: Chat Area -->
-  <main class="chat-area" id="chatArea">
+  <main class="chat-main" id="chatMain">
     
-    <!-- Empty State (Desktop) -->
-    <div class="empty-state" id="emptyState">
-      <div style="width: 250px; height: 250px; background-color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-        <i class="fas fa-comments" style="font-size: 5rem; color: #d1d7db;"></i>
-      </div>
+    <!-- Desktop Placeholder -->
+    <div class="chat-placeholder" id="chatPlaceholder">
+      <i class="fas fa-comments" style="font-size: 5rem; color: #d1d7db; margin-bottom: 20px;"></i>
       <h2 style="color: #41525d; font-weight: 300;">HomeHub Web</h2>
-      <p style="color: #667781;">Send and receive messages securely.</p>
+      <p style="color: #667781;">Send and receive messages.</p>
     </div>
 
-    <!-- Active Chat Interface -->
-    <div id="chatInterface" style="display: none; height: 100%; flex-direction: column;">
+    <!-- Active Chat View -->
+    <div id="activeChatView" style="display: none; height: 100%; flex-direction: column;">
       
-      <header class="chat-header">
+      <header class="chat-view-header">
         <button class="back-btn" id="backBtn">
           <i class="fas fa-arrow-left"></i>
         </button>
         <div class="header-avatar" id="headerAvatar"></div>
         <div style="flex: 1;">
-          <div style="font-weight: 600; color: var(--text-primary);" id="headerName">Name</div>
-          <div style="font-size: 0.75rem; color: var(--text-secondary);" id="headerStatus">online</div>
+          <div style="font-weight: 600; color: var(--wa-text-primary);" id="headerName">Name</div>
+          <div style="font-size: 0.75rem; color: var(--wa-text-secondary);" id="headerStatus">online</div>
         </div>
         
-        <!-- Simulation Button -->
-        <button id="simToggle" style="margin-left:auto; border:none; background:none; color:var(--text-secondary); font-size:0.8rem; cursor:pointer;">
+        <!-- Sim Button -->
+        <button id="simBtn" style="margin-left:auto; border:none; background:none; font-size:0.8rem; color:var(--wa-text-secondary); cursor:pointer;">
           Sim Online
         </button>
-        
-        <div style="color: #54656f; margin-left: 15px; display: flex; gap: 20px; font-size: 1.1rem;">
+
+        <div style="color: #54656f; margin-left: 15px; display: flex; gap: 20px;">
           <i class="fas fa-search"></i>
           <i class="fas fa-ellipsis-v"></i>
         </div>
       </header>
 
-      <div class="messages-container" id="messagesList"></div>
+      <div class="messages-scroll-area" id="messagesArea">
+        <!-- Messages -->
+      </div>
 
-      <!-- REPLY INPUT SECTION (FIXED) -->
-      <footer class="chat-footer">
-        <i class="far fa-smile footer-icons"></i>
-        <i class="fas fa-plus footer-icons" style="font-size: 1.2rem;"></i>
-        <div class="input-box-wrapper">
-          <input type="text" class="chat-input" id="messageInput" placeholder="Type a message" autocomplete="off">
+      <!-- INPUT AREA (Always visible now) -->
+      <footer class="chat-input-footer">
+        <i class="far fa-smile footer-icon"></i>
+        <i class="fas fa-plus footer-icon" style="font-size: 1.2rem;"></i>
+        <div class="input-wrapper">
+          <input type="text" class="chat-text-input" id="msgInput" placeholder="Type a message" autocomplete="off">
         </div>
         <button class="send-btn" id="sendBtn">
           <i class="fas fa-paper-plane"></i>
@@ -479,23 +452,24 @@
 
     // --- DOM ---
     const els = {
+      wrapper: document.getElementById('chatWrapper'),
       list: document.getElementById('chatList'),
       search: document.getElementById('searchInput'),
-      chatArea: document.getElementById('chatArea'),
-      emptyState: document.getElementById('emptyState'),
-      chatInterface: document.getElementById('chatInterface'),
+      main: document.getElementById('chatMain'),
+      placeholder: document.getElementById('chatPlaceholder'),
+      activeView: document.getElementById('activeChatView'),
       headerName: document.getElementById('headerName'),
       headerAvatar: document.getElementById('headerAvatar'),
       headerStatus: document.getElementById('headerStatus'),
-      messagesList: document.getElementById('messagesList'),
-      input: document.getElementById('messageInput'),
+      messagesArea: document.getElementById('messagesArea'),
+      input: document.getElementById('msgInput'),
       sendBtn: document.getElementById('sendBtn'),
       backBtn: document.getElementById('backBtn'),
-      simBtn: document.getElementById('simToggle'),
+      simBtn: document.getElementById('simBtn'),
       body: document.body
     };
 
-    // --- DATA PROCESSING ---
+    // --- PROCESS DATA ---
     function processData() {
       window.rawMessages.forEach(msg => {
         const isMe = msg.sender_id === state.currentUserId;
@@ -523,18 +497,18 @@
 
     // --- TICK LOGIC ---
     function getTickHtml(msg, isOnline) {
-      if (msg.is_read) return '<i class="fas fa-check-double msg-tick tick-blue"></i>';
-      if (isOnline) return '<i class="fas fa-check-double msg-tick tick-grey"></i>';
-      return '<i class="fas fa-check msg-tick tick-grey"></i>';
+      if (msg.is_read) return '<i class="fas fa-check-double tick tick-blue"></i>';
+      if (isOnline) return '<i class="fas fa-check-double tick tick-grey"></i>';
+      return '<i class="fas fa-check tick tick-grey"></i>';
     }
 
-    // --- RENDER SIDEBAR ---
-    function renderSidebar() {
+    // --- RENDER LIST ---
+    function renderList() {
       els.list.innerHTML = '';
       const sorted = Object.values(state.conversations).sort((a, b) => new Date(b.lastMsgTime) - new Date(a.lastMsgTime));
 
       if (sorted.length === 0) {
-        els.list.innerHTML = '<div style="padding:20px; text-align:center; color:#667781;">No conversations found.</div>';
+        els.list.innerHTML = '<div style="padding:20px; text-align:center; color:#667781;">No messages.</div>';
         return;
       }
 
@@ -549,22 +523,19 @@
         
         const timeStr = new Date(lastMsg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         
-        // Determine tick for preview (use active chat status for demo)
         const isOnline = (state.activeChatId === convo.id) ? state.isRecipientOnline : false;
         const tickHtml = (lastMsg.sender_id === state.currentUserId) ? getTickHtml(lastMsg, isOnline) : '';
 
         div.innerHTML = `
           <div class="avatar">${avatarHtml}</div>
           <div class="chat-info">
-            <div class="chat-top">
+            <div class="info-top">
               <span class="chat-name" title="${convo.name}">${convo.name}</span>
               <span class="chat-time">${timeStr}</span>
             </div>
-            <div class="chat-bottom">
-              <div class="last-message">
-                <span class="tick-preview">${tickHtml}</span>
-                ${lastMsg.content}
-              </div>
+            <div class="info-bottom">
+              <span style="margin-right:3px">${tickHtml}</span>
+              <span class="last-msg">${lastMsg.content}</span>
             </div>
           </div>
         `;
@@ -576,17 +547,15 @@
     function loadChat(id) {
       state.activeChatId = id;
       const convo = state.conversations[id];
-
-      // Reset demo state
       state.isRecipientOnline = false;
       updateStatusUI();
 
-      renderSidebar();
-      els.emptyState.style.display = 'none';
-      els.chatInterface.style.display = 'flex';
-      els.body.classList.add('chat-open'); // Triggers mobile slide
+      renderList();
+      els.placeholder.style.display = 'none';
+      els.activeView.style.display = 'flex';
+      els.body.classList.add('chat-active');
+      els.body.classList.add('mobile-chat-open');
 
-      // Header
       els.headerName.textContent = convo.name;
       const initials = convo.name.substring(0,2).toUpperCase();
       els.headerAvatar.innerHTML = convo.avatar 
@@ -597,15 +566,15 @@
     }
 
     function renderMessages(messages) {
-      els.messagesList.innerHTML = '';
+      els.messagesArea.innerHTML = '';
       messages.forEach(msg => renderBubble(msg));
-      els.messagesList.scrollTop = els.messagesList.scrollHeight;
+      els.messagesArea.scrollTop = els.messagesArea.scrollHeight;
     }
 
     function renderBubble(msg) {
       const isMe = msg.sender_id === state.currentUserId;
       const row = document.createElement('div');
-      row.className = `message-row ${isMe ? 'sent' : 'received'}`;
+      row.className = `msg-row ${isMe ? 'sent' : 'received'}`;
       
       const timeStr = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
       let tickHtml = '';
@@ -614,16 +583,16 @@
       row.innerHTML = `
         <div class="bubble">
           ${msg.content}
-          <div class="bubble-meta">
-            <span class="msg-time">${timeStr}</span>
+          <div class="meta">
+            <span class="time">${timeStr}</span>
             ${tickHtml}
           </div>
         </div>
       `;
-      els.messagesList.appendChild(row);
+      els.messagesArea.appendChild(row);
     }
 
-    // --- SEND MESSAGE ---
+    // --- SEND ---
     function sendMessage() {
       const text = els.input.value.trim();
       if (!text || !state.activeChatId) return;
@@ -641,8 +610,8 @@
       state.conversations[state.activeChatId].messages.push(tempMsg);
       renderBubble(tempMsg);
       els.input.value = '';
-      els.messagesList.scrollTop = els.messagesList.scrollHeight;
-      renderSidebar();
+      els.messagesArea.scrollTop = els.messagesArea.scrollHeight;
+      renderList();
 
       fetch(window.location.href, {
         method: 'POST',
@@ -650,26 +619,25 @@
         body: JSON.stringify({ content: text, receiver_id: state.activeChatId })
       })
       .then(res => res.json())
-      .then(data => { if(!data.success) alert("Failed to send"); })
+      .then(data => { if(!data.success) alert("Failed"); })
       .catch(e => console.error(e));
     }
 
-    // --- HELPERS ---
     function updateStatusUI() {
       if (state.isRecipientOnline) {
         els.headerStatus.textContent = "online";
-        els.headerStatus.style.color = "var(--primary-green)";
+        els.headerStatus.style.color = "var(--wa-primary)";
         els.simBtn.textContent = "Go Offline";
-        els.simBtn.style.color = "var(--primary-green)";
+        els.simBtn.style.color = "var(--wa-primary)";
       } else {
         els.headerStatus.textContent = "offline";
-        els.headerStatus.style.color = "var(--text-secondary)";
+        els.headerStatus.style.color = "var(--wa-text-secondary)";
         els.simBtn.textContent = "Go Online";
-        els.simBtn.style.color = "var(--text-secondary)";
+        els.simBtn.style.color = "var(--wa-text-secondary)";
       }
       if (state.activeChatId) {
         renderMessages(state.conversations[state.activeChatId].messages);
-        renderSidebar();
+        renderList();
       }
     }
 
@@ -682,12 +650,13 @@
     els.input.addEventListener('keypress', e => { if(e.key === 'Enter') sendMessage(); });
     
     els.backBtn.addEventListener('click', () => {
-      els.body.classList.remove('chat-open');
+      els.body.classList.remove('chat-active');
+      els.body.classList.remove('mobile-chat-open');
       state.activeChatId = null;
       setTimeout(() => {
-        els.chatInterface.style.display = 'none';
-        els.emptyState.style.display = 'flex';
-        renderSidebar();
+        els.activeView.style.display = 'none';
+        els.placeholder.style.display = 'flex';
+        renderList();
       }, 300);
     });
 
@@ -705,9 +674,8 @@
       updateStatusUI();
     });
 
-    // INIT
     processData();
-    renderSidebar();
+    renderList();
   });
 </script>
 {% endblock %}
