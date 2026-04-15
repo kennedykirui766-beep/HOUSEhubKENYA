@@ -678,6 +678,8 @@ def all_bookings():
     )
 
 
+from sqlalchemy import or_
+
 @tenant_bp.route('/messages')
 @login_required
 def messages():
@@ -686,7 +688,7 @@ def messages():
         return redirect(url_for("auth.login"))
 
     try:
-        tenant_messages = Message.query.options(
+        msgs = Message.query.options(
             joinedload(Message.sender),
             joinedload(Message.receiver)
         ).filter(
@@ -694,33 +696,41 @@ def messages():
                 Message.sender_id == current_user.id,
                 Message.receiver_id == current_user.id
             )
-        ).order_by(Message.timestamp.desc()).all()
+        ).order_by(Message.timestamp.asc()).all()
 
-        # ✅ CONVERT TO JSON-SERIALIZABLE FORMAT
         messages_data = []
-        for msg in tenant_messages:
+
+        for m in msgs:
+            # 👇 Determine the OTHER user (same logic as landlord)
+            if m.sender_id == current_user.id:
+                other = m.receiver
+            else:
+                other = m.sender
+
             messages_data.append({
-                "id": msg.id,
-                "sender_id": msg.sender_id,
-                "receiver_id": msg.receiver_id,
-                "content": msg.content,
-                "timestamp": serialize_timestamp(msg.timestamp),
+                "id": m.id,
+                "sender_id": m.sender_id,
+                "receiver_id": m.receiver_id,
+                "content": m.content,
+                "timestamp": serialize_timestamp(m.timestamp),
 
-                # 👇 IMPORTANT: include user info
-                "sender": {
-                    "id": msg.sender.id,
-                    "name": msg.sender.name,
-                    "profile_image": getattr(msg.sender, "profile_picture", None)
-                } if msg.sender else None,
-
-                "receiver": {
-                    "id": msg.receiver.id,
-                    "name": msg.receiver.name,
-                    "profile_image": getattr(msg.receiver, "profile_picture", None)
-                } if msg.receiver else None
+                # ✅ IMPORTANT (your JS depends on this)
+                "other_user": {
+                    "id": other.id,
+                    "name": other.name,
+                    "avatar": getattr(other, "profile_picture", None)
+                }
             })
 
-        return render_template("tenant/messages.html", messages=messages_data)
+        return render_template(
+            "tenant/messages.html",
+            messages=messages_data,
+            user={
+                "id": current_user.id,
+                "name": current_user.name,
+                "role": current_user.role
+            }
+        )
 
     except Exception as e:
         db.session.rollback()
@@ -786,81 +796,48 @@ def contact_providers():
     )
 
 # Chat with landlord
-@tenant_bp.route('/chat/<int:landlord_id>', methods=['GET', 'POST'])
+@tenant_bp.route('/send_message', methods=['POST'])
 @login_required
-def chat(landlord_id):
+def send_message():
     from datetime import datetime
 
-    # =========================
-    # SEND MESSAGE (AJAX SUPPORT)
-    # =========================
-    if request.method == 'POST':
-        try:
-            # ✅ Support BOTH form and JSON
-            data = request.get_json(silent=True)
+    if current_user.role != "tenant":
+        return {"success": False, "error": "Unauthorized"}, 403
 
-            if data:
-                content = data.get("content")
-            else:
-                content = request.form.get("message")
+    data = request.get_json()
 
-            if not content:
-                return {"success": False, "error": "Empty message"}, 400
+    receiver_id = data.get("receiver_id")
+    content = data.get("content")
 
-            message = Message(
-                sender_id=current_user.id,
-                receiver_id=landlord_id,
-                content=content,
-                timestamp=datetime.utcnow()
-            )
+    if not receiver_id or not content:
+        return {"success": False, "error": "Missing data"}, 400
 
-            db.session.add(message)
-            db.session.commit()
+    try:
+        message = Message(
+            sender_id=current_user.id,
+            receiver_id=receiver_id,
+            content=content,
+            timestamp=datetime.utcnow()
+        )
 
-            # ✅ Return JSON for fetch()
-            return {
-                "success": True,
-                "message": {
-                    "content": message.content,
-                    "timestamp": serialize_timestamp(message.timestamp),
-                    "sender_id": message.sender_id
-                }
+        db.session.add(message)
+        db.session.commit()
+
+        return {
+            "success": True,
+            "message": {
+                "id": message.id,
+                "sender_id": message.sender_id,
+                "receiver_id": message.receiver_id,
+                "content": message.content,
+                "timestamp": message.timestamp.isoformat()
             }
+        }
 
-        except Exception as e:
-            db.session.rollback()
-            print("Chat send error:", e)
-            return {"success": False}, 500
-
-    # =========================
-    # FETCH MESSAGES
-    # =========================
-    messages = Message.query.filter(
-        ((Message.sender_id == current_user.id) & (Message.receiver_id == landlord_id)) |
-        ((Message.sender_id == landlord_id) & (Message.receiver_id == current_user.id))
-    ).order_by(Message.timestamp.asc()).all()
-
-    landlord = User.query.get(landlord_id)
-
-    # ✅ Convert to JSON-safe format
-    messages_data = []
-    for msg in messages:
-        messages_data.append({
-            "id": msg.id,
-            "sender_id": msg.sender_id,
-            "receiver_id": msg.receiver_id,
-            "content": msg.content,
-            "timestamp": serialize_timestamp(msg.timestamp),
-
-            "sender_name": msg.sender.name if msg.sender else "Unknown",
-            "receiver_name": msg.receiver.name if msg.receiver else "Unknown"
-        })
-
-    return render_template(
-        'chat.html',
-        messages=messages_data,
-        user=landlord
-    )
+    except Exception as e:
+        db.session.rollback()
+        print("Send error:", e)
+        return {"success": False}, 500
 
 
 # routes/tenant_routes.py
