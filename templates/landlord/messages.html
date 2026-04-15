@@ -21,7 +21,7 @@
   /* --- 2. CHAT CONTAINER --- */
   .chat-app-wrapper {
     display: flex;
-    height: 85vh; /* Fixed height for desktop to ensure footer visibility */
+    height: 85vh; /* Fixed height for desktop */
     min-height: 600px;
     background-color: var(--wa-bg-app);
     width: 100%;
@@ -63,22 +63,21 @@
   .search-box {
     padding: 8px 12px;
     border-bottom: 1px solid var(--wa-border);
-    background: #fff; /* Ensure background exists */
+    background: #fff;
   }
 
-  /* FIXED: Flexbox Search Bar to prevent icon hiding */
   .search-wrapper {
     background-color: #f0f2f5;
     border-radius: 8px;
     display: flex;
     align-items: center;
-    padding: 0 12px; /* Padding inside the grey box */
+    padding: 0 12px;
     height: 35px;
   }
 
   .search-icon {
     color: #54656f;
-    margin-right: 10px; /* Space between icon and text */
+    margin-right: 10px;
     font-size: 0.9rem;
   }
 
@@ -272,7 +271,7 @@
     padding: 10px 16px;
     display: flex;
     align-items: center;
-    z-index: 50; /* Desktop z-index */
+    z-index: 50;
     flex-shrink: 0; /* Prevent shrinking */
   }
 
@@ -310,16 +309,20 @@
   }
   .send-btn:hover { color: var(--wa-primary); }
 
-  /* --- 6. RESPONSIVE / MOBILE FIXES --- */
+  /* --- 6. RESPONSIVE / MOBILE FIX --- */
   @media (max-width: 768px) {
     body.mobile-chat-open { overflow: hidden; }
 
     .chat-app-wrapper {
-      height: 100dvh; /* Dynamic Viewport Height */
-      min-height: 100vh;
+      /* FIX: Pin to edges instead of using vh units to fix Portrait/Landscape visibility */
+      top: 0; 
+      bottom: 0; 
+      left: 0; 
+      right: 0;
+      height: auto; /* Auto calculated based on top/bottom */
+      
       border-radius: 0;
-      position: fixed; /* Fixes to screen */
-      top: 0; left: 0;
+      position: fixed;
       z-index: 9999;
     }
 
@@ -332,15 +335,13 @@
       z-index: 5;
     }
 
-    /* FIX: Ensure chat-main fills the absolute container */
     .chat-main {
       width: 100%;
       position: absolute;
       top: 0; left: 0;
-      bottom: 0; /* Force bottom stretch */
-      height: 100%; /* Force full height */
+      height: 100%; /* Takes full height of wrapper */
       z-index: 10;
-      transform: translateX(100%); /* Hidden right */
+      transform: translateX(100%);
       transition: transform 0.3s ease-in-out;
     }
 
@@ -352,14 +353,13 @@
 
     .back-btn { display: block; }
 
-    /* FIX: Boost Footer Z-Index for mobile to ensure it sits on top */
+    /* Ensure footer is always on top of content */
     .chat-input-footer {
       z-index: 100;
-      padding: 10px 10px; /* Slightly smaller padding for mobile */
+      padding: 10px 10px;
     }
   }
 
-  /* Scrollbar */
   ::-webkit-scrollbar { width: 6px !important; }
   ::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.2); border-radius: 3px; }
 
@@ -438,7 +438,7 @@
         <!-- Messages -->
       </div>
 
-      <!-- INPUT AREA (High Z-Index on Mobile) -->
+      <!-- INPUT AREA -->
       <footer class="chat-input-footer">
         <i class="far fa-smile footer-icon"></i>
         <i class="fas fa-plus footer-icon" style="font-size: 1.2rem;"></i>
