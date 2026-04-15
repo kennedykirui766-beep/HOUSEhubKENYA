@@ -1451,10 +1451,14 @@
         </div>
 
         <a href="{{ url_for('main.index') }}" class="navbar-brand-center">
-            <span class="brand-icon">
-                <i class="fas fa-home"></i>
-            </span>
-            HOUSEhubKENYA
+            {% if APP_LOGO_URL %}
+                <img src="{{ APP_LOGO_URL }}" alt="HomeHub Logo" style="height:28px; margin-right:0.6rem; vertical-align:middle;">
+            {% else %}
+                <span class="brand-icon">
+                    <i class="fas fa-home"></i>
+                </span>
+            {% endif %}
+            <span class="brand-name">HOUSEhubKENYA</span>
         </a>
 
         <div class="navbar-right">
@@ -1499,9 +1503,13 @@
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <a href="{{ url_for('main.index') }}" class="d-flex align-items-center gap-2 text-decoration-none" style="color: var(--text-primary);">
-                <span class="brand-icon" style="width: 28px; height: 28px; font-size: 0.7rem;">
-                    <i class="fas fa-home"></i>
-                </span>
+                {% if APP_LOGO_URL %}
+                    <img src="{{ APP_LOGO_URL }}" alt="HomeHub" style="height:28px; width:auto;">
+                {% else %}
+                    <span class="brand-icon" style="width: 28px; height: 28px; font-size: 0.7rem;">
+                        <i class="fas fa-home"></i>
+                    </span>
+                {% endif %}
                 <span style="font-weight: 700; font-size: 1.1rem;">HomeHub</span>
             </a>
             <button class="sidebar-close-btn" id="closeSidebar" aria-label="Close menu">
