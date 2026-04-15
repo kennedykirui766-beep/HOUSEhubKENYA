@@ -126,6 +126,22 @@ def create_app():
     app.jinja_env.filters['timeago'] = timeago
     app.jinja_env.filters['datetimeformat'] = datetimeformat
 
+    # Inject commonly used settings into templates
+    @app.context_processor
+    def inject_app_settings():
+        try:
+            from flask import url_for
+            logo = app.config.get('APP_LOGO', 'images/homehub.jpg')
+            # If APP_LOGO is an absolute URL (Cloudinary or other CDN), use it directly.
+            if isinstance(logo, str) and (logo.startswith('http://') or logo.startswith('https://') or logo.startswith('//')):
+                logo_url = logo
+            else:
+                logo_url = url_for('static', filename=logo)
+        except Exception:
+            logo_url = '/static/images/homehub.jpg'
+        # Provide both the raw config value and the resolved URL for templates and services.
+        return dict(APP_LOGO=logo, APP_LOGO_URL=logo_url)
+
     # Blueprints
     from routes.auth_routes import auth_bp
     from routes.landlord_routes import landlord_bp
@@ -167,7 +183,14 @@ def create_app():
 
     @app.route('/favicon.ico')
     def favicon():
-        return app.send_static_file('images/Screenshot_2025-10-07_003020.png')
+        # Serve or redirect to the configured logo for favicon.
+        logo = app.config.get('APP_LOGO', 'images/logo.png')
+        if isinstance(logo, str) and (logo.startswith('http://') or logo.startswith('https://') or logo.startswith('//')):
+            return redirect(logo)
+        try:
+            return app.send_static_file(logo)
+        except Exception:
+            return app.send_static_file('images/logo.png')
     
     @app.teardown_appcontext
     def shutdown_session(exception=None):
