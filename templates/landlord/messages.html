@@ -272,7 +272,7 @@
     display: flex;
     align-items: center;
     z-index: 50;
-    flex-shrink: 0; /* Prevent shrinking */
+    flex-shrink: 0;
   }
 
   .footer-icon {
@@ -313,13 +313,19 @@
   @media (max-width: 768px) {
     body.mobile-chat-open { overflow: hidden; }
 
+    /* FIX: Hide the Global Support Chat Button on this specific page (mobile only)
+       to prevent it from covering the text input area. */
+    .chat-support-btn {
+      display: none !important;
+    }
+
     .chat-app-wrapper {
-      /* FIX: Pin to edges instead of using vh units to fix Portrait/Landscape visibility */
+      /* Pin to edges */
       top: 0; 
       bottom: 0; 
       left: 0; 
       right: 0;
-      height: auto; /* Auto calculated based on top/bottom */
+      height: auto;
       
       border-radius: 0;
       position: fixed;
@@ -339,7 +345,7 @@
       width: 100%;
       position: absolute;
       top: 0; left: 0;
-      height: 100%; /* Takes full height of wrapper */
+      height: 100%;
       z-index: 10;
       transform: translateX(100%);
       transition: transform 0.3s ease-in-out;
@@ -353,7 +359,6 @@
 
     .back-btn { display: block; }
 
-    /* Ensure footer is always on top of content */
     .chat-input-footer {
       z-index: 100;
       padding: 10px 10px;
