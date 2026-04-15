@@ -673,7 +673,7 @@ HomeHub{% endblock %} {% block content %}
         </div>
         <div class="user-profile">
           <img
-            src="{{ url_for('static', filename='images/homehub.jpg') }}"
+            src="{{ APP_LOGO }}"
             alt="User Avatar"
             class="user-avatar"
           />
@@ -703,7 +703,7 @@ HomeHub{% endblock %} {% block content %}
   <!-- Profile Section -->
   <div class="profile-section">
     <img
-      src="{{ url_for('static', filename='images/homehub.jpg') }}"
+      src="{{ url_for('static', filename=APP_LOGO) }}"
       alt="Profile Picture"
       class="profile-avatar"
     />
