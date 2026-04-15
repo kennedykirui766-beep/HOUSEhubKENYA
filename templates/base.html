@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}HOUSEhubKENYA{% endblock %}</title>
+    <!-- Favicon / App icon (uses configured APP_LOGO) -->
+    <link rel="icon" href="{{ url_for('static', filename=APP_LOGO) }}" type="image/png">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename=APP_LOGO) }}">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -1635,7 +1638,7 @@
                 <div class="row">
                     <div class="col-12 col-lg-4 footer-section">
                         <h5>HomeHub</h5>
-                        <img src="{{ url_for('static', filename='images/homehub.jpg') }}" alt="HomeHub Logo" style="height: 40px; margin-bottom: 1rem;">
+                        <img src="{{ APP_LOGO }}" alt="HomeHub Logo" style="height: 40px; margin-bottom: 1rem;">
                         <p>Your trusted platform for seamless property management, connecting landlords, tenants, and service providers.</p>
                     </div>
 
