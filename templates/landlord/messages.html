@@ -313,15 +313,14 @@
   @media (max-width: 768px) {
     body.mobile-chat-open { overflow: hidden; }
 
-    /* FIX: Hide the Global Support Chat Button on this specific page (mobile only)
-       to prevent it from covering the text input area. */
+    /* FIX: Hide the Global Support Chat Button on mobile to prevent collision */
     .chat-support-btn {
       display: none !important;
     }
 
     .chat-app-wrapper {
-      /* Pin to edges */
-      top: 0; 
+      /* FIXED: Start BELOW the navbar (64px is the navbar height) */
+      top: var(--navbar-height); 
       bottom: 0; 
       left: 0; 
       right: 0;
@@ -329,7 +328,8 @@
       
       border-radius: 0;
       position: fixed;
-      z-index: 9999;
+      /* Lower z-index slightly so it doesn't conflict with navbar, but still above content */
+      z-index: 1030; 
     }
 
     .chat-sidebar {
