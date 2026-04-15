@@ -1,107 +1,126 @@
 {% extends "base.html" %}
 
-{% block title %}Chat - HomeHub{% endblock %}
+{% block title %}Messages - HomeHub{% endblock %}
 
 {% block styles %}
 <style>
-  /* ========== WHATSAPP STYLE LAYOUT & VARIABLES ========== */
+  /* --- WHATSAPP THEME VARIABLES --- */
   :root {
-    --wa-app-bg: #d1d7db;
-    --wa-sidebar-bg: #ffffff;
-    --wa-chat-bg: #efeae2;
-    --wa-header-bg: #f0f2f5;
-    --wa-primary-green: #00a884;
-    --wa-outgoing-bg: #d9fdd3;
-    --wa-incoming-bg: #ffffff;
-    --wa-text-primary: #111b21;
-    --wa-text-secondary: #667781;
-    --wa-border-color: #e9edef;
-    --wa-input-bg: #ffffff;
-    --wa-shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+    --app-bg: #d1d7db;
+    --sidebar-bg: #ffffff;
+    --chat-bg: #efeae2;
+    --header-bg: #f0f2f5;
+    --primary-green: #00a884;
+    --outgoing-bubble: #d9fdd3;
+    --incoming-bubble: #ffffff;
+    --text-primary: #111b21;
+    --text-secondary: #667781;
+    --border-color: #e9edef;
+    --system-msg-bg: #ffffff;
+    --input-bg: #ffffff;
   }
 
-  /* Reset specific to chat container */
-  .msg-page {
-    padding: 0;
-    background-color: var(--wa-app-bg);
-    height: calc(100vh - var(--header-height, 60px));
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-  }
-
-  .chat-container {
-    display: flex;
-    width: 100%;
-    max-width: 1600px;
+  /* --- LAYOUT STRUCTURE --- */
+  body, html {
     height: 100%;
-    background-color: #fff;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-    overflow: hidden;
-    position: relative;
+    margin: 0;
+    background-color: var(--app-bg);
+    overflow: hidden; /* Prevent body scroll, handle inside containers */
   }
 
-  /* ========== SIDEBAR (Conversation List) ========== */
-  .chat-sidebar {
-    width: 350px;
+  .main-container {
+    display: flex;
+    height: calc(100vh - 60px); /* Adjust based on your navbar height */
+    max-width: 1600px;
+    margin: 0 auto;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* --- SIDEBAR (LEFT PANEL) --- */
+  .sidebar {
+    width: 30%;
+    min-width: 300px;
+    max-width: 450px;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid var(--wa-border-color);
-    background-color: var(--wa-sidebar-bg);
-    transition: transform 0.3s ease;
-    z-index: 10;
+    border-right: 1px solid var(--border-color);
+    background-color: var(--sidebar-bg);
+    z-index: 2;
   }
 
   .sidebar-header {
-    padding: 10px 16px;
-    background-color: var(--wa-header-bg);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     height: 60px;
-    border-bottom: 1px solid var(--wa-border-color);
+    padding: 10px 16px;
+    background-color: var(--header-bg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-color);
     flex-shrink: 0;
   }
 
   .sidebar-header h3 {
-    font-size: 1.1rem;
-    color: var(--wa-text-primary);
     margin: 0;
-    font-weight: 600;
+    font-size: 1.2rem;
+    color: var(--text-primary);
   }
 
-  .chat-list {
-    flex: 1;
-    overflow-y: auto;
-    padding-top: 8px;
+  /* Search Bar in Sidebar */
+  .search-container {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-color);
+    background: #fff;
   }
-
-  /* Chat List Item */
-  .chat-item {
+  .search-input-wrapper {
+    background-color: var(--header-bg);
+    border-radius: 8px;
     display: flex;
     align-items: center;
-    padding: 12px 16px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    border-bottom: 1px solid var(--wa-border-color);
+    padding: 6px 12px;
+  }
+  .search-input-wrapper input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    margin-left: 10px;
+    outline: none;
+    font-size: 0.9rem;
   }
 
-  .chat-item:hover {
+  /* Conversation List */
+  .conversation-list {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .conversation-item {
+    display: flex;
+    padding: 12px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.2s;
+    align-items: center;
+  }
+
+  .conversation-item:hover {
     background-color: #f5f6f6;
   }
 
-  .chat-item.active {
+  .conversation-item.active {
     background-color: #f0f2f5;
   }
 
-  .chat-avatar {
+  .avatar {
     width: 49px;
     height: 49px;
     border-radius: 50%;
-    object-fit: cover;
-    margin-right: 15px;
-    flex-shrink: 0;
     background-color: #dfe5e7;
+    flex-shrink: 0;
+    margin-right: 15px;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -109,143 +128,131 @@
     font-weight: bold;
     font-size: 1.1rem;
   }
+  .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 
-  .chat-info {
+  .conv-info {
     flex: 1;
     min-width: 0;
   }
 
-  .chat-top-row {
+  .conv-top {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
   }
 
-  .chat-name {
-    font-weight: 500;
-    color: var(--wa-text-primary);
+  .conv-name {
     font-size: 1.05rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    color: var(--text-primary);
+    font-weight: 500;
   }
 
-  .chat-time {
+  .conv-time {
     font-size: 0.75rem;
-    color: var(--wa-text-secondary);
+    color: var(--text-secondary);
   }
 
-  .chat-preview {
-    font-size: 0.9rem;
-    color: var(--wa-text-secondary);
+  .conv-preview {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    display: flex;
-    align-items: center;
-    gap: 4px;
+  }
+  
+  .unread-badge {
+    background-color: #25d366;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 12px;
+    margin-left: 5px;
+    flex-shrink: 0;
+    display: none; /* Hidden by default */
   }
 
-  /* ========== MAIN CHAT AREA ========== */
-  .chat-main {
+  /* --- CHAT AREA (RIGHT PANEL) --- */
+  .chat-area {
     flex: 1;
     display: flex;
     flex-direction: column;
-    background-color: var(--wa-chat-bg);
-    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+    background-color: var(--chat-bg);
+    /* WhatsApp Doodle Background Pattern */
+    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.08' fill-rule='evenodd'/%3E%3C/svg%3E");
     position: relative;
   }
 
-  .chat-placeholder {
+  /* Empty State */
+  .empty-state {
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     height: 100%;
     text-align: center;
-    color: var(--wa-text-secondary);
-    border-bottom: 6px solid var(--wa-primary-green);
+    border-bottom: 6px solid #43c960;
+    background: #f0f2f5;
+    z-index: 1;
   }
 
-  .chat-view-header {
+  /* Chat Header */
+  .chat-header {
+    height: 60px;
     padding: 10px 16px;
-    background-color: var(--wa-header-bg);
+    background-color: var(--header-bg);
     display: flex;
     align-items: center;
-    border-bottom: 1px solid var(--wa-border-color);
-    height: 60px;
+    border-bottom: 1px solid var(--border-color);
     flex-shrink: 0;
     z-index: 5;
   }
 
-  .btn-back {
-    display: none;
+  .back-btn {
+    display: none; /* Hidden on desktop */
     background: none;
     border: none;
+    color: var(--text-secondary);
     font-size: 1.2rem;
-    color: var(--wa-text-secondary);
     margin-right: 10px;
     cursor: pointer;
   }
 
+  .chat-header-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+  }
+  
   .header-avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    margin-right: 15px;
-    object-fit: cover;
+    margin-right: 10px;
     background: #dfe5e7;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-weight: bold;
   }
 
-  .header-info {
-    flex: 1;
-  }
-
-  .header-name {
-    font-weight: 600;
-    color: var(--wa-text-primary);
-    margin-bottom: 2px;
-  }
-
-  .header-status {
-    font-size: 0.8rem;
-    color: var(--wa-text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #8696a0;
-    display: none;
-  }
-  .status-dot.online {
-    background-color: var(--wa-primary-green);
-    display: block;
-  }
-
-  /* Messages Area */
-  .messages-area {
+  /* Messages List */
+  .messages-container {
     flex: 1;
     overflow-y: auto;
     padding: 20px 5%;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 2px;
   }
 
-  /* Message Bubbles */
+  /* Bubbles */
   .msg-row {
     display: flex;
-    margin-bottom: 4px;
+    margin-bottom: 10px;
     width: 100%;
   }
 
@@ -257,7 +264,7 @@
     justify-content: flex-start;
   }
 
-  .msg-bubble {
+  .bubble {
     max-width: 65%;
     padding: 6px 7px 8px 9px;
     border-radius: 7.5px;
@@ -268,53 +275,46 @@
     word-wrap: break-word;
   }
 
-  .msg-bubble.sent {
-    background-color: var(--wa-outgoing-bg);
+  .bubble.sent {
+    background-color: var(--outgoing-bubble);
     border-top-right-radius: 0;
   }
+  
+  /* Bubble Tails */
+  .bubble.sent::before {
+    content: "";
+    position: absolute;
+    top: 0; right: -8px;
+    width: 0; height: 0;
+    border: 8px solid transparent;
+    border-top-color: var(--outgoing-bubble);
+    border-right-color: var(--outgoing-bubble);
+    border-left: 0; border-bottom: 0;
+  }
 
-  .msg-bubble.received {
-    background-color: var(--wa-incoming-bg);
+  .bubble.received {
+    background-color: var(--incoming-bubble);
     border-top-left-radius: 0;
   }
-
-  .msg-bubble.sent::before {
+  
+  .bubble.received::before {
     content: "";
     position: absolute;
-    top: 0;
-    right: -8px;
-    width: 0;
-    height: 0;
+    top: 0; left: -8px;
+    width: 0; height: 0;
     border: 8px solid transparent;
-    border-top-color: var(--wa-outgoing-bg);
-    border-right-color: var(--wa-outgoing-bg);
-    border-left: 0;
-    border-bottom: 0;
-  }
-
-  .msg-bubble.received::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -8px;
-    width: 0;
-    height: 0;
-    border: 8px solid transparent;
-    border-top-color: var(--wa-incoming-bg);
-    border-left-color: var(--wa-incoming-bg);
-    border-right: 0;
-    border-bottom: 0;
+    border-top-color: var(--incoming-bubble);
+    border-left-color: var(--incoming-bubble);
+    border-right: 0; border-bottom: 0;
   }
 
   .msg-meta {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 4px;
-    margin-top: 2px;
     float: right;
     margin-left: 10px;
-    padding-top: 4px;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
   }
 
   .msg-time {
@@ -324,25 +324,20 @@
 
   .msg-check {
     font-size: 0.7rem;
+    color: #53bdeb; /* Blue ticks */
   }
   
-  /* Tick Colors */
-  .tick-single { color: #999; }
-  .tick-double-grey { color: #999; }
-  .tick-double-blue { color: #53bdeb; }
-
-  /* Input Area */
-  .chat-input-area {
+  /* Input Footer */
+  .chat-footer {
     min-height: 62px;
-    background-color: var(--wa-header-bg);
+    background-color: var(--header-bg);
     padding: 5px 16px;
     display: flex;
     align-items: center;
-    gap: 10px;
     z-index: 5;
   }
 
-  .input-wrapper {
+  .input-box {
     flex: 1;
     background-color: #fff;
     border-radius: 8px;
@@ -357,421 +352,371 @@
     outline: none;
     font-size: 0.95rem;
     font-family: inherit;
-    max-height: 100px;
-    overflow-y: auto;
-    resize: none;
-    background: transparent;
   }
 
-  .btn-send {
+  .send-btn {
     background: none;
     border: none;
-    color: var(--wa-text-secondary);
+    color: var(--text-secondary);
     font-size: 1.5rem;
+    margin-left: 10px;
     cursor: pointer;
-    padding: 5px;
     transition: color 0.2s;
   }
+  .send-btn:hover { color: var(--primary-green); }
 
-  .btn-send:hover {
-    color: var(--wa-primary-green);
-  }
-
-  .no-conversations {
-    text-align: center;
-    padding: 2rem;
-    color: var(--wa-text-secondary);
-  }
-
-  ::-webkit-scrollbar { width: 6px !important; height: 6px !important; }
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px !important; }
   ::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.2); border-radius: 3px; }
-  ::-webkit-scrollbar-track { background: hsla(0,0%,100%,0.1); }
 
-  @media (max-width: 767px) {
-    .msg-page { height: calc(100vh - 50px); }
-    .chat-sidebar { width: 100%; position: absolute; height: 100%; left: 0; top: 0; }
-    .chat-main { width: 100%; position: absolute; height: 100%; left: 100%; top: 0; transition: transform 0.3s ease; z-index: 20; }
-    body.chat-active .chat-main { transform: translateX(-100%); }
-    .btn-back { display: block; }
+  /* --- RESPONSIVE / MOBILE LOGIC --- */
+  @media (max-width: 768px) {
+    .main-container {
+      position: relative;
+      width: 100vw;
+      height: calc(100vh - 50px); /* Assuming mobile header is smaller */
+    }
+
+    .sidebar {
+      width: 100%;
+      max-width: none;
+      position: absolute;
+      top: 0; left: 0;
+      height: 100%;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .chat-area {
+      width: 100%;
+      position: absolute;
+      top: 0; left: 0;
+      height: 100%;
+      transform: translateX(100%); /* Hidden off-screen right */
+      transition: transform 0.3s ease-in-out;
+      z-index: 10;
+    }
+
+    /* State: Chat Active */
+    body.chat-active .sidebar {
+      transform: translateX(-20%); /* Parallax effect */
+      opacity: 0.5;
+    }
+    
+    body.chat-active .chat-area {
+      transform: translateX(0);
+    }
+
+    .back-btn { display: block; }
+    .empty-state { display: none; } /* Never show empty state on mobile, go straight to list */
   }
 </style>
 {% endblock %}
 
 {% block content %}
+<!-- Data Injection -->
 <script>
-  // Data Injection
-  // Note: The route now passes ISO strings, fixing the strftime error.
   window.rawMessages = {{ messages | tojson }};
-  window.currentUser = {{ current_user.id | tojson }};
-  
-  // Inject the landlord (user) data passed from the route
-  window.landlord = {{ user | tojson }};
+  window.currentUser = {{ user | tojson }};
 </script>
 
-<div class="msg-page">
-  <div class="container-fluid" style="height: 100%;">
-    <div class="chat-container">
-      
-      <!-- SIDEBAR -->
-      <aside class="chat-sidebar" id="chatSidebar">
-        <div class="sidebar-header">
-          <h3>Chats</h3>
-          <div style="display: flex; gap: 15px; color: var(--wa-text-secondary);">
-            <a href="/tenant/messages" style="color: inherit; text-decoration: none;" title="Back to Inbox">
-              <i class="fas fa-inbox"></i>
-            </a>
-            <i class="fas fa-ellipsis-v"></i>
-          </div>
-        </div>
-
-        <div class="chat-list" id="conversationList">
-          <!-- Since this route is specific to one landlord, the sidebar will only show this chat -->
-          <!-- Or you could implement a separate fetch to show all other landlords here -->
-          <div class="no-conversations">Select a chat</div>
-        </div>
-      </aside>
-
-      <!-- MAIN: Chat Window -->
-      <main class="chat-main" id="chatMain">
-        
-        <!-- Placeholder -->
-        <div class="chat-placeholder" id="chatPlaceholder">
-          <div style="width: 150px; height: 150px; background-color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-            <i class="fas fa-home" style="font-size: 4rem; color: #d1d7db;"></i>
-          </div>
-          <h2 style="color: #41525d; font-weight: 300; margin-bottom: 0.5rem;">HomeHub Messages</h2>
-          <p style="color: #667781; font-size: 0.9rem;">Loading chat...</p>
-        </div>
-
-        <!-- Active Chat View -->
-        <div id="activeChatView" style="display: none; flex-direction: column; height: 100%;">
-          
-          <!-- Chat Header -->
-          <header class="chat-view-header">
-            <button class="btn-back" id="btnBackMobile">
-              <i class="fas fa-arrow-left"></i>
-            </button>
-            <div class="header-avatar" id="headerAvatar">?</div>
-            <div class="header-info">
-              <div class="header-name" id="headerName">Landlord</div>
-              <div class="header-status">
-                <span class="status-dot" id="headerStatusDot"></span>
-                <span id="headerStatusText">offline</span>
-              </div>
-            </div>
-            <div style="color: var(--wa-text-secondary); display: flex; gap: 20px;">
-              <i class="fas fa-search"></i>
-              <i class="fas fa-ellipsis-v"></i>
-            </div>
-          </header>
-
-          <!-- Messages List -->
-          <div class="messages-area" id="messagesArea">
-            <!-- Messages injected here -->
-          </div>
-
-          <!-- Input Area -->
-          <footer class="chat-input-area">
-            <i class="far fa-smile" style="color: var(--wa-text-secondary); font-size: 1.5rem; cursor: pointer;"></i>
-            <div class="input-wrapper">
-              <input type="text" class="chat-input" id="messageInput" placeholder="Type a message" autocomplete="off">
-            </div>
-            <button class="btn-send" id="btnSend">
-              <i class="fas fa-paper-plane"></i>
-            </button>
-          </footer>
-
-        </div>
-
-      </main>
+<div class="main-container" id="mainContainer">
+  
+  <!-- LEFT: Sidebar (Conversation List) -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h3>Chats</h3>
+      <div style="color: var(--text-secondary); display: flex; gap: 20px;">
+        <i class="fas fa-circle-notch" title="Status"></i>
+        <i class="fas fa-comment-alt" title="New Chat"></i>
+        <i class="fas fa-ellipsis-v"></i>
+      </div>
     </div>
-  </div>
+    
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <i class="fas fa-search" style="color: #54656f;"></i>
+        <input type="text" placeholder="Search or start new chat" id="searchInput">
+      </div>
+    </div>
+
+    <!-- List of Tenants -->
+    <div class="conversation-list" id="conversationList">
+      <!-- Populated via JS -->
+    </div>
+  </aside>
+
+  <!-- RIGHT: Chat Area -->
+  <main class="chat-area" id="chatArea">
+    
+    <!-- Placeholder for Desktop -->
+    <div class="empty-state" id="emptyState">
+      <i class="fas fa-laptop-house" style="font-size: 5rem; color: #d1d7db; margin-bottom: 20px;"></i>
+      <h2 style="color: #41525d; font-weight: 300;">HomeHub Web</h2>
+      <p style="color: #667781; margin-top: 10px;">Send and receive messages with tenants.</p>
+      <p style="color: #8696a0; font-size: 0.85rem; margin-top: 30px;"><i class="fas fa-lock"></i> End-to-end encrypted</p>
+    </div>
+
+    <!-- Actual Chat Interface -->
+    <div id="activeChatInterface" style="display: none; height: 100%; flex-direction: column;">
+      
+      <header class="chat-header">
+        <button class="back-btn" id="backButton">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+        <div class="header-avatar" id="headerAvatar"></div>
+        <div class="chat-header-info">
+          <div style="font-weight: 600; color: var(--text-primary);" id="headerName">Tenant Name</div>
+          <div style="font-size: 0.75rem; color: var(--text-secondary);" id="headerStatus">online</div>
+        </div>
+        <div style="color: var(--text-secondary); margin-left: auto; display: flex; gap: 20px;">
+          <i class="fas fa-search"></i>
+          <i class="fas fa-ellipsis-v"></i>
+        </div>
+      </header>
+
+      <div class="messages-container" id="messagesList">
+        <!-- Messages go here -->
+      </div>
+
+      <footer class="chat-footer">
+        <i class="far fa-smile" style="color: #8696a0; font-size: 1.5rem; margin-right: 10px; cursor: pointer;"></i>
+        <div class="input-box">
+          <input type="text" class="chat-input" id="messageInput" placeholder="Type a message" autocomplete="off">
+        </div>
+        <button class="send-btn" id="sendBtn">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </footer>
+
+    </div>
+
+  </main>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Data References
-    let rawMessages = window.rawMessages || [];
-    const currentUserId = window.currentUser;
-    const landlordData = window.landlord || {}; // Data about the person we are chatting with
-    
-    // UI Elements
-    const messagesArea = document.getElementById('messagesArea');
-    const headerName = document.getElementById('headerName');
-    const headerAvatar = document.getElementById('headerAvatar');
-    const headerStatusDot = document.getElementById('headerStatusDot');
-    const headerStatusText = document.getElementById('headerStatusText');
-    const messageInput = document.getElementById('messageInput');
-    const btnSend = document.getElementById('btnSend');
-    const btnBackMobile = document.getElementById('btnBackMobile');
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1. STATE MANAGEMENT
+    const state = {
+      currentUserId: window.currentUser.id,
+      conversations: {}, // Map of tenantId -> { info, messages[] }
+      activeChatId: null
+    };
 
-    let landlordOnline = landlordData.is_online || false;
-    let pollingInterval = null;
+    // 2. DOM ELEMENTS
+    const els = {
+      list: document.getElementById('conversationList'),
+      search: document.getElementById('searchInput'),
+      chatArea: document.getElementById('chatArea'),
+      emptyState: document.getElementById('emptyState'),
+      activeInterface: document.getElementById('activeChatInterface'),
+      headerName: document.getElementById('headerName'),
+      headerAvatar: document.getElementById('headerAvatar'),
+      messagesList: document.getElementById('messagesList'),
+      input: document.getElementById('messageInput'),
+      sendBtn: document.getElementById('sendBtn'),
+      backBtn: document.getElementById('backButton'),
+      body: document.body
+    };
 
-    // --- 1. INITIALIZE CHAT ---
-    function initChat() {
-      // Since this route is specific to one landlord, we auto-open the chat
-      if (landlordData) {
-        const conversation = {
-          id: landlordData.id,
-          name: landlordData.name,
-          avatar: landlordData.profile_image,
-          messages: rawMessages
-        };
-        openChat(conversation);
-      }
-    }
-
-    // --- 2. TICK LOGIC (The Core Requirement) ---
-    function getTickIcon(msg, isUserOnline) {
-      // Logic:
-      // 1. If read -> Blue Double
-      // 2. Else if Online -> Grey Double
-      // 3. Else -> Grey Single
-      
-      // NOTE: 'is_read' must be included in your route's JSON response
-      if (msg.is_read) {
-        return '<i class="fas fa-check-double tick-double-blue"></i>';
-      } else if (isUserOnline) {
-        return '<i class="fas fa-check-double tick-double-grey"></i>';
-      } else {
-        return '<i class="fas fa-check tick-single"></i>';
-      }
-    }
-
-    // --- 3. OPEN CHAT ---
-    function openChat(conversation) {
-      // UI Updates
-      document.getElementById('chatPlaceholder').style.display = 'none';
-      document.getElementById('activeChatView').style.display = 'flex';
-      document.body.classList.add('chat-active');
-
-      // Set Header Info
-      headerName.textContent = conversation.name;
-      const initials = conversation.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
-      if (conversation.avatar) {
-        headerAvatar.innerHTML = `<img src="${conversation.avatar}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-      } else {
-        headerAvatar.style.background = '#00a884';
-        headerAvatar.innerHTML = initials;
-      }
-
-      // Update Online Status UI immediately
-      updateOnlineStatusUI(landlordOnline);
-
-      // Render Messages
-      renderMessages(conversation.messages);
-
-      // Start Polling for Status (Online/Read)
-      startPolling(conversation.id);
-    }
-
-    // --- 4. RENDER MESSAGES ---
-    function renderMessages(messages) {
-      messagesArea.innerHTML = '';
-      let lastDate = null;
-
-      // Sort by time
-      messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-
-      messages.forEach(msg => {
-        const isSent = msg.sender_id === currentUserId;
-        const msgDate = new Date(msg.timestamp).toLocaleDateString();
+    // 3. DATA PROCESSING (Group raw messages by Tenant)
+    function processData() {
+      window.rawMessages.forEach(msg => {
+        // Determine the 'Other' person (Tenant)
+        // If sender is me, other is receiver. If receiver is me, other is sender.
+        const isMe = msg.sender_id === state.currentUserId;
+        const otherId = isMe ? msg.receiver_id : msg.sender_id;
         
-        if (msgDate !== lastDate) {
-          const divider = document.createElement('div');
-          divider.style.cssText = "text-align: center; margin: 10px 0; color: #fff; background: rgba(225,245,254,0.9); padding: 5px 12px; border-radius: 8px; align-self: center; font-size: 0.8rem; box-shadow: 0 1px 2px rgba(0,0,0,0.1);";
-          divider.innerText = msgDate === new Date().toLocaleDateString() ? "Today" : msgDate;
-          messagesArea.appendChild(divider);
-          lastDate = msgDate;
+        // Use the 'other_user' data passed from backend
+        const otherInfo = msg.other_user;
+
+        if (!state.conversations[otherId]) {
+          state.conversations[otherId] = {
+            id: otherId,
+            name: otherInfo.name,
+            avatar: otherInfo.avatar,
+            messages: [],
+            lastMsgTime: msg.timestamp
+          };
         }
-
-        appendMessageBubble(msg, isSent);
+        
+        // Add message
+        state.conversations[otherId].messages.push(msg);
+        
+        // Update last message time (for sorting)
+        if (new Date(msg.timestamp) > new Date(state.conversations[otherId].lastMsgTime)) {
+          state.conversations[otherId].lastMsgTime = msg.timestamp;
+        }
       });
+    }
 
+    // 4. RENDER SIDEBAR
+    function renderSidebar() {
+      els.list.innerHTML = '';
+      
+      // Convert object to array and sort by time desc
+      const sortedConvos = Object.values(state.conversations).sort((a, b) => 
+        new Date(b.lastMsgTime) - new Date(a.lastMsgTime)
+      );
+
+      if (sortedConvos.length === 0) {
+        els.list.innerHTML = '<div style="padding:20px; text-align:center; color:#667781;">No messages yet.</div>';
+        return;
+      }
+
+      sortedConvos.forEach(convo => {
+        const lastMsg = convo.messages[convo.messages.length - 1];
+        const div = document.createElement('div');
+        div.className = `conversation-item ${state.activeChatId === convo.id ? 'active' : ''}`;
+        div.onclick = () => loadChat(convo.id);
+
+        // Avatar logic
+        const initials = convo.name ? convo.name.charAt(0).toUpperCase() : '?';
+        const avatarHtml = convo.avatar 
+          ? `<img src="${convo.avatar}" alt="Avatar">` 
+          : `<span>${initials}</span>`;
+
+        // Time formatting
+        const timeStr = new Date(lastMsg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+        div.innerHTML = `
+          <div class="avatar">${avatarHtml}</div>
+          <div class="conv-info">
+            <div class="conv-top">
+              <span class="conv-name">${convo.name}</span>
+              <span class="conv-time">${timeStr}</span>
+            </div>
+            <div class="conv-preview">
+              <span>${lastMsg.sender_id === state.currentUserId ? '<i class="fas fa-check-double" style="font-size:0.7rem; color:#53bdeb; margin-right:3px;"></i>' : ''} 
+              ${lastMsg.content}</span>
+            </div>
+          </div>
+        `;
+        els.list.appendChild(div);
+      });
+    }
+
+    // 5. LOAD CHAT
+    function loadChat(tenantId) {
+      state.activeChatId = tenantId;
+      const convo = state.conversations[tenantId];
+      
+      // UI Updates
+      renderSidebar(); // To update 'active' class
+      els.emptyState.style.display = 'none';
+      els.activeInterface.style.display = 'flex';
+      els.body.classList.add('chat-active'); // Triggers mobile slide
+
+      // Header
+      els.headerName.textContent = convo.name;
+      const initials = convo.name ? convo.name.substring(0,2).toUpperCase() : '??';
+      els.headerAvatar.innerHTML = convo.avatar 
+        ? `<img src="${convo.avatar}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`
+        : `<div style="width:100%; height:100%; background:#00a884; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">${initials}</div>`;
+
+      // Messages
+      els.messagesList.innerHTML = '';
+      convo.messages.forEach(msg => renderBubble(msg));
       scrollToBottom();
     }
 
-    function appendMessageBubble(msg, isSent) {
+    // 6. RENDER BUBBLE
+    function renderBubble(msg) {
+      const isMe = msg.sender_id === state.currentUserId;
       const row = document.createElement('div');
-      row.className = `msg-row ${isSent ? 'sent' : 'received'}`;
-      row.dataset.id = msg.id; // Store ID to update ticks later
-
-      // Time formatting
-      const d = new Date(msg.timestamp);
-      let hours = d.getHours();
-      const minutes = d.getMinutes().toString().padStart(2, '0');
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      hours = hours % 12;
-      hours = hours ? hours : 12;
-      const timeStr = hours + ':' + minutes + ' ' + ampm;
-
-      // Get Ticks
-      const checkIcon = isSent ? getTickIcon(msg, landlordOnline) : '';
+      row.className = `msg-row ${isMe ? 'sent' : 'received'}`;
+      
+      const timeStr = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
       row.innerHTML = `
-        <div class="msg-bubble">
+        <div class="bubble">
           ${msg.content}
           <div class="msg-meta">
             <span class="msg-time">${timeStr}</span>
-            ${checkIcon}
+            ${isMe ? '<i class="fas fa-check-double msg-check"></i>' : ''}
           </div>
         </div>
       `;
-      messagesArea.appendChild(row);
-      scrollToBottom();
+      els.messagesList.appendChild(row);
     }
 
-    // --- 5. ONLINE STATUS & POLLING ---
-    function updateOnlineStatusUI(isOnline, lastSeen) {
-      landlordOnline = isOnline; // Update global state
-      if (isOnline) {
-        headerStatusDot.classList.add('online');
-        headerStatusText.innerText = "online";
-        headerStatusText.style.color = "var(--wa-primary-green)";
-      } else {
-        headerStatusDot.classList.remove('online');
-        headerStatusText.innerText = lastSeen ? `last seen ${lastSeen}` : "offline";
-        headerStatusText.style.color = "var(--wa-text-secondary)";
-      }
-      
-      // Refresh message ticks based on new online status
-      refreshMessageTicks();
-    }
-
-    function refreshMessageTicks() {
-      // Find all sent messages and update their tick icons
-      const sentRows = document.querySelectorAll('.msg-row.sent');
-      sentRows.forEach(row => {
-        // Find the original message data from rawMessages by ID
-        const msgId = parseInt(row.dataset.id);
-        const msg = rawMessages.find(m => m.id === msgId);
-        if (msg) {
-          const newTickHtml = getTickIcon(msg, landlordOnline);
-          const meta = row.querySelector('.msg-meta');
-          if (meta) {
-            // Remove old tick icon if exists, append new one
-            const oldTick = meta.querySelector('.msg-check, .tick-single, .tick-double-grey, .tick-double-blue');
-            if (oldTick) oldTick.remove();
-            meta.insertAdjacentHTML('beforeend', newTickHtml);
-          }
-        }
-      });
-    }
-
-    function startPolling(chatId) {
-      if (pollingInterval) clearInterval(pollingInterval);
-      
-      // Initial Check
-      checkStatus(chatId);
-
-      // Poll every 5 seconds
-      pollingInterval = setInterval(() => {
-        checkStatus(chatId);
-      }, 5000);
-    }
-
-    function checkStatus(chatId) {
-      // You need a backend route for this. Example:
-      // GET /tenant/check_status/<landlord_id> 
-      // Returns: { "is_online": true, "last_seen": "2 mins ago", "messages_read": [1, 2, 3] }
-      
-      // Placeholder logic for now:
-      // 1. Fetch updates (Mocking here)
-      // fetch(`/tenant/check_status/${chatId}`)
-      //   .then(r => r.json())
-      //   .then(data => {
-      //      updateOnlineStatusUI(data.is_online, data.last_seen);
-      //      
-      //      // If messages_read list is returned, update local rawMessages and re-render ticks
-      //      if(data.messages_read) {
-      //         data.messages_read.forEach(readId => {
-      //            const m = rawMessages.find(m => m.id === readId);
-      //            if(m) m.is_read = true;
-      //         });
-      //         refreshMessageTicks();
-      //      }
-      //   });
-    }
-
-    // --- 6. SEND MESSAGE LOGIC ---
+    // 7. SEND MESSAGE
     function sendMessage() {
-      const text = messageInput.value.trim();
-      if (!text) return;
+      const text = els.input.value.trim();
+      if (!text || !state.activeChatId) return;
 
-      // Optimistic UI
+      // Optimistic Update
       const tempMsg = {
-        id: Date.now(), // Temporary ID
-        sender_id: currentUserId,
+        id: Date.now(),
+        sender_id: state.currentUserId,
+        receiver_id: state.activeChatId,
         content: text,
         timestamp: new Date().toISOString(),
-        is_read: false
+        other_user: state.conversations[state.activeChatId] // temp ref
       };
-      rawMessages.push(tempMsg);
-      appendMessageBubble(tempMsg, true);
-      messageInput.value = '';
+
+      // Update local state
+      state.conversations[state.activeChatId].messages.push(tempMsg);
       
-      // Send to Backend (POST to current URL as per route)
+      // Update UI
+      renderBubble(tempMsg);
+      els.input.value = '';
+      scrollToBottom();
+      renderSidebar(); // Update preview text
+
+      // API Call
       fetch(window.location.href, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': getCSRFToken()
-        },
-        body: JSON.stringify({
-          content: text
-        })
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken()},
+        body: JSON.stringify({ content: text, receiver_id: state.activeChatId })
       })
-      .then(response => response.json())
+      .then(res => res.json())
       .then(data => {
-        if (data.success) {
-          // Update temp message with real data from server
-          const realMsg = data.message;
-          const index = rawMessages.findIndex(m => m.id === tempMsg.id);
-          if (index !== -1) {
-            rawMessages[index] = realMsg;
-            // Re-render specific row or just update ID
-            const row = document.querySelector(`.msg-row[data-id="${tempMsg.id}"]`);
-            if(row) row.dataset.id = realMsg.id;
-          }
-        } else {
-          alert("Failed to send.");
+        if(!data.success) {
+          // Revert or show error
+          console.error("Failed to send");
         }
       })
-      .catch(err => {
-        console.error(err);
-        alert("Error sending message");
-      });
+      .catch(e => console.error(e));
+    }
+
+    // Utilities
+    function scrollToBottom() {
+      els.messagesList.scrollTop = els.messagesList.scrollHeight;
     }
 
     function getCSRFToken() {
-      const meta = document.querySelector('meta[name="csrf-token"]');
-      if (meta) return meta.getAttribute('content');
-      const input = document.querySelector('input[name="csrf_token"]');
-      if (input) return input.value;
-      return '';
-    }
-
-    function scrollToBottom() {
-      messagesArea.scrollTop = messagesArea.scrollHeight;
+      return document.querySelector('meta[name="csrf-token"]')?.content || '';
     }
 
     // Event Listeners
-    btnSend.addEventListener('click', sendMessage);
-    messageInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') sendMessage();
-    });
+    els.sendBtn.addEventListener('click', sendMessage);
+    els.input.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
     
-    btnBackMobile.addEventListener('click', () => {
-      document.body.classList.remove('chat-active');
-      clearInterval(pollingInterval);
-      window.location.href = "/tenant/messages"; // Go back to inbox
+    els.backBtn.addEventListener('click', () => {
+      els.body.classList.remove('chat-active'); // Slide back on mobile
+      state.activeChatId = null;
+      setTimeout(() => {
+        els.activeInterface.style.display = 'none';
+        els.emptyState.style.display = 'flex';
+        renderSidebar(); // Remove active highlight
+      }, 300); // Wait for transition
+    });
+
+    // Search Filter (Simple Client Side)
+    els.search.addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase();
+      const items = els.list.querySelectorAll('.conversation-item');
+      items.forEach(item => {
+        const name = item.querySelector('.conv-name').textContent.toLowerCase();
+        item.style.display = name.includes(term) ? 'flex' : 'none';
+      });
     });
 
     // Init
-    initChat();
+    processData();
+    renderSidebar();
   });
 </script>
 {% endblock %}

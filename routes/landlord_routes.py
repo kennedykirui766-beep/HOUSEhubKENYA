@@ -818,33 +818,43 @@ def messages():
         flash("Access denied.", "danger")
         return redirect(url_for("main.index"))
 
-    # Fetch messages
-    messages = Message.query.filter(
+    # Fetch all messages involving the landlord
+    # We join with User to get names/avatars easily
+    msgs_query = Message.query.filter(
         (Message.receiver_id == current_user.id) |
         (Message.sender_id == current_user.id)
-    ).order_by(Message.timestamp.desc()).all()
+    ).order_by(Message.timestamp.asc()).all() # Ascending helps with grouping
 
-    # ✅ Convert to JSON-serializable format
     messages_data = []
-    for m in messages:
+    for m in msgs_query:
+        # Determine who the 'other' person is
+        if m.sender_id == current_user.id:
+            other_id = m.receiver_id
+            other_name = m.receiver.name
+            other_avatar = getattr(m.receiver, 'profile_picture', None)
+        else:
+            other_id = m.sender_id
+            other_name = m.sender.name
+            other_avatar = getattr(m.sender, 'profile_picture', None)
+
         messages_data.append({
             "id": m.id,
             "sender_id": m.sender_id,
             "receiver_id": m.receiver_id,
-            "content": m.content,   # or m.message depending on your model
+            "content": m.content,
             "timestamp": serialize_timestamp(m.timestamp),
-
-            # Optional: sender name (VERY useful in UI)
-            "sender_name": m.sender.name if hasattr(m, "sender") and m.sender else "Unknown",
-            "receiver_name": m.receiver.name if hasattr(m, "receiver") and m.receiver else "Unknown"
+            # Add info about the person on the other end
+            "other_user": {
+                "id": other_id,
+                "name": other_name,
+                "avatar": other_avatar
+            }
         })
 
     user_data = {
         "id": current_user.id,
         "name": current_user.name,
-        "email": current_user.email,
-        "role": current_user.role,
-        "profile_picture": getattr(current_user, "profile_picture", None)
+        "role": current_user.role
     }
 
     return render_template(
@@ -852,7 +862,7 @@ def messages():
         messages=messages_data,
         user=user_data
     )
-
+    
 @landlord_bp.route('/delete_account', methods=['GET', 'POST'])
 @login_required
 def delete_account():
