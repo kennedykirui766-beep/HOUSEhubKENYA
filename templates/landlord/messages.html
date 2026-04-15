@@ -18,21 +18,20 @@
     --wa-border: #e9edef;
   }
 
-  /* --- 2. CHAT CONTAINER (Fits inside Base Layout) --- */
-  /* We give this a fixed height to ensure the input bar is always visible */
+  /* --- 2. CHAT CONTAINER --- */
   .chat-app-wrapper {
     display: flex;
-    height: 85vh; /* Occupies 85% of screen height */
-    min-height: 600px; /* Minimum height for smaller screens */
+    height: 85vh; /* Fixed height for desktop to ensure footer visibility */
+    min-height: 600px;
     background-color: var(--wa-bg-app);
     width: 100%;
-    border-radius: 4px; /* Slight rounding to fit inside a container */
+    border-radius: 4px;
     overflow: hidden;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     position: relative;
   }
 
-  /* --- 3. LEFT SIDEBAR (LIST OF TENANTS) --- */
+  /* --- 3. LEFT SIDEBAR --- */
   .chat-sidebar {
     width: 30%;
     min-width: 300px;
@@ -64,25 +63,32 @@
   .search-box {
     padding: 8px 12px;
     border-bottom: 1px solid var(--wa-border);
+    background: #fff; /* Ensure background exists */
+  }
+
+  /* FIXED: Flexbox Search Bar to prevent icon hiding */
+  .search-wrapper {
+    background-color: #f0f2f5;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px; /* Padding inside the grey box */
+    height: 35px;
+  }
+
+  .search-icon {
+    color: #54656f;
+    margin-right: 10px; /* Space between icon and text */
+    font-size: 0.9rem;
   }
 
   .search-input {
     width: 100%;
-    background-color: #f0f2f5;
     border: none;
-    border-radius: 8px;
-    padding: 8px 12px 8px 36px; /* Space for icon */
+    background: transparent;
     font-size: 0.9rem;
-    position: relative;
-  }
-  
-  .search-icon {
-    position: absolute;
-    left: 22px;
-    top: 20px;
-    color: #54656f;
-    font-size: 0.9rem;
-    pointer-events: none;
+    outline: none;
+    color: var(--wa-text-primary);
   }
 
   .chat-list {
@@ -123,7 +129,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-width: 0; /* Crucial for text truncation */
+    min-width: 0;
   }
 
   .info-top {
@@ -164,12 +170,10 @@
     display: flex;
     flex-direction: column;
     background-color: var(--wa-bg-chat);
-    /* WhatsApp Doodle Background */
     background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.08' fill-rule='evenodd'/%3E%3C/svg%3E");
     position: relative;
   }
 
-  /* Empty State */
   .chat-placeholder {
     display: flex;
     flex-direction: column;
@@ -181,7 +185,6 @@
     background: #f0f2f5;
   }
 
-  /* Active Chat Header */
   .chat-view-header {
     height: 60px;
     padding: 0 16px;
@@ -193,7 +196,7 @@
   }
 
   .back-btn {
-    display: none; /* Hidden on desktop */
+    display: none;
     border: none;
     background: none;
     color: var(--wa-text-secondary);
@@ -209,9 +212,8 @@
     margin-right: 10px;
   }
 
-  /* Messages List */
   .messages-scroll-area {
-    flex: 1; /* Takes available space */
+    flex: 1;
     overflow-y: auto;
     padding: 20px 5%;
     display: flex;
@@ -219,7 +221,6 @@
     gap: 2px;
   }
 
-  /* Bubbles */
   .msg-row {
     display: flex;
     margin-bottom: 10px;
@@ -265,13 +266,14 @@
   .tick-blue { color: #53bdeb; }
   .tick-grey { color: #8696a0; }
 
-  /* --- 5. INPUT AREA (FIXED AT BOTTOM) --- */
+  /* --- 5. INPUT AREA --- */
   .chat-input-footer {
     background-color: var(--wa-bg-header);
     padding: 10px 16px;
     display: flex;
     align-items: center;
-    z-index: 50; /* Ensure it's on top */
+    z-index: 50; /* Desktop z-index */
+    flex-shrink: 0; /* Prevent shrinking */
   }
 
   .footer-icon {
@@ -308,19 +310,18 @@
   }
   .send-btn:hover { color: var(--wa-primary); }
 
-  /* --- 6. RESPONSIVE / MOBILE --- */
+  /* --- 6. RESPONSIVE / MOBILE FIXES --- */
   @media (max-width: 768px) {
+    body.mobile-chat-open { overflow: hidden; }
+
     .chat-app-wrapper {
-      height: 100dvh; /* Full mobile viewport height */
+      height: 100dvh; /* Dynamic Viewport Height */
       min-height: 100vh;
       border-radius: 0;
-      position: fixed; /* Fixes to the screen */
+      position: fixed; /* Fixes to screen */
       top: 0; left: 0;
-      z-index: 9999; /* Above base nav */
+      z-index: 9999;
     }
-    
-    /* Make sure body doesn't scroll behind it */
-    body.mobile-chat-open { overflow: hidden; }
 
     .chat-sidebar {
       width: 100%;
@@ -331,24 +332,37 @@
       z-index: 5;
     }
 
+    /* FIX: Ensure chat-main fills the absolute container */
     .chat-main {
       width: 100%;
       position: absolute;
       top: 0; left: 0;
-      height: 100%;
+      bottom: 0; /* Force bottom stretch */
+      height: 100%; /* Force full height */
       z-index: 10;
       transform: translateX(100%); /* Hidden right */
       transition: transform 0.3s ease-in-out;
     }
 
-    .chat-placeholder { display: none; } /* No placeholder on mobile */
+    .chat-placeholder { display: none; }
 
     body.chat-active .chat-main {
       transform: translateX(0);
     }
 
     .back-btn { display: block; }
+
+    /* FIX: Boost Footer Z-Index for mobile to ensure it sits on top */
+    .chat-input-footer {
+      z-index: 100;
+      padding: 10px 10px; /* Slightly smaller padding for mobile */
+    }
   }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px !important; }
+  ::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.2); border-radius: 3px; }
+
 </style>
 {% endblock %}
 
@@ -373,9 +387,12 @@
       </div>
     </div>
 
+    <!-- Search Area (Flexbox Implementation) -->
     <div class="search-box">
-      <i class="fas fa-search search-icon"></i>
-      <input type="text" class="search-input" placeholder="Search or start new chat" id="searchInput">
+      <div class="search-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" class="search-input" placeholder="Search or start new chat" id="searchInput">
+      </div>
     </div>
 
     <div class="chat-list" id="chatList">
@@ -421,7 +438,7 @@
         <!-- Messages -->
       </div>
 
-      <!-- INPUT AREA (Always visible now) -->
+      <!-- INPUT AREA (High Z-Index on Mobile) -->
       <footer class="chat-input-footer">
         <i class="far fa-smile footer-icon"></i>
         <i class="fas fa-plus footer-icon" style="font-size: 1.2rem;"></i>
