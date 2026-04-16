@@ -1148,9 +1148,9 @@
         </div>
         
         <!-- Check if unread_senders_list is available and has content -->
-        {% if unread_senders_list %}
+        {% if unread_senders %}
           <div class="notif-list" id="notifList">
-            {% for sender in unread_senders_list %}
+            {% for sender in unread_senders %}
             <a href="{{ url_for('landlord.messages', tenant_id=sender.id) }}" class="notif-item">
               <div class="notif-sender-info">
                 <span class="notif-sender-name">{{ sender.name }}</span>
