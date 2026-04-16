@@ -919,14 +919,18 @@ def mark_all_messages_read():
         return {"success": False, "error": "Unauthorized"}, 403
 
     try:
-        Message.query.filter(
+        unread_messages = Message.query.filter(
             Message.receiver_id == current_user.id,
             Message.is_read == False
-        ).update({"is_read": True})
+        ).all()
+
+        for msg in unread_messages:
+            msg.is_read = True
+            msg.read_at = datetime.utcnow()
 
         db.session.commit()
 
-        return {"success": True}
+        return {"success": True, "updated": len(unread_messages)}
 
     except Exception as e:
         db.session.rollback()
