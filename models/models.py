@@ -304,6 +304,7 @@ class Payment(db.Model):
     payment_link = db.Column(db.String(500), nullable=True)
     transaction_id = db.Column(db.String(200), nullable=True)
     receipt_url = db.Column(db.String(500), nullable=True)
+    receipt_pdf_url = db.Column(db.String(500), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
