@@ -307,7 +307,7 @@
           Unread Messages
         </div>
         
-        {% if stats.unread_senders %}
+        {% if unread_count > 0 %}
           {% for sender in stats.unread_senders %}
             <a href="/landlord/messages?tenant_id={{ sender.id }}" class="notif-item">
               <div class="notif-avatar">
