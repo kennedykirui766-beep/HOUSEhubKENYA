@@ -1169,8 +1169,8 @@
                 <i class="fas fa-map-marker-alt"></i> {{ house.address if house else 'No property assigned' }}
               </p>
             </div>
-            <a href="{{ url_for('landlord.send_message', tenant_id=user.id) }}" class="btn-dash-primary">
-              <i class="fas fa-comment"></i> Message
+            <a href="{{ url_for('landlord.messages', tenant_id=user.id) }}" class="btn-dash-primary">
+                <i class="fas fa-comment"></i> Message
             </a>
           </div>
         </div>

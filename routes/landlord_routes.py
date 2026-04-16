@@ -818,16 +818,16 @@ def messages():
         flash("Access denied.", "danger")
         return redirect(url_for("main.index"))
 
-    # Fetch all messages involving the landlord
-    # We join with User to get names/avatars easily
+    # ✅ NEW: get selected tenant
+    selected_user_id = request.args.get("tenant_id")
+
     msgs_query = Message.query.filter(
         (Message.receiver_id == current_user.id) |
         (Message.sender_id == current_user.id)
-    ).order_by(Message.timestamp.asc()).all() # Ascending helps with grouping
+    ).order_by(Message.timestamp.asc()).all()
 
     messages_data = []
     for m in msgs_query:
-        # Determine who the 'other' person is
         if m.sender_id == current_user.id:
             other_id = m.receiver_id
             other_name = m.receiver.name
@@ -843,7 +843,6 @@ def messages():
             "receiver_id": m.receiver_id,
             "content": m.content,
             "timestamp": serialize_timestamp(m.timestamp),
-            # Add info about the person on the other end
             "other_user": {
                 "id": other_id,
                 "name": other_name,
@@ -860,7 +859,8 @@ def messages():
     return render_template(
         'landlord/messages.html',
         messages=messages_data,
-        user=user_data
+        user=user_data,
+        selected_user_id=int(selected_user_id) if selected_user_id else None  # ✅ NEW
     )
     
 @landlord_bp.route('/delete_account', methods=['GET', 'POST'])
