@@ -851,7 +851,7 @@ def messages():
         return redirect(url_for("main.index"))
 
     # ✅ NEW: get selected tenant
-    selected_user_id = request.args.get("tenant_id")
+    selected_user_id = request.args.get("tenant_id", type=int)
 
     # =========================
     # ✅ NEW: MARK AS READ
@@ -859,7 +859,7 @@ def messages():
     if selected_user_id:
         try:
             Message.query.filter(
-                Message.sender_id == int(selected_user_id),
+                Message.sender_id == selected_user_id,
                 Message.receiver_id == current_user.id,
                 Message.is_read == False
             ).update({"is_read": True})
@@ -869,11 +869,35 @@ def messages():
             db.session.rollback()
             print("Read update error:", e)
 
+    # =========================
+    # BASE QUERY (ALL MESSAGES)
+    # =========================
     msgs_query = Message.query.filter(
         (Message.receiver_id == current_user.id) |
         (Message.sender_id == current_user.id)
-    ).order_by(Message.timestamp.asc()).all()
+    )
 
+    # =========================
+    # FILTER CHAT IF SELECTED
+    # =========================
+    if selected_user_id:
+        msgs_query = msgs_query.filter(
+            (
+                (Message.sender_id == current_user.id) &
+                (Message.receiver_id == selected_user_id)
+            ) |
+            (
+                (Message.sender_id == selected_user_id) &
+                (Message.receiver_id == current_user.id)
+            )
+        )
+
+    # FINAL ORDER + EXECUTE
+    msgs_query = msgs_query.order_by(Message.timestamp.asc()).all()
+
+    # =========================
+    # FORMAT MESSAGES
+    # =========================
     messages_data = []
     for m in msgs_query:
         if m.sender_id == current_user.id:
@@ -908,9 +932,10 @@ def messages():
         'landlord/messages.html',
         messages=messages_data,
         user=user_data,
-        selected_user_id=int(selected_user_id) if selected_user_id else None  # ✅ NEW
+        selected_user_id=selected_user_id
     )
-
+    
+    
 @csrf.exempt
 @landlord_bp.route("/messages/mark_all_read", methods=["POST"])
 @login_required
