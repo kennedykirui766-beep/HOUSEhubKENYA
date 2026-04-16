@@ -656,7 +656,7 @@ def verify_2fa_login():
                 return redirect(url_for("tenant.dashboard"))
             elif user.role == "landlord":
                 return redirect(url_for("landlord.dashboard"))
-                elif user.role == "service":
+            elif user.role == "service":
                 return redirect(url_for("main.index"))
             elif user.role == "admin":
                 return redirect(url_for("admin.dashboard"))
