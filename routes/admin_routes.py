@@ -304,6 +304,134 @@ def support_ticket_resolve(ticket_id):
     flash('Support ticket marked resolved.', 'success')
     return redirect(url_for('admin.support_tickets'))
 
+
+# --- Operations Dashboard (High-impact single view)
+@admin_bp.route('/operations')
+@login_required
+def operations():
+    stats = get_stats()
+
+    # quick lists for the dashboard
+    try:
+        open_maintenance = MaintenanceRequest.query.filter(MaintenanceRequest.status != 'resolved').order_by(MaintenanceRequest.sla_due.asc().nulls_last(), MaintenanceRequest.created_at.desc()).limit(20).all()
+    except Exception:
+        open_maintenance = []
+
+    try:
+        unresolved_support = SupportTicket.query.filter(SupportTicket.status != 'resolved').order_by(SupportTicket.created_at.desc()).limit(20).all()
+    except Exception:
+        unresolved_support = []
+
+    try:
+        recent_payment_issues = Payment.query.filter((Payment.status.ilike('%fail%')) | (Payment.status.ilike('%error%'))).order_by(Payment.created_at.desc()).limit(20).all()
+    except Exception:
+        recent_payment_issues = []
+
+    return render_template('admin.operations.html', stats=stats, open_maintenance=open_maintenance, unresolved_support=unresolved_support, recent_payment_issues=recent_payment_issues)
+
+
+@admin_bp.route('/maintenance_queue')
+@login_required
+def maintenance_queue():
+    # Filters
+    status = (request.args.get('status') or '').strip()
+    page = int(request.args.get('page') or 1)
+    per_page = int(request.args.get('per_page') or 25)
+    sort_by = (request.args.get('sort_by') or '').strip()
+    sort_dir = (request.args.get('sort_dir') or 'asc').strip().lower()
+
+    base = MaintenanceRequest.query
+    if status:
+        base = base.filter(MaintenanceRequest.status == status)
+
+    # Order by requested sort, default SLA then creation
+    if sort_by == 'id':
+        order_col = MaintenanceRequest.id
+    elif sort_by == 'status':
+        order_col = MaintenanceRequest.status
+    elif sort_by == 'sla':
+        order_col = MaintenanceRequest.sla_due
+    else:
+        order_col = None
+
+    if order_col is not None:
+        if sort_dir == 'asc':
+            base = base.order_by(order_col.asc())
+        else:
+            base = base.order_by(order_col.desc())
+    else:
+        base = base.order_by(MaintenanceRequest.sla_due.asc().nulls_last(), MaintenanceRequest.created_at.desc())
+
+    pagination = base.paginate(page=page, per_page=per_page, error_out=False)
+    items = pagination.items
+    stats = get_stats()
+    from datetime import datetime, timedelta
+    now = datetime.utcnow()
+    td = timedelta
+    # Provide a simple list of landlords (users with role landlord)
+    landlords = User.query.filter(User.role.ilike('%landlord%')).all()
+    canned_responses = [
+        'Acknowledged. We will assign a technician within 24 hours.',
+        'Please provide more details and photos if possible.',
+        'Escalating to landlord for immediate attention.',
+    ]
+    return render_template('admin.maintenance_queue.html', items=items, pagination=pagination, stats=stats, landlords=landlords, canned_responses=canned_responses, now=now, timedelta=td, current_sort=sort_by, current_dir=sort_dir, status_filter=status)
+
+
+@admin_bp.route('/maintenance/bulk_assign', methods=['POST'])
+@login_required
+def maintenance_bulk_assign():
+    ids = request.form.getlist('ids')
+    landlord_id = request.form.get('landlord_id')
+    assigned = 0
+    if not ids or not landlord_id:
+        flash('No items or landlord selected.', 'danger')
+        return redirect(url_for('admin.maintenance_queue'))
+
+    for mid in ids:
+        req = MaintenanceRequest.query.get(mid)
+        if not req:
+            continue
+        try:
+            req.assigned_to = int(landlord_id)
+            req.status = 'assigned'
+            assigned += 1
+        except Exception:
+            continue
+
+    db.session.commit()
+    flash(f'Assigned {assigned} maintenance request(s).', 'success')
+    return redirect(url_for('admin.maintenance_queue'))
+
+
+@admin_bp.route('/maintenance/respond', methods=['POST'])
+@login_required
+def maintenance_respond():
+    req_id = request.form.get('request_id')
+    response_text = request.form.get('response')
+    canned = request.form.get('canned')
+    if canned and not response_text:
+        response_text = canned
+
+    if not req_id or not response_text:
+        flash('Missing request or response text.', 'danger')
+        return redirect(url_for('admin.maintenance_queue'))
+
+    req = MaintenanceRequest.query.get(req_id)
+    if not req:
+        flash('Request not found.', 'danger')
+        return redirect(url_for('admin.maintenance_queue'))
+
+    comment = MaintenanceComment(request_id=req.id, author_id=current_user.id, role='admin', comment=response_text)
+    db.session.add(comment)
+    # optionally change status
+    if request.form.get('set_resolved') == '1':
+        req.status = 'resolved'
+
+    db.session.commit()
+    flash('Response added to request timeline.', 'success')
+    return redirect(url_for('admin.maintenance_queue'))
+
 # --- Platform Settings ---
 @admin_bp.route('/platform_settings',  methods=['GET', 'POST'])
 @login_required
