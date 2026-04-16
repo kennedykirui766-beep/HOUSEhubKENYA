@@ -419,7 +419,7 @@ def submit_request():
         db.session.commit()
 
         flash("Maintenance request sent to landlord!", "success")
-        return redirect(url_for('tenant.dashboard'))
+        return redirect(url_for('landlord.maintenance'))
 
     return render_template('tenant/submit_request.html', bookings=bookings)
 
