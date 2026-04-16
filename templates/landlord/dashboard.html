@@ -131,22 +131,21 @@
 
   /* ========== NOTIFICATION DROPDOWN STYLES ========== */
   .notif-wrapper {
-    position: relative; /* Context for absolute dropdown */
-    z-index: 2000; /* High z-index wrapper */
+    position: relative;
+    z-index: 2000;
   }
 
   .notif-dropdown {
     position: absolute;
-    /* UPDATED: Ensures it sits exactly 10px below the button */
-    top: calc(100% + 10px); 
-    right: 0; /* Aligns right edge with button */
-    width: 350px;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 480px; /* UPDATED: Expanded width for professional look */
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-xl);
-    z-index: 2000; /* High z-index to ensure visibility */
-    display: none; /* Hidden by default */
+    z-index: 2000;
+    display: none;
     flex-direction: column;
     overflow: hidden;
     animation: slideDown 0.2s ease-out forwards;
@@ -195,6 +194,26 @@
 
   .notif-mark-read:hover {
     text-decoration: underline;
+  }
+
+  /* UPDATED: Close Button Styles */
+  .notif-close-btn {
+    margin-left: 0.75rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+  }
+
+  .notif-close-btn:hover {
+    color: var(--text-primary);
+    background-color: rgba(0,0,0,0.05);
   }
 
   .notif-list {
@@ -1066,28 +1085,34 @@
       justify-content: center;
     }
     
-    /* Notification Responsive - Centered but anchored to button */
+    /* Notification Responsive */
     .notif-wrapper {
-      /* Ensure relative context remains */
       position: relative; 
     }
 
     .notif-dropdown {
-      position: absolute; /* Stays relative to button */
-      top: calc(100% + 8px); /* Sit below button */
+      position: absolute;
+      top: calc(100% + 8px);
       left: 50%;
-      transform: translateX(-50%); /* Center horizontally */
+      transform: translateX(-50%);
       right: auto;
-      width: 90%; /* Width constrained by screen */
-      max-width: 350px;
-      z-index: 2500; /* Ensure visibility above all content */
-      max-height: 70vh; /* Ensure it doesn't go off bottom of screen */
+      width: 90%;
+      max-width: 480px; /* Updated max-width for mobile */
+      z-index: 2500;
+      max-height: 70vh;
     }
 
     .notif-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.5rem;
+    }
+    
+    /* Adjust close button positioning for flex column header on mobile */
+    .notif-close-btn {
+        align-self: flex-end; /* Push to right when header stacks */
+        margin-left: 0;
+        margin-top: -1.5rem; /* Position near title */
     }
   }
 
@@ -1163,6 +1188,11 @@
                 <span style="color:#ccc">|</span>
                 <a href="#" onclick="markAllAsRead(event)" class="notif-mark-read">Mark all read</a>
             {% endif %}
+            
+            <!-- ADDED: Close Button (X) -->
+            <span class="notif-close-btn" onclick="toggleNotifications()">
+                <i class="fas fa-times"></i>
+            </span>
           </div>
         </div>
         
@@ -1524,9 +1554,12 @@
             if (countText) countText.textContent = '0 Total';
             
             // 4. Remove "Mark all read" link
-            // We can find the element via the parent
             const link = e.target;
             if(link) link.style.display = 'none';
+            
+            // 5. UPDATED: Close Dropdown
+            const dropdown = document.getElementById('notifDropdown');
+            if (dropdown) dropdown.classList.remove('active');
             
         } else {
             console.error('Failed to mark messages as read');
