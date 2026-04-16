@@ -912,6 +912,27 @@ def messages():
         user=user_data,
         selected_user_id=int(selected_user_id) if selected_user_id else None  # ✅ NEW
     )
+
+@landlord_bp.route("/messages/mark_all_read", methods=["POST"])
+@login_required
+def mark_all_messages_read():
+    if current_user.role != "landlord":
+        return {"success": False, "error": "Unauthorized"}, 403
+
+    try:
+        Message.query.filter(
+            Message.receiver_id == current_user.id,
+            Message.is_read == False
+        ).update({"is_read": True})
+
+        db.session.commit()
+
+        return {"success": True}
+
+    except Exception as e:
+        db.session.rollback()
+        print("Mark all read error:", e)
+        return {"success": False}, 500
     
 @landlord_bp.route('/delete_account', methods=['GET', 'POST'])
 @login_required

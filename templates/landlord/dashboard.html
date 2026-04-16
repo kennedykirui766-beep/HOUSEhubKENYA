@@ -126,7 +126,7 @@
     margin: 0;
   }
 
-  /* ========== NOTIFICATION DROPDOWN STYLES (NEW) ========== */
+  /* ========== NOTIFICATION DROPDOWN STYLES ========== */
   .notif-wrapper {
     position: relative;
   }
@@ -166,6 +166,30 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+  }
+  
+  .notif-header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .notif-header small {
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+
+  .notif-mark-read {
+    color: var(--primary-color);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .notif-mark-read:hover {
+    text-decoration: underline;
   }
 
   .notif-list {
@@ -1038,6 +1062,11 @@
       width: 280px;
       right: -12px;
     }
+    .notif-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
   }
 
   @media (max-width: 480px) {
@@ -1106,12 +1135,19 @@
       <div class="notif-dropdown" id="notifDropdown">
         <div class="notif-header">
           <span>Unread Messages</span>
-          <small>{{ unread_count }} Total</small>
+          <div class="notif-header-right">
+            <small id="notif-count-text">{{ unread_count }} Total</small>
+            {% if unread_count > 0 %}
+                <span style="color:#ccc">|</span>
+                <a href="#" onclick="markAllAsRead(event)" class="notif-mark-read">Mark all read</a>
+            {% endif %}
+          </div>
         </div>
         
         {% if unread_count > 0 %}
-          <div class="notif-list">
+          <div class="notif-list" id="notifList">
             {% for sender in unread_senders_list %}
+            <!-- Clicking this link opens messages for the specific tenant -->
             <a href="{{ url_for('landlord.messages', tenant_id=sender.id) }}" class="notif-item">
               <div class="notif-sender-info">
                 <span class="notif-sender-name">{{ sender.name }}</span>
@@ -1124,7 +1160,7 @@
             {% endfor %}
           </div>
         {% else %}
-          <div class="notif-empty">
+          <div class="notif-empty" id="notifEmpty">
             <i class="fas fa-check-circle"></i>
             <p>No unread messages</p>
           </div>
@@ -1433,6 +1469,59 @@
     }
     
     dropdown.classList.toggle('active');
+  }
+
+  // ---- Mark All as Read Logic ----
+  function markAllAsRead(e) {
+    e.preventDefault();
+    
+    // NOTE: Ensure you have a backend route like /landlord/messages/mark_all_read
+    // that handles POST requests.
+    fetch('/landlord/messages/mark_all_read', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            // UI Updates
+            // 1. Hide Badge
+            document.querySelector('.dash-notif-badge').classList.add('hidden');
+            
+            // 2. Empty List
+            const notifList = document.getElementById('notifList');
+            const emptyState = document.getElementById('notifEmpty');
+            
+            if (notifList) notifList.style.display = 'none';
+            if (emptyState) emptyState.style.display = 'block';
+            
+            // 3. Update Header Text
+            const countText = document.getElementById('notif-count-text');
+            if (countText) countText.textContent = '0 Total';
+            
+            // 4. Remove "Mark all read" link
+            // We can find the element via the parent
+            const link = e.target;
+            if(link) link.style.display = 'none';
+            
+        } else {
+            console.error('Failed to mark messages as read');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+  }
+
+  // Helper to get CSRF token if meta tag exists
+  function getCsrfToken() {
+      const meta = document.querySelector('meta[name="csrf-token"]');
+      if (meta) return meta.getAttribute('content');
+      const input = document.querySelector('input[name="csrf_token"]');
+      if (input) return input.value;
+      return '';
   }
 
   // Close notifications when clicking outside
