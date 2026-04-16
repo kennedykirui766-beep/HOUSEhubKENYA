@@ -913,6 +913,7 @@ def messages():
         selected_user_id=int(selected_user_id) if selected_user_id else None  # ✅ NEW
     )
 
+@csrf.exempt
 @landlord_bp.route("/messages/mark_all_read", methods=["POST"])
 @login_required
 def mark_all_messages_read():
