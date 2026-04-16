@@ -291,15 +291,34 @@
       </div>
     </div>
 
-    <!-- Recent Messages -->
+    <!-- Recent Messages (previews) -->
     <div class="stat-card info">
       <div class="stat-icon-box">
         <i class="fas fa-envelope"></i>
       </div>
       <div class="stat-info">
         <h4>Recent Messages</h4>
-        <div class="stat-value">{{ recent_messages|length }}</div>
-        <a href="{{ url_for('tenant.messages') }}" class="stat-link">View Messages</a>
+        <div class="stat-value" style="font-size:0.95rem; font-weight:600;">{{ recent_messages|length }}</div>
+        <div style="margin-top:0.5rem;">
+          {% if recent_messages %}
+          <ul class="item-list" style="max-height:120px; overflow:auto;">
+            {% for msg in recent_messages %}
+            <li style="display:block;">
+              <div style="display:flex; justify-content:space-between; gap:0.5rem; align-items:flex-start;">
+                <div style="flex:1; min-width:0;">
+                  <strong class="d-block small text-dark">{{ msg.sender_name }}</strong>
+                  <small class="text-muted small text-truncate" style="display:block;">{{ msg.snippet }}</small>
+                </div>
+                <small class="text-muted" style="white-space:nowrap; margin-left:0.5rem;">{% if msg.date %}{{ msg.date.strftime('%b %d') }}{% endif %}</small>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p class="text-muted small">No messages</p>
+          {% endif %}
+        </div>
+        <a href="{{ url_for('tenant.messages') }}" class="stat-link">View All Messages</a>
       </div>
     </div>
 
