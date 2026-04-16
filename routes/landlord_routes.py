@@ -115,6 +115,34 @@ def dashboard():
         .all()
     )
 
+    # =========================
+    # 🔔 NEW: UNREAD MESSAGES
+    # =========================
+
+    unread_messages = Message.query.filter(
+        Message.receiver_id == current_user.id,
+        Message.is_read == False
+    ).all()
+
+    # Count total unread
+    unread_count = len(unread_messages)
+
+    # Group by sender (for dropdown names)
+    unread_senders = {}
+    for msg in unread_messages:
+        sender = msg.sender
+        if sender.id not in unread_senders:
+            unread_senders[sender.id] = {
+                "id": sender.id,
+                "name": sender.name,
+                "count": 1
+            }
+        else:
+            unread_senders[sender.id]["count"] += 1
+
+    # Convert to list for template
+    unread_senders_list = list(unread_senders.values())
+
     # 📊 Stats dictionary
     stats = {
         "total_properties": total_properties,
@@ -129,9 +157,12 @@ def dashboard():
         houses=houses,
         tenants=tenants,
         recent_payments=recent_payments,
-        stats=stats
-    )
+        stats=stats,
 
+        # ✅ NEW DATA
+        unread_count=unread_count,
+        unread_senders=unread_senders_list
+    )
 
 # ---------------- Manage Properties ----------------
 import json
@@ -820,6 +851,22 @@ def messages():
 
     # ✅ NEW: get selected tenant
     selected_user_id = request.args.get("tenant_id")
+
+    # =========================
+    # ✅ NEW: MARK AS READ
+    # =========================
+    if selected_user_id:
+        try:
+            Message.query.filter(
+                Message.sender_id == int(selected_user_id),
+                Message.receiver_id == current_user.id,
+                Message.is_read == False
+            ).update({"is_read": True})
+
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print("Read update error:", e)
 
     msgs_query = Message.query.filter(
         (Message.receiver_id == current_user.id) |

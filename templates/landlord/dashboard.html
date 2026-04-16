@@ -35,6 +35,7 @@
     gap: 1rem;
   }
 
+  /* NOTIFICATION BELL */
   .dash-notif-btn {
     position: relative;
     width: 40px;
@@ -60,908 +61,222 @@
 
   .dash-notif-badge {
     position: absolute;
-    top: -4px;
-    right: -4px;
-    width: 18px;
-    height: 18px;
+    top: -5px;
+    right: -5px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    background: #dc3545;
+    background: #dc3545; /* Red/Warning color */
     color: white;
-    font-size: 0.6rem;
+    font-size: 0.7rem;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
     border: 2px solid var(--card-bg);
+    display: none; /* Hidden if 0 */
   }
 
-  .dash-profile {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-  }
-
-  .dash-avatar {
-    width: 38px;
-    height: 38px;
-    border-radius: var(--radius-md);
-    object-fit: cover;
-    border: 2px solid var(--border-color);
-    flex-shrink: 0;
-  }
-
-  .dash-avatar-placeholder {
-    width: 38px;
-    height: 38px;
-    border-radius: var(--radius-md);
-    background: var(--primary-light);
-    color: var(--primary-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.9rem;
-    flex-shrink: 0;
-    border: 2px solid var(--border-color);
-  }
-
-  .dash-profile-info {
-    line-height: 1.3;
-  }
-
-  .dash-profile-info h4 {
-    color: var(--text-primary);
-    font-weight: 600;
-    font-size: 0.85rem;
-    margin: 0;
-  }
-
-  .dash-profile-info p {
-    color: var(--text-muted);
-    font-size: 0.72rem;
-    margin: 0;
-  }
-
-  /* ========== DASHBOARD HEADER ========== */
-  .dash-header {
-    margin-bottom: 1.75rem;
-  }
-
-  .dash-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.3rem;
-  }
-
-  .dash-subtitle {
-    color: var(--text-secondary);
-    font-size: 0.925rem;
-  }
-
-  /* ========== STATS GRID ========== */
-  .dash-stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1.25rem;
-    margin-bottom: 1.75rem;
-  }
-
-  .dash-stat-card {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    padding: 1.35rem 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    transition: var(--transition);
-    min-width: 0;
-    overflow: hidden;
-  }
-
-  .dash-stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--primary-color);
-  }
-
-  .dash-stat-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    flex-shrink: 0;
-  }
-
-  .dash-stat-icon.primary {
-    background: var(--primary-light);
-    color: var(--primary-color);
-  }
-
-  .dash-stat-icon.success {
-    background: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
-  }
-
-  .dash-stat-icon.warning {
-    background: rgba(245, 158, 11, 0.1);
-    color: #f59e0b;
-  }
-
-  .dash-stat-icon.danger {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-  }
-
-  .dash-stat-content {
-    min-width: 0;
-    flex: 1;
-  }
-
-  .dash-stat-content h3 {
-    color: var(--text-secondary);
-    font-size: 0.78rem;
-    font-weight: 500;
-    margin: 0 0 0.3rem;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .dash-stat-value {
-    color: var(--text-primary);
-    font-size: 1.5rem;
-    font-weight: 700;
-    line-height: 1;
-    overflow-wrap: break-word;
-    word-break: break-word;
-  }
-
-  /* ========== CONTENT GRID ========== */
-  .dash-content-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.25rem;
-    margin-bottom: 2rem;
-  }
-
-  /* ========== CONTENT CARDS ========== */
-  .dash-card {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    transition: var(--transition);
-    min-width: 0;
-  }
-
-  .dash-card:hover {
-    box-shadow: var(--shadow-md);
-  }
-
-  .dash-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.15rem 1.25rem;
-    border-bottom: 1px solid var(--border-color);
-    gap: 0.5rem;
-  }
-
-  .dash-card-title {
-    color: var(--text-primary);
-    font-weight: 600;
-    font-size: 1rem;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-width: 0;
-  }
-
-  .dash-card-title i {
-    color: var(--primary-color);
-    flex-shrink: 0;
-  }
-
-  .dash-card-action {
-    color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.8rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    transition: var(--transition);
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .dash-card-action:hover {
-    color: var(--secondary-color);
-    gap: 0.5rem;
-  }
-
-  .dash-card-body {
-    padding: 0;
-  }
-
-  /* ========== LIST ITEMS ========== */
-  .dash-list-item {
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--border-color);
-    transition: var(--transition);
-  }
-
-  .dash-list-item:last-child {
-    border-bottom: none;
-  }
-
-  .dash-list-item:hover {
-    background-color: var(--primary-light);
-  }
-
-  .dash-list-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 0.75rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .dash-list-top .dash-list-info {
-    min-width: 0;
-    flex: 1;
-  }
-
-  .dash-list-title {
-    color: var(--text-primary);
-    font-weight: 600;
-    font-size: 0.9rem;
-    margin: 0 0 0.2rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .dash-list-subtitle {
-    color: var(--text-muted);
-    font-size: 0.8rem;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .dash-list-subtitle i {
-    color: var(--primary-color);
-    margin-right: 0.25rem;
-    font-size: 0.7rem;
-  }
-
-  .dash-list-specs {
-    display: flex;
-    gap: 0.75rem;
-    color: var(--text-secondary);
-    font-size: 0.78rem;
-    margin-bottom: 0.65rem;
-  }
-
-  .dash-list-specs i {
-    color: var(--primary-color);
-    margin-right: 0.2rem;
-    font-size: 0.7rem;
-  }
-
-  .dash-list-actions {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  /* ========== STATUS BADGES ========== */
-  .dash-badge {
-    padding: 0.25rem 0.65rem;
-    border-radius: var(--radius-full);
-    font-size: 0.7rem;
-    font-weight: 600;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .dash-badge-occupied,
-  .dash-badge-completed,
-  .dash-badge-paid {
-    background: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
-  }
-
-  .dash-badge-vacant,
-  .dash-badge-pending {
-    background: rgba(245, 158, 11, 0.1);
-    color: #f59e0b;
-  }
-
-  .dash-badge-overdue,
-  .dash-badge-urgent {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-  }
-
-  .dash-badge-in-progress,
-  .dash-badge-partial {
-    background: rgba(99, 102, 241, 0.1);
-    color: var(--primary-color);
-  }
-
-  .dash-badge-cancelled {
-    background: rgba(107, 114, 128, 0.1);
-    color: #6b7280;
-  }
-
-  /* ========== BUTTONS ========== */
-  .btn-dash-outline {
-    border: 1.5px solid var(--border-color);
-    color: var(--text-secondary);
-    padding: 0.35rem 0.75rem;
-    border-radius: var(--radius-sm);
-    font-weight: 500;
-    background: transparent;
-    transition: var(--transition);
-    font-size: 0.78rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    cursor: pointer;
-    font-family: inherit;
-  }
-
-  .btn-dash-outline:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-    background: var(--primary-light);
-  }
-
-  .btn-dash-primary {
-    background: var(--gradient-primary);
-    border: none;
-    color: white;
-    padding: 0.35rem 0.75rem;
-    border-radius: var(--radius-sm);
-    font-weight: 500;
-    transition: var(--transition);
-    font-size: 0.78rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    cursor: pointer;
-    font-family: inherit;
-  }
-
-  .btn-dash-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-    color: white;
-  }
-
-  .btn-dash-danger {
-    background: transparent;
-    border: 1.5px solid rgba(239, 68, 68, 0.3);
-    color: #ef4444;
-    padding: 0.35rem 0.75rem;
-    border-radius: var(--radius-sm);
-    font-weight: 500;
-    transition: var(--transition);
-    font-size: 0.78rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    cursor: pointer;
-    font-family: inherit;
-  }
-
-  .btn-dash-danger:hover {
-    background: #ef4444;
-    color: white;
-    border-color: #ef4444;
-  }
-
-  /* ========== TABLE ========== */
-  .dash-table-wrap {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .dash-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 400px;
-  }
-
-  .dash-table thead th {
-    background-color: var(--body-bg);
-    color: var(--text-secondary);
-    font-weight: 600;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    padding: 0.75rem 1.25rem;
-    text-align: left;
-    border-bottom: 1px solid var(--border-color);
-    white-space: nowrap;
-  }
-
-  .dash-table tbody td {
-    padding: 0.75rem 1.25rem;
-    border-bottom: 1px solid var(--border-color);
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-  }
-
-  .dash-table tbody tr:last-child td {
-    border-bottom: none;
-  }
-
-  .dash-table tbody tr:hover {
-    background-color: var(--primary-light);
-  }
-
-  .dash-table .td-name {
-    color: var(--text-primary);
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 180px;
-  }
-
-  /* ========== EMPTY STATE ========== */
-  .dash-empty {
-    text-align: center;
-    padding: 2.5rem 1rem;
-    color: var(--text-secondary);
-  }
-
-  .dash-empty i {
-    font-size: 2.5rem;
-    color: var(--text-muted);
-    margin-bottom: 0.75rem;
-    display: block;
-    opacity: 0.5;
-  }
-
-  .dash-empty p {
-    margin-bottom: 1.25rem;
-    font-size: 0.9rem;
-  }
-
-  /* ========== CHAT WIDGET ========== */
-  .dash-chat {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 999;
-  }
-
-  .dash-chat-toggle {
-    width: 52px;
-    height: 52px;
-    background: var(--gradient-primary);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
-    font-size: 1.15rem;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .dash-chat-toggle:hover {
-    transform: scale(1.08);
-    box-shadow: 0 10px 28px rgba(99, 102, 241, 0.5);
-  }
-
-  .dash-chat-window {
+  /* Dropdown Menu */
+  .notif-dropdown {
     position: absolute;
-    bottom: 64px;
+    top: 100%;
     right: 0;
-    width: 340px;
-    height: 420px;
-    background-color: var(--card-bg);
-    border-radius: var(--radius-lg);
-    display: none;
-    flex-direction: column;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-xl);
-    overflow: hidden;
-  }
-
-  .dash-chat-window.active {
-    display: flex;
-    animation: dashChatIn 0.25s ease-out;
-  }
-
-  @keyframes dashChatIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .dash-chat-head {
-    background: var(--gradient-primary);
-    padding: 0.85rem 1rem;
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .dash-chat-head h4 {
-    margin: 0;
-    font-size: 0.9rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-
-  .dash-chat-close {
-    background: none;
-    border: none;
-    color: white;
-    cursor: pointer;
-    padding: 0.25rem;
-    font-size: 1rem;
-    opacity: 0.8;
-    transition: var(--transition);
-  }
-
-  .dash-chat-close:hover {
-    opacity: 1;
-  }
-
-  .dash-chat-body {
-    flex: 1;
+    width: 320px;
+    max-height: 400px;
     overflow-y: auto;
-    padding: 1rem;
-    background-color: var(--body-bg);
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .dash-chat-msg {
-    display: flex;
-    max-width: 85%;
-  }
-
-  .dash-chat-msg.received {
-    align-self: flex-start;
-  }
-
-  .dash-chat-msg.sent {
-    align-self: flex-end;
-  }
-
-  .dash-chat-bubble {
-    padding: 0.6rem 0.85rem;
-    border-radius: var(--radius-md);
-    font-size: 0.82rem;
-    line-height: 1.5;
-  }
-
-  .dash-chat-msg.received .dash-chat-bubble {
-    background-color: var(--card-bg);
-    color: var(--text-primary);
+    background: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-bottom-left-radius: 4px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+    z-index: 2000;
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    padding: 0.5rem 0;
   }
 
-  .dash-chat-msg.sent .dash-chat-bubble {
-    background: var(--gradient-primary);
-    color: white;
-    border-bottom-right-radius: 4px;
-  }
-
-  .dash-chat-foot {
-    padding: 0.75rem;
-    background-color: var(--card-bg);
-    border-top: 1px solid var(--border-color);
+  .notif-dropdown.active {
     display: flex;
-    gap: 0.5rem;
   }
 
-  .dash-chat-input {
-    flex: 1;
-    padding: 0.55rem 0.85rem;
-    border-radius: var(--radius-full);
-    border: 2px solid var(--border-color);
-    background-color: var(--body-bg);
-    color: var(--text-primary);
-    font-size: 0.82rem;
-    transition: var(--transition);
-    font-family: inherit;
-    min-width: 0;
-  }
-
-  .dash-chat-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-  }
-
-  .dash-chat-input::placeholder {
-    color: var(--text-muted);
-  }
-
-  .dash-chat-send {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: none;
-    background: var(--gradient-primary);
-    color: white;
+  .notif-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
     cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.2s;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .notif-item:last-child {
+    border-bottom: none;
+  }
+
+  .notif-item:hover {
+    background-color: var(--primary-light);
+  }
+
+  .notif-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #dfe5e7;
+    flex-shrink: 0;
+    margin-right: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: var(--transition);
-    flex-shrink: 0;
-    font-size: 0.8rem;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+    overflow: hidden;
   }
-
-  .dash-chat-send:hover {
-    transform: scale(1.08);
-  }
-
-  /* ========== MODAL (POPUP) ========== */
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
+  
+  .notif-avatar img {
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-    padding: 1rem;
+    object-fit: cover;
   }
 
-  .modal-overlay.active {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .modal-box {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    transform: translateY(20px);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    overflow: hidden;
+  .notif-content {
+    flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
-  }
-
-  .modal-overlay.active .modal-box {
-    transform: translateY(0);
-  }
-
-  .modal-header {
-    padding: 1.25rem 1.5rem 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .modal-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
-    flex-shrink: 0;
   }
 
-  .modal-icon.danger {
-    background-color: #fee2e2;
-    color: #ef4444;
-  }
-
-  .modal-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin: 0;
-  }
-
-  .modal-body {
-    padding: 1rem 1.5rem;
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-    line-height: 1.5;
-  }
-  
-  .modal-body strong {
-    color: var(--text-primary);
+  .notif-name {
     font-weight: 600;
-  }
-
-  .modal-footer {
-    padding: 0.75rem 1.5rem 1.5rem;
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
-  }
-
-  .btn-modal {
-    padding: 0.6rem 1.2rem;
-    border-radius: var(--radius-md);
     font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: var(--transition);
-    font-family: inherit;
-    border: none;
-  }
-
-  .btn-modal-cancel {
-    background-color: transparent;
-    color: var(--text-secondary);
-    border: 1px solid var(--border-color);
-  }
-
-  .btn-modal-cancel:hover {
-    background-color: var(--body-bg);
     color: var(--text-primary);
-    border-color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .btn-modal-confirm {
-    background-color: #ef4444;
+  .notif-preview {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .notif-badge-sm {
+    background-color: var(--primary-color);
     color: white;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    font-size: 0.65rem;
+    padding: 1px 5px;
+    border-radius: 10px;
+    margin-left: 8px;
   }
 
-  .btn-modal-confirm:hover {
-    background-color: #dc2626;
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-  }
+  /* ... (Rest of existing CSS) ... */
+  .dash-profile { display: flex; align-items: center; gap: 0.65rem; }
+  .dash-avatar { width: 38px; height: 38px; border-radius: var(--radius-md); object-fit: cover; border: 2px solid var(--border-color); flex-shrink: 0; }
+  .dash-avatar-placeholder { width: 38px; height: 38px; border-radius: var(--radius-md); background: var(--primary-light); color: var(--primary-color); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0; border: 2px solid var(--border-color); }
+  .dash-profile-info { line-height: 1.3; }
+  .dash-profile-info h4 { color: var(--text-primary); font-weight: 600; font-size: 0.95rem; margin: 0; }
+  .dash-profile-info p { color: var(--text-muted); font-size: 0.75rem; margin: 0; }
   
-  .btn-modal-confirm:disabled {
-    background-color: #fca5a5;
-    cursor: not-allowed;
-    box-shadow: none;
-  }
+  /* DASHBOARD HEADER */
+  .dash-header { margin-bottom: 1.75rem; }
+  .dash-title { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.3rem; }
+  .dash-subtitle { color: var(--text-secondary); font-size: 0.95rem; }
+  
+  /* STATS GRID */
+  .dash-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 1.75rem; }
+  .dash-stat-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; transition: var(--transition); box-shadow: var(--shadow-sm); }
+  .dash-stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+  .dash-stat-icon { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0; }
+  .dash-stat-icon.primary { background-color: var(--primary-light); color: var(--primary-color); }
+  .dash-stat-icon.success { background-color: #dcfce7; color: #22c55e; }
+  .dash-stat-icon.warning { background-color: #fef3c7; color: #d97706; }
+  .dash-stat-icon.danger { background-color: #fee2e2; color: #ef4444; }
+  .dash-stat-value { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); }
+  .dash-stat-content h3 { color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; text-transform: uppercase; margin-bottom: 0.25rem; }
+  
+  /* CONTENT GRID */
+  .dash-content-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; margin-bottom: 1.75rem; }
+  .dash-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-lg); display: flex; flex-direction: column; overflow: hidden; }
+  .dash-card-header { padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); background: var(--primary-light); }
+  .dash-card-title { color: var(--text-primary); font-weight: 600; font-size: 1rem; }
+  .dash-card-title i { color: var(--primary-color); margin-right: 0.5rem; }
+  .dash-card-action { color: var(--primary-color); text-decoration: none; font-weight: 500; font-size: 0.85rem; display: flex; align-items: center; gap: 0.25rem; }
+  .dash-card-action:hover { gap: 0.5rem; }
+  .dash-card-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
 
-  /* ========== RESPONSIVE ========== */
-  @media (max-width: 1199px) {
-    .dash-stats {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
+  /* LISTS */
+  .dash-list-item { display: flex; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); }
+  .dash-list-item:hover { background-color: var(--primary-light); }
+  .dash-list-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+  .dash-list-title { font-weight: 600; color: var(--text-primary); font-size: 1rem; }
+  .dash-list-subtitle { font-size: 0.875rem; color: var(--text-secondary); }
+  .dash-list-specs { display: flex; gap: 1rem; font-size: 0.85rem; color: var(--text-secondary); }
+  .dash-list-actions { display: flex; gap: 0.5rem; }
+  .btn-dash-outline { border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0.5rem 1rem; border-radius: var(--radius-sm); font-size: 0.85rem; cursor: pointer; transition: var(--transition); }
+  .btn-dash-outline:hover { background: var(--primary-light); color: var(--primary-color); border-color: var(--primary-color); }
+  .btn-dash-danger { color: #ef4444; background: transparent; border: 1px solid rgba(239, 68, 68, 0.2); padding: 0.5rem 1rem; border-radius: var(--radius-sm); font-size: 0.85rem; cursor: pointer; transition: var(--transition); }
+  .btn-dash-danger:hover { background: #ef4444; color: white; }
+  
+  /* EMPTY */
+  .dash-empty { text-align: center; padding: 3rem; color: var(--text-secondary); }
+  .dash-empty i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+  .btn-dash-primary { background: var(--gradient-primary); color: white; padding: 0.5rem 1.25rem; border-radius: var(--radius-sm); font-weight: 500; text-decoration: none; }
+  .btn-dash-primary:hover { transform: translateY(-1px); }
+
+  /* TABLE */
+  .dash-table-wrap { overflow-x: auto; }
+  .dash-table { width: 100%; border-collapse: collapse; }
+  .dash-table th { background: var(--card-bg); color: var(--text-secondary); font-weight: 600; font-size: 0.85rem; padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+  .dash-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); }
+  
+  /* STATUS BADGES */
+  .dash-badge { padding: 0.25rem 0.5rem; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+  .dash-badge-occupied, .dash-badge-completed, .dash-badge-paid { background-color: #d1fae5; color: #059669; }
+  .dash-badge-vacant, .dash-badge-pending { background-color: #f3f4f6; color: #6b7280; }
+  .dash-badge-overdue, .dash-badge-urgent { background-color: #fee2e2; color: #dc2626; }
+  .dash-badge-in-progress { background-color: #bfdbfe; color: #1e40af; }
+
+  /* CHAT WIDGET (Kept existing but ensured compatibility) */
+  .dash-chat { position: fixed; bottom: 24px; right: 24px; z-index: 999; }
+  .dash-chat-toggle { width: 50px; height: 50px; border-radius: 50%; background: var(--gradient-primary); color: white; border: none; cursor: pointer; box-shadow: var(--shadow-md); font-size: 1.25rem; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
+  .dash-chat-toggle:hover { transform: scale(1.05); box-shadow: var(--shadow-lg); }
+  .dash-chat-window { position: absolute; bottom: 60px; right: 0; width: 340px; height: 420px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-lg); display: none; flex-direction: column; box-shadow: var(--shadow-xl); }
+  .dash-chat-window.active { display: flex; }
+  .dash-chat-head { background: var(--gradient-primary); padding: 0.85rem 1rem; color: white; display: flex; justify-content: space-between; align-items: center; }
+  .dash-chat-body { flex: 1; overflow-y: auto; padding: 1rem; background: var(--body-bg); display: flex; flex-direction: column; gap: 0.75rem; }
+  .dash-chat-msg { display: flex; max-width: 85%; }
+  .dash-chat-bubble { padding: 0.6rem 0.85rem; border-radius: var(--radius-md); font-size: 0.9rem; }
+  .dash-chat-msg.received .dash-chat-bubble { background: white; border: 1px solid var(--border-color); }
+  .dash-chat-msg.sent .dash-chat-bubble { background: var(--primary-color); color: white; }
+  .dash-chat-foot { padding: 0.75rem; border-top: 1px solid var(--border-color); display: flex; gap: 0.5rem; }
+  .dash-chat-input { flex: 1; border: 1px solid var(--border-color); border-radius: var(--radius-full); padding: 0.5rem; font-size: 0.9rem; outline: none; }
+  .dash-chat-send { width: 36px; height: 36px; border: none; border-radius: 50%; background: var(--primary-color); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+  /* MODAL */
+  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1050; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
+  .modal-overlay.active { opacity: 1; pointer-events: auto; }
+  .modal-box { background-color: white; border-radius: var(--radius-lg); width: 90%; max-width: 450px; overflow: hidden; box-shadow: var(--shadow-xl); transform: translateY(20px); transition: transform 0.3s ease; display: flex; flex-direction: column; }
+  .modal-overlay.active .modal-box { transform: translateY(0); }
+  .modal-header { padding: 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); }
+  .modal-title { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); }
+  .modal-close { background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; }
+  .modal-body { padding: 1.5rem; color: var(--text-secondary); line-height: 1.5; }
+  .modal-body strong { color: var(--text-primary); }
+  .modal-footer { padding: 1rem; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 0.75rem; background: var(--card-bg); }
+  .btn-modal { padding: 0.6rem 1.25rem; border-radius: var(--radius-md); font-weight: 500; cursor: pointer; transition: var(--transition); border: none; }
+  .btn-modal-cancel { background: white; color: var(--text-secondary); border: 1px solid var(--border-color); }
+  .btn-modal-cancel:hover { background: var(--primary-light); color: var(--primary-color); }
+  .btn-modal-confirm { background: #ef4444; color: white; }
+  .btn-modal-confirm:hover { background: #dc2626; }
 
   @media (max-width: 991px) {
-    .dash-content-grid {
-      grid-template-columns: 1fr;
-    }
-    .dash-profile-info {
-      display: none;
-    }
-  }
-
-  @media (max-width: 767px) {
-    .dash-topbar {
-      padding: 1rem 0;
-    }
-    .dash-topbar-left h4 {
-      font-size: 1rem;
-    }
-    .dash-title {
-      font-size: 1.45rem;
-    }
-    .dash-stats {
-      grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
-    }
-    .dash-stat-card {
-      padding: 1rem;
-      gap: 0.75rem;
-    }
-    .dash-stat-icon {
-      width: 40px;
-      height: 40px;
-      font-size: 0.95rem;
-    }
-    .dash-stat-value {
-      font-size: 1.25rem;
-    }
-    .dash-stat-content h3 {
-      font-size: 0.7rem;
-    }
-    .dash-chat-window {
-      width: calc(100vw - 48px);
-      right: -12px;
-    }
-    .dash-list-top {
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-    .dash-list-actions {
-      width: 100%;
-    }
-    .dash-list-actions .btn-dash-outline,
-    .dash-list-actions .btn-dash-danger {
-      flex: 1;
-      justify-content: center;
-    }
-    .modal-footer {
-      flex-direction: column-reverse;
-    }
-    .btn-modal {
-      width: 100%;
-      justify-content: center;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .dash-stats {
-      grid-template-columns: 1fr 1fr;
-      gap: 0.6rem;
-    }
-    .dash-stat-card {
-      padding: 0.85rem;
-      gap: 0.6rem;
-    }
-    .dash-stat-value {
-      font-size: 1.1rem;
-    }
-    .dash-stat-icon {
-      width: 36px;
-      height: 36px;
-      font-size: 0.85rem;
-    }
-    .dash-card-header {
-      padding: 0.9rem 1rem;
-    }
-    .dash-list-item {
-      padding: 0.85rem 1rem;
-    }
-  }
-
-  @media (max-width: 380px) {
-    .dash-stat-content h3 {
-      font-size: 0.65rem;
-    }
-    .dash-stat-value {
-      font-size: 1rem;
-    }
-    .dash-title {
-      font-size: 1.25rem;
-    }
+    .dash-stats { grid-template-columns: repeat(2, 1fr); }
+    .dash-content-grid { grid-template-columns: 1fr; }
   }
 </style>
 {% endblock %}
@@ -976,13 +291,50 @@
   </div>
 
   <div class="dash-topbar-right">
-    <a href="{{ url_for('landlord.messages') }}" class="dash-notif-btn" aria-label="View notifications">
-      <i class="fas fa-bell"></i>
-      <!-- Assuming notifications might exist, or remove this badge logic if not passed -->
-      {% if notifications %}
-      <span class="dash-notif-badge">{{ notifications|length }}</span>
+    <!-- Notification Bell with Badge -->
+    <div style="position: relative; display: inline-block;">
+      <button class="dash-notif-btn" onclick="toggleNotifications(event)" aria-label="Notifications">
+        <i class="fas fa-bell"></i>
+      </button>
+      <!-- Badge -->
+      {% if stats.unread_count > 0 %}
+      <span class="dash-notif-badge">{{ stats.unread_count }}</span>
       {% endif %}
-    </a>
+      
+      <!-- Dropdown Container -->
+      <div id="notifDropdown" class="notif-dropdown">
+        <div style="padding: 0.5rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.8rem; text-align: center;">
+          Unread Messages
+        </div>
+        
+        {% if stats.unread_senders %}
+          {% for sender in stats.unread_senders %}
+            <a href="/landlord/messages?tenant_id={{ sender.id }}" class="notif-item">
+              <div class="notif-avatar">
+                {% if sender.avatar %}
+                  <img src="{{ sender.avatar }}" alt="{{ sender.name }}">
+                {% else %}
+                  <span>{{ sender.name[:2].upper() }}</span>
+                {% endif %}
+              </div>
+              <div class="notif-content">
+                <div class="notif-name">
+                  {{ sender.name }}
+                  <span class="notif-badge-sm">{{ sender.count }}</span>
+                </div>
+                <div class="notif-preview">
+                  {{ sender.last_msg_content }}
+                </div>
+              </div>
+            </a>
+          {% endfor %}
+        {% else %}
+          <div style="padding: 2rem; text-align: center; color: var(--text-secondary); font-size: 0.9rem;">
+            No new messages.
+          </div>
+        {% endif %}
+      </div>
+    </div>
 
     <div class="dash-profile">
         {% if current_user.profile_picture %}
@@ -992,14 +344,12 @@
             <i class="fas fa-user"></i>
           </div>
         {% endif %}
-
         <div class="dash-profile-info">
           <h4>{{ current_user.name }}</h4>
           <p>{{ current_user.role|capitalize }}</p>
         </div>
       </div>
   </div>
-</div>
 
 <!-- Dashboard Header -->
 <div class="dash-header">
@@ -1007,7 +357,7 @@
   <p class="dash-subtitle">Monitor your properties, tenants, and revenue at a glance.</p>
 </div>
 
-<!-- Stats Cards -->
+<!-- Stats Grid -->
 <div class="dash-stats">
   <div class="dash-stat-card">
     <div class="dash-stat-icon primary">
@@ -1041,11 +391,10 @@
 
   <div class="dash-stat-card">
     <div class="dash-stat-icon warning">
-      <!-- Changed icon to reflect bookings -->
       <i class="fas fa-calendar-check"></i>
     </div>
     <div class="dash-stat-content">
-      <h3>Pending Bookings</h3>
+      <h3>Pending Requests</h3>
       <div class="dash-stat-value">{{ stats.pending_requests }}</div>
     </div>
   </div>
@@ -1075,7 +424,7 @@
                 <i class="fas fa-map-marker-alt"></i> {{ property.address }}
               </p>
             </div>
-            <!-- Logic for occupied/vacant status on dashboard -->
+            <!-- Logic for occupied/vacant status -->
             <span class="dash-badge {% if property.status == 'occupied' %}dash-badge-occupied{% else %}dash-badge-vacant{% endif %}">
               {{ property.status|capitalize }}
             </span>
@@ -1139,7 +488,7 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="3" class="text-center p-4 text-muted">No recent payments</td>
+              <td colspan="3" style="text-align: center; padding: 2rem;">No recent payments</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -1166,10 +515,10 @@
             <div class="dash-list-info">
               <h4 class="dash-list-title">{{ user.name }}</h4>
               <p class="dash-list-subtitle">
-                <i class="fas fa-map-marker-alt"></i> {{ house.address if house else 'No property assigned' }}
+                <i class="fas fa-home"></i> {{ house.title if house else 'No property assigned' }}
               </p>
             </div>
-            <a href="{{ url_for('landlord.messages', tenant_id=user.id) }}" class="btn-dash-primary">
+            <a href="/landlord/messages?tenant_id={{ user.id }}" class="btn-dash-outline">
                 <i class="fas fa-comment"></i> Message
             </a>
           </div>
@@ -1184,7 +533,7 @@
     </div>
   </div>
 
-  <!-- Pending Booking Requests Card (Replaces Maintenance) -->
+  <!-- Pending Booking Requests Card -->
   <div class="dash-card">
     <div class="dash-card-header">
       <h3 class="dash-card-title">
@@ -1234,7 +583,7 @@
   <div class="dash-chat-window" id="chatBox">
     <div class="dash-chat-head">
       <h4><i class="fas fa-headset"></i> Support Chat</h4>
-      <button class="dash-chat-close" onclick="toggleChat()" aria-label="Close chat"><i class="fas fa-times"></i></button>
+      <button class="dash-chat-close" onclick="toggleChat()"><i class="fas fa-times"></i></button>
     </div>
     <div class="dash-chat-body" id="chatBody">
       <div class="dash-chat-msg received">
@@ -1243,38 +592,35 @@
     </div>
     <div class="dash-chat-foot">
       <input type="text" class="dash-chat-input" id="chatInput" placeholder="Type a message..." />
-      <button class="dash-chat-send" onclick="sendChatMessage()" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
+      <button class="dash-chat-send" onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
     </div>
   </div>
 </div>
 
 <!-- DELETE CONFIRMATION MODAL -->
 <div class="modal-overlay" id="deleteModal">
-    <div class="modal-box">
-        <div class="modal-header">
-            <div class="modal-icon danger">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <h3 class="modal-title">Delete Property?</h3>
-        </div>
-        <div class="modal-body">
-            <p>Are you sure you want to delete <strong id="modalPropertyName">property name</strong>?</p>
-            <p class="text-muted" style="font-size: 0.85rem; margin-top: 0.5rem;">This action cannot be undone. All associated data will be permanently removed.</p>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-modal btn-modal-cancel" onclick="closeDeleteModal()">Cancel</button>
-            <button class="btn-modal btn-modal-confirm" id="btnConfirmDelete">
-                <i class="fas fa-trash-alt"></i> Delete
-            </button>
-        </div>
+  <div class="modal-box">
+    <div class="modal-header">
+      <h4 class="modal-title">Delete Property?</h4>
+      <button class="modal-close" onclick="closeDeleteModal()"><i class="fas fa-times"></i></button>
     </div>
+    <div class="modal-body">
+      <p>Are you sure you want to delete <strong id="modalPropertyName">property name</strong>? <br><br> This action cannot be undone. All associated data will be permanently removed.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn-modal btn-modal-confirm" id="btnConfirmDelete">
+        <i class="fas fa-trash-alt"></i> Delete
+      </button>
+    </div>
+  </div>
 </div>
 
 {% endblock %}
 
 {% block scripts %}
 <script>
-  // ---- Chat ----
+  // ---- Chat Widget Logic ----
   function toggleChat() {
     document.getElementById('chatBox').classList.toggle('active');
   }
@@ -1288,7 +634,7 @@
 
     const userEl = document.createElement('div');
     userEl.className = 'dash-chat-msg sent';
-    userEl.innerHTML = '<div class="dash-chat-bubble">' + msg.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
+    userEl.innerHTML = '<div class="dash-chat-bubble">' + msg + '</div>';
     body.appendChild(userEl);
     input.value = '';
     body.scrollTop = body.scrollHeight;
@@ -1302,52 +648,53 @@
     }, 1000);
   }
 
-  document.getElementById('chatInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') sendChatMessage();
+  // ---- Notifications Logic ----
+  function toggleNotifications(event) {
+    event.stopPropagation();
+    const dropdown = document.getElementById('notifDropdown');
+    dropdown.classList.toggle('active');
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('notifDropdown');
+    const btn = document.querySelector('.dash-notif-btn');
+    if (!dropdown.contains(event.target) && !btn.contains(event.target)) {
+      dropdown.classList.remove('active');
+    }
   });
 
   // ---- Delete Modal Logic ----
-  var deleteModal = document.getElementById('deleteModal');
-  var modalPropertyName = document.getElementById('modalPropertyName');
-  var btnConfirmDelete = document.getElementById('btnConfirmDelete');
-  var propertyToDeleteId = null;
+  const deleteModal = document.getElementById('deleteModal');
+  const modalPropertyName = document.getElementById('modalPropertyName');
+  const btnConfirmDelete = document.getElementById('btnConfirmDelete');
+  let propertyToDeleteId = null;
 
   function openDeleteModal(id, title) {
     propertyToDeleteId = id;
     modalPropertyName.textContent = title;
-    deleteModal.classList.add('active');
+    deleteModal.style.display = 'flex';
+    setTimeout(() => deleteModal.classList.add('active'), 10);
   }
 
   function closeDeleteModal() {
     deleteModal.classList.remove('active');
+    setTimeout(() => deleteModal.style.display = 'none', 300);
     propertyToDeleteId = null;
   }
 
-  // Close modal if clicking outside
-  deleteModal.addEventListener('click', function(e) {
-    if (e.target === deleteModal) {
-      closeDeleteModal();
-    }
-  });
-
-  // Close on Escape key
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && deleteModal.classList.contains('active')) {
-      closeDeleteModal();
-    }
-  });
-
-  // Confirm Delete Action
+  // Event Listeners for Modal
   btnConfirmDelete.addEventListener('click', function() {
     if (!propertyToDeleteId) return;
 
-    // Add loading state to button
-    var originalBtnText = btnConfirmDelete.innerHTML;
-    btnConfirmDelete.disabled = true;
-    btnConfirmDelete.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+    // Loading state
+    const originalBtnContent = this.innerHTML;
+    this.disabled = true;
+    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
 
-    var headers = { 'Content-Type': 'application/json' };
-    var csrfToken = document.querySelector('input[name="csrf_token"]');
+    // CSRF Token
+    const headers = { 'Content-Type': 'application/json' };
+    const csrfToken = document.querySelector('input[name="csrf_token"]');
     if (csrfToken) headers['X-CSRFToken'] = csrfToken.value;
 
     fetch('/landlord/delete_property/' + propertyToDeleteId, {
@@ -1357,23 +704,33 @@
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        // Close modal
         closeDeleteModal();
-        // Reload page to update stats
         window.location.reload();
       } else {
         alert('Error: ' + (data.error || 'Failed to delete property'));
-        // Reset button
-        btnConfirmDelete.disabled = false;
-        btnConfirmDelete.innerHTML = originalBtnText;
+        this.disabled = false;
+        this.innerHTML = originalBtnContent;
       }
     })
-    .catch(() => {
+    .catch(error => {
+      console.error('Error:', error);
       alert('An error occurred. Please try again.');
-      // Reset button
-      btnConfirmDelete.disabled = false;
-      btnConfirmDelete.innerHTML = originalBtnText;
+      this.disabled = false;
+      this.innerHTML = originalBtnContent;
     });
+  });
+
+  // Close modal on Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      if (deleteModal.classList.contains('active')) {
+        closeDeleteModal();
+      }
+      const dropdown = document.getElementById('notifDropdown');
+      if (dropdown.classList.contains('active')) {
+        dropdown.classList.remove('active');
+      }
+    }
   });
 </script>
 {% endblock %}
