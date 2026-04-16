@@ -790,13 +790,9 @@ def compose_message():
 @tenant_bp.route('/contact_providers')
 @login_required
 def contact_providers():
-    service_providers = User.query.filter_by(role='service').all()
-    return render_template(
-        'tenant.html',
-        bookings=[],
-        houses=[],
-        service_providers=service_providers
-    )
+    # Service-provider functionality removed — redirect safely.
+    flash("Service provider functionality is no longer available.", "info")
+    return redirect(url_for('main.index'))
 
 # Chat with 
 @csrf.exempt

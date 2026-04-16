@@ -91,7 +91,9 @@ def help_tenant():
 # Service Provider Help Page
 @main_bp.route('/help/service-provider')
 def help_service_provider():
-    return render_template('help_service_provider.html')
+    # Service-provider help removed — redirect to general help
+    flash("Service provider help is no longer available.", "info")
+    return redirect(url_for('main.help'))
 
 
 # Admin Help Page
