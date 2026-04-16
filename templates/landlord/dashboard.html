@@ -4,6 +4,15 @@
 
 {% block styles %}
 <style>
+  /* Global Reset for Responsive Layout */
+  * {
+    box-sizing: border-box; /* Ensures padding doesn't break width */
+  }
+
+  body {
+    overflow-x: hidden; /* Prevents horizontal scrollbar */
+  }
+
   /* ========== TOP BAR ========== */
   .dash-topbar {
     display: flex;
@@ -139,7 +148,7 @@
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
-    width: 480px; /* UPDATED: Expanded width for professional look */
+    width: 480px; /* Expanded width */
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
@@ -196,7 +205,7 @@
     text-decoration: underline;
   }
 
-  /* UPDATED: Close Button Styles */
+  /* Close Button Styles */
   .notif-close-btn {
     margin-left: 0.75rem;
     cursor: pointer;
@@ -1033,9 +1042,27 @@
   }
 
   @media (max-width: 767px) {
-    .dash-topbar {
-      padding: 1rem 0;
+    /* FIX: Force Full Width */
+    body, main {
+      width: 100% !important;
+      max-width: 100% !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      overflow-x: hidden;
     }
+
+    .dash-topbar {
+      padding: 1rem 0; /* Remove horizontal padding to touch edges */
+      width: 100%;
+    }
+    
+    .dash-header, 
+    .dash-stats, 
+    .dash-content-grid {
+      width: 100%;
+      max-width: 100%;
+    }
+
     .dash-topbar-left h4 {
       font-size: 1rem;
     }
@@ -1091,13 +1118,13 @@
     }
 
     .notif-dropdown {
-      position: absolute;
+      position: absolute; 
       top: calc(100% + 8px);
       left: 50%;
       transform: translateX(-50%);
       right: auto;
       width: 90%;
-      max-width: 480px; /* Updated max-width for mobile */
+      max-width: 480px;
       z-index: 2500;
       max-height: 70vh;
     }
@@ -1110,9 +1137,9 @@
     
     /* Adjust close button positioning for flex column header on mobile */
     .notif-close-btn {
-        align-self: flex-end; /* Push to right when header stacks */
+        align-self: flex-end; 
         margin-left: 0;
-        margin-top: -1.5rem; /* Position near title */
+        margin-top: -1.5rem;
     }
   }
 
@@ -1189,7 +1216,7 @@
                 <a href="#" onclick="markAllAsRead(event)" class="notif-mark-read">Mark all read</a>
             {% endif %}
             
-            <!-- ADDED: Close Button (X) -->
+            <!-- Close Button (X) -->
             <span class="notif-close-btn" onclick="toggleNotifications()">
                 <i class="fas fa-times"></i>
             </span>
@@ -1554,10 +1581,11 @@
             if (countText) countText.textContent = '0 Total';
             
             // 4. Remove "Mark all read" link
+            // We can find the element via the parent
             const link = e.target;
             if(link) link.style.display = 'none';
             
-            // 5. UPDATED: Close Dropdown
+            // 5. Close Dropdown
             const dropdown = document.getElementById('notifDropdown');
             if (dropdown) dropdown.classList.remove('active');
             
@@ -1584,7 +1612,7 @@
     const notifWrapper = document.querySelector('.notif-wrapper');
     const dropdown = document.getElementById('notifDropdown');
     
-    // If click is outside the wrapper, close dropdown
+    // If click is outside of wrapper, close dropdown
     if (!notifWrapper.contains(e.target)) {
       dropdown.classList.remove('active');
     }
