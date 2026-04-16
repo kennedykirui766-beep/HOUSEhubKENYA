@@ -809,6 +809,72 @@ def messages():
         print("Error loading messages:", e)
         flash("Unable to load messages.", "danger")
         return redirect(url_for("tenant.dashboard"))
+    
+@tenant_bp.route("/poll_messages")
+@login_required
+def poll_messages():
+    if current_user.role != "tenant":
+        return jsonify({"error": "Access denied"}), 403
+
+    # =========================
+    # 1. UNREAD COUNT (cheap)
+    # =========================
+    unread_count = Message.query.filter(
+        Message.receiver_id == current_user.id,
+        Message.is_read == False
+    ).count()
+
+    # =========================
+    # 2. FETCH ONLY NEW MESSAGES
+    # =========================
+    since_param = request.args.get("since")  # ISO timestamp
+
+    msgs_query = Message.query.filter(
+        (Message.receiver_id == current_user.id) |
+        (Message.sender_id == current_user.id)
+    )
+
+    if since_param:
+        try:
+            since_dt = datetime.fromisoformat(since_param)
+            msgs_query = msgs_query.filter(Message.timestamp > since_dt)
+        except ValueError:
+            pass  # fallback if invalid timestamp
+
+    msgs_query = msgs_query.order_by(Message.timestamp.asc()).limit(50).all()
+
+    # =========================
+    # 3. FORMAT RESPONSE
+    # =========================
+    messages_data = []
+    for m in msgs_query:
+        if m.sender_id == current_user.id:
+            other_id = m.receiver_id
+            other_name = m.receiver.name
+            other_avatar = getattr(m.receiver, 'profile_picture', None)
+        else:
+            other_id = m.sender_id
+            other_name = m.sender.name
+            other_avatar = getattr(m.sender, 'profile_picture', None)
+
+        messages_data.append({
+            "id": m.id,
+            "sender_id": m.sender_id,
+            "receiver_id": m.receiver_id,
+            "content": m.content,
+            "timestamp": serialize_timestamp(m.timestamp),
+            "is_read": m.is_read,
+            "other_user": {
+                "id": other_id,
+                "name": other_name,
+                "avatar": other_avatar
+            }
+        })
+
+    return jsonify({
+        "unread_count": unread_count,
+        "messages": messages_data
+    })    
 
 @tenant_bp.route('/compose_message', methods=['GET', 'POST'])
 @login_required

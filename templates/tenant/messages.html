@@ -21,7 +21,7 @@
   /* --- 2. CHAT CONTAINER --- */
   .chat-app-wrapper {
     display: flex;
-    height: 85vh; /* Fixed height for desktop */
+    height: 85vh;
     min-height: 600px;
     background-color: var(--wa-bg-app);
     width: 100%;
@@ -64,7 +64,7 @@
     padding: 8px 12px;
     border-bottom: 1px solid var(--wa-border);
     background: #fff;
-    display: none; /* Hidden by default for toggle logic */
+    display: none;
   }
 
   .search-wrapper {
@@ -329,7 +329,7 @@
   }
   .modal-header { padding: 1rem; border-bottom: 1px solid #eee; display:flex; justify-content:space-between; align-items:center; }
   .modal-body { padding: 1.5rem; color: #667781; }
-  .modal-footer { padding: 1rem; display:flex; justify-content:flex-end; gap:10px; background:#f0f2f5; }  
+  .modal-footer { padding: 1rem; display:flex; justify-content:flex-end; gap:10px; background:#f0f2f5; }
   .btn-modal {
     padding: 8px 16px; border-radius: 6px; border:none; cursor:pointer; font-weight:500;
   }
@@ -340,19 +340,16 @@
   @media (max-width: 768px) {
     body.mobile-chat-open { overflow: hidden; }
 
-    /* Hide Global Support Chat Button */
     .chat-support-btn {
       display: none !important;
     }
 
     .chat-app-wrapper {
-      /* Start BELOW navbar */
-      top: var(--navbar-height); 
-      bottom: 0; 
-      left: 0; 
+      top: var(--navbar-height);
+      bottom: 0;
+      left: 0;
       right: 0;
       height: auto;
-      
       border-radius: 0;
       position: fixed;
       z-index: 1030;
@@ -406,19 +403,16 @@
 
 <!-- Main App Wrapper -->
 <div class="chat-app-wrapper" id="chatWrapper">
-  
+
   <!-- LEFT: Sidebar -->
   <aside class="chat-sidebar">
     <div class="sidebar-header">
       <span class="sidebar-title">Chats</span>
       <div style="color: #54656f; display: flex; gap: 20px; font-size: 1.2rem;">
-        <!-- Mark All Read -->
         <i class="fas fa-check-double" onclick="markAllRead()" title="Mark All Read" style="cursor: pointer;"></i>
-        <!-- Compose Message -->
         <a href="{{ url_for('tenant.compose_message') }}" style="color: inherit; text-decoration: none;">
           <i class="fas fa-edit" title="Message Landlord"></i>
         </a>
-        <!-- Search Toggle -->
         <i class="fas fa-search" onclick="toggleSearch()" style="cursor: pointer;"></i>
       </div>
     </div>
@@ -438,7 +432,7 @@
 
   <!-- RIGHT: Chat Area -->
   <main class="chat-main" id="chatMain">
-    
+
     <!-- Desktop Placeholder -->
     <div class="chat-placeholder" id="chatPlaceholder">
       <i class="fas fa-comments" style="font-size: 5rem; color: #d1d7db; margin-bottom: 20px;"></i>
@@ -448,7 +442,7 @@
 
     <!-- Active Chat View -->
     <div id="activeChatView" style="display: none; height: 100%; flex-direction: column;">
-      
+
       <header class="chat-view-header">
         <button class="back-btn" id="backBtn">
           <i class="fas fa-arrow-left"></i>
@@ -458,8 +452,7 @@
           <div style="font-weight: 600; color: var(--wa-text-primary);" id="headerName">Landlord Name</div>
           <div style="font-size: 0.75rem; color: var(--wa-text-secondary);" id="headerStatus">online</div>
         </div>
-        
-        <!-- Delete Conversation Icon -->
+
         <div style="color: #54656f; margin-left: 15px; display: flex; gap: 20px;">
           <i class="fas fa-trash" style="cursor: pointer; color: #ef4444;" onclick="openDeleteModal()" title="Delete Conversation"></i>
         </div>
@@ -488,35 +481,50 @@
 
 <!-- DELETE MODAL -->
 <div class="modal-overlay" id="deleteModal">
-    <div class="modal-box">
-        <div class="modal-header">
-            <h4 style="margin:0;">Delete Conversation?</h4>
-            <i class="fas fa-times" style="cursor:pointer" onclick="closeDeleteModal()"></i>
-        </div>
-        <div class="modal-body">
-            <p>Are you sure you want to delete this conversation? This action cannot be undone.</p>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-modal btn-cancel" onclick="closeDeleteModal()">Cancel</button>
-            <button class="btn-modal btn-confirm" id="btnConfirmDelete">
-                Delete
-            </button>
-        </div>
+  <div class="modal-box">
+    <div class="modal-header">
+      <h4 style="margin:0;">Delete Conversation?</h4>
+      <i class="fas fa-times" style="cursor:pointer" onclick="closeDeleteModal()"></i>
     </div>
+    <div class="modal-body">
+      <p>Are you sure you want to delete this conversation? This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn-modal btn-confirm" id="btnConfirmDelete">Delete</button>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // --- STATE ---
+
+    // =====================================================================
+    // STATE
+    // =====================================================================
     const state = {
       currentUserId: window.currentUser,
       conversations: {},
-      activeChatId: null
+      activeChatId: null,
+
+      // --- Smart polling state ---
+      // Tracks total unread count from the last poll so we can detect changes
+      lastKnownUnreadCount: null,
+      // Watermark: ISO timestamp of the newest message we have locally.
+      // Sent as ?since= so the server only returns messages newer than this.
+      lastMessageTimestamp: null,
+      // Interval handle so we can clear it if needed
+      pollInterval: null,
+      // How often to poll (ms). Active chat = 4s, idle = 15s
+      POLL_ACTIVE_MS: 4000,
+      POLL_IDLE_MS: 15000,
     };
 
-    // --- DOM ---
+    // =====================================================================
+    // DOM
+    // =====================================================================
     const els = {
       list: document.getElementById('chatList'),
       search: document.getElementById('msgSearch'),
@@ -535,55 +543,70 @@
       body: document.body
     };
 
-    // --- PROCESS DATA ---
-    function processData() {
-      window.rawMessages.forEach(msg => {
+    // =====================================================================
+    // PROCESS DATA
+    // Merges a flat array of messages into state.conversations.
+    // Also advances state.lastMessageTimestamp to the newest message seen,
+    // so poll() always sends the correct ?since= watermark.
+    // =====================================================================
+    function processData(messages) {
+      messages.forEach(msg => {
         const isMe = msg.sender_id === state.currentUserId;
-        // Determine 'other' user (Landlord)
         const otherId = isMe ? msg.receiver_id : msg.sender_id;
-        const otherInfo = isMe ? (msg.receiver || {name: "Landlord", profile_image: null}) 
-                                    : (msg.sender || {name: "Landlord", profile_image: null});
+        const otherInfo = isMe
+          ? (msg.receiver || { name: 'Landlord', profile_image: null })
+          : (msg.sender   || { name: 'Landlord', profile_image: null });
 
         if (!state.conversations[otherId]) {
           state.conversations[otherId] = {
             id: otherId,
-            name: otherInfo.name || "Landlord",
+            name: otherInfo.name || 'Landlord',
             avatar: otherInfo.profile_image,
             messages: [],
             lastMsgTime: msg.timestamp
           };
         }
 
-        // Safety defaults for new fields
         if (typeof msg.delivered_at === 'undefined') msg.delivered_at = null;
-        if (typeof msg.is_read === 'undefined') msg.is_read = false;
-        
-        state.conversations[otherId].messages.push(msg);
+        if (typeof msg.is_read     === 'undefined') msg.is_read      = false;
+
+        // Avoid duplicate messages when merging poll results
+        const alreadyExists = state.conversations[otherId].messages.some(m => m.id === msg.id);
+        if (!alreadyExists) {
+          state.conversations[otherId].messages.push(msg);
+        }
 
         if (new Date(msg.timestamp) > new Date(state.conversations[otherId].lastMsgTime)) {
           state.conversations[otherId].lastMsgTime = msg.timestamp;
         }
+
+        // Advance the global timestamp watermark so the next poll only
+        // fetches messages newer than the latest one we already have.
+        if (
+          !state.lastMessageTimestamp ||
+          new Date(msg.timestamp) > new Date(state.lastMessageTimestamp)
+        ) {
+          state.lastMessageTimestamp = msg.timestamp;
+        }
       });
     }
 
-    // --- TICK LOGIC (UPDATED) ---
+    // =====================================================================
+    // TICK LOGIC
+    // =====================================================================
     function getTickHtml(msg) {
-      // 1. If not delivered -> Single Grey Tick
-      if (!msg.delivered_at) {
-        return '<i class="fas fa-check tick tick-grey"></i>';
-      }
-      // 2. If not read -> Double Grey Tick
-      if (!msg.is_read) {
-        return '<i class="fas fa-check-double tick tick-grey"></i>';
-      }
-      // 3. Otherwise -> Double Blue Tick
+      if (!msg.delivered_at) return '<i class="fas fa-check tick tick-grey"></i>';
+      if (!msg.is_read)      return '<i class="fas fa-check-double tick tick-grey"></i>';
       return '<i class="fas fa-check-double tick tick-blue"></i>';
     }
 
-    // --- RENDER LIST ---
+    // =====================================================================
+    // RENDER LIST
+    // =====================================================================
     function renderList() {
       els.list.innerHTML = '';
-      const sorted = Object.values(state.conversations).sort((a, b) => new Date(b.lastMsgTime) - new Date(a.lastMsgTime));
+      const sorted = Object.values(state.conversations)
+        .sort((a, b) => new Date(b.lastMsgTime) - new Date(a.lastMsgTime));
 
       if (sorted.length === 0) {
         els.list.innerHTML = '<div style="padding:20px; text-align:center; color:#667781;">No messages.</div>';
@@ -596,11 +619,10 @@
         div.className = `chat-item ${state.activeChatId === convo.id ? 'active' : ''}`;
         div.onclick = () => loadChat(convo.id);
 
-        const initials = convo.name ? convo.name.charAt(0).toUpperCase() : '?';
+        const initials  = convo.name ? convo.name.charAt(0).toUpperCase() : '?';
         const avatarHtml = convo.avatar ? `<img src="${convo.avatar}">` : `<span>${initials}</span>`;
-        
-        const timeStr = new Date(lastMsg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        const tickHtml = (lastMsg.sender_id === state.currentUserId) ? getTickHtml(lastMsg) : '';
+        const timeStr   = new Date(lastMsg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const tickHtml  = (lastMsg.sender_id === state.currentUserId) ? getTickHtml(lastMsg) : '';
 
         div.innerHTML = `
           <div class="avatar">${avatarHtml}</div>
@@ -619,70 +641,76 @@
       });
     }
 
-    // --- LOAD CHAT ---
+    // =====================================================================
+    // LOAD CHAT
+    // =====================================================================
     function loadChat(id) {
       state.activeChatId = id;
       const convo = state.conversations[id];
 
       renderList();
       els.placeholder.style.display = 'none';
-      els.activeView.style.display = 'flex';
+      els.activeView.style.display  = 'flex';
       els.body.classList.add('chat-active');
       els.body.classList.add('mobile-chat-open');
 
       els.headerName.textContent = convo.name;
-      const initials = convo.name.substring(0,2).toUpperCase();
-      els.headerAvatar.innerHTML = convo.avatar 
+      const initials = convo.name.substring(0, 2).toUpperCase();
+      els.headerAvatar.innerHTML = convo.avatar
         ? `<img src="${convo.avatar}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`
         : `<div style="width:100%; height:100%; background:#00a884; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white;">${initials}</div>`;
 
       renderMessages(convo.messages);
 
-      // NEW: Mark as read when opening chat
+      // Mark as read when opening chat
       fetch('/tenant/mark_read/' + id, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken()}
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken() }
       })
       .then(res => res.json())
       .then(data => {
-        if(data.success) {
-          // Optimistically update UI to show read status immediately
-          const activeConvo = state.conversations[id];
-          activeConvo.messages.forEach(m => m.is_read = true);
-          renderMessages(activeConvo.messages);
+        if (data.success) {
+          state.conversations[id].messages.forEach(m => m.is_read = true);
+          renderMessages(state.conversations[id].messages);
           renderList();
         }
       })
-      .catch(e => console.error("Mark read error:", e));
+      .catch(e => console.error('Mark read error:', e));
+
+      // Switch to fast polling now that a chat is open
+      restartPolling(state.POLL_ACTIVE_MS);
     }
 
+    // =====================================================================
+    // RENDER MESSAGES
+    // =====================================================================
     function renderMessages(messages) {
       els.messagesArea.innerHTML = '';
       let lastDate = null;
-      
-      messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-      messages.forEach(msg => {
-        // Add Date Divider
+      const sorted = [...messages].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+      sorted.forEach(msg => {
         const msgDate = new Date(msg.timestamp).toLocaleDateString();
         if (msgDate !== lastDate) {
           const divider = document.createElement('div');
-          divider.style.cssText = "text-align: center; margin: 10px 0; color: #fff; background: rgba(225,245,254,0.9); padding: 5px 12px; border-radius: 8px; align-self: center; font-size: 0.8rem; box-shadow: 0 1px 2px rgba(0,0,0,0.1);";
-          divider.innerText = msgDate === new Date().toLocaleDateString() ? "Today" : msgDate;
+          divider.style.cssText = 'text-align:center; margin:10px 0; color:#fff; background:rgba(225,245,254,0.9); padding:5px 12px; border-radius:8px; align-self:center; font-size:0.8rem; box-shadow:0 1px 2px rgba(0,0,0,0.1);';
+          divider.innerText = msgDate === new Date().toLocaleDateString() ? 'Today' : msgDate;
           els.messagesArea.appendChild(divider);
           lastDate = msgDate;
         }
         renderBubble(msg);
       });
+
       els.messagesArea.scrollTop = els.messagesArea.scrollHeight;
     }
 
     function renderBubble(msg) {
       const isMe = msg.sender_id === state.currentUserId;
-      const row = document.createElement('div');
+      const row  = document.createElement('div');
       row.className = `msg-row ${isMe ? 'sent' : 'received'}`;
-      
-      const timeStr = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+      const timeStr  = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       const tickHtml = isMe ? getTickHtml(msg) : '';
 
       row.innerHTML = `
@@ -697,7 +725,9 @@
       els.messagesArea.appendChild(row);
     }
 
-    // --- SEND ---
+    // =====================================================================
+    // SEND MESSAGE
+    // =====================================================================
     function sendMessage() {
       const text = els.input.value.trim();
       if (!text || !state.activeChatId) return;
@@ -710,9 +740,8 @@
         timestamp: new Date().toISOString(),
         delivered_at: null,
         is_read: false,
-        // Temporary mock object
-        sender: {name: "Me", profile_image: null},
-        receiver: {name: "Landlord", profile_image: null}
+        sender:   { name: 'Me',       profile_image: null },
+        receiver: { name: 'Landlord', profile_image: null }
       };
 
       state.conversations[state.activeChatId].messages.push(tempMsg);
@@ -723,39 +752,120 @@
 
       fetch('/tenant/send_message', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken()},
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken() },
         body: JSON.stringify({ content: text, receiver_id: state.activeChatId })
       })
       .then(res => res.json())
       .then(data => {
         if (data.success && data.message) {
-          // Update local state with real message from server (includes delivered_at)
           const realMsg = data.message;
-          const convo = state.conversations[state.activeChatId];
-          
-          // Find the temp message and update it
+          const convo   = state.conversations[state.activeChatId];
           const tempMsgIndex = convo.messages.length - 1;
+
           if (convo.messages[tempMsgIndex].id === tempMsg.id) {
             convo.messages[tempMsgIndex] = realMsg;
-            // Re-render to show real timestamp and delivery status
+
+            // Advance the watermark so the next poll won't re-fetch this message
+            if (
+              !state.lastMessageTimestamp ||
+              new Date(realMsg.timestamp) > new Date(state.lastMessageTimestamp)
+            ) {
+              state.lastMessageTimestamp = realMsg.timestamp;
+            }
+
             renderMessages(convo.messages);
             renderList();
           }
         } else {
-          const errorMsg = data.error || "Failed to send message";
-          alert(errorMsg);
+          alert(data.error || 'Failed to send message');
         }
       })
       .catch(e => {
-        console.error("Send error:", e);
-        alert("Network error while sending message");
+        console.error('Send error:', e);
+        alert('Network error while sending message');
       });
     }
 
-    // --- TENANT SPECIFIC LOGIC ---
+    // =====================================================================
+    // SMART POLLING
+    //
+    // Calls /tenant/poll_messages?since=<ISO> — the tenant-specific endpoint.
+    // Two conditions trigger a message merge + re-render:
+    //   1. A chat is currently open  (activeChatId is set)
+    //   2. The server-reported unread count changed since the last poll
+    //
+    // All other ticks only update the unread count snapshot and return early,
+    // avoiding unnecessary DOM work and bandwidth.
+    // =====================================================================
+    function poll() {
+      // Build URL — append ?since= so the server returns only new messages
+      let url = '/tenant/poll_messages';
+      if (state.lastMessageTimestamp) {
+        url += '?since=' + encodeURIComponent(state.lastMessageTimestamp);
+      }
+
+      fetch(url, {
+        method: 'GET',
+        headers: { 'X-CSRFToken': getCSRFToken() }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Poll failed: ' + res.status);
+        return res.json();
+      })
+      .then(data => {
+        const newUnreadCount = data.unread_count ?? 0;
+        const chatIsOpen     = state.activeChatId !== null;
+        const unreadChanged  = state.lastKnownUnreadCount !== null &&
+                               newUnreadCount !== state.lastKnownUnreadCount;
+
+        // Always update the unread snapshot
+        state.lastKnownUnreadCount = newUnreadCount;
+
+        // Guard — skip merge & re-render if neither condition is met
+        if (!chatIsOpen && !unreadChanged) return;
+
+        // Merge new messages; processData() advances lastMessageTimestamp
+        if (data.messages && data.messages.length > 0) {
+          processData(data.messages);
+
+          if (chatIsOpen) {
+            const convo = state.conversations[state.activeChatId];
+            if (convo) {
+              const wasAtBottom = isScrolledToBottom(els.messagesArea);
+              renderMessages(convo.messages);
+              if (wasAtBottom) {
+                els.messagesArea.scrollTop = els.messagesArea.scrollHeight;
+              }
+            }
+          }
+
+          // Keep sidebar previews current regardless of which chat is open
+          renderList();
+        }
+      })
+      .catch(err => {
+        // Swallow network errors — polling must keep running
+        console.warn('[Poll]', err.message);
+      });
+    }
+
+    // Helper: true when the scroll area is within 60px of the bottom
+    function isScrolledToBottom(el) {
+      return el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+    }
+
+    // Start (or restart) the polling interval. Clears any existing timer first.
+    function restartPolling(intervalMs) {
+      if (state.pollInterval) clearInterval(state.pollInterval);
+      state.pollInterval = setInterval(poll, intervalMs);
+    }
+
+    // =====================================================================
+    // TENANT-SPECIFIC HELPERS
+    // =====================================================================
     window.toggleSearch = function() {
       els.searchBox.style.display = els.searchBox.style.display === 'none' ? 'block' : 'none';
-      if(els.searchBox.style.display === 'block') els.search.focus();
+      if (els.searchBox.style.display === 'block') els.search.focus();
     };
 
     window.markAllRead = function() {
@@ -764,16 +874,13 @@
         headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken() }
       })
       .then(r => r.json())
-      .then(d => {
-        if(d.success) showToast("All messages marked as read");
-      });
+      .then(d => { if (d.success) showToast('All messages marked as read'); });
     };
 
     window.openDeleteModal = function() {
-      const msgs = state.conversations[state.activeChatId].messages;
-      if(msgs.length > 0) {
-        const lastMsgId = msgs[msgs.length - 1].id;
-        document.getElementById('btnConfirmDelete').dataset.msgId = lastMsgId;
+      const msgs = state.conversations[state.activeChatId]?.messages;
+      if (msgs && msgs.length > 0) {
+        document.getElementById('btnConfirmDelete').dataset.msgId = msgs[msgs.length - 1].id;
         els.deleteModal.classList.add('active');
       }
     };
@@ -784,25 +891,21 @@
 
     document.getElementById('btnConfirmDelete').onclick = function() {
       const msgId = this.dataset.msgId;
-      if(!msgId) return;
+      if (!msgId) return;
       fetch('/tenant/delete_message/' + msgId, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken()}
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken() }
       })
       .then(r => r.json())
       .then(d => {
-        if(d.success) {
-          closeDeleteModal();
-          window.location.reload();
-        } else {
-          alert('Error deleting message');
-        }
+        if (d.success) { closeDeleteModal(); window.location.reload(); }
+        else alert('Error deleting message');
       });
     };
 
     function showToast(msg) {
       const t = document.createElement('div');
-      t.style.cssText = `position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); color:#fff; padding:10px 20px; border-radius:20px; z-index:3000;`;
+      t.style.cssText = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); color:#fff; padding:10px 20px; border-radius:20px; z-index:3000;';
       t.innerText = msg;
       document.body.appendChild(t);
       setTimeout(() => t.remove(), 3000);
@@ -812,14 +915,20 @@
       return document.querySelector('meta[name="csrf-token"]')?.content || '';
     }
 
-    // --- EVENTS ---
+    // =====================================================================
+    // EVENTS
+    // =====================================================================
     els.sendBtn.addEventListener('click', sendMessage);
-    els.input.addEventListener('keypress', e => { if(e.key === 'Enter') sendMessage(); });
-    
+    els.input.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
+
     els.backBtn.addEventListener('click', () => {
       els.body.classList.remove('chat-active');
       els.body.classList.remove('mobile-chat-open');
       state.activeChatId = null;
+
+      // Drop back to slow idle polling
+      restartPolling(state.POLL_IDLE_MS);
+
       setTimeout(() => {
         els.activeView.style.display = 'none';
         els.placeholder.style.display = 'flex';
@@ -828,19 +937,41 @@
     });
 
     els.search.addEventListener('input', e => {
-      const term = e.target.value.toLowerCase();
+      const term  = e.target.value.toLowerCase();
       const items = els.list.querySelectorAll('.chat-item');
       items.forEach(item => {
-        const name = item.querySelector('.chat-name').textContent.toLowerCase();
+        const name    = item.querySelector('.chat-name').textContent.toLowerCase();
         const preview = item.querySelector('.last-msg').textContent.toLowerCase();
         item.style.display = (name.includes(term) || preview.includes(term)) ? 'flex' : 'none';
       });
     });
 
-    els.deleteModal.addEventListener('click', (e) => { if(e.target === els.deleteModal) closeDeleteModal(); });
+    els.deleteModal.addEventListener('click', e => {
+      if (e.target === els.deleteModal) closeDeleteModal();
+    });
 
-    processData();
+    // Pause polling when the tab is hidden; resume when visible again
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (state.pollInterval) {
+          clearInterval(state.pollInterval);
+          state.pollInterval = null;
+        }
+      } else {
+        const intervalMs = state.activeChatId ? state.POLL_ACTIVE_MS : state.POLL_IDLE_MS;
+        restartPolling(intervalMs);
+        poll(); // Immediate fetch so the user gets fresh data right away
+      }
+    });
+
+    // =====================================================================
+    // INIT
+    // =====================================================================
+    processData(window.rawMessages);  // Seeds conversations + lastMessageTimestamp
     renderList();
+
+    restartPolling(state.POLL_IDLE_MS); // Start slow; loadChat() upgrades to fast
+    poll();                             // Immediate first poll to seed unread count
   });
 </script>
 {% endblock %}
