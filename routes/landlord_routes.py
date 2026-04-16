@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 from extensions import db, csrf
 from werkzeug.utils import secure_filename
 from datetime import datetime
-from models.models import Message, PaymentLink, User, House, Booking, Payment, MaintenanceRequest, ServiceProvider
+from models.models import Message, PaymentLink, User, House, Booking, Payment, MaintenanceRequest
 import cloudinary.uploader
 import json
 
@@ -536,12 +536,13 @@ def maintenance():
 @landlord_bp.route("/service-providers")
 @login_required
 def service_providers():
+    # Service-provider functionality removed — redirect safely.
     if current_user.role != "landlord":
         flash("Access denied.", "danger")
         return redirect(url_for("main.index"))
 
-    providers = ServiceProvider.query.all()
-    return render_template("landlord/service_providers.html", providers=providers, stats={})
+    flash("Service provider functionality has been removed.", "info")
+    return redirect(url_for("main.index"))
 
 
 # ---------------- Reports ----------------
