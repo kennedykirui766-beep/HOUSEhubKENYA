@@ -21,7 +21,7 @@
   /* --- 2. CHAT CONTAINER --- */
   .chat-app-wrapper {
     display: flex;
-    height: 85vh; /* Fixed height for desktop */
+    height: 85vh;
     min-height: 600px;
     background-color: var(--wa-bg-app);
     width: 100%;
@@ -313,23 +313,19 @@
   @media (max-width: 768px) {
     body.mobile-chat-open { overflow: hidden; }
 
-    /* FIX: Hide Global Support Chat Button on mobile */
     .chat-support-btn {
       display: none !important;
     }
 
     .chat-app-wrapper {
-      /* FIXED: Start BELOW navbar (64px is navbar height) */
-      top: var(--navbar-height); 
-      bottom: 0; 
-      left: 0; 
+      top: var(--navbar-height);
+      bottom: 0;
+      left: 0;
       right: 0;
       height: auto;
-      
       border-radius: 0;
       position: fixed;
-      /* Lower z-index slightly so it doesn't conflict with navbar, but still above content */
-      z-index: 1030; 
+      z-index: 1030;
     }
 
     .chat-sidebar {
@@ -380,7 +376,7 @@
 
 <!-- Main App Wrapper -->
 <div class="chat-app-wrapper" id="chatWrapper">
-  
+
   <!-- LEFT: Sidebar -->
   <aside class="chat-sidebar">
     <div class="sidebar-header">
@@ -392,7 +388,6 @@
       </div>
     </div>
 
-    <!-- Search Area (Flexbox Implementation) -->
     <div class="search-box">
       <div class="search-wrapper">
         <i class="fas fa-search search-icon"></i>
@@ -407,7 +402,7 @@
 
   <!-- RIGHT: Chat Area -->
   <main class="chat-main" id="chatMain">
-    
+
     <!-- Desktop Placeholder -->
     <div class="chat-placeholder" id="chatPlaceholder">
       <i class="fas fa-comments" style="font-size: 5rem; color: #d1d7db; margin-bottom: 20px;"></i>
@@ -417,7 +412,7 @@
 
     <!-- Active Chat View -->
     <div id="activeChatView" style="display: none; height: 100%; flex-direction: column;">
-      
+
       <header class="chat-view-header">
         <button class="back-btn" id="backBtn">
           <i class="fas fa-arrow-left"></i>
@@ -427,7 +422,7 @@
           <div style="font-weight: 600; color: var(--wa-text-primary);" id="headerName">Name</div>
           <div style="font-size: 0.75rem; color: var(--wa-text-secondary);" id="headerStatus">online</div>
         </div>
-        
+
         <!-- Sim Button -->
         <button id="simBtn" style="margin-left:auto; border:none; background:none; font-size:0.8rem; color:var(--wa-text-secondary); cursor:pointer;">
           Sim Online
@@ -464,15 +459,32 @@
 {% block scripts %}
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // --- STATE ---
+
+    // =====================================================================
+    // STATE
+    // =====================================================================
     const state = {
       currentUserId: window.currentUser.id,
       conversations: {},
       activeChatId: null,
-      isRecipientOnline: false
+      isRecipientOnline: false,
+
+      // --- Smart polling state ---
+      // Tracks total unread count from the last poll so we can detect changes
+      lastKnownUnreadCount: null,
+      // Watermark: ISO timestamp of the newest message we have locally.
+      // Sent as ?since= so the server only returns messages newer than this.
+      lastMessageTimestamp: null,
+      // Interval handle so we can clear it if needed
+      pollInterval: null,
+      // How often to poll (ms). Active chat = 4s, idle = 15s
+      POLL_ACTIVE_MS: 4000,
+      POLL_IDLE_MS: 15000,
     };
 
-    // --- DOM ---
+    // =====================================================================
+    // DOM
+    // =====================================================================
     const els = {
       wrapper: document.getElementById('chatWrapper'),
       list: document.getElementById('chatList'),
@@ -491,9 +503,11 @@
       body: document.body
     };
 
-    // --- PROCESS DATA ---
-    function processData() {
-      window.rawMessages.forEach(msg => {
+    // =====================================================================
+    // PROCESS INITIAL DATA
+    // =====================================================================
+    function processData(messages) {
+      messages.forEach(msg => {
         const isMe = msg.sender_id === state.currentUserId;
         const otherId = isMe ? msg.receiver_id : msg.sender_id;
         const otherInfo = msg.other_user;
@@ -509,25 +523,44 @@
         }
 
         if (typeof msg.is_read === 'undefined') msg.is_read = false;
-        state.conversations[otherId].messages.push(msg);
+
+        // Avoid duplicate messages (can happen when merging poll results)
+        const alreadyExists = state.conversations[otherId].messages.some(m => m.id === msg.id);
+        if (!alreadyExists) {
+          state.conversations[otherId].messages.push(msg);
+        }
 
         if (new Date(msg.timestamp) > new Date(state.conversations[otherId].lastMsgTime)) {
           state.conversations[otherId].lastMsgTime = msg.timestamp;
         }
+
+        // Keep the global timestamp watermark up to date so poll() sends
+        // the correct ?since= value and never re-fetches old messages.
+        if (
+          !state.lastMessageTimestamp ||
+          new Date(msg.timestamp) > new Date(state.lastMessageTimestamp)
+        ) {
+          state.lastMessageTimestamp = msg.timestamp;
+        }
       });
     }
 
-    // --- TICK LOGIC ---
+    // =====================================================================
+    // TICK LOGIC
+    // =====================================================================
     function getTickHtml(msg, isOnline) {
       if (msg.is_read) return '<i class="fas fa-check-double tick tick-blue"></i>';
-      if (isOnline) return '<i class="fas fa-check-double tick tick-grey"></i>';
+      if (isOnline)    return '<i class="fas fa-check-double tick tick-grey"></i>';
       return '<i class="fas fa-check tick tick-grey"></i>';
     }
 
-    // --- RENDER LIST ---
+    // =====================================================================
+    // RENDER LIST
+    // =====================================================================
     function renderList() {
       els.list.innerHTML = '';
-      const sorted = Object.values(state.conversations).sort((a, b) => new Date(b.lastMsgTime) - new Date(a.lastMsgTime));
+      const sorted = Object.values(state.conversations)
+        .sort((a, b) => new Date(b.lastMsgTime) - new Date(a.lastMsgTime));
 
       if (sorted.length === 0) {
         els.list.innerHTML = '<div style="padding:20px; text-align:center; color:#667781;">No messages.</div>';
@@ -542,9 +575,9 @@
 
         const initials = convo.name ? convo.name.charAt(0).toUpperCase() : '?';
         const avatarHtml = convo.avatar ? `<img src="${convo.avatar}">` : `<span>${initials}</span>`;
-        
-        const timeStr = new Date(lastMsg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
+
+        const timeStr = new Date(lastMsg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
         const isOnline = (state.activeChatId === convo.id) ? state.isRecipientOnline : false;
         const tickHtml = (lastMsg.sender_id === state.currentUserId) ? getTickHtml(lastMsg, isOnline) : '';
 
@@ -565,7 +598,9 @@
       });
     }
 
-    // --- LOAD CHAT ---
+    // =====================================================================
+    // LOAD CHAT
+    // =====================================================================
     function loadChat(id) {
       state.activeChatId = id;
       const convo = state.conversations[id];
@@ -579,12 +614,15 @@
       els.body.classList.add('mobile-chat-open');
 
       els.headerName.textContent = convo.name;
-      const initials = convo.name.substring(0,2).toUpperCase();
-      els.headerAvatar.innerHTML = convo.avatar 
+      const initials = convo.name.substring(0, 2).toUpperCase();
+      els.headerAvatar.innerHTML = convo.avatar
         ? `<img src="${convo.avatar}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`
         : `<div style="width:100%; height:100%; background:#00a884; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white;">${initials}</div>`;
 
       renderMessages(convo.messages);
+
+      // Switch to fast polling now that the user opened a chat
+      restartPolling(state.POLL_ACTIVE_MS);
     }
 
     function renderMessages(messages) {
@@ -597,8 +635,8 @@
       const isMe = msg.sender_id === state.currentUserId;
       const row = document.createElement('div');
       row.className = `msg-row ${isMe ? 'sent' : 'received'}`;
-      
-      const timeStr = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+      const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       let tickHtml = '';
       if (isMe) tickHtml = getTickHtml(msg, state.isRecipientOnline);
 
@@ -614,7 +652,9 @@
       els.messagesArea.appendChild(row);
     }
 
-    // --- SEND ---
+    // =====================================================================
+    // SEND MESSAGE
+    // =====================================================================
     function sendMessage() {
       const text = els.input.value.trim();
       if (!text || !state.activeChatId) return;
@@ -635,36 +675,39 @@
       els.messagesArea.scrollTop = els.messagesArea.scrollHeight;
       renderList();
 
-      // UPDATE: Use specific route /landlord/send_message
       fetch('/landlord/send_message', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken()},
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken() },
         body: JSON.stringify({ content: text, receiver_id: state.activeChatId })
       })
       .then(res => res.json())
       .then(data => {
         if (data.success && data.message) {
-          // Update local state with the real message from server
           const realMsg = data.message;
           const convo = state.conversations[state.activeChatId];
-          
-          // Find the temp message (last one added) and update it
           const tempMsgIndex = convo.messages.length - 1;
           if (convo.messages[tempMsgIndex].id === tempMsg.id) {
             convo.messages[tempMsgIndex] = realMsg;
-            // Re-render to show real timestamp/ID
+            // Advance the watermark so the next poll won't re-fetch this message
+            if (
+              !state.lastMessageTimestamp ||
+              new Date(realMsg.timestamp) > new Date(state.lastMessageTimestamp)
+            ) {
+              state.lastMessageTimestamp = realMsg.timestamp;
+            }
             renderMessages(convo.messages);
             renderList();
           }
         } else {
-          // Handle error returned by route
-          const errorMsg = data.error || "Failed to send message";
-          alert(errorMsg);
+          alert(data.error || "Failed to send message");
         }
       })
       .catch(e => console.error(e));
     }
 
+    // =====================================================================
+    // STATUS UI
+    // =====================================================================
     function updateStatusUI() {
       if (state.isRecipientOnline) {
         els.headerStatus.textContent = "online";
@@ -687,14 +730,108 @@
       return document.querySelector('meta[name="csrf-token"]')?.content || '';
     }
 
-    // --- EVENTS ---
+    // =====================================================================
+    // SMART POLLING
+    //
+    // Two conditions trigger an actual message fetch:
+    //   1. User has a chat open (activeChatId is set)
+    //   2. The server-reported total unread count changed since last poll
+    //
+    // The poll endpoint is /landlord/poll_messages and should return:
+    //   { unread_count: <int>, messages: [...] }
+    //
+    // When neither condition is true we still call the lightweight poll
+    // endpoint but skip the heavier message merge / re-render work.
+    // =====================================================================
+    function poll() {
+      // Build URL — append ?since= so the server only returns messages
+      // newer than the newest one we already have locally. This avoids
+      // re-fetching the entire history on every tick.
+      let url = '/landlord/poll_messages';
+      if (state.lastMessageTimestamp) {
+        url += '?since=' + encodeURIComponent(state.lastMessageTimestamp);
+      }
+
+      fetch(url, {
+        method: 'GET',
+        headers: { 'X-CSRFToken': getCSRFToken() }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Poll failed: ' + res.status);
+        return res.json();
+      })
+      .then(data => {
+        const newUnreadCount = data.unread_count ?? 0;
+        const chatIsOpen     = state.activeChatId !== null;
+        const unreadChanged  = state.lastKnownUnreadCount !== null &&
+                               newUnreadCount !== state.lastKnownUnreadCount;
+
+        // Update our snapshot of unread count regardless
+        state.lastKnownUnreadCount = newUnreadCount;
+
+        // --- Only process messages if one of the two conditions is met ---
+        if (!chatIsOpen && !unreadChanged) {
+          // Nothing to do — skip expensive merge & re-render
+          return;
+        }
+
+        // Merge new messages into local state.
+        // processData() also advances state.lastMessageTimestamp automatically,
+        // so the next poll will use the updated ?since= watermark.
+        if (data.messages && data.messages.length > 0) {
+          processData(data.messages);
+
+          // If a chat is open, append only the new bubbles that arrived
+          // (avoid a full re-render to prevent scroll-jump for the user).
+          if (chatIsOpen) {
+            const convo = state.conversations[state.activeChatId];
+            if (convo) {
+              const wasAtBottom = isScrolledToBottom(els.messagesArea);
+              renderMessages(convo.messages);
+              if (wasAtBottom) {
+                els.messagesArea.scrollTop = els.messagesArea.scrollHeight;
+              }
+            }
+          }
+
+          // Always refresh the sidebar list so last-message previews stay current
+          renderList();
+        }
+      })
+      .catch(err => {
+        // Silently swallow network errors so polling keeps running
+        console.warn('[Poll]', err.message);
+      });
+    }
+
+    // Helper: returns true if the scroll area is near the bottom (within 60px)
+    function isScrolledToBottom(el) {
+      return el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+    }
+
+    // Start (or restart) the polling interval at a given interval in ms.
+    // Clears any existing interval first to avoid duplicates.
+    function restartPolling(intervalMs) {
+      if (state.pollInterval) {
+        clearInterval(state.pollInterval);
+      }
+      state.pollInterval = setInterval(poll, intervalMs);
+    }
+
+    // =====================================================================
+    // EVENTS
+    // =====================================================================
     els.sendBtn.addEventListener('click', sendMessage);
-    els.input.addEventListener('keypress', e => { if(e.key === 'Enter') sendMessage(); });
-    
+    els.input.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
+
     els.backBtn.addEventListener('click', () => {
       els.body.classList.remove('chat-active');
       els.body.classList.remove('mobile-chat-open');
       state.activeChatId = null;
+
+      // Back to idle polling speed
+      restartPolling(state.POLL_IDLE_MS);
+
       setTimeout(() => {
         els.activeView.style.display = 'none';
         els.placeholder.style.display = 'flex';
@@ -716,8 +853,33 @@
       updateStatusUI();
     });
 
-    processData();
+    // Pause polling when the browser tab is hidden; resume when visible again
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (state.pollInterval) {
+          clearInterval(state.pollInterval);
+          state.pollInterval = null;
+        }
+      } else {
+        // Resume at the right speed for current context
+        const intervalMs = state.activeChatId ? state.POLL_ACTIVE_MS : state.POLL_IDLE_MS;
+        restartPolling(intervalMs);
+        // Do an immediate poll so the user gets fresh data right away
+        poll();
+      }
+    });
+
+    // =====================================================================
+    // INIT
+    // =====================================================================
+    processData(window.rawMessages);
     renderList();
+
+    // Kick off idle polling — switches to fast polling inside loadChat()
+    restartPolling(state.POLL_IDLE_MS);
+
+    // Seed the initial unread count with a first poll right away
+    poll();
   });
 </script>
 {% endblock %}
