@@ -197,6 +197,7 @@
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+    width: 100%;
   }
 
   .notif-item {
@@ -208,6 +209,8 @@
     transition: var(--transition);
     border-bottom: 1px solid var(--border-color);
     gap: 0.5rem;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .notif-item:last-child {
@@ -1144,10 +1147,10 @@
           </div>
         </div>
         
-        {% if unread_count > 0 %}
+        <!-- Check if unread_senders_list is available and has content -->
+        {% if unread_senders_list %}
           <div class="notif-list" id="notifList">
             {% for sender in unread_senders_list %}
-            <!-- Clicking this link opens messages for the specific tenant -->
             <a href="{{ url_for('landlord.messages', tenant_id=sender.id) }}" class="notif-item">
               <div class="notif-sender-info">
                 <span class="notif-sender-name">{{ sender.name }}</span>

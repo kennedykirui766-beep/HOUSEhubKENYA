@@ -116,9 +116,8 @@ def dashboard():
     )
 
     # =========================
-    # 🔔 NEW: UNREAD MESSAGES
+    # 🔔 UNREAD MESSAGES
     # =========================
-
     unread_messages = Message.query.filter(
         Message.receiver_id == current_user.id,
         Message.is_read == False
@@ -127,7 +126,7 @@ def dashboard():
     unread_count = len(unread_messages)
 
     # =========================
-    # GROUP BY SENDER (FIXED + CLEAN)
+    # GROUP BY SENDER
     # =========================
     unread_senders_dict = {}
 
@@ -143,8 +142,7 @@ def dashboard():
 
         unread_senders_dict[sender.id]["count"] += 1
 
-    # convert dict → list for template
-    unread_senders = list(unread_senders_dict.values())
+    unread_senders_list = list(unread_senders_dict.values())
 
     # 📊 Stats dictionary
     stats = {
@@ -162,9 +160,9 @@ def dashboard():
         recent_payments=recent_payments,
         stats=stats,
 
-        # 🔔 notifications
+        # 🔔 notifications (UPDATED AS REQUESTED)
         unread_count=unread_count,
-        unread_senders=unread_senders
+        unread_senders=unread_senders_list
     )
 
 # ---------------- Manage Properties ----------------
