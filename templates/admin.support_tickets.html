@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Support Tickets - Admin{% endblock %}
+
+{% block content %}
+<div class="content-card">
+  <div class="content-card-header">
+    <h3 class="content-card-title">Support Tickets</h3>
+    <div>
+      <a href="{{ url_for('admin.dashboard') }}" class="btn btn-light">Back</a>
+    </div>
+  </div>
+  <div class="content-card-body">
+    <form class="form-inline mb-3" method="get">
+      <div class="form-row align-items-center">
+        <div class="col-auto">
+          <input name="q" value="{{ q or '' }}" class="form-control" placeholder="Search tickets, user, email" />
+        </div>
+        <div class="col-auto">
+          <select name="status" class="form-control">
+            <option value="">All status</option>
+            <option value="open" {% if request.args.get('status') == 'open' %}selected{% endif %}>Open</option>
+            <option value="pending" {% if request.args.get('status') == 'pending' %}selected{% endif %}>Pending</option>
+            <option value="resolved" {% if request.args.get('status') == 'resolved' %}selected{% endif %}>Resolved</option>
+          </select>
+        </div>
+        <div class="col-auto">
+          <input type="date" name="start_date" value="{{ request.args.get('start_date','') }}" class="form-control" />
+        </div>
+        <div class="col-auto">
+          <input type="date" name="end_date" value="{{ request.args.get('end_date','') }}" class="form-control" />
+        </div>
+        <div class="col-auto">
+          <select name="sort_by" class="form-control">
+            <option value="created_at" {% if request.args.get('sort_by','created_at') == 'created_at' %}selected{% endif %}>Sort: Created</option>
+            <option value="user_name" {% if request.args.get('sort_by') == 'user_name' %}selected{% endif %}>Sort: User</option>
+            <option value="status" {% if request.args.get('sort_by') == 'status' %}selected{% endif %}>Sort: Status</option>
+          </select>
+        </div>
+        <div class="col-auto">
+          <select name="sort_dir" class="form-control">
+            <option value="desc" {% if request.args.get('sort_dir','desc') == 'desc' %}selected{% endif %}>Desc</option>
+            <option value="asc" {% if request.args.get('sort_dir') == 'asc' %}selected{% endif %}>Asc</option>
+          </select>
+        </div>
+        <div class="col-auto">
+          <button class="btn btn-primary" type="submit">Apply</button>
+          <a href="{{ url_for('admin.support_tickets', export='csv', q=q, status=request.args.get('status'), start_date=request.args.get('start_date'), end_date=request.args.get('end_date'), sort_by=request.args.get('sort_by'), sort_dir=request.args.get('sort_dir')) }}" class="btn btn-secondary ml-2">Export CSV</a>
+        </div>
+      </div>
+    </form>
+    {% if tickets %}
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>User</th>
+            <th>Subject</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in tickets %}
+          <tr>
+            <td>{{ t.id }}</td>
+            <td>{{ t.user.name if t.user else 'Unknown' }} ({{ t.user.email if t.user else '' }})</td>
+            <td>{{ t.subject }}</td>
+            <td>{{ t.status }}</td>
+            <td>{{ t.created_at | datetimeformat }}</td>
+            <td>
+              <a href="{{ url_for('admin.support_ticket_view', ticket_id=t.id) }}" class="btn btn-sm btn-primary">View</a>
+              {% if t.status != 'resolved' %}
+              <form action="{{ url_for('admin.support_ticket_resolve', ticket_id=t.id) }}" method="post" style="display:inline">
+                <button class="btn btn-sm btn-success" type="submit">Resolve</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% if pagination and pagination.pages > 1 %}
+      <nav aria-label="Ticket pages" class="mt-3">
+        <ul class="pagination">
+          {% if pagination.has_prev %}
+          <li class="page-item"><a class="page-link" href="?page={{ pagination.prev_num }}&q={{ q or '' }}">Previous</a></li>
+          {% else %}
+          <li class="page-item disabled"><span class="page-link">Previous</span></li>
+          {% endif %}
+
+          <li class="page-item disabled"><span class="page-link">Page {{ pagination.page }} of {{ pagination.pages }}</span></li>
+
+          {% if pagination.has_next %}
+          <li class="page-item"><a class="page-link" href="?page={{ pagination.next_num }}&q={{ q or '' }}">Next</a></li>
+          {% else %}
+          <li class="page-item disabled"><span class="page-link">Next</span></li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+    {% else %}
+      <p>No support tickets found.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

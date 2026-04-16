@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Support Ticket #{{ ticket.id }}{% endblock %}
+
+{% block content %}
+<div class="content-card">
+  <div class="content-card-header">
+    <h3 class="content-card-title">Ticket #{{ ticket.id }} — {{ ticket.subject }}</h3>
+    <div>
+      <a href="{{ url_for('admin.support_tickets') }}" class="btn btn-light">Back to tickets</a>
+    </div>
+  </div>
+  <div class="content-card-body">
+    <p><strong>User:</strong> {{ ticket.user.name if ticket.user else 'Unknown' }} ({{ ticket.user.email if ticket.user else '' }})</p>
+    <p><strong>Status:</strong> {{ ticket.status }}</p>
+    <p><strong>Created:</strong> {{ ticket.created_at | datetimeformat }}</p>
+    <hr>
+    <h5>Ticket Description</h5>
+    <div class="list-item">{{ ticket.description }}</div>
+
+    <h5 style="margin-top:1rem">Related Messages</h5>
+    {% if messages %}
+      <ul>
+        {% for m in messages %}
+        <li><strong>{{ m.full_name }}</strong> ({{ m.created_at | datetimeformat }}):<br>{{ m.message }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No related messages found.</p>
+    {% endif %}
+
+    <form action="{{ url_for('admin.support_ticket_resolve', ticket_id=ticket.id) }}" method="post">
+      {% if ticket.status != 'resolved' %}
+      <button class="btn btn-success">Mark Resolved</button>
+      {% else %}
+      <span class="status-badge status-success">Resolved</span>
+      {% endif %}
+    </form>
+  </div>
+</div>
+{% endblock %}

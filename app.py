@@ -56,6 +56,19 @@ def create_app():
     socketio = SocketIO(app, cors_allowed_origins="*")
     CORS(app)
     mail.init_app(app)
+    # Rate limiter
+    try:
+        from extensions import limiter
+        limiter.init_app(app)
+    except Exception:
+        pass
+
+    # Start background notification worker (best-effort)
+    try:
+        from services.notification import start_worker
+        start_worker()
+    except Exception:
+        app.logger.exception('Failed to start notification worker')
 
     # Exempt Socket.IO routes from CSRF (since chat.html uses WebSocket)
     csrf.exempt('routes.support_routes.support_bp')

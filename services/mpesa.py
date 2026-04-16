@@ -72,3 +72,22 @@ def stk_push(phone, amount):
         "checkout_request_id": checkout_request_id
     }
 
+
+def create_payment_link(amount, phone_number=None, account_ref=None):
+    """Wrapper that attempts STK push and returns (link, transaction_id).
+    Falls back to a dev URL when MPESA not configured.
+    """
+    try:
+        res = stk_push(phone_number, amount)
+        cid = res.get('checkout_request_id')
+        if cid:
+            link = f"mpesa://stk/{cid}"
+            return link, cid
+    except Exception:
+        pass
+
+    # fallback dev link
+    tx = f"dev-{int(datetime.now().timestamp())}"
+    link = f"https://example.com/pay/{tx}?amount={int(amount)}"
+    return link, tx
+

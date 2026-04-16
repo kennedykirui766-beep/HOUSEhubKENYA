@@ -300,6 +300,11 @@ class Payment(db.Model):
     due_date = db.Column(db.Date)
 
     status = db.Column(db.String(20), default='Pending')
+    # New fields for payment flows
+    payment_link = db.Column(db.String(500), nullable=True)
+    transaction_id = db.Column(db.String(200), nullable=True)
+    receipt_url = db.Column(db.String(500), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class MaintenanceRequest(db.Model):
@@ -313,6 +318,18 @@ class MaintenanceRequest(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     date_submitted = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+    # Attachments stored as JSON list of URLs
+    attachments = db.Column(db.Text, nullable=True)
+
+    # SLA / expected resolution datetime
+    sla_due = db.Column(db.DateTime, nullable=True)
+
+    # Optional freeform tenant comments (JSON or text)
+    tenant_comments = db.Column(db.Text, nullable=True)
+
+    # Relationship: comments timeline (see MaintenanceComment)
+    comments = db.relationship('MaintenanceComment', back_populates='request', lazy=True, cascade='all, delete-orphan')
 
     # Relationships (optional but powerful)
     tenant = db.relationship('User', back_populates='maintenance_requests')
@@ -360,6 +377,19 @@ class SupportMessage(db.Model):
 
     # Optional: link to user if logged in
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+
+
+class MaintenanceComment(db.Model):
+    __tablename__ = 'maintenance_comment'
+    id = db.Column(db.Integer, primary_key=True)
+    request_id = db.Column(db.Integer, db.ForeignKey('maintenance_request.id'), nullable=False)
+    author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    role = db.Column(db.String(50), nullable=True)  # 'tenant' or 'landlord' or 'admin'
+    comment = db.Column(db.Text, nullable=False)
+    attachments = db.Column(db.Text, nullable=True)  # JSON list of URLs
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    request = db.relationship('MaintenanceRequest', back_populates='comments')
 
 
 # ----------------- SupportTicket -----------------

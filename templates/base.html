@@ -1911,6 +1911,120 @@
         }
     </script>
 
+    {% if current_user.is_authenticated and current_user.role == 'tenant' %}
+    <!-- Contact Widget: floating support/chat widget (prefill to landlord if tenant) -->
+    <style>
+    .contact-widget { position: fixed; right: 20px; bottom: 20px; z-index: 3000; font-family: Inter, sans-serif; }
+    .cw-button { width:56px; height:56px; border-radius:50%; background:var(--gradient-primary); color:#fff; border:none; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); cursor:pointer; }
+    .cw-menu { margin-top:10px; display:flex; flex-direction:column; gap:8px; align-items:flex-end; }
+    .cw-action { display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:10px; background:var(--card-bg); color:var(--text-primary); text-decoration:none; box-shadow:var(--shadow-sm); border:1px solid var(--border-color); }
+    .cw-action i { width:18px; text-align:center; }
+    .cw-primary { background: var(--gradient-primary); color: #fff; border: none; }
+    .cw-modal { position: fixed; right: 20px; bottom: 96px; width: 340px; max-width: calc(100% - 40px); background: var(--card-bg); border-radius: 12px; box-shadow: var(--shadow-lg); padding: 12px; display:none; z-index:3100; }
+    .cw-modal.active { display:block; }
+    .cw-modal textarea { width:100%; min-height:110px; border-radius:8px; border:1px solid var(--border-color); padding:8px; resize:vertical; }
+    .cw-row { display:flex; gap:8px; margin-top:8px; justify-content:flex-end; }
+    .cw-toast { position: fixed; right: 20px; bottom: 86px; background: rgba(0,0,0,0.8); color: #fff; padding:8px 12px; border-radius:8px; z-index:3200; display:none; }
+    </style>
+
+    <div class="contact-widget" id="contactWidget">
+        <button id="cwToggle" class="cw-button" title="Contact support"><i class="fas fa-comments"></i></button>
+        <div class="cw-menu" id="cwMenu" aria-hidden="true">
+            <a id="cwCall" class="cw-action" href="#"><i class="fas fa-phone"></i><span class="d-none d-sm-inline">Call</span></a>
+            <a id="cwWhatsApp" class="cw-action" href="#" target="_blank"><i class="fab fa-whatsapp"></i><span class="d-none d-sm-inline">WhatsApp</span></a>
+            <button id="cwMessage" class="cw-action cw-primary" type="button"><i class="fas fa-edit"></i><span class="d-none d-sm-inline">Message</span></button>
+        </div>
+
+        <div id="cwModal" class="cw-modal" role="dialog" aria-hidden="true">
+            <div style="font-weight:600; margin-bottom:6px;">Send a message</div>
+            <div id="cwRecipient" style="font-size:0.9rem; color:var(--text-muted); margin-bottom:8px;">Preparing...</div>
+            <textarea id="cwText" placeholder="Type your message..."></textarea>
+            <div class="cw-row">
+                <button id="cwCancel" class="cw-action" style="background:transparent;">Cancel</button>
+                <button id="cwSend" class="cw-action cw-primary">Send</button>
+            </div>
+        </div>
+
+        <div id="cwToast" class="cw-toast"></div>
+    </div>
+
+    <script>
+    (function(){
+        const btn = document.getElementById('cwToggle');
+        const menu = document.getElementById('cwMenu');
+        const callLink = document.getElementById('cwCall');
+        const waLink = document.getElementById('cwWhatsApp');
+        const msgBtn = document.getElementById('cwMessage');
+        const modal = document.getElementById('cwModal');
+        const cancel = document.getElementById('cwCancel');
+        const send = document.getElementById('cwSend');
+        const text = document.getElementById('cwText');
+        const recipientEl = document.getElementById('cwRecipient');
+        const toast = document.getElementById('cwToast');
+
+        let recipient = null;
+
+        function showToast(t){ toast.textContent = t; toast.style.display = 'block'; setTimeout(()=> toast.style.display='none', 3000); }
+
+        btn.addEventListener('click', ()=>{ menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex'; });
+
+        // Load default recipient when widget first shown
+        function loadRecipient(){
+            fetch('/tenant/default_recipient').then(r=>r.json()).then(j=>{
+                if(j && j.has_recipient){
+                    recipient = j;
+                    recipientEl.textContent = 'To: ' + (j.name || 'Landlord');
+                    if(j.phone_number){
+                        const num = j.phone_number.replace(/[^0-9+]/g,'');
+                        callLink.href = 'tel:' + num;
+                        waLink.href = 'https://wa.me/' + num.replace(/^\+/, '') + '?text=' + encodeURIComponent('Hi ' + (j.name||'') + ',');
+                    } else {
+                        callLink.href = '#';
+                        waLink.href = '#';
+                    }
+                } else {
+                    recipient = null;
+                    recipientEl.textContent = 'Contact support via message or WhatsApp.';
+                    callLink.href = '#';
+                    waLink.href = '#';
+                }
+            }).catch(err=>{
+                recipient = null;
+                recipientEl.textContent = 'Contact support via message or WhatsApp.';
+            });
+        }
+
+        // Open message modal
+        msgBtn.addEventListener('click', ()=>{
+            modal.classList.add('active');
+            modal.setAttribute('aria-hidden','false');
+            loadRecipient();
+        });
+
+        cancel.addEventListener('click', ()=>{ modal.classList.remove('active'); modal.setAttribute('aria-hidden','true'); text.value=''; });
+
+        send.addEventListener('click', ()=>{
+            const content = text.value && text.value.trim();
+            if(!content){ showToast('Please enter a message'); return; }
+            if(!recipient || !recipient.id){ showToast('No landlord found — message will be sent to support'); }
+            const receiver_id = recipient && recipient.id ? recipient.id : 0;
+
+            fetch('/tenant/send_message', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || ''},
+                body: JSON.stringify({ receiver_id: receiver_id, content: content })
+            }).then(r=>r.json()).then(j=>{
+                if(j && j.success){ showToast('Message sent'); modal.classList.remove('active'); text.value=''; }
+                else { showToast('Failed to send'); }
+            }).catch(e=>{ console.error(e); showToast('Network error'); });
+        });
+
+        // Initialize recipient proactively for quicker UX
+        loadRecipient();
+    })();
+    </script>
+    {% endif %}
+
     {% block scripts %}{% endblock %}
 </body>
 </html>
