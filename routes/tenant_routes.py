@@ -1057,7 +1057,40 @@ def view_receipt(id):
         tenant_id=current_user.id
     ).first_or_404()
 
-    return render_template('tenant/receipt.html', payment=payment)
+    # If receipt URL not present, generate and save it
+    if not getattr(payment, 'receipt_url', None):
+        try:
+            from services.receipt import generate_and_save_receipt
+            generate_and_save_receipt(payment)
+        except Exception:
+            pass
+
+    # If receipt_url exists, redirect to it for download/view
+    if getattr(payment, 'receipt_url', None):
+        return redirect(payment.receipt_url)
+
+    # Fallback: render a simple HTML view
+    return render_template('receipts/payment_receipt.html', payment=payment)
+
+
+@tenant_bp.route('/receipt/<int:id>/download')
+@login_required
+def download_receipt(id):
+    payment = Payment.query.filter_by(id=id, tenant_id=current_user.id).first_or_404()
+    try:
+        from services.receipt import generate_and_save_receipt
+        url = generate_and_save_receipt(payment)
+        if url:
+            return redirect(url)
+    except Exception:
+        pass
+    # If generation fails, render inline as attachment
+    html = render_template('receipts/payment_receipt.html', payment=payment)
+    from flask import make_response
+    resp = make_response(html)
+    resp.headers['Content-Type'] = 'text/html'
+    resp.headers['Content-Disposition'] = f'attachment; filename=receipt-{payment.id}.html'
+    return resp
 
 
 @tenant_bp.route('/payments/export')
