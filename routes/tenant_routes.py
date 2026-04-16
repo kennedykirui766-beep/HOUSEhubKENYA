@@ -119,8 +119,20 @@ def dashboard():
         for p in payments
     ]
     payment_data = [p.amount for p in payments]
-    # Recent messages for tenant
-    recent_messages = Message.query.filter_by(receiver_id=current_user.id).order_by(Message.date.desc()).limit(3).all()
+    # Recent messages for tenant (summarize sender, snippet, date)
+    recent_messages_q = Message.query.filter_by(receiver_id=current_user.id).order_by(Message.date.desc()).limit(3).all()
+    recent_messages = []
+    for m in recent_messages_q:
+        try:
+            sender = User.query.get(m.sender_id) if getattr(m, 'sender_id', None) else None
+            recent_messages.append({
+                'id': m.id,
+                'sender_name': sender.name if sender else 'Unknown',
+                'snippet': (m.content or '')[:120],
+                'date': getattr(m, 'date', None)
+            })
+        except Exception:
+            recent_messages.append({'id': getattr(m, 'id', None), 'sender_name': 'Unknown', 'snippet': (m.content or '')[:120], 'date': getattr(m, 'date', None)})
 
     # Outstanding balance: sum of pending payments
     try:
