@@ -1,0 +1,56 @@
+{% extends 'admin.html' %}
+{% block content %}
+<div class="container">
+  <h2>Operations Dashboard</h2>
+  <div class="row">
+    <div class="col-md-3">
+      <div class="card p-2">
+        <strong>Total users</strong>
+        <div>{{ stats.total_users }}</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-2">
+        <strong>Open maintenance</strong>
+        <div>{{ stats.maintenance_open }}</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-2">
+        <strong>Open support</strong>
+        <div>{{ stats.support_open }}</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-2">
+        <strong>Payment failures</strong>
+        <div>{{ stats.payment_failures }}</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="mt-4">Maintenance (priority)</h3>
+  <table class="table table-sm">
+    <thead><tr><th>ID</th><th>Issue</th><th>Status</th><th>SLA</th><th>Assigned</th></tr></thead>
+    <tbody>
+      {% for r in open_maintenance %}
+      <tr>
+        <td>{{ r.id }}</td>
+        <td>{{ r.issue }}</td>
+        <td>{{ r.status }}</td>
+        <td>{{ r.sla_due or '—' }}</td>
+        <td>{{ r.assigned_to or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3 class="mt-4">Recent Support (unresolved)</h3>
+  <ul>
+    {% for s in unresolved_support %}
+      <li>{{ s.id }} — {{ s.subject }} ({{ s.user.name if s.user else 'anon' }})</li>
+    {% endfor %}
+  </ul>
+
+</div>
+{% endblock %}
