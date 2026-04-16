@@ -4,15 +4,6 @@
 
 {% block styles %}
 <style>
-  /* Global Reset */
-  * {
-    box-sizing: border-box; 
-  }
-
-  body {
-    overflow-x: hidden;
-  }
-
   /* ========== TOP BAR ========== */
   .dash-topbar {
     display: flex;
@@ -23,8 +14,6 @@
     margin-bottom: 0.5rem;
     border-bottom: 1px solid var(--border-color);
     flex-wrap: wrap;
-    position: relative;
-    z-index: 100;
   }
 
   .dash-topbar-left h4 {
@@ -46,6 +35,11 @@
     gap: 1rem;
   }
 
+  /* ========== NOTIFICATION BELL ========== */
+  .dash-notif-wrapper {
+    position: relative;
+  }
+
   .dash-notif-btn {
     position: relative;
     width: 40px;
@@ -61,7 +55,6 @@
     transition: var(--transition);
     font-size: 1rem;
     text-decoration: none;
-    z-index: 1002;
   }
 
   .dash-notif-btn:hover {
@@ -74,9 +67,10 @@
     position: absolute;
     top: -4px;
     right: -4px;
-    width: 18px;
+    min-width: 18px;
     height: 18px;
-    border-radius: 50%;
+    padding: 0 4px;
+    border-radius: 9px;
     background: #dc3545;
     color: white;
     font-size: 0.6rem;
@@ -85,13 +79,228 @@
     align-items: center;
     justify-content: center;
     border: 2px solid var(--card-bg);
-  }
-  
-  /* Hide badge if count is 0 */
-  .dash-notif-badge.hidden {
-    display: none;
+    line-height: 1;
   }
 
+  /* ========== NOTIFICATION DROPDOWN ========== */
+  .notif-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    width: 320px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    z-index: 500;
+    overflow: hidden;
+    display: none;
+    flex-direction: column;
+    animation: notifDropIn 0.2s ease-out;
+  }
+
+  .notif-dropdown.open {
+    display: flex;
+  }
+
+  @keyframes notifDropIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Small caret arrow — points up toward the bell */
+  .notif-dropdown::before {
+    content: '';
+    position: absolute;
+    top: -7px;
+    left: 12px;
+    width: 13px;
+    height: 13px;
+    background: var(--card-bg);
+    border-left: 1px solid var(--border-color);
+    border-top: 1px solid var(--border-color);
+    transform: rotate(45deg);
+    z-index: 1;
+  }
+
+  .notif-dropdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 1rem 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--body-bg);
+  }
+
+  .notif-dropdown-header h5 {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .notif-dropdown-header h5 i {
+    color: var(--primary-color);
+    font-size: 0.8rem;
+  }
+
+  .notif-unread-pill {
+    background: #dc3545;
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 0.15rem 0.45rem;
+    border-radius: 20px;
+  }
+
+  .notif-dropdown-body {
+    max-height: 320px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  /* Scrollbar styling */
+  .notif-dropdown-body::-webkit-scrollbar {
+    width: 4px;
+  }
+  .notif-dropdown-body::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .notif-dropdown-body::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+  }
+
+  .notif-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    text-decoration: none;
+    transition: background 0.15s ease;
+    cursor: pointer;
+  }
+
+  .notif-item:last-child {
+    border-bottom: none;
+  }
+
+  .notif-item:hover {
+    background: var(--primary-light);
+  }
+
+  .notif-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    border: 2px solid var(--border-color);
+    text-transform: uppercase;
+  }
+
+  .notif-item-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .notif-item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .notif-sender-name {
+    color: var(--text-primary);
+    font-size: 0.82rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .notif-time {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .notif-preview {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+  }
+
+  .notif-count-badge {
+    flex-shrink: 0;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 9px;
+    background: var(--primary-color);
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+  }
+
+  .notif-dropdown-footer {
+    padding: 0.65rem 1rem;
+    border-top: 1px solid var(--border-color);
+    background: var(--body-bg);
+    text-align: center;
+  }
+
+  .notif-dropdown-footer a {
+    color: var(--primary-color);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: var(--transition);
+  }
+
+  .notif-dropdown-footer a:hover {
+    color: var(--secondary-color);
+    gap: 0.5rem;
+  }
+
+  .notif-empty {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+  }
+
+  .notif-empty i {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+    display: block;
+    opacity: 0.4;
+  }
+
+  /* ========== PROFILE ========== */
   .dash-profile {
     display: flex;
     align-items: center;
@@ -136,156 +345,6 @@
     color: var(--text-muted);
     font-size: 0.72rem;
     margin: 0;
-  }
-
-  /* ========== NOTIFICATION DROPDOWN STYLES ========== */
-  .notif-wrapper {
-    position: relative;
-    z-index: 2000;
-  }
-
-  .notif-dropdown {
-    position: absolute;
-    top: calc(100% + 10px);
-    right: 0;
-    width: 480px; 
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-xl);
-    z-index: 2000;
-    display: none;
-    flex-direction: column;
-    overflow: hidden;
-    animation: slideDown 0.2s ease-out forwards;
-  }
-
-  .notif-dropdown.active {
-    display: flex;
-  }
-
-  @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .notif-header {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--border-color);
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    background-color: var(--body-bg);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .notif-header-right {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .notif-header small {
-    color: var(--text-secondary);
-    font-weight: 400;
-  }
-
-  .notif-mark-read {
-    color: var(--primary-color);
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-decoration: none;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-
-  .notif-mark-read:hover {
-    text-decoration: underline;
-  }
-
-  .notif-close-btn {
-    margin-left: 0.75rem;
-    cursor: pointer;
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-  }
-
-  .notif-close-btn:hover {
-    color: var(--text-primary);
-    background-color: rgba(0,0,0,0.05);
-  }
-
-  .notif-list {
-    max-height: 400px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .notif-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.85rem 1rem;
-    text-decoration: none;
-    transition: var(--transition);
-    border-bottom: 1px solid var(--border-color);
-    gap: 0.5rem;
-    width: 100%;
-    box-sizing: border-box;
-    background-color: var(--card-bg);
-  }
-
-  .notif-item:last-child {
-    border-bottom: none;
-  }
-
-  .notif-item:hover {
-    background-color: var(--primary-light);
-  }
-
-  .notif-sender-info {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-  }
-
-  .notif-sender-name {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .notif-sender-count {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    white-space: nowrap;
-  }
-
-  .notif-icon {
-    color: var(--primary-color);
-    font-size: 0.9rem;
-    flex-shrink: 0;
-  }
-
-  .notif-empty {
-    padding: 2rem 1rem;
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 0.85rem;
   }
 
   /* ========== DASHBOARD HEADER ========== */
@@ -1024,51 +1083,35 @@
     box-shadow: none;
   }
 
-  /* ========== AGGRESSIVE RESPONSIVE FIX FOR FULL WIDTH ========== */
-  @media (max-width: 767px) {
-    /* 1. Override Base Template Constraints */
-    html, body {
-        width: 100vw !important;
-        overflow-x: hidden !important;
-    }
-
-    /* Target main specifically from base.html */
-    main#main {
-        width: 100vw !important;
-        max-width: 100vw !important;
-        padding: 0 !important; /* Remove base padding to utilize full screen */
-    }
-
-    /* 2. Force Dashboard Containers to Full Width */
-    .dash-topbar, 
-    .dash-header,
-    .dash-stats, 
-    .dash-content-grid {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-        /* Add small padding back manually so text isn't against edge */
-        padding-left: 1rem !important;
-        padding-right: 1rem !important; 
-    }
-
-    /* 3. Fix Grid Columns to 1 (Full Width Items) */
+  /* ========== RESPONSIVE ========== */
+  @media (max-width: 1199px) {
     .dash-stats {
-        grid-template-columns: 1fr !important; 
-        gap: 0.75rem !important;
+      grid-template-columns: repeat(2, 1fr);
     }
+  }
+
+  @media (max-width: 991px) {
     .dash-content-grid {
-        grid-template-columns: 1fr !important;
-        gap: 1rem !important;
+      grid-template-columns: 1fr;
     }
-    
-    /* Mobile Specific Adjustments */
+    .dash-profile-info {
+      display: none;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .dash-topbar {
+      padding: 1rem 0;
+    }
     .dash-topbar-left h4 {
       font-size: 1rem;
     }
     .dash-title {
       font-size: 1.45rem;
+    }
+    .dash-stats {
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
     }
     .dash-stat-card {
       padding: 1rem;
@@ -1108,39 +1151,19 @@
       width: 100%;
       justify-content: center;
     }
-    
-    /* Notification Responsive */
-    .notif-wrapper {
-      position: relative; 
-    }
-
+    /* Responsive: notification dropdown on small screens */
     .notif-dropdown {
-      position: absolute; 
-      top: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%);
-      right: auto;
-      width: 90%;
-      max-width: 480px;
-      z-index: 2500;
-      max-height: 70vh;
+      width: calc(100vw - 2rem);
+      left: 0;
     }
-
-    .notif-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
-    
-    .notif-close-btn {
-        align-self: flex-end; 
-        margin-left: 0;
-        margin-top: -1.5rem;
+    .notif-dropdown::before {
+      left: 12px;
     }
   }
 
   @media (max-width: 480px) {
     .dash-stats {
+      grid-template-columns: 1fr 1fr;
       gap: 0.6rem;
     }
     .dash-stat-card {
@@ -1187,60 +1210,90 @@
   </div>
 
   <div class="dash-topbar-right">
-    
-    <!-- Notification Bell Wrapper -->
-    <div class="notif-wrapper">
-      <!-- Bell Button -->
-      <div class="dash-notif-btn" onclick="toggleNotifications()" aria-label="View notifications">
-        <i class="fas fa-bell"></i>
-        
-        <!-- Badge shows count if > 0 -->
-        <span class="dash-notif-badge {% if unread_count == 0 %}hidden{% endif %}">
-          {{ unread_count }}
-        </span>
-      </div>
 
-      <!-- Notification Dropdown -->
-      <div class="notif-dropdown" id="notifDropdown">
-        <div class="notif-header">
-          <span>Unread Messages</span>
-          <div class="notif-header-right">
-            <small id="notif-count-text">{{ unread_count }} Total</small>
-            {% if unread_count > 0 %}
-                <span style="color:#ccc">|</span>
-                <a href="#" onclick="markAllAsRead(event)" class="notif-mark-read">Mark all read</a>
+    <!-- ===== NOTIFICATION BELL WITH DROPDOWN ===== -->
+    <div class="dash-notif-wrapper" id="notifWrapper">
+      <button
+        class="dash-notif-btn"
+        id="notifBell"
+        aria-label="View notifications"
+        aria-haspopup="true"
+        aria-expanded="false"
+        onclick="toggleNotifDropdown(event)"
+      >
+        <i class="fas fa-bell"></i>
+        {% if unread_count and unread_count > 0 %}
+        <span class="dash-notif-badge">{{ unread_count if unread_count <= 99 else '99+' }}</span>
+        {% endif %}
+      </button>
+
+      <!-- Dropdown -->
+      <div class="notif-dropdown" id="notifDropdown" role="menu">
+        <div class="notif-dropdown-header">
+          <h5>
+            <i class="fas fa-bell"></i>
+            Notifications
+            {% if unread_count and unread_count > 0 %}
+            <span class="notif-unread-pill">{{ unread_count }} unread</span>
             {% endif %}
-            
-            <!-- Close Button (X) -->
-            <span class="notif-close-btn" onclick="toggleNotifications()">
-                <i class="fas fa-times"></i>
-            </span>
-          </div>
+          </h5>
         </div>
-        
-        <!-- Check if unread_senders_list is available and has content -->
-        {% if unread_senders %}
-          <div class="notif-list" id="notifList">
+
+        <div class="notif-dropdown-body">
+          {% if unread_senders and unread_senders|length > 0 %}
             {% for sender in unread_senders %}
-            <a href="{{ url_for('landlord.messages', tenant_id=sender.id) }}" class="notif-item">
-              <div class="notif-sender-info">
-                <span class="notif-sender-name">{{ sender.name }}</span>
-                <span class="notif-sender-count">
-                  {{ sender.count }} new message{{ 's' if sender.count > 1 else '' }}
-                </span>
+            <a
+              href="{{ url_for('landlord.messages', tenant_id=sender.id) }}"
+              class="notif-item"
+              role="menuitem"
+              onclick="closeNotifDropdown()"
+            >
+              <!-- Avatar: initials -->
+              <div class="notif-avatar">
+                {{ sender.name[0] | upper }}{% if sender.name.split()|length > 1 %}{{ sender.name.split()[1][0] | upper }}{% endif %}
               </div>
-              <i class="fas fa-chevron-right notif-icon"></i>
+
+              <div class="notif-item-body">
+                <div class="notif-item-top">
+                  <span class="notif-sender-name">{{ sender.name }}</span>
+                  {% if sender.last_message_time %}
+                  <span class="notif-time">
+                    {{ sender.last_message_time | timesince if timesince is defined else sender.last_message_time.strftime('%H:%M') }}
+                  </span>
+                  {% endif %}
+                </div>
+                <div class="notif-preview">
+                  {% if sender.last_message %}
+                    {{ sender.last_message | truncate(60, true, '…') }}
+                  {% else %}
+                    {{ sender.count }} unread message{{ 's' if sender.count != 1 else '' }}
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- Unread count badge -->
+              {% if sender.count > 0 %}
+              <span class="notif-count-badge">{{ sender.count }}</span>
+              {% endif %}
             </a>
             {% endfor %}
-          </div>
-        {% else %}
-          <div class="notif-empty" id="notifEmpty">
-            <i class="fas fa-check-circle"></i>
-            <p>No unread messages</p>
-          </div>
-        {% endif %}
+          {% else %}
+            <div class="notif-empty">
+              <i class="fas fa-bell-slash"></i>
+              You're all caught up!
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="notif-dropdown-footer">
+          <a href="{{ url_for('landlord.messages') }}">
+            View all messages <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
       </div>
+      <!-- /Dropdown -->
     </div>
+    <!-- ===== END NOTIFICATION BELL ===== -->
 
     <div class="dash-profile">
         {% if current_user.profile_picture %}
@@ -1299,7 +1352,6 @@
 
   <div class="dash-stat-card">
     <div class="dash-stat-icon warning">
-      <!-- Changed icon to reflect bookings -->
       <i class="fas fa-calendar-check"></i>
     </div>
     <div class="dash-stat-content">
@@ -1333,7 +1385,6 @@
                 <i class="fas fa-map-marker-alt"></i> {{ property.address }}
               </p>
             </div>
-            <!-- Logic for occupied/vacant status on dashboard -->
             <span class="dash-badge {% if property.status == 'occupied' %}dash-badge-occupied{% else %}dash-badge-vacant{% endif %}">
               {{ property.status|capitalize }}
             </span>
@@ -1442,7 +1493,7 @@
     </div>
   </div>
 
-  <!-- Pending Booking Requests Card (Replaces Maintenance) -->
+  <!-- Pending Booking Requests Card -->
   <div class="dash-card">
     <div class="dash-card-header">
       <h3 class="dash-card-title">
@@ -1532,92 +1583,9 @@
 
 {% block scripts %}
 <script>
-  // ---- Notification Dropdown Logic ----
-  function toggleNotifications() {
-    const dropdown = document.getElementById('notifDropdown');
-    const chatBox = document.getElementById('chatBox');
-    
-    // Close chat if open
-    if (chatBox.classList.contains('active')) {
-      chatBox.classList.remove('active');
-    }
-    
-    dropdown.classList.toggle('active');
-  }
-
-  // ---- Mark All as Read Logic ----
-  function markAllAsRead(e) {
-    e.preventDefault();
-    
-    // NOTE: Ensure you have a backend route like /landlord/messages/mark_all_read
-    // that handles POST requests.
-    fetch('/landlord/messages/mark_all_read', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken()
-        }
-    })
-    .then(response => {
-        if (response.ok) {
-            // UI Updates
-            // 1. Hide Badge
-            document.querySelector('.dash-notif-badge').classList.add('hidden');
-            
-            // 2. Empty List
-            const notifList = document.getElementById('notifList');
-            const emptyState = document.getElementById('notifEmpty');
-            
-            if (notifList) notifList.style.display = 'none';
-            if (emptyState) emptyState.style.display = 'block';
-            
-            // 3. Update Header Text
-            const countText = document.getElementById('notif-count-text');
-            if (countText) countText.textContent = '0 Total';
-            
-            // 4. Remove "Mark all read" link
-            // We can find the element via the parent
-            const link = e.target;
-            if(link) link.style.display = 'none';
-            
-            // 5. Close Dropdown
-            const dropdown = document.getElementById('notifDropdown');
-            if (dropdown) dropdown.classList.remove('active');
-            
-        } else {
-            console.error('Failed to mark messages as read');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-  }
-
-  // Helper to get CSRF token if meta tag exists
-  function getCsrfToken() {
-      const meta = document.querySelector('meta[name="csrf-token"]');
-      if (meta) return meta.getAttribute('content');
-      const input = document.querySelector('input[name="csrf_token"]');
-      if (input) return input.value;
-      return '';
-  }
-
-  // Close notifications when clicking outside
-  document.addEventListener('click', function(e) {
-    const notifWrapper = document.querySelector('.notif-wrapper');
-    const dropdown = document.getElementById('notifDropdown');
-    
-    // If click is outside the wrapper, close dropdown
-    if (!notifWrapper.contains(e.target)) {
-      dropdown.classList.remove('active');
-    }
-  });
-
   // ---- Chat ----
   function toggleChat() {
     document.getElementById('chatBox').classList.toggle('active');
-    // Close notifications if open
-    document.getElementById('notifDropdown').classList.remove('active');
   }
 
   function sendChatMessage() {
@@ -1664,25 +1632,21 @@
     propertyToDeleteId = null;
   }
 
-  // Close modal if clicking outside
   deleteModal.addEventListener('click', function(e) {
     if (e.target === deleteModal) {
       closeDeleteModal();
     }
   });
 
-  // Close on Escape key
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && deleteModal.classList.contains('active')) {
       closeDeleteModal();
     }
   });
 
-  // Confirm Delete Action
   btnConfirmDelete.addEventListener('click', function() {
     if (!propertyToDeleteId) return;
 
-    // Add loading state to button
     var originalBtnText = btnConfirmDelete.innerHTML;
     btnConfirmDelete.disabled = true;
     btnConfirmDelete.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
@@ -1698,23 +1662,48 @@
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        // Close modal
         closeDeleteModal();
-        // Reload page to update stats
         window.location.reload();
       } else {
         alert('Error: ' + (data.error || 'Failed to delete property'));
-        // Reset button
         btnConfirmDelete.disabled = false;
         btnConfirmDelete.innerHTML = originalBtnText;
       }
     })
     .catch(() => {
       alert('An error occurred. Please try again.');
-      // Reset button
       btnConfirmDelete.disabled = false;
       btnConfirmDelete.innerHTML = originalBtnText;
     });
+  });
+
+  // ---- Notification Bell Dropdown ----
+  var notifBell      = document.getElementById('notifBell');
+  var notifDropdown  = document.getElementById('notifDropdown');
+
+  function toggleNotifDropdown(e) {
+    e.stopPropagation();
+    var isOpen = notifDropdown.classList.toggle('open');
+    notifBell.setAttribute('aria-expanded', isOpen);
+  }
+
+  function closeNotifDropdown() {
+    notifDropdown.classList.remove('open');
+    notifBell.setAttribute('aria-expanded', 'false');
+  }
+
+  // Close when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!document.getElementById('notifWrapper').contains(e.target)) {
+      closeNotifDropdown();
+    }
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeNotifDropdown();
+    }
   });
 </script>
 {% endblock %}
