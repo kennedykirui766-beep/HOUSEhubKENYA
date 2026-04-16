@@ -44,8 +44,9 @@
         <strong>Approved admin email:</strong> {{ approved_admin_email or 'Not configured' }}<br>
         <strong>Authenticator verified:</strong> {% if admin_totp_verified %}Yes{% else %}No{% endif %}
         <div class="mt-2">
-          <a href="{{ url_for('auth.admin_security_setup') }}" class="btn btn-sm btn-primary me-2">Set Up Admin QR 2FA</a>
-          <a href="{{ url_for('auth.admin_2fa_verify') }}" class="btn btn-sm btn-outline-primary">Verify Authenticator</a>
+            <a href="{{ url_for('auth.admin_security_setup') }}" class="btn btn-sm btn-primary me-2">Set Up Admin QR 2FA</a>
+            <a href="{{ url_for('auth.admin_2fa_verify') }}" class="btn btn-sm btn-outline-primary me-2">Verify Authenticator</a>
+            <a href="{{ url_for('admin.support_tickets') }}" class="btn btn-sm btn-info">Support Tickets</a>
         </div>
       </div>
     </section>
@@ -61,14 +62,14 @@
       {% endfor %}
       {% endif %}
       {% endwith %}
-    </section>
-
-    <!-- System Overview -->
-    <section class="system-overview" style="background: #F5E8C7; color: #1A1A1A;">
-      <h2>System Overview</h2>
-      <div class="card">Total Users: {{ stats.total_users }}</div>
-      <div class="card">Total Properties: {{ stats.total_properties }}</div>
-      <div class="card">Total Transactions: {{ stats.total_transactions }}</div>
+        return render_template(
+            'admin.html',
+            users=users,
+            houses=houses,
+            stats=stats,
+            approved_admin_email=get_allowed_admin_email(),
+            admin_totp_verified=has_admin_totp_verified(current_user),
+        )
     </section>
 
     <!-- Platform Health Metrics -->

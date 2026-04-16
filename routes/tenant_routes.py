@@ -5,7 +5,7 @@ from io import BytesIO
 import json
 import os
 
-from flask import Blueprint, current_app, flash, jsonify, render_template, request, redirect, url_for
+from flask import Blueprint, current_app, flash, jsonify, render_template, request, redirect, url_for, make_response
 from flask_login import login_required, current_user, logout_user
 from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
@@ -17,7 +17,8 @@ from werkzeug.utils import secure_filename
 
 from models.models import (
     Document, Booking, MaintenanceRequest, Message,
-    House, Notification, Payment, User, Event
+    House, Notification, Payment, User, Event,
+    SupportTicket, SupportMessage
 )
 
 from extensions import db, csrf
@@ -67,6 +68,8 @@ tenant_bp = Blueprint('tenant', __name__, url_prefix='/tenant')
 
 # Track online users (user_id -> connection info)
 online_users = set()
+
+from extensions import db, csrf, limiter
 
 @tenant_bp.route('/dashboard')
 @login_required
@@ -418,12 +421,35 @@ def submit_request():
             return redirect(url_for('tenant.submit_request'))
 
         # Create maintenance request
+        # Handle photo uploads (allow multiple)
+        attachments = []
+        try:
+            files = request.files.getlist('photos')
+        except Exception:
+            files = []
+
+        for f in files:
+            if f and f.filename:
+                try:
+                    upload_result = cloudinary.uploader.upload(
+                        f,
+                        resource_type="image",
+                        folder="homehub/maintenance"
+                    )
+                    url = upload_result.get('secure_url')
+                    if url:
+                        attachments.append(url)
+                except Exception:
+                    pass
+
         request_obj = MaintenanceRequest(
             tenant_id=current_user.id,
             house_id=house.id,
             issue=issue,
+            description=issue,
             status="Open",
-            date_submitted=datetime.utcnow()
+            date_submitted=datetime.utcnow(),
+            attachments=json.dumps(attachments) if attachments else None
         )
 
         db.session.add(request_obj)
@@ -490,7 +516,27 @@ def pay_rent():
         db.session.add(payment)
         db.session.commit()
 
-        flash("Rent payment submitted!", "success")
+        # Create a payment link (STK push or dev link) and save
+        try:
+            from services.mpesa import create_payment_link
+            link, tx = create_payment_link(amount, phone_number=getattr(current_user, 'phone_number', None), account_ref=f"rent-{payment.id}")
+            payment.payment_link = link
+            payment.transaction_id = tx
+            db.session.commit()
+
+            # Send payment email (best-effort)
+            try:
+                from services.email_service import send_payment_email
+                send_payment_email(current_user.email, current_user.name, link, amount)
+            except Exception:
+                import logging
+                logging.exception('Failed to send payment email')
+
+        except Exception:
+            import logging
+            logging.exception('Failed to create payment link')
+
+        flash("Rent payment initiated. Check your phone or email for payment link.", "success")
         return redirect(url_for('tenant.dashboard'))
 
     return render_template('tenant/pay_rent.html', bookings=bookings)
@@ -820,6 +866,7 @@ def contact_providers():
 # Chat with 
 @csrf.exempt
 @tenant_bp.route('/send_message', methods=['POST'])
+@limiter.limit("6 per minute;100 per day")
 @login_required
 def send_message():
     from datetime import datetime
@@ -832,14 +879,60 @@ def send_message():
     receiver_id = data.get("receiver_id")
     content = data.get("content")
 
-    if not receiver_id or not content:
+    if not content:
         return {"success": False, "error": "Missing data"}, 400
 
+
     try:
-        # 1. CREATE MESSAGE (always SENT first)
+        # If receiver_id is falsy or landlord not found, treat as support message/ticket
+        receiver = None
+        if receiver_id:
+            try:
+                receiver = User.query.get(int(receiver_id))
+            except Exception:
+                receiver = None
+
+        if not receiver:
+            # Create a support ticket and record the support message
+            ticket = SupportTicket(
+                user_id=current_user.id,
+                subject=f"Support message from {current_user.name}",
+                description=content,
+                status='open'
+            )
+            db.session.add(ticket)
+
+            support_msg = SupportMessage(
+                full_name=current_user.name,
+                email=current_user.email,
+                phone=getattr(current_user, 'phone_number', None),
+                role=current_user.role,
+                message=content,
+                user_id=current_user.id
+            )
+            db.session.add(support_msg)
+            db.session.commit()
+
+            # Enqueue email notification to support inbox (background worker)
+            try:
+                from services.notification import enqueue_support_email
+                enqueue_support_email(
+                    full_name=current_user.name,
+                    sender_email=current_user.email,
+                    phone=getattr(current_user, 'phone_number', None),
+                    role=current_user.role,
+                    message=content,
+                )
+            except Exception:
+                import logging
+                logging.exception('Failed to enqueue support notification email')
+
+            return {"success": True, "support": True, "ticket_id": ticket.id}
+
+        # 1. CREATE MESSAGE (send to landlord)
         message = Message(
             sender_id=current_user.id,
-            receiver_id=receiver_id,
+            receiver_id=receiver.id,
             content=content,
             timestamp=datetime.utcnow(),
             delivered_at=None,
@@ -850,8 +943,7 @@ def send_message():
         db.session.commit()
 
         # 2. DELIVERY LOGIC (ONLY if user is online)
-        # (temporary check — later replaced by SocketIO event)
-        if receiver_id in online_users:
+        if receiver.id in online_users:
             message.delivered_at = datetime.utcnow()
             db.session.commit()
 
@@ -901,6 +993,36 @@ def mark_read(landlord_id):
     db.session.commit()
     return {"success": True}
 
+
+@tenant_bp.route('/default_recipient')
+@login_required
+def default_recipient():
+    """Return a recommended recipient for tenant messages (active booking landlord).
+    Falls back to an informative response if no active booking exists.
+    """
+    if current_user.role != 'tenant':
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    booking = Booking.query.filter_by(tenant_id=current_user.id, status='active').first()
+    if not booking:
+        return jsonify({'has_recipient': False, 'message': 'No active booking'}), 200
+
+    # Prefer relationship if present, otherwise load by id
+    house = getattr(booking, 'property', None) or House.query.get(getattr(booking, 'house_id', None))
+    if not house:
+        return jsonify({'has_recipient': False, 'message': 'No property found for booking'}), 200
+
+    landlord = User.query.get(getattr(house, 'owner_id', None))
+    if not landlord:
+        return jsonify({'has_recipient': False, 'message': 'No landlord found for property'}), 200
+
+    return jsonify({
+        'has_recipient': True,
+        'id': landlord.id,
+        'name': landlord.name,
+        'phone_number': getattr(landlord, 'phone_number', None)
+    })
+
 # routes/tenant_routes.py
 
 @tenant_bp.route('/settings', methods=['GET', 'POST'])
@@ -935,7 +1057,69 @@ def view_receipt(id):
         tenant_id=current_user.id
     ).first_or_404()
 
-    return render_template('tenant/receipt.html', payment=payment)
+    # If receipt URL not present, generate and save it
+    if not getattr(payment, 'receipt_url', None):
+        try:
+            from services.receipt import generate_and_save_receipt
+            generate_and_save_receipt(payment)
+        except Exception:
+            pass
+
+    # If receipt_url exists, redirect to it for download/view
+    if getattr(payment, 'receipt_url', None):
+        return redirect(payment.receipt_url)
+
+    # Fallback: render a simple HTML view
+    return render_template('receipts/payment_receipt.html', payment=payment)
+
+
+@tenant_bp.route('/receipt/<int:id>/download')
+@login_required
+def download_receipt(id):
+    payment = Payment.query.filter_by(id=id, tenant_id=current_user.id).first_or_404()
+    try:
+        from services.receipt import generate_and_save_receipt
+        url = generate_and_save_receipt(payment)
+        if url:
+            return redirect(url)
+    except Exception:
+        pass
+    # If generation fails, render inline as attachment
+    html = render_template('receipts/payment_receipt.html', payment=payment)
+    from flask import make_response
+    resp = make_response(html)
+    resp.headers['Content-Type'] = 'text/html'
+    resp.headers['Content-Disposition'] = f'attachment; filename=receipt-{payment.id}.html'
+    return resp
+
+
+@tenant_bp.route('/payments/export')
+@login_required
+def export_payments():
+    # Export tenant's payments as CSV
+    import csv
+    import io
+
+    payments = Payment.query.filter_by(tenant_id=current_user.id).order_by(Payment.created_at.desc()).all()
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['id', 'house_id', 'amount', 'payment_month', 'date', 'status', 'transaction_id', 'payment_link'])
+    for p in payments:
+        writer.writerow([
+            p.id,
+            p.house_id,
+            p.amount,
+            p.payment_month,
+            getattr(p, 'date', ''),
+            p.status,
+            getattr(p, 'transaction_id', ''),
+            getattr(p, 'payment_link', ''),
+        ])
+
+    resp = make_response(output.getvalue())
+    resp.headers['Content-Type'] = 'text/csv'
+    resp.headers['Content-Disposition'] = 'attachment; filename="payments.csv"'
+    return resp
 
 @tenant_bp.route('/request/<int:id>')
 @login_required

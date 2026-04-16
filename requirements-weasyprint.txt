@@ -1,0 +1,5 @@
+WeasyPrint
+
+# Note: WeasyPrint requires system libraries (cairo, pango, gdk-pixbuf).
+# On Windows, install GTK/Cairo dependencies or use headless Linux builder.
+# To add permanently to project dependencies, merge this line into requirements.txt.

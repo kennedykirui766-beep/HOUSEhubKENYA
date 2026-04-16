@@ -1,9 +1,15 @@
 from flask import Blueprint, render_template, redirect, request, url_for, flash, session
 from flask_login import login_required, current_user, login_user, logout_user
 from sqlalchemy import inspect
+from sqlalchemy import or_
 import logging
 from models.models import User, House, SystemUpdateSubscriber, SystemSetting
+from models.models import SupportTicket, SupportMessage
 from extensions import db, csrf
+from flask import make_response
+import csv
+import io
+from datetime import datetime
 from utils_delete import delete_user_and_dependents
 
 logger = logging.getLogger(__name__)
@@ -151,6 +157,108 @@ def delete_property(house_id):
 def view_reports():
     stats = get_stats()
     return render_template('admin.view_reports.html', stats=stats)
+
+
+@admin_bp.route('/support_tickets')
+@login_required
+def support_tickets():
+    # Server-side search, pagination, and CSV export
+    q = (request.args.get('q') or '').strip()
+    page = int(request.args.get('page') or 1)
+    per_page = int(request.args.get('per_page') or 20)
+
+    base = SupportTicket.query.outerjoin(User, SupportTicket.user_id == User.id)
+
+    if q:
+        like_q = f"%{q}%"
+        base = base.filter(
+            or_(
+                SupportTicket.subject.ilike(like_q),
+                SupportTicket.description.ilike(like_q),
+                User.name.ilike(like_q),
+                User.email.ilike(like_q)
+            )
+        )
+
+    # Advanced filters: status, date range
+    status = (request.args.get('status') or '').strip()
+    start_date = (request.args.get('start_date') or '').strip()
+    end_date = (request.args.get('end_date') or '').strip()
+
+    if status:
+        base = base.filter(SupportTicket.status == status)
+
+    try:
+        if start_date:
+            sd = datetime.fromisoformat(start_date)
+            base = base.filter(SupportTicket.created_at >= sd)
+        if end_date:
+            ed = datetime.fromisoformat(end_date)
+            base = base.filter(SupportTicket.created_at <= ed)
+    except Exception:
+        # ignore parse errors and continue
+        pass
+
+    # Sorting
+    sort_by = (request.args.get('sort_by') or 'created_at').strip()
+    sort_dir = (request.args.get('sort_dir') or 'desc').strip().lower()
+    order_col = SupportTicket.created_at
+    if sort_by == 'user_name':
+        order_col = User.name
+    elif sort_by == 'status':
+        order_col = SupportTicket.status
+    elif sort_by == 'created_at':
+        order_col = SupportTicket.created_at
+
+    if sort_dir == 'asc':
+        base = base.order_by(order_col.asc())
+    else:
+        base = base.order_by(order_col.desc())
+
+    # CSV export if requested
+    if request.args.get('export') == 'csv':
+        tickets_all = base.all()
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['id', 'user_id', 'user_name', 'user_email', 'subject', 'description', 'status', 'created_at'])
+        for t in tickets_all:
+            writer.writerow([
+                t.id,
+                t.user_id,
+                getattr(t.user, 'name', '') if getattr(t, 'user', None) else '',
+                getattr(t.user, 'email', '') if getattr(t, 'user', None) else '',
+                t.subject,
+                t.description,
+                t.status,
+                getattr(t, 'created_at', '')
+            ])
+        resp = make_response(output.getvalue())
+        resp.headers['Content-Type'] = 'text/csv'
+        resp.headers['Content-Disposition'] = 'attachment; filename="support_tickets.csv"'
+        return resp
+
+    pagination = base.paginate(page=page, per_page=per_page, error_out=False)
+    tickets = pagination.items
+    stats = get_stats()
+    return render_template('admin.support_tickets.html', tickets=tickets, stats=stats, pagination=pagination, q=q)
+
+
+@admin_bp.route('/support_tickets/<int:ticket_id>')
+@login_required
+def support_ticket_view(ticket_id):
+    ticket = SupportTicket.query.get_or_404(ticket_id)
+    messages = SupportMessage.query.filter_by(user_id=ticket.user_id).order_by(SupportMessage.created_at.desc()).all()
+    return render_template('admin.support_ticket_view.html', ticket=ticket, messages=messages)
+
+
+@admin_bp.route('/support_tickets/<int:ticket_id>/resolve', methods=['POST'])
+@login_required
+def support_ticket_resolve(ticket_id):
+    ticket = SupportTicket.query.get_or_404(ticket_id)
+    ticket.status = 'resolved'
+    db.session.commit()
+    flash('Support ticket marked resolved.', 'success')
+    return redirect(url_for('admin.support_tickets'))
 
 # --- Platform Settings ---
 @admin_bp.route('/platform_settings',  methods=['GET', 'POST'])
