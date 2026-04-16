@@ -1467,7 +1467,6 @@
             {% set profile_url =
                 url_for('landlord.profile') if current_user.role.lower() == 'landlord'
                 else url_for('tenant.profile') if current_user.role.lower() == 'tenant'
-                else url_for('service_provider.profile') if current_user.role.lower() == 'service'
                 else '#' %}
 
             <a href="{{ profile_url }}" class="navbar-profile d-none d-md-flex">
@@ -1586,14 +1585,7 @@
                 <li class="nav-item"><a href="{{ url_for('admin.audit_logs') }}" class="nav-link"><i class="fas fa-history"></i> <span>Audit Logs</span></a></li>
 
                 {% elif current_user.role.lower() == 'service' %}
-                <li class="nav-item"><a href="{{ url_for('service_provider.dashboard') }}" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('service_provider.requests') }}" class="nav-link"><i class="fas fa-clipboard-list"></i> <span>Service Requests</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('service_provider.schedule') }}" class="nav-link"><i class="fas fa-calendar-alt"></i> <span>Schedule</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('service_provider.earnings') }}" class="nav-link"><i class="fas fa-money-bill-wave"></i> <span>Earnings</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('service_provider.profile') }}" class="nav-link"><i class="fas fa-user"></i> <span>My Profile</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('service_provider.reviews') }}" class="nav-link"><i class="fas fa-star"></i> <span>Reviews</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('service_provider.settings') }}" class="nav-link"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
-                <li class="nav-item"><a href="{{ url_for('service_provider.delete_account') }}" class="nav-link text-danger"><i class="fas fa-trash-alt"></i> <span>Delete Account</span></a></li>
+                <!-- Service provider role removed; no sidebar items -->
                 {% endif %}
 
                 <li class="nav-item mt-2"><div class="sidebar-divider"></div></li>
@@ -1665,8 +1657,6 @@
                                 <li><a href="{{ url_for('tenant.properties') }}">Browse Properties</a></li>
                                 {% elif current_user.role.lower() == 'admin' %}
                                 <li><a href="{{ url_for('admin.manage_users') }}">Manage Users</a></li>
-                                {% elif current_user.role.lower() == 'service' %}
-                                <li><a href="{{ url_for('service_provider.dashboard') }}">Dashboard</a></li>
                                 {% endif %} 
                             {% else %}
                             <li><a href="{{ url_for('auth.signup') }}">Sign Up</a></li>
