@@ -277,6 +277,44 @@
       </div>
     </div>
 
+    <!-- Balance -->
+    <div class="stat-card primary">
+      <div class="stat-icon-box">
+        <i class="fas fa-wallet"></i>
+      </div>
+      <div class="stat-info">
+        <h4>Outstanding Balance</h4>
+        <div class="stat-value">
+          ${{ '%.2f'|format(balance) if balance else '0.00' }}
+        </div>
+        <a href="{{ url_for('tenant.pay_rent') }}" class="stat-link">Pay Now</a>
+      </div>
+    </div>
+
+    <!-- Recent Messages -->
+    <div class="stat-card info">
+      <div class="stat-icon-box">
+        <i class="fas fa-envelope"></i>
+      </div>
+      <div class="stat-info">
+        <h4>Recent Messages</h4>
+        <div class="stat-value">{{ recent_messages|length }}</div>
+        <a href="{{ url_for('tenant.messages') }}" class="stat-link">View Messages</a>
+      </div>
+    </div>
+
+    <!-- Active Bookings -->
+    <div class="stat-card warning">
+      <div class="stat-icon-box">
+        <i class="fas fa-calendar-check"></i>
+      </div>
+      <div class="stat-info">
+        <h4>Active Bookings</h4>
+        <div class="stat-value">{{ active_bookings_count }}</div>
+        <a href="{{ url_for('tenant.all_bookings') }}" class="stat-link">Manage Bookings</a>
+      </div>
+    </div>
+
     <!-- Open Requests -->
     <div class="stat-card warning">
       <div class="stat-icon-box">
