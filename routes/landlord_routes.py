@@ -124,24 +124,27 @@ def dashboard():
         Message.is_read == False
     ).all()
 
-    # Count total unread
     unread_count = len(unread_messages)
 
-    # Group by sender (for dropdown names)
-    unread_senders = {}
+    # =========================
+    # GROUP BY SENDER (FIXED + CLEAN)
+    # =========================
+    unread_senders_dict = {}
+
     for msg in unread_messages:
         sender = msg.sender
-        if sender.id not in unread_senders:
-            unread_senders[sender.id] = {
+
+        if sender.id not in unread_senders_dict:
+            unread_senders_dict[sender.id] = {
                 "id": sender.id,
                 "name": sender.name,
-                "count": 1
+                "count": 0
             }
-        else:
-            unread_senders[sender.id]["count"] += 1
 
-    # Convert to list for template
-    unread_senders_list = list(unread_senders.values())
+        unread_senders_dict[sender.id]["count"] += 1
+
+    # convert dict → list for template
+    unread_senders = list(unread_senders_dict.values())
 
     # 📊 Stats dictionary
     stats = {
@@ -159,9 +162,9 @@ def dashboard():
         recent_payments=recent_payments,
         stats=stats,
 
-        # ✅ NEW DATA
+        # 🔔 notifications
         unread_count=unread_count,
-        unread_senders=unread_senders_list
+        unread_senders=unread_senders
     )
 
 # ---------------- Manage Properties ----------------

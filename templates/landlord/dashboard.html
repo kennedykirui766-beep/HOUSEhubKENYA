@@ -33,14 +33,23 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+    position: relative; /* Anchor for dropdown */
   }
 
-  /* NOTIFICATION BELL */
-  .dash-notif-btn {
+  .dash-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-left: auto; /* Push profile to left of notification bell */
+    order: 2; 
+  }
+
+  /* --- NOTIFICATION BELL --- */
+  .notif-bell-btn {
     position: relative;
     width: 40px;
     height: 40px;
-    border-radius: var(--radius-md);
+    border-radius: 50%;
     border: 1px solid var(--border-color);
     background: var(--card-bg);
     color: var(--text-secondary);
@@ -49,69 +58,81 @@
     justify-content: center;
     cursor: pointer;
     transition: var(--transition);
-    font-size: 1rem;
-    text-decoration: none;
+    order: 3; /* Ensure it's visible */
   }
 
-  .dash-notif-btn:hover {
+  .notif-bell-btn:hover {
     border-color: var(--primary-color);
     color: var(--primary-color);
     background: var(--primary-light);
   }
 
-  .dash-notif-badge {
+  .notif-badge {
     position: absolute;
-    top: -5px;
-    right: -5px;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #dc3545; /* Red/Warning color */
+    top: -2px;
+    right: -2px;
+    min-width: 18px;
+    height: 18px;
+    background-color: #ef4444;
     color: white;
-    font-size: 0.7rem;
+    border-radius: 50%;
+    font-size: 0.65rem;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid var(--card-bg);
-    display: none; /* Hidden if 0 */
+    border: 2px solid var(--card-bg); /* creates padding effect */
   }
 
-  /* Dropdown Menu */
+  /* --- NOTIFICATION DROPDOWN --- */
   .notif-dropdown {
     position: absolute;
-    top: 100%;
+    top: 110%;
     right: 0;
-    width: 320px;
-    max-height: 400px;
-    overflow-y: auto;
+    width: 300px;
     background: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
     box-shadow: var(--shadow-xl);
-    z-index: 2000;
+    z-index: 1050;
     display: none; /* Hidden by default */
-    flex-direction: column;
-    padding: 0.5rem 0;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.2s, transform 0.2s;
+    max-height: 400px;
+    overflow: hidden;
   }
 
   .notif-dropdown.active {
-    display: flex;
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .notif-header {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--body-bg);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .notif-list {
+    max-height: 300px;
+    overflow-y: auto;
   }
 
   .notif-item {
     display: flex;
-    align-items: center;
-    padding: 0.75rem;
-    cursor: pointer;
-    border-bottom: 1px solid var(--border-color);
-    transition: background 0.2s;
+    padding: 0.75rem 1rem;
     text-decoration: none;
-    color: inherit;
-  }
-
-  .notif-item:last-child {
-    border-bottom: none;
+    border-bottom: 1px solid var(--border-color);
+    align-items: center;
+    transition: background 0.2s;
+    color: var(--text-primary);
   }
 
   .notif-item:hover {
@@ -119,19 +140,13 @@
   }
 
   .notif-avatar {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    background-color: #dfe5e7;
-    flex-shrink: 0;
-    margin-right: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 0.9rem;
-    font-weight: 600;
+    background-color: #e2e8f0;
+    margin-right: 1rem;
     overflow: hidden;
+    flex-shrink: 0;
   }
   
   .notif-avatar img {
@@ -143,14 +158,11 @@
   .notif-content {
     flex: 1;
     min-width: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
   }
 
   .notif-name {
-    font-weight: 600;
     font-size: 0.9rem;
+    font-weight: 600;
     color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
@@ -165,124 +177,866 @@
     text-overflow: ellipsis;
   }
 
-  .notif-badge-sm {
-    background-color: var(--primary-color);
-    color: white;
-    font-size: 0.65rem;
-    padding: 1px 5px;
-    border-radius: 10px;
-    margin-left: 8px;
+  .notif-empty {
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
   }
 
-  /* ... (Rest of existing CSS) ... */
-  .dash-profile { display: flex; align-items: center; gap: 0.65rem; }
-  .dash-avatar { width: 38px; height: 38px; border-radius: var(--radius-md); object-fit: cover; border: 2px solid var(--border-color); flex-shrink: 0; }
-  .dash-avatar-placeholder { width: 38px; height: 38px; border-radius: var(--radius-md); background: var(--primary-light); color: var(--primary-color); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0; border: 2px solid var(--border-color); }
-  .dash-profile-info { line-height: 1.3; }
-  .dash-profile-info h4 { color: var(--text-primary); font-weight: 600; font-size: 0.95rem; margin: 0; }
-  .dash-profile-info p { color: var(--text-muted); font-size: 0.75rem; margin: 0; }
-  
-  /* DASHBOARD HEADER */
-  .dash-header { margin-bottom: 1.75rem; }
-  .dash-title { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.3rem; }
-  .dash-subtitle { color: var(--text-secondary); font-size: 0.95rem; }
-  
-  /* STATS GRID */
-  .dash-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 1.75rem; }
-  .dash-stat-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; transition: var(--transition); box-shadow: var(--shadow-sm); }
-  .dash-stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
-  .dash-stat-icon { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0; }
-  .dash-stat-icon.primary { background-color: var(--primary-light); color: var(--primary-color); }
-  .dash-stat-icon.success { background-color: #dcfce7; color: #22c55e; }
-  .dash-stat-icon.warning { background-color: #fef3c7; color: #d97706; }
-  .dash-stat-icon.danger { background-color: #fee2e2; color: #ef4444; }
-  .dash-stat-value { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); }
-  .dash-stat-content h3 { color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; text-transform: uppercase; margin-bottom: 0.25rem; }
-  
-  /* CONTENT GRID */
-  .dash-content-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; margin-bottom: 1.75rem; }
-  .dash-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-lg); display: flex; flex-direction: column; overflow: hidden; }
-  .dash-card-header { padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); background: var(--primary-light); }
-  .dash-card-title { color: var(--text-primary); font-weight: 600; font-size: 1rem; }
-  .dash-card-title i { color: var(--primary-color); margin-right: 0.5rem; }
-  .dash-card-action { color: var(--primary-color); text-decoration: none; font-weight: 500; font-size: 0.85rem; display: flex; align-items: center; gap: 0.25rem; }
-  .dash-card-action:hover { gap: 0.5rem; }
-  .dash-card-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
+  .notif-footer {
+    padding: 0.75rem;
+    background-color: var(--body-bg);
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+  }
 
-  /* LISTS */
-  .dash-list-item { display: flex; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); }
-  .dash-list-item:hover { background-color: var(--primary-light); }
-  .dash-list-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
-  .dash-list-title { font-weight: 600; color: var(--text-primary); font-size: 1rem; }
-  .dash-list-subtitle { font-size: 0.875rem; color: var(--text-secondary); }
-  .dash-list-specs { display: flex; gap: 1rem; font-size: 0.85rem; color: var(--text-secondary); }
-  .dash-list-actions { display: flex; gap: 0.5rem; }
-  .btn-dash-outline { border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0.5rem 1rem; border-radius: var(--radius-sm); font-size: 0.85rem; cursor: pointer; transition: var(--transition); }
-  .btn-dash-outline:hover { background: var(--primary-light); color: var(--primary-color); border-color: var(--primary-color); }
-  .btn-dash-danger { color: #ef4444; background: transparent; border: 1px solid rgba(239, 68, 68, 0.2); padding: 0.5rem 1rem; border-radius: var(--radius-sm); font-size: 0.85rem; cursor: pointer; transition: var(--transition); }
-  .btn-dash-danger:hover { background: #ef4444; color: white; }
+  .btn-view-all {
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    display: block;
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: background 0.2s;
+  }
+  .btn-view-all:hover {
+    background-color: var(--primary-light);
+  }
+
+  /* ========== DASHBOARD HEADER ========== */
+  .dash-header {
+    margin-bottom: 1.75rem;
+  }
+
+  .dash-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+  }
+
+  .dash-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.925rem;
+  }
+
+  /* ========== STATS GRID ========== */
+  .dash-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .dash-stat-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.35rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: var(--transition);
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .dash-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-color);
+  }
+
+  .dash-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .dash-stat-icon.primary {
+    background: var(--primary-light);
+    color: var(--primary-color);
+  }
+
+  .dash-stat-icon.success {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+  }
+
+  .dash-stat-icon.warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+  }
+
+  .dash-stat-icon.danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+
+  .dash-stat-content {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .dash-stat-content h3 {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    font-weight: 500;
+    margin: 0 0 0.3rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dash-stat-value {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  /* ========== CONTENT GRID ========== */
+  .dash-content-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+
+  /* ========== CONTENT CARDS ========== */
+  .dash-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: var(--transition);
+    min-width: 0;
+  }
+
+  .dash-card:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  .dash-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.15rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .dash-card-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 1rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dash-card-title i {
+    color: var(--primary-color);
+    flex-shrink: 0;
+  }
+
+  .dash-card-action {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: var(--transition);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .dash-card-action:hover {
+    color: var(--secondary-color);
+    gap: 0.5rem;
+  }
+
+  .dash-card-body {
+    padding: 1.25rem 1.5rem;
+  }
+
+  /* ========== LIST ITEMS ========== */
+  .dash-list-item {
+    padding: 1.15rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: var(--transition);
+  }
+
+  .dash-list-item:last-child {
+    border-bottom: none;
+  }
+
+  .dash-list-item:hover {
+    background-color: var(--primary-light);
+  }
+
+  .dash-list-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Center vertically */
+    margin-bottom: 0.5rem;
+  }
+
+  .dash-list-info {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .dash-list-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dash-list-subtitle {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dash-list-subtitle i {
+    color: var(--primary-color);
+    font-size: 0.75rem;
+  }
+
+  .dash-list-specs {
+    display: flex;
+    gap: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .dash-list-specs i {
+    color: var(--primary-color);
+    width: 16px;
+    text-align: center;
+  }
+
+  .dash-list-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-shrink: 0;
+    margin-left: 1rem;
+  }
+
+  /* ========== STATUS BADGES ========== */
+  .dash-badge {
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-full);
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .dash-badge-occupied,
+  .dash-badge-completed,
+  .dash-badge-paid {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+  }
+
+  .dash-badge-vacant,
+  .dash-badge-pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+  }
+
+  .dash-badge-overdue,
+  .dash-badge-urgent {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+
+  .dash-badge-in-progress,
+  .dash-badge-partial {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary-color);
+  }
+
+  .dash-badge-cancelled {
+    background: rgba(107, 114, 128, 0.1);
+    color: #6b7280;
+  }
+
+  /* ========== BUTTONS ========== */
+  .btn-dash-outline {
+    border: 1.5px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    background: transparent;
+    transition: var(--transition);
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+
+  .btn-dash-outline:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: var(--primary-light);
+  }
+
+  .btn-dash-primary {
+    background: var(--gradient-primary);
+    border: none;
+    color: white;
+    padding: 0.4rem 0.9rem;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    transition: var(--transition);
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .btn-dash-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    color: white;
+  }
+
+  .btn-dash-danger {
+    background: transparent;
+    border: 1.5px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    transition: var(--transition);
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .btn-dash-danger:hover {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+  }
+
+  /* ========== TABLE ========== */
+  .dash-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dash-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 400px;
+  }
+
+  .dash-table th {
+    background-color: var(--body-bg);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.8rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .dash-table td {
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+
+  .dash-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .dash-table tbody tr:hover {
+    background-color: var(--primary-light);
+  }
+
+  .dash-table .td-name {
+    color: var(--text-primary);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+  }
+
+  /* ========== EMPTY STATE ========== */
+  .dash-empty {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--text-secondary);
+  }
+
+  .dash-empty i {
+    font-size: 2.5rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+    display: block;
+    opacity: 0.5;
+  }
+
+  .dash-empty p {
+    margin-bottom: 1.25rem;
+    font-size: 0.95rem;
+  }
+
+  /* ========== SUPPORT CHAT WIDGET (Renamed) ========== */
+  .dash-chat {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 999;
+  }
+
+  .dash-chat-toggle {
+    width: 52px;
+    height: 52px;
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    font-size: 1.15rem;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dash-chat-toggle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.5);
+  }
+
+  .dash-chat-window {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    width: 340px;
+    height: 420px;
+    background-color: var(--card-bg);
+    border-radius: var(--radius-lg);
+    display: none;
+    flex-direction: column;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+  }
+
+  .dash-chat-window.active {
+    display: flex;
+    animation: dashChatIn 0.25s ease-out;
+  }
+
+  @keyframes dashChatIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .dash-chat-head {
+    background: var(--gradient-primary);
+    padding: 0.85rem 1rem;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .dash-chat-head h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .dash-chat-close {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0.25rem;
+    opacity: 0.8;
+    transition: var(--transition);
+  }
+
+  .dash-chat-close:hover {
+    opacity: 1;
+  }
+
+  .dash-chat-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    background-color: var(--body-bg);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .dash-chat-msg {
+    display: flex;
+    max-width: 85%;
+  }
+
+  .dash-chat-msg.received {
+    align-self: flex-start;
+  }
+
+  .dash-chat-msg.sent {
+    align-self: flex-end;
+  }
+
+  .dash-chat-bubble {
+    padding: 0.6rem 0.85rem;
+    border-radius: var(--radius-md);
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+
+  .dash-chat-msg.received .dash-chat-bubble {
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-bottom-left-radius: 4px;
+  }
+
+  .dash-chat-msg.sent .dash-chat-bubble {
+    background-color: var(--gradient-primary);
+    color: white;
+    border-bottom-right-radius: 4px;
+  }
+
+  .dash-chat-foot {
+    padding: 0.75rem;
+    background-color: var(--card-bg);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .dash-chat-input {
+    flex: 1;
+    padding: 0.55rem 0.85rem;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-color);
+    background-color: var(--body-bg);
+    color: var(--text-primary);
+    font-size: 0.82rem;
+    transition: var(--transition);
+    font-family: inherit;
+    min-width: 0;
+  }
+
+  .dash-chat-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+  }
+
+  .dash-chat-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .dash-chat-send {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: var(--gradient-primary);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    flex-shrink: 0;
+  }
+
+  .dash-chat-send:hover {
+    transform: scale(1.05);
+  }
+
+  /* ========== MODAL (POPUP) ========== */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    padding: 1rem;
+  }
+
+  .modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .modal-box {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.05);
+    transform: translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-overlay.active .modal-box {
+    transform: translateY(0);
+  }
+
+  .modal-header {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .modal-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .modal-icon.danger {
+    background-color: #fee2e2;
+    color: #ef4444;
+  }
+
+  .modal-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  .modal-body strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  .modal-footer {
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--body-bg);
+  }
+
+  .btn-modal {
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-modal-cancel {
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+  }
+
+  .btn-modal-cancel:hover {
+    background-color: var(--body-bg);
+    color: var(--text-primary);
+  }
+
+  .btn-modal-confirm {
+    background-color: #ef4444;
+    color: white;
+    border: 1px solid #ef4444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-modal-confirm:hover {
+    background-color: #dc2626;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  }
   
-  /* EMPTY */
-  .dash-empty { text-align: center; padding: 3rem; color: var(--text-secondary); }
-  .dash-empty i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
-  .btn-dash-primary { background: var(--gradient-primary); color: white; padding: 0.5rem 1.25rem; border-radius: var(--radius-sm); font-weight: 500; text-decoration: none; }
-  .btn-dash-primary:hover { transform: translateY(-1px); }
+  .btn-modal-confirm:disabled {
+    background-color: #fca5a5;
+    border-color: #fca5a5;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .btn-modal-confirm:disabled i {
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { 100% { transform: rotate(360deg); } }
 
-  /* TABLE */
-  .dash-table-wrap { overflow-x: auto; }
-  .dash-table { width: 100%; border-collapse: collapse; }
-  .dash-table th { background: var(--card-bg); color: var(--text-secondary); font-weight: 600; font-size: 0.85rem; padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border-color); }
-  .dash-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); }
-  
-  /* STATUS BADGES */
-  .dash-badge { padding: 0.25rem 0.5rem; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
-  .dash-badge-occupied, .dash-badge-completed, .dash-badge-paid { background-color: #d1fae5; color: #059669; }
-  .dash-badge-vacant, .dash-badge-pending { background-color: #f3f4f6; color: #6b7280; }
-  .dash-badge-overdue, .dash-badge-urgent { background-color: #fee2e2; color: #dc2626; }
-  .dash-badge-in-progress { background-color: #bfdbfe; color: #1e40af; }
-
-  /* CHAT WIDGET (Kept existing but ensured compatibility) */
-  .dash-chat { position: fixed; bottom: 24px; right: 24px; z-index: 999; }
-  .dash-chat-toggle { width: 50px; height: 50px; border-radius: 50%; background: var(--gradient-primary); color: white; border: none; cursor: pointer; box-shadow: var(--shadow-md); font-size: 1.25rem; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
-  .dash-chat-toggle:hover { transform: scale(1.05); box-shadow: var(--shadow-lg); }
-  .dash-chat-window { position: absolute; bottom: 60px; right: 0; width: 340px; height: 420px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-lg); display: none; flex-direction: column; box-shadow: var(--shadow-xl); }
-  .dash-chat-window.active { display: flex; }
-  .dash-chat-head { background: var(--gradient-primary); padding: 0.85rem 1rem; color: white; display: flex; justify-content: space-between; align-items: center; }
-  .dash-chat-body { flex: 1; overflow-y: auto; padding: 1rem; background: var(--body-bg); display: flex; flex-direction: column; gap: 0.75rem; }
-  .dash-chat-msg { display: flex; max-width: 85%; }
-  .dash-chat-bubble { padding: 0.6rem 0.85rem; border-radius: var(--radius-md); font-size: 0.9rem; }
-  .dash-chat-msg.received .dash-chat-bubble { background: white; border: 1px solid var(--border-color); }
-  .dash-chat-msg.sent .dash-chat-bubble { background: var(--primary-color); color: white; }
-  .dash-chat-foot { padding: 0.75rem; border-top: 1px solid var(--border-color); display: flex; gap: 0.5rem; }
-  .dash-chat-input { flex: 1; border: 1px solid var(--border-color); border-radius: var(--radius-full); padding: 0.5rem; font-size: 0.9rem; outline: none; }
-  .dash-chat-send { width: 36px; height: 36px; border: none; border-radius: 50%; background: var(--primary-color); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-
-  /* MODAL */
-  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1050; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
-  .modal-overlay.active { opacity: 1; pointer-events: auto; }
-  .modal-box { background-color: white; border-radius: var(--radius-lg); width: 90%; max-width: 450px; overflow: hidden; box-shadow: var(--shadow-xl); transform: translateY(20px); transition: transform 0.3s ease; display: flex; flex-direction: column; }
-  .modal-overlay.active .modal-box { transform: translateY(0); }
-  .modal-header { padding: 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); }
-  .modal-title { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); }
-  .modal-close { background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; }
-  .modal-body { padding: 1.5rem; color: var(--text-secondary); line-height: 1.5; }
-  .modal-body strong { color: var(--text-primary); }
-  .modal-footer { padding: 1rem; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 0.75rem; background: var(--card-bg); }
-  .btn-modal { padding: 0.6rem 1.25rem; border-radius: var(--radius-md); font-weight: 500; cursor: pointer; transition: var(--transition); border: none; }
-  .btn-modal-cancel { background: white; color: var(--text-secondary); border: 1px solid var(--border-color); }
-  .btn-modal-cancel:hover { background: var(--primary-light); color: var(--primary-color); }
-  .btn-modal-confirm { background: #ef4444; color: white; }
-  .btn-modal-confirm:hover { background: #dc2626; }
+  /* ========== RESPONSIVE ========== */
+  @media (max-width: 1199px) {
+    .dash-stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
 
   @media (max-width: 991px) {
-    .dash-stats { grid-template-columns: repeat(2, 1fr); }
-    .dash-content-grid { grid-template-columns: 1fr; }
+    .dash-content-grid {
+      grid-template-columns: 1fr;
+    }
+    .dash-profile-info {
+      display: none;
+    }
+    .dash-topbar-left h4 { font-size: 1rem; }
+    .dash-topbar-left p { display: none; }
+  }
+
+  @media (max-width: 767px) {
+    .dash-topbar {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem;
+    }
+    .dash-topbar-right {
+      width: 100%;
+      justify-content: space-between;
+    }
+    .dash-profile {
+      margin-left: 0;
+      order: 0;
+    }
+    .dash-chat {
+      bottom: 10px;
+      right: 10px;
+    }
+    .dash-chat-window {
+      width: calc(100vw - 20px);
+      right: 10px;
+      left: 10px;
+      bottom: 70px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .dash-stats {
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+    }
+    .dash-stat-card {
+      padding: 1rem;
+      gap: 0.6rem;
+    }
+    .dash-stat-icon {
+      width: 40px;
+      height: 40px;
+      font-size: 0.95rem;
+    }
+    .dash-stat-value {
+      font-size: 1.1rem;
+    }
+    .dash-stat-content h3 {
+      font-size: 0.7rem;
+    }
+    .dash-card-header {
+      padding: 0.85rem 1rem;
+    }
+    .dash-card-title {
+      font-size: 0.9rem;
+    }
+    .dash-chat-toggle {
+      width: 42px;
+      height: 42px;
+      font-size: 1rem;
+    }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-
 <!-- Top Bar -->
 <div class="dash-topbar">
   <div class="dash-topbar-left">
@@ -291,65 +1045,63 @@
   </div>
 
   <div class="dash-topbar-right">
-    <!-- Notification Bell with Badge -->
-    <div style="position: relative; display: inline-block;">
-      <button class="dash-notif-btn" onclick="toggleNotifications(event)" aria-label="Notifications">
+    
+    <!-- Notification Bell -->
+    <div class="dropdown-wrapper" id="notifWrapper">
+      <button class="notif-bell-btn" onclick="toggleNotifications()" aria-label="View Notifications">
         <i class="fas fa-bell"></i>
-      </button>
-      <!-- Badge -->
-       {% if unread_count > 0 %}
-      <span class="dash-notif-badge">{{ stats.unread_count }}</span>
-      {% endif %}
-      
-      <!-- Dropdown Container -->
-      <div id="notifDropdown" class="notif-dropdown">
-        <div style="padding: 0.5rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.8rem; text-align: center;">
-          Unread Messages
-        </div>
-        
         {% if unread_count > 0 %}
-          {% for sender in stats.unread_senders %}
-            <a href="/landlord/messages?tenant_id={{ sender.id }}" class="notif-item">
-              <div class="notif-avatar">
-                {% if sender.avatar %}
-                  <img src="{{ sender.avatar }}" alt="{{ sender.name }}">
-                {% else %}
-                  <span>{{ sender.name[:2].upper() }}</span>
-                {% endif %}
-              </div>
-              <div class="notif-content">
-                <div class="notif-name">
-                  {{ sender.name }}
-                  <span class="notif-badge-sm">{{ sender.count }}</span>
+        <span class="notif-badge">{{ unread_count }}</span>
+        {% endif %}
+      </button>
+
+      <!-- Dropdown List -->
+      <div class="notif-dropdown" id="notifDropdown">
+        {% if unread_senders %}
+        <div class="notif-header">New Messages</div>
+        <div class="notif-list">
+            {% for sender in unread_senders %}
+            <a href="{{ url_for('landlord.messages') }}?chat_id={{ sender.id }}" class="notif-item">
+                <div class="notif-avatar">
+                    {% if sender.avatar %}
+                        <img src="{{ sender.avatar }}" alt="{{ sender.name }}">
+                    {% else %}
+                        <span>{{ sender.name[0] }}</span>
+                    {% endif %}
                 </div>
-                <div class="notif-preview">
-                  {{ sender.last_msg_content }}
+                <div class="notif-content">
+                    <div class="notif-name">{{ sender.name }}</div>
+                    <!-- Small content of who send messages -->
+                    <div class="notif-preview">{{ sender.last_message_content or "New message" }}</div>
                 </div>
-              </div>
             </a>
-          {% endfor %}
+            {% endfor %}
+        </div>
+        <div class="notif-footer">
+            <a href="{{ url_for('landlord.messages') }}" class="btn-view-all">View All Messages</a>
+        </div>
         {% else %}
-          <div style="padding: 2rem; text-align: center; color: var(--text-secondary); font-size: 0.9rem;">
-            No new messages.
-          </div>
+        <div class="notif-empty">No new messages</div>
         {% endif %}
       </div>
     </div>
 
+    <!-- Profile -->
     <div class="dash-profile">
-        {% if current_user.profile_picture %}
+      {% if current_user.profile_picture %}
           <img src="{{ current_user.profile_picture }}" alt="User Avatar" class="dash-avatar" />
-        {% else %}
+      {% else %}
           <div class="dash-avatar-placeholder">
             <i class="fas fa-user"></i>
           </div>
-        {% endif %}
-        <div class="dash-profile-info">
-          <h4>{{ current_user.name }}</h4>
-          <p>{{ current_user.role|capitalize }}</p>
-        </div>
+      {% endif %}
+      <div class="dash-profile-info">
+        <h4>{{ current_user.name }}</h4>
+        <p>{{ current_user.role|capitalize }}</p>
       </div>
+    </div>
   </div>
+</div>
 
 <!-- Dashboard Header -->
 <div class="dash-header">
@@ -357,7 +1109,7 @@
   <p class="dash-subtitle">Monitor your properties, tenants, and revenue at a glance.</p>
 </div>
 
-<!-- Stats Grid -->
+<!-- Stats Cards -->
 <div class="dash-stats">
   <div class="dash-stat-card">
     <div class="dash-stat-icon primary">
@@ -391,10 +1143,11 @@
 
   <div class="dash-stat-card">
     <div class="dash-stat-icon warning">
+      <!-- Changed to bookings icon -->
       <i class="fas fa-calendar-check"></i>
     </div>
     <div class="dash-stat-content">
-      <h3>Pending Requests</h3>
+      <h3>Pending Bookings</h3>
       <div class="dash-stat-value">{{ stats.pending_requests }}</div>
     </div>
   </div>
@@ -424,7 +1177,7 @@
                 <i class="fas fa-map-marker-alt"></i> {{ property.address }}
               </p>
             </div>
-            <!-- Logic for occupied/vacant status -->
+            <!-- Logic for occupied/vacant status on dashboard -->
             <span class="dash-badge {% if property.status == 'occupied' %}dash-badge-occupied{% else %}dash-badge-vacant{% endif %}">
               {{ property.status|capitalize }}
             </span>
@@ -488,7 +1241,7 @@
             </tr>
             {% else %}
             <tr>
-              <td colspan="3" style="text-align: center; padding: 2rem;">No recent payments</td>
+                <td colspan="3" class="text-center p-4 text-muted">No recent payments</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -515,13 +1268,13 @@
             <div class="dash-list-info">
               <h4 class="dash-list-title">{{ user.name }}</h4>
               <p class="dash-list-subtitle">
-                <i class="fas fa-home"></i> {{ house.title if house else 'No property assigned' }}
+                <i class="fas fa-home"></i> {{ house.address if house else 'No property assigned' }}
               </p>
             </div>
-            <a href="/landlord/messages?tenant_id={{ user.id }}" class="btn-dash-outline">
-                <i class="fas fa-comment"></i> Message
-            </a>
           </div>
+          <a href="{{ url_for('landlord.messages', tenant_id=user.id) }}" class="btn-dash-primary">
+            <i class="fas fa-comment"></i> Message
+          </a>
         </div>
         {% endfor %}
       {% else %}
@@ -533,11 +1286,11 @@
     </div>
   </div>
 
-  <!-- Pending Booking Requests Card -->
+  <!-- Pending Booking Requests Card (Replaces Maintenance) -->
   <div class="dash-card">
     <div class="dash-card-header">
       <h3 class="dash-card-title">
-        <i class="fas fa-calendar-check"></i> Pending Bookings
+        <i class="fas fa-calendar-check"></i> Pending Requests
       </h3>
       <a href="{{ url_for('landlord.bookings') }}" class="dash-card-action">
         View All <i class="fas fa-arrow-right"></i>
@@ -575,126 +1328,142 @@
 
 </div>
 
-<!-- Chat Widget -->
+<!-- Chat Widget (Support) -->
 <div class="dash-chat">
-  <button class="dash-chat-toggle" onclick="toggleChat()" aria-label="Open support chat">
+  <button class="dash-chat-toggle" onclick="toggleSupportChat()" aria-label="Open support chat">
     <i class="fas fa-comments"></i>
   </button>
-  <div class="dash-chat-window" id="chatBox">
+  <div class="dash-chat-window" id="supportChatWindow">
     <div class="dash-chat-head">
       <h4><i class="fas fa-headset"></i> Support Chat</h4>
-      <button class="dash-chat-close" onclick="toggleChat()"><i class="fas fa-times"></i></button>
+      <button class="dash-chat-close" onclick="toggleSupportChat()" aria-label="Close chat"><i class="fas fa-times"></i></button>
     </div>
-    <div class="dash-chat-body" id="chatBody">
+    <div class="dash-chat-body" id="supportChatBody">
       <div class="dash-chat-msg received">
         <div class="dash-chat-bubble">Hello! How can I help you today?</div>
       </div>
     </div>
     <div class="dash-chat-foot">
-      <input type="text" class="dash-chat-input" id="chatInput" placeholder="Type a message..." />
-      <button class="dash-chat-send" onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
+      <input type="text" class="dash-chat-input" id="supportInput" placeholder="Type a message..." />
+      <button class="dash-chat-send" onclick="sendSupportMessage()" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
     </div>
   </div>
 </div>
 
 <!-- DELETE CONFIRMATION MODAL -->
 <div class="modal-overlay" id="deleteModal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <h4 class="modal-title">Delete Property?</h4>
-      <button class="modal-close" onclick="closeDeleteModal()"><i class="fas fa-times"></i></button>
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-icon danger">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="modal-title">Delete Property?</h3>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete <strong id="modalPropertyName">property name</strong>?</p>
+            <p class="text-muted" style="font-size: 0.85rem; margin-top: 0.5rem;">This action cannot be undone. All associated data will be permanently removed.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-modal btn-modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+            <button class="btn-modal btn-modal-confirm" id="btnConfirmDelete">
+                <i class="fas fa-trash-alt"></i> Delete
+            </button>
+        </div>
     </div>
-    <div class="modal-body">
-      <p>Are you sure you want to delete <strong id="modalPropertyName">property name</strong>? <br><br> This action cannot be undone. All associated data will be permanently removed.</p>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-modal btn-modal-cancel" onclick="closeDeleteModal()">Cancel</button>
-      <button class="btn-modal btn-modal-confirm" id="btnConfirmDelete">
-        <i class="fas fa-trash-alt"></i> Delete
-      </button>
-    </div>
-  </div>
 </div>
 
 {% endblock %}
 
 {% block scripts %}
 <script>
-  // ---- Chat Widget Logic ----
-  function toggleChat() {
-    document.getElementById('chatBox').classList.toggle('active');
+  // --- Notification Logic ---
+  const notifWrapper = document.getElementById('notifWrapper');
+  const notifDropdown = document.getElementById('notifDropdown');
+
+  function toggleNotifications(event) {
+    // Prevent closing when clicking the toggle button itself
+    if (event) event.stopPropagation();
+    notifDropdown.classList.toggle('active');
   }
 
-  function sendChatMessage() {
-    const input = document.getElementById('chatInput');
-    const body = document.getElementById('chatBody');
-    const msg = input.value.trim();
+  // Close dropdown if clicking outside
+  document.addEventListener('click', function(event) {
+    if (!notifWrapper.contains(event.target)) {
+      notifDropdown.classList.remove('active');
+    }
+  });
 
-    if (!msg) return;
+  // --- Chat Widget (Support) Logic ---
+  function toggleSupportChat() {
+    document.getElementById('supportChatWindow').classList.toggle('active');
+  }
 
-    const userEl = document.createElement('div');
-    userEl.className = 'dash-chat-msg sent';
-    userEl.innerHTML = '<div class="dash-chat-bubble">' + msg + '</div>';
-    body.appendChild(userEl);
+  function sendSupportMessage() {
+    const input = document.getElementById('supportInput');
+    const body = document.getElementById('supportChatBody');
+    const text = input.value.trim();
+
+    if (!text) return;
+
+    const userMsgDiv = document.createElement('div');
+    userMsgDiv.className = 'dash-chat-msg sent';
+    userMsgDiv.innerHTML = '<div class="dash-chat-bubble">' + text + '</div>';
+    body.appendChild(userMsgDiv);
     input.value = '';
     body.scrollTop = body.scrollHeight;
 
+    // Mock Bot Reply
     setTimeout(() => {
-      const botEl = document.createElement('div');
-      botEl.className = 'dash-chat-msg received';
-      botEl.innerHTML = '<div class="dash-chat-bubble">Thank you for your message. Our support team will get back to you shortly.</div>';
-      body.appendChild(botEl);
+      const botMsgDiv = document.createElement('div');
+      botMsgDiv.className = 'dash-chat-msg received';
+      botMsgDiv.innerHTML = '<div class="dash-chat-bubble">Thank you for your message. Our support team will get back to you shortly.</div>';
+      body.appendChild(botMsgDiv);
       body.scrollTop = body.scrollHeight;
     }, 1000);
   }
 
-  // ---- Notifications Logic ----
-  function toggleNotifications(event) {
-    event.stopPropagation();
-    const dropdown = document.getElementById('notifDropdown');
-    dropdown.classList.toggle('active');
-  }
-
-  // Close dropdown when clicking outside
-  document.addEventListener('click', function(event) {
-    const dropdown = document.getElementById('notifDropdown');
-    const btn = document.querySelector('.dash-notif-btn');
-    if (!dropdown.contains(event.target) && !btn.contains(event.target)) {
-      dropdown.classList.remove('active');
-    }
-  });
-
-  // ---- Delete Modal Logic ----
-  const deleteModal = document.getElementById('deleteModal');
-  const modalPropertyName = document.getElementById('modalPropertyName');
-  const btnConfirmDelete = document.getElementById('btnConfirmDelete');
-  let propertyToDeleteId = null;
+  // --- Delete Modal Logic ---
+  var deleteModal = document.getElementById('deleteModal');
+  var modalPropertyName = document.getElementById('modalPropertyName');
+  var btnConfirmDelete = document.getElementById('btnConfirmDelete');
+  var propertyToDeleteId = null;
 
   function openDeleteModal(id, title) {
     propertyToDeleteId = id;
     modalPropertyName.textContent = title;
-    deleteModal.style.display = 'flex';
-    setTimeout(() => deleteModal.classList.add('active'), 10);
+    deleteModal.classList.add('active');
   }
 
   function closeDeleteModal() {
     deleteModal.classList.remove('active');
-    setTimeout(() => deleteModal.style.display = 'none', 300);
     propertyToDeleteId = null;
   }
 
-  // Event Listeners for Modal
+  // Close modal if clicking outside
+  deleteModal.addEventListener('click', function(e) {
+    if (e.target === deleteModal) {
+      closeDeleteModal();
+    }
+  });
+
+  // Close on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && deleteModal.classList.contains('active')) {
+      closeDeleteModal();
+    }
+  });
+
+  // Confirm Delete Action
   btnConfirmDelete.addEventListener('click', function() {
     if (!propertyToDeleteId) return;
 
-    // Loading state
-    const originalBtnContent = this.innerHTML;
-    this.disabled = true;
-    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+    // Set Loading State
+    var originalBtnText = btnConfirmDelete.innerHTML;
+    btnConfirmDelete.disabled = true;
+    btnConfirmDelete.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
 
-    // CSRF Token
-    const headers = { 'Content-Type': 'application/json' };
-    const csrfToken = document.querySelector('input[name="csrf_token"]');
+    var headers = { 'Content-Type': 'application/json' };
+    var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
     if (csrfToken) headers['X-CSRFToken'] = csrfToken.value;
 
     fetch('/landlord/delete_property/' + propertyToDeleteId, {
@@ -705,32 +1474,19 @@
     .then(data => {
       if (data.success) {
         closeDeleteModal();
+        // Reload page to update stats
         window.location.reload();
       } else {
         alert('Error: ' + (data.error || 'Failed to delete property'));
-        this.disabled = false;
-        this.innerHTML = originalBtnContent;
+        btnConfirmDelete.disabled = false;
+        btnConfirmDelete.innerHTML = originalBtnText;
       }
     })
-    .catch(error => {
-      console.error('Error:', error);
+    .catch(() => {
       alert('An error occurred. Please try again.');
-      this.disabled = false;
-      this.innerHTML = originalBtnContent;
+      btnConfirmDelete.disabled = false;
+      btnConfirmDelete.innerHTML = originalBtn;
     });
-  });
-
-  // Close modal on Escape
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      if (deleteModal.classList.contains('active')) {
-        closeDeleteModal();
-      }
-      const dropdown = document.getElementById('notifDropdown');
-      if (dropdown.classList.contains('active')) {
-        dropdown.classList.remove('active');
-      }
-    }
   });
 </script>
 {% endblock %}
