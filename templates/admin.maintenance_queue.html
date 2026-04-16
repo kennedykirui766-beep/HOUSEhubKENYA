@@ -1,0 +1,83 @@
+{% extends 'admin.html' %}
+{% block content %}
+<div class="container">
+  <h2>Maintenance Queue & Triage</h2>
+
+  <form method="get" class="form-inline mb-3">
+    <label class="mr-2">Status</label>
+    <select name="status" class="form-control mr-2">
+      <option value="">All</option>
+      <option value="pending">Pending</option>
+      <option value="assigned">Assigned</option>
+      <option value="resolved">Resolved</option>
+    </select>
+    <button class="btn btn-primary">Filter</button>
+  </form>
+
+  <form method="post" action="{{ url_for('admin.maintenance_bulk_assign') }}">
+    <div class="mb-2">
+      <label>Assign selected to landlord:</label>
+      <select name="landlord_id" class="form-control d-inline-block w-auto">
+        <option value="">Choose</option>
+        {% for l in landlords %}
+          <option value="{{ l.id }}">{{ l.name }} ({{ l.email }})</option>
+        {% endfor %}
+      </select>
+      <button class="btn btn-sm btn-secondary">Assign</button>
+    </div>
+
+    <table class="table table-sm">
+      <thead>
+        <tr><th></th><th>ID</th><th>Issue</th><th>Status</th><th>SLA</th><th>Tenant</th></tr>
+      </thead>
+      <tbody>
+        {% for it in items %}
+        <tr>
+          <td><input type="checkbox" name="ids" value="{{ it.id }}"></td>
+          <td>{{ it.id }}</td>
+          <td>{{ it.issue }}</td>
+          <td>{{ it.status }}</td>
+          <td>{{ it.sla_due or '—' }}</td>
+          <td>{{ it.tenant.name if it.tenant else '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </form>
+
+  <h4 class="mt-4">Respond / Canned Responses</h4>
+  <form method="post" action="{{ url_for('admin.maintenance_respond') }}">
+    <input type="hidden" name="request_id" id="request_id_input">
+    <div class="form-group">
+      <label>Choose canned</label>
+      <select name="canned" class="form-control">
+        <option value="">—</option>
+        {% for c in canned_responses %}
+          <option value="{{ c }}">{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Message</label>
+      <textarea name="response" class="form-control" rows="3"></textarea>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="set_resolved" value="1" id="set_resolved">
+      <label class="form-check-label" for="set_resolved">Mark as resolved</label>
+    </div>
+    <button class="btn btn-primary mt-2">Send Response</button>
+  </form>
+
+  <!-- Pagination -->
+  <nav aria-label="Page navigation">
+    {% if pagination.has_prev %}
+      <a class="btn btn-sm btn-outline-secondary" href="?page={{ pagination.prev_num }}">Previous</a>
+    {% endif %}
+    Page {{ pagination.page }} of {{ pagination.pages }}
+    {% if pagination.has_next %}
+      <a class="btn btn-sm btn-outline-secondary" href="?page={{ pagination.next_num }}">Next</a>
+    {% endif %}
+  </nav>
+
+</div>
+{% endblock %}

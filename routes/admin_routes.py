@@ -4,7 +4,7 @@ from sqlalchemy import inspect
 from sqlalchemy import or_
 import logging
 from models.models import User, House, SystemUpdateSubscriber, SystemSetting
-from models.models import SupportTicket, SupportMessage
+from models.models import SupportTicket, SupportMessage, MaintenanceRequest, Payment, MaintenanceComment
 from extensions import db, csrf
 from flask import make_response
 import csv
@@ -52,20 +52,64 @@ def restrict_to_admin():
 
 def get_stats():
     """Return a consistent stats dictionary for all admin pages."""
+    # Best-effort derived stats — keep lightweight
+    try:
+        total_users = User.query.count()
+    except Exception:
+        total_users = 0
+
+    try:
+        total_properties = House.query.count()
+    except Exception:
+        total_properties = 0
+
+    try:
+        maintenance_total = MaintenanceRequest.query.count()
+        maintenance_open = MaintenanceRequest.query.filter(MaintenanceRequest.status != 'resolved').count()
+        maintenance_resolved = MaintenanceRequest.query.filter(MaintenanceRequest.status == 'resolved').count()
+    except Exception:
+        maintenance_total = maintenance_open = maintenance_resolved = 0
+
+    try:
+        support_open = SupportTicket.query.filter(SupportTicket.status != 'resolved').count()
+    except Exception:
+        support_open = 0
+
+    # Payment failures heuristic
+    try:
+        payment_failures = Payment.query.filter(
+            (Payment.status.ilike('%fail%')) | (Payment.status.ilike('%error%'))
+        ).count()
+    except Exception:
+        payment_failures = 0
+
+    # Background queue length
+    queue_len = 0
+    try:
+        import services.notification as notification
+        queue_len = notification._task_queue.qsize()
+    except Exception:
+        queue_len = 0
+
+    # DB health check
+    db_ok = True
+    try:
+        db.session.execute('SELECT 1')
+    except Exception:
+        db_ok = False
+
     return {
-        'total_users': User.query.count(),
-        'total_properties': House.query.count(),
-        'total_transactions': 0,   # Placeholder
-        'uptime': 99.5,            # Placeholder (% uptime)
-        'api_response': 280,       # Placeholder (ms)
-        'maintenance_total': 0,    # Placeholder
-        'maintenance_open': 0,
-        'maintenance_resolved': 0,
-        'feedback_total': 0,
-        'feedback_open': 0,
-        'feedback_resolved': 0,
-        'daily_logins': [5, 8, 12, 10, 7, 9, 14],  # Example
-        'total_reports': 0
+        'total_users': total_users,
+        'total_properties': total_properties,
+        'maintenance_total': maintenance_total,
+        'maintenance_open': maintenance_open,
+        'maintenance_resolved': maintenance_resolved,
+        'support_open': support_open,
+        'payment_failures': payment_failures,
+        'queue_length': queue_len,
+        'db_ok': db_ok,
+        'uptime': 99.5,
+        'api_response': 280,
     }
 
 # --- Dashboard ---
