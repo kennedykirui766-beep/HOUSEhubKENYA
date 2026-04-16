@@ -119,6 +119,14 @@ def dashboard():
         for p in payments
     ]
     payment_data = [p.amount for p in payments]
+    # Recent messages for tenant
+    recent_messages = Message.query.filter_by(receiver_id=current_user.id).order_by(Message.date.desc()).limit(3).all()
+
+    # Outstanding balance: sum of pending payments
+    try:
+        balance = sum([float(p.amount or 0) for p in payments if getattr(p, 'status', '').lower() in ['pending', 'pending']])
+    except Exception:
+        balance = 0
     dashboard_order = []
     if current_user.dashboard_order:
         try:
@@ -141,7 +149,10 @@ def dashboard():
         next_payment=next_payment,
         payment_labels=payment_labels,
         payment_data=payment_data,
-        dashboard_order=dashboard_order
+        dashboard_order=dashboard_order,
+        balance=balance,
+        recent_messages=recent_messages,
+        active_bookings_count=len([b for b in bookings if getattr(b, 'status', '').lower() == 'active'])
     )
 
 
