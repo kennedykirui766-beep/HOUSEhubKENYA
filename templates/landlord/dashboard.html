@@ -50,6 +50,7 @@
     transition: var(--transition);
     font-size: 1rem;
     text-decoration: none;
+    z-index: 1001; /* Ensure button is clickable */
   }
 
   .dash-notif-btn:hover {
@@ -1060,11 +1061,18 @@
       justify-content: center;
     }
     
-    /* Notification Responsive */
+    /* Notification Responsive - UPDATED FOR CENTERING */
     .notif-dropdown {
-      width: 280px;
-      right: -12px;
+      position: fixed; /* Break out of parent container */
+      top: 75px; /* Position below the top bar area */
+      left: 50%; /* Center horizontally */
+      transform: translateX(-50%); /* Perfect center */
+      width: 90%; /* Responsive width */
+      max-width: 320px; /* Max width limit */
+      right: auto; /* Remove previous right alignment */
+      z-index: 1060; /* Ensure it sits above everything */
     }
+    
     .notif-header {
         flex-direction: column;
         align-items: flex-start;
