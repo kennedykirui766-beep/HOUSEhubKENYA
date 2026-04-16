@@ -131,19 +131,21 @@
 
   /* ========== NOTIFICATION DROPDOWN STYLES ========== */
   .notif-wrapper {
-    position: relative;
+    position: relative; /* Context for absolute dropdown */
+    z-index: 2000; /* High z-index wrapper */
   }
 
   .notif-dropdown {
     position: absolute;
-    top: 130%; /* Slightly more gap from button */
-    right: 0;
-    width: 350px; /* Professional fixed width */
+    /* UPDATED: Ensures it sits exactly 10px below the button */
+    top: calc(100% + 10px); 
+    right: 0; /* Aligns right edge with button */
+    width: 350px;
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-xl);
-    z-index: 1050;
+    z-index: 2000; /* High z-index to ensure visibility */
     display: none; /* Hidden by default */
     flex-direction: column;
     overflow: hidden;
@@ -165,7 +167,7 @@
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-primary);
-    background-color: var(--body-bg); /* Slight contrast header */
+    background-color: var(--body-bg);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -196,7 +198,7 @@
   }
 
   .notif-list {
-    max-height: 400px; /* Constrained height with scroll */
+    max-height: 400px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -1064,16 +1066,22 @@
       justify-content: center;
     }
     
-    /* Notification Responsive - Mobile Centered but Constrained */
+    /* Notification Responsive - Centered but anchored to button */
+    .notif-wrapper {
+      /* Ensure relative context remains */
+      position: relative; 
+    }
+
     .notif-dropdown {
-      position: fixed; /* Break out of container to float */
-      top: 70px;
+      position: absolute; /* Stays relative to button */
+      top: calc(100% + 8px); /* Sit below button */
       left: 50%;
-      transform: translateX(-50%);
-      width: 90%;
-      max-width: 360px;
+      transform: translateX(-50%); /* Center horizontally */
       right: auto;
-      max-height: 70vh; /* Don't cover whole vertical space */
+      width: 90%; /* Width constrained by screen */
+      max-width: 350px;
+      z-index: 2500; /* Ensure visibility above all content */
+      max-height: 70vh; /* Ensure it doesn't go off bottom of screen */
     }
 
     .notif-header {
