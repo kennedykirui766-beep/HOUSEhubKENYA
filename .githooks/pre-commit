@@ -23,9 +23,9 @@ for f in $STAGED; do
   }
 
   # Scan staged content for common secret patterns
-  if git show :"$f" 2>/dev/null | grep -I -n -E "(SENDGRID|SG\.[A-Za-z0-9_-]{20,}|SECRET_KEY|API_KEY|MAIL_PASSWORD|BEGIN RSA PRIVATE KEY|PRIVATE KEY|PASSWORD=|AKIA[0-9A-Z]{16})" >/dev/null 2>&1; then
+  if git show :"$f" 2>/dev/null | grep -I -n -E "(MAILJET|SG\.[A-Za-z0-9_-]{20,}|SECRET_KEY|API_KEY|MAIL_PASSWORD|BEGIN RSA PRIVATE KEY|PRIVATE KEY|PASSWORD=|AKIA[0-9A-Z]{16})" >/dev/null 2>&1; then
     echo "Pre-commit blocked: potential secret found in $f"
-    git show :"$f" 2>/dev/null | grep -n -E "(SENDGRID|SG\.[A-Za-z0-9_-]{20,}|SECRET_KEY|API_KEY|MAIL_PASSWORD|BEGIN RSA PRIVATE KEY|PRIVATE KEY|PASSWORD=|AKIA[0-9A-Z]{16})" || true
+    git show :"$f" 2>/dev/null | grep -n -E "(MAILJET|SG\.[A-Za-z0-9_-]{20,}|SECRET_KEY|API_KEY|MAIL_PASSWORD|BEGIN RSA PRIVATE KEY|PRIVATE KEY|PASSWORD=|AKIA[0-9A-Z]{16})" || true
     BLOCKED=1
   fi
 done
