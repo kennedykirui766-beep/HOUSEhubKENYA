@@ -4,40 +4,27 @@
 
 {% block styles %}
 <style>
-    :root {
-        --primary-color: #4361ee;
-        --primary-hover: #3a0ca3;
-        --secondary-color: #7209b7;
-        --success-color: #10b981;
-        --danger-color: #ef4444;
-        --bg-light: #f8f9fa;
-        --text-dark: #212529;
-        --text-muted: #6c757d;
-        --border-color: #e9ecef;
-        --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        --radius-lg: 16px;
-        --radius-md: 10px;
-    }
+    /* We rely on variables from base.css */
 
-    .payment-wrapper {
+    .payment-container {
         max-width: 900px;
-        margin: 2rem auto;
-        padding: 0 1rem;
+        margin: 0 auto;
     }
 
     .payment-card {
-        background: white;
+        background-color: var(--card-bg);
         border-radius: var(--radius-lg);
-        box-shadow: var(--card-shadow);
+        box-shadow: var(--shadow-lg);
         overflow: hidden;
         border: 1px solid var(--border-color);
     }
 
     .card-header-custom {
-        background: linear-gradient(135deg, var(--success-color), #059669);
+        background: var(--gradient-success);
         color: white;
-        padding: 2rem;
+        padding: 2rem 2rem 1.5rem 2rem;
         text-align: center;
+        position: relative;
     }
 
     .card-header-custom h2 {
@@ -52,58 +39,65 @@
         font-size: 0.95rem;
     }
 
-    .card-body {
+    .card-body-custom {
         padding: 2.5rem;
     }
 
+    /* Form Controls */
     .form-label {
         font-weight: 600;
-        color: var(--text-dark);
+        color: var(--text-primary);
         font-size: 0.9rem;
         margin-bottom: 0.5rem;
-        display: block;
     }
 
     .form-control, .form-select {
-        width: 100%;
-        padding: 0.8rem 1rem;
+        padding: 0.75rem 1rem;
         border: 1px solid var(--border-color);
         border-radius: var(--radius-md);
         font-size: 1rem;
-        transition: all 0.3s ease;
-        background-color: #fcfcfc;
+        background-color: var(--card-bg);
+        color: var(--text-primary);
+        transition: var(--transition);
     }
 
     .form-control:focus, .form-select:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
+        border-color: var(--success-color);
+        box-shadow: 0 0 0 4px var(--success-light);
         outline: none;
-        background-color: white;
     }
 
     /* Rent Display Box */
     .rent-display {
-        background-color: #ecfdf5;
-        border: 1px solid #d1fae5;
-        border-radius: var(--radius-md);
+        background-color: var(--success-light);
+        border: 1px solid var(--success-color);
+        border-radius: var(--radius-lg);
         padding: 1.5rem;
         text-align: center;
         margin-bottom: 1.5rem;
-        transition: all 0.3s;
+        transition: transform 0.2s;
+    }
+    
+    .rent-display:hover {
+        transform: translateY(-2px);
     }
 
     .rent-label {
-        color: #065f46;
+        color: #065f46; /* Darker green for text readability */
         font-weight: 600;
         text-transform: uppercase;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         letter-spacing: 1px;
         margin-bottom: 0.5rem;
         display: block;
     }
+    
+    [data-bs-theme="dark"] .rent-label {
+        color: #6ee7b7;
+    }
 
     .rent-amount {
-        color: #047857;
+        color: var(--success-color);
         font-size: 2.5rem;
         font-weight: 800;
         line-height: 1;
@@ -115,181 +109,153 @@
         margin-right: 2px;
     }
 
-    /* Buttons */
-    .btn {
-        padding: 0.8rem 2rem;
+    /* Info Alert */
+    .info-alert {
+        background-color: var(--info-light);
+        border-left: 4px solid var(--info-color);
+        color: #1e40af;
+        padding: 1rem;
         border-radius: var(--radius-md);
-        font-weight: 600;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 1rem;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-    }
-
-    .btn-success {
-        background-color: var(--success-color);
-        color: white;
-        width: 100%;
-    }
-
-    .btn-success:hover {
-        background-color: #059669;
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
-    }
-
-    .btn-secondary {
-        background-color: #e5e7eb;
-        color: var(--text-dark);
-    }
-
-    .btn-secondary:hover {
-        background-color: #d1d5db;
-    }
-
-    /* Alert Styling */
-    .alert-custom {
-        padding: 1rem 1.5rem;
-        border-radius: var(--radius-md);
-        margin-bottom: 2rem;
-        border-left: 5px solid;
+        font-size: 0.9rem;
         display: flex;
-        align-items: center;
-        justify-content: space-between;
+        align-items: flex-start;
+        gap: 0.75rem;
     }
 
-    .alert-info { background-color: #eff6ff; border-color: #3b82f6; color: #1e40af; }
-    .alert-success { background-color: #ecfdf5; border-color: #10b981; color: #065f46; }
-    .alert-warning { background-color: #fffbeb; border-color: #f59e0b; color: #92400e; }
+    [data-bs-theme="dark"] .info-alert {
+        background-color: rgba(59, 130, 246, 0.15);
+        color: #93c5fd;
+    }
 
     /* Empty State */
     .empty-state {
+        padding: 4rem 2rem;
         text-align: center;
-        padding: 3rem 1rem;
-        color: var(--text-muted);
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--border-color);
+        margin-bottom: 1.5rem;
+        display: block;
     }
 
     /* Responsive */
     @media (max-width: 768px) {
-        .card-body { padding: 1.5rem; }
+        .card-body-custom { padding: 1.5rem; }
         .rent-amount { font-size: 2rem; }
+        .card-header-custom h2 { font-size: 1.5rem; }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="payment-wrapper">
+<div class="container-fluid">
+    <div class="payment-container">
 
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert-custom alert-{{ category }}">
-                    <span>{{ message }}</span>
-                    <button onclick="this.parentElement.style.display='none'" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:inherit;">&times;</button>
-                </div>
-            {% endfor %}
+        {% if bookings %}
+        <div class="payment-card">
+            <div class="card-header-custom">
+                <h2><i class="fas fa-file-invoice-dollar"></i> Pay Rent</h2>
+                <p>Select your property and the month you wish to pay for.</p>
+            </div>
+
+            <div class="card-body-custom">
+                <form method="POST" id="rentForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                    <div class="row">
+                        <!-- Left Column: Selection -->
+                        <div class="col-lg-7">
+                            
+                            <!-- Property Selection -->
+                            <div class="mb-4">
+                                <label for="houseSelect" class="form-label">Select Property / Booking</label>
+                                <select name="house_id" id="houseSelect" class="form-select" required onchange="updateRentAmount()">
+                                    <option value="" disabled selected>-- Choose your property --</option>
+                                    {% for booking in bookings %}
+                                        <option value="{{ booking.house.id }}" data-rent="{{ booking.house.rent_amount }}" data-name="{{ booking.house.name }}">
+                                            {{ booking.house.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <small class="text-muted" style="font-size: 0.85rem;">Only approved bookings are listed.</small>
+                            </div>
+
+                            <!-- Month Selection -->
+                            <div class="mb-4">
+                                <label for="payment_month" class="form-label">Payment For Month</label>
+                                <div class="input-group">
+                                    <span class="input-group-text" style="background-color: var(--sidebar-hover); border-right: none;">
+                                        <i class="far fa-calendar-alt"></i>
+                                    </span>
+                                    <input type="month" name="payment_month" id="payment_month" class="form-control" style="border-left: none;" required>
+                                </div>
+                            </div>
+
+                            <!-- Optional Notes -->
+                            <div class="mb-4">
+                                <label for="notes" class="form-label">Reference / Notes (Optional)</label>
+                                <textarea name="notes" id="notes" class="form-control" rows="3" placeholder="E.g., Rent for January 2024..."></textarea>
+                            </div>
+
+                        </div>
+
+                        <!-- Right Column: Summary -->
+                        <div class="col-lg-5">
+                            <div class="rent-display">
+                                <span class="rent-label">Total Amount Due</span>
+                                <div class="rent-amount">
+                                    <span class="currency">KES</span> <span id="displayAmount">0.00</span>
+                                </div>
+                                <div id="propertyNameDisplay" style="margin-top:0.5rem; font-size:0.9rem; color: var(--text-secondary); height: 1.2em;">
+                                    <!-- Property name appears here -->
+                                </div>
+                            </div>
+                            
+                            <div class="info-alert">
+                                <i class="fas fa-info-circle mt-1"></i>
+                                <div>
+                                    <strong>Note:</strong> Payments will be processed with a status of "Pending" until verified.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4" style="border-top: 1px dashed var(--border-color); opacity: 0.5;">
+
+                    <div class="d-flex justify-content-between align-items-center gap-3">
+                        <a href="{{ url_for('tenant.dashboard') }}" class="btn btn-outline-custom" style="flex: 1;">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn" style="background: var(--gradient-success); color: white; border: none; font-weight: 600; padding: 0.8rem 1.5rem; border-radius: var(--radius-md); flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: var(--transition); box-shadow: var(--shadow-md);">
+                            Confirm Payment <i class="fas fa-money-bill-wave"></i>
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="payment-card">
+            <div class="empty-state">
+                <i class="fas fa-home"></i>
+                <h3 class="h4 mb-3">No Active Properties</h3>
+                <p class="text-muted">You do not have any approved bookings to pay rent for.</p>
+                <a href="{{ url_for('tenant.dashboard') }}" class="btn btn-outline-custom mt-3">
+                    Return to Dashboard
+                </a>
+            </div>
+        </div>
         {% endif %}
-    {% endwith %}
 
-    {% if bookings %}
-    <div class="payment-card">
-        <div class="card-header-custom">
-            <h2>Pay Rent</h2>
-            <p>Select your property and the month you wish to pay for.</p>
-        </div>
-
-        <div class="card-body">
-            <form method="POST" id="rentForm">
-                {{ csrf_token() }}
-
-                <div class="row">
-                    <!-- Left Column: Selection -->
-                    <div class="col-lg-7">
-                        
-                        <!-- Property Selection -->
-                        <div class="mb-4">
-                            <label for="houseSelect" class="form-label">Select Property / Booking</label>
-                            <select name="house_id" id="houseSelect" class="form-select" required onchange="updateRentAmount()">
-                                <option value="" disabled selected>-- Choose your property --</option>
-                                {% for booking in bookings %}
-                                    <option value="{{ booking.house.id }}" data-rent="{{ booking.house.rent_amount }}" data-name="{{ booking.house.name }}">
-                                        {{ booking.house.name }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                            <small class="text-muted" style="font-size: 0.85rem;">Only approved bookings are listed.</small>
-                        </div>
-
-                        <!-- Month Selection -->
-                        <div class="mb-4">
-                            <label for="payment_month" class="form-label">Payment For Month</label>
-                            <input type="month" name="payment_month" id="payment_month" class="form-control" required>
-                        </div>
-
-                        <!-- Optional Notes (Not used in route logic, but good for UI) -->
-                        <div class="mb-4">
-                            <label for="notes" class="form-label">Reference / Notes (Optional)</label>
-                            <textarea name="notes" id="notes" class="form-control" rows="3" placeholder="E.g., Rent for January 2024..."></textarea>
-                        </div>
-
-                    </div>
-
-                    <!-- Right Column: Summary -->
-                    <div class="col-lg-5">
-                        <div class="rent-display">
-                            <span class="rent-label">Total Amount Due</span>
-                            <div class="rent-amount">
-                                <span class="currency">KES</span> <span id="displayAmount">0.00</span>
-                            </div>
-                            <div id="propertyNameDisplay" style="margin-top:0.5rem; font-size:0.9rem; color:#6b7280; height: 1.2em;">
-                                <!-- Property name appears here -->
-                            </div>
-                        </div>
-                        
-                        <div class="alert alert-info d-flex align-items-center" style="background:#f0f9ff; border-color:#bae6fd; color:#0369a1; font-size:0.9rem;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px; flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                            <span>Payments will be processed with a status of "Pending" until verified.</span>
-                        </div>
-                    </div>
-                </div>
-
-                <hr class="my-4" style="border-top: 1px dashed var(--border-color);">
-
-                <div class="d-flex justify-content-between align-items-center">
-                    <a href="{{ url_for('tenant.dashboard') }}" class="btn btn-secondary">
-                        Cancel
-                    </a>
-                    <button type="submit" class="btn btn-success">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
-                        Confirm Payment
-                    </button>
-                </div>
-
-            </form>
-        </div>
     </div>
-    {% else %}
-    <div class="payment-card">
-        <div class="empty-state">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:1rem;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-            <h3>No Active Properties</h3>
-            <p>You do not have any approved bookings to pay rent for.</p>
-            <a href="{{ url_for('tenant.dashboard') }}" class="btn btn-secondary mt-3">Return to Dashboard</a>
-        </div>
-    </div>
-    {% endif %}
-
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    // Set default month to next month (convenience)
+    // Set default month to next month
     document.addEventListener('DOMContentLoaded', function() {
         const dateInput = document.getElementById('payment_month');
         if (dateInput) {
@@ -313,7 +279,7 @@
             const rent = selectedOption.getAttribute('data-rent');
             const name = selectedOption.getAttribute('data-name');
             
-            // Format currency (assuming simple number, add commas)
+            // Format currency (add commas)
             const formattedRent = Number(rent).toLocaleString('en-US', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2

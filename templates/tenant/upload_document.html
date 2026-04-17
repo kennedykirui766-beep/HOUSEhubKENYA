@@ -4,115 +4,57 @@
 
 {% block styles %}
 <style>
-    :root {
-        --primary-color: #4361ee;
-        --primary-hover: #3a0ca3;
-        --secondary-color: #7209b7;
-        --success-color: #10b981;
-        --danger-color: #ef4444;
-        --bg-light: #f8f9fa;
-        --text-dark: #212529;
-        --text-muted: #6c757d;
-        --border-color: #e9ecef;
-        --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        --radius-lg: 16px;
-        --radius-md: 10px;
-    }
+    /* We rely on variables from base.css (e.g., --primary-color, --card-bg) */
 
-    .documents-wrapper {
-        max-width: 1200px;
-        margin: 2rem auto;
-        padding: 0 1rem;
-    }
-
-    .page-header {
-        margin-bottom: 2rem;
+    .documents-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        margin-bottom: 1.5rem;
     }
 
-    .page-header h1 {
-        font-size: 1.75rem;
+    .documents-header h2 {
+        font-size: 1.5rem;
         font-weight: 700;
-        color: var(--text-dark);
-    }
-
-    /* Grid Layout */
-    .documents-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-
-    @media (min-width: 992px) {
-        .documents-grid {
-            grid-template-columns: 350px 1fr; /* Upload fixed width, List fills rest */
-            align-items: start;
-        }
-    }
-
-    /* Cards */
-    .card {
-        background: white;
-        border-radius: var(--radius-lg);
-        box-shadow: var(--card-shadow);
-        border: 1px solid var(--border-color);
-        overflow: hidden;
-    }
-
-    .card-header {
-        padding: 1.25rem 1.5rem;
-        border-bottom: 1px solid var(--border-color);
-        background-color: #fcfcfc;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .card-header h3 {
-        font-size: 1.1rem;
-        font-weight: 600;
         margin: 0;
-        color: var(--text-dark);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        color: var(--text-primary);
     }
 
-    .card-body {
-        padding: 1.5rem;
-    }
-
-    /* --- Upload Form Styling --- */
+    /* --- Upload Zone Styling --- */
     .upload-area {
         border: 2px dashed var(--border-color);
-        border-radius: var(--radius-md);
-        padding: 2rem 1rem;
+        border-radius: var(--radius-lg);
+        padding: 2.5rem 1.5rem;
         text-align: center;
-        background-color: #f8f9fa;
+        background-color: var(--sidebar-hover);
         transition: all 0.3s ease;
         cursor: pointer;
         position: relative;
     }
 
-    .upload-area:hover, .upload-area.dragover {
+    .upload-area:hover, 
+    .upload-area.dragover {
         border-color: var(--primary-color);
-        background-color: #eef2ff;
+        background-color: var(--primary-light);
     }
 
     .upload-icon {
-        width: 48px;
-        height: 48px;
+        font-size: 2.5rem;
         color: var(--primary-color);
         margin-bottom: 1rem;
         opacity: 0.8;
+        transition: transform 0.3s;
+    }
+    
+    .upload-area:hover .upload-icon {
+        transform: translateY(-5px);
     }
 
     .upload-text {
-        color: var(--text-dark);
-        font-weight: 500;
-        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.25rem;
     }
 
     .upload-subtext {
@@ -120,7 +62,6 @@
         font-size: 0.85rem;
     }
 
-    /* Hide actual file input */
     #documentFile {
         position: absolute;
         top: 0;
@@ -129,203 +70,208 @@
         height: 100%;
         opacity: 0;
         cursor: pointer;
+        z-index: 10;
     }
 
-    .form-control, .form-select {
-        padding: 0.7rem 1rem;
+    /* --- Form Controls --- */
+    .form-label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-select {
+        padding: 0.75rem 1rem;
         border: 1px solid var(--border-color);
         border-radius: var(--radius-md);
         font-size: 0.95rem;
         width: 100%;
-        transition: all 0.3s;
+        color: var(--text-primary);
+        background-color: var(--card-bg);
+        transition: var(--transition);
     }
 
-    .form-control:focus, .form-select:focus {
+    .form-select:focus {
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        box-shadow: 0 0 0 4px var(--primary-light);
         outline: none;
     }
 
     .btn-upload {
         width: 100%;
-        background-color: var(--primary-color);
+        background: var(--gradient-primary);
         color: white;
-        padding: 0.8rem;
+        padding: 0.85rem;
         border-radius: var(--radius-md);
         font-weight: 600;
         border: none;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: var(--transition);
         display: flex;
         justify-content: center;
         align-items: center;
         gap: 0.5rem;
+        margin-top: 1rem;
     }
 
     .btn-upload:hover {
-        background-color: var(--primary-hover);
-        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
     }
 
-    /* --- Table Styling --- */
-    .table-responsive {
+    /* --- Document List Table --- */
+    .table-container-custom {
         overflow-x: auto;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
     }
-
-    table {
+    
+    .table-custom {
         width: 100%;
-        border-collapse: collapse;
-        text-align: left;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-bottom: 0;
     }
 
-    thead th {
-        padding: 1rem;
-        background-color: #f8f9fa;
-        color: var(--text-muted);
+    .table-custom thead th {
+        background-color: var(--sidebar-hover);
+        color: var(--text-secondary);
         font-size: 0.75rem;
         text-transform: uppercase;
-        font-weight: 600;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        padding: 1rem 1.25rem;
+        text-align: left;
         border-bottom: 2px solid var(--border-color);
     }
 
-    tbody td {
-        padding: 1rem;
-        border-bottom: 1px solid var(--border-color);
+    .table-custom tbody td {
+        padding: 1rem 1.25rem;
         vertical-align: middle;
-        font-size: 0.95rem;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        background-color: var(--card-bg);
     }
 
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background-color: #fafafa; }
+    .table-custom tbody tr:last-child td {
+        border-bottom: none;
+    }
 
-    .doc-icon-cell {
+    .table-custom tbody tr:hover td {
+        background-color: var(--sidebar-hover);
+    }
+
+    /* --- Icon Cell --- */
+    .doc-icon-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .doc-icon-box {
         width: 40px;
         height: 40px;
-        background-color: #e0e7ff;
+        background-color: var(--primary-light);
         color: var(--primary-color);
-        border-radius: 8px;
+        border-radius: var(--radius-md);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-right: 1rem;
+        font-size: 1.2rem;
         flex-shrink: 0;
     }
 
-    .doc-info {
-        display: flex;
-        align-items: center;
-    }
-    
-    .doc-name {
+    .doc-title {
         font-weight: 600;
-        color: var(--text-dark);
+        color: var(--text-primary);
         display: block;
+        margin-bottom: 0.1rem;
     }
-    
+
     .doc-meta {
         font-size: 0.8rem;
         color: var(--text-muted);
     }
 
-    .status-badge {
-        padding: 0.25rem 0.75rem;
-        border-radius: 50px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-    
-    .status-verified { background-color: #d1fae5; color: #065f46; }
-    .status-pending { background-color: #fef3c7; color: #92400e; }
-
-    .action-btns {
-        display: flex;
-        gap: 0.5rem;
-    }
-
-    .btn-icon {
-        width: 32px;
-        height: 32px;
-        border-radius: 6px;
-        display: flex;
+    /* --- Actions --- */
+    .action-link {
+        width: 34px;
+        height: 34px;
+        border-radius: var(--radius-sm);
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid var(--border-color);
-        background: white;
-        color: var(--text-muted);
-        transition: all 0.2s;
+        color: var(--text-secondary);
+        background-color: var(--sidebar-hover);
         text-decoration: none;
+        transition: all 0.2s;
+        border: 1px solid transparent;
     }
 
-    .btn-icon:hover {
-        background-color: var(--primary-color);
-        color: white;
+    .action-link:hover {
+        color: var(--primary-color);
+        background-color: var(--primary-light);
         border-color: var(--primary-color);
     }
 
-    .btn-icon.delete:hover {
-        background-color: var(--danger-color);
+    .action-link.delete:hover {
+        color: var(--danger-color);
+        background-color: var(--danger-light);
         border-color: var(--danger-color);
     }
 
-    /* Empty State */
+    /* --- Empty State --- */
     .empty-state {
+        padding: 3rem;
         text-align: center;
-        padding: 3rem 1rem;
-        color: var(--text-muted);
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--border-color);
+        margin-bottom: 1rem;
+        display: block;
     }
 
-    /* Alert */
-    .alert-custom {
-        padding: 1rem 1.5rem;
-        border-radius: var(--radius-md);
-        margin-bottom: 1.5rem;
-        border-left: 5px solid;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+    .empty-state p {
+        color: var(--text-muted);
+        margin: 0;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="documents-wrapper">
+<div class="container-fluid">
     
-    <div class="page-header">
-        <h1>My Documents</h1>
+    <div class="documents-header">
+        <h2>My Documents</h2>
+        <!-- Breadcrumb or extra actions can go here -->
     </div>
 
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert-custom alert-{{ category }}" style="border-color: {{ 'var(--success-color)' if category == 'success' else 'var(--danger-color)' }}; background-color: {{ 'rgba(16, 185, 129, 0.1)' if category == 'success' else 'rgba(239, 68, 68, 0.1)' }}; color: {{ 'var(--text-dark)' }};">
-                    <span>{{ message }}</span>
-                    <button onclick="this.parentElement.style.display='none'" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:inherit;">&times;</button>
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <div class="documents-grid">
+    <!-- Grid Layout: Upload on left, List on right -->
+    <div class="row g-4">
         
         <!-- COLUMN 1: Upload Form -->
-        <div class="upload-column">
-            <div class="card">
-                <div class="card-header">
-                    <h3>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                        Upload Document
+        <div class="col-lg-4 col-xl-3">
+            <div class="content-card h-100">
+                <div class="content-card-header">
+                    <h3 class="content-card-title">
+                        <i class="fas fa-cloud-upload-alt"></i> Upload New
                     </h3>
                 </div>
-                <div class="card-body">
+                <div class="content-card-body">
                     <form method="POST" enctype="multipart/form-data" id="uploadForm">
-                        {{ csrf_token() }}
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         
-                        <!-- Custom Drag & Drop Zone -->
+                        <!-- Drag & Drop Zone -->
                         <div class="upload-area" id="dropZone">
                             <input type="file" id="documentFile" name="document" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required>
-                            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-                            <div class="upload-text" id="fileNameDisplay">Click or Drag file here</div>
+                            <div class="upload-icon">
+                                <i class="fas fa-file-import"></i>
+                            </div>
+                            <div class="upload-text" id="fileNameDisplay">Click or Drag file</div>
                             <div class="upload-subtext">PDF, DOC, JPG, PNG (Max 5MB)</div>
                         </div>
 
@@ -342,8 +288,8 @@
                             </select>
                         </div>
 
-                        <button type="submit" class="btn-upload mt-4">
-                            Upload to Cloud
+                        <button type="submit" class="btn-upload">
+                            <i class="fas fa-upload"></i> Upload Document
                         </button>
                     </form>
                 </div>
@@ -351,68 +297,69 @@
         </div>
 
         <!-- COLUMN 2: Document List -->
-        <div class="list-column">
-            <div class="card" style="min-height: 400px;">
-                <div class="card-header">
-                    <h3>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                        Document History
+        <div class="col-lg-8 col-xl-9">
+            <div class="content-card">
+                <div class="content-card-header">
+                    <h3 class="content-card-title">
+                        <i class="fas fa-folder-open"></i> Document History
                     </h3>
-                    <!-- Simple Search (Visual Only) -->
-                    <div style="font-size: 0.9rem; color: var(--text-muted);">
+                    <span class="text-muted" style="font-size: 0.85rem;">
                         {{ documents|length }} Files
-                    </div>
+                    </span>
                 </div>
                 
-                <div class="card-body" style="padding: 0;">
+                <div class="content-card-body p-0">
                     {% if documents %}
-                    <div class="table-responsive">
-                        <table>
+                    <div class="table-container-custom">
+                        <table class="table-custom">
                             <thead>
                                 <tr>
-                                    <th>Document</th>
+                                    <th>Document Name</th>
                                     <th>Date Uploaded</th>
+                                    <th>Type</th>
                                     <th>Status</th>
-                                    <th>Actions</th>
+                                    <th class="text-end">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for doc in documents %}
                                 <tr>
                                     <td>
-                                        <div class="doc-info">
-                                            <div class="doc-icon-cell">
+                                        <div class="doc-icon-wrapper">
+                                            <div class="doc-icon-box">
                                                 {% if doc.name.lower().endswith('.pdf') %}
-                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                                    <i class="fas fa-file-pdf"></i>
+                                                {% elif doc.name.lower().endswith(('.jpg', '.jpeg', '.png')) %}
+                                                    <i class="fas fa-file-image"></i>
+                                                {% elif doc.name.lower().endswith(('.doc', '.docx')) %}
+                                                    <i class="fas fa-file-word"></i>
                                                 {% else %}
-                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                                                    <i class="fas fa-file-alt"></i>
                                                 {% endif %}
                                             </div>
                                             <div>
-                                                <span class="doc-name">{{ doc.name }}</span>
-                                                {% if doc.document_type %}
-                                                <span class="doc-meta">{{ doc.document_type }}</span>
-                                                {% endif %}
+                                                <span class="doc-title">{{ doc.name }}</span>
+                                                <div class="doc-meta">ID: #{{ doc.id }}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td>
-                                        <!-- Using uploaded_at to match your Route logic, or upload_date if model differs -->
-                                        {{ doc.uploaded_at.strftime('%B %d, %Y') if doc.uploaded_at else 'N/A' }}
+                                        <i class="far fa-calendar-alt me-1 text-muted"></i>
+                                        {{ doc.uploaded_at.strftime('%b %d, %Y') if doc.uploaded_at else 'N/A' }}
                                     </td>
+                                    <td>{{ doc.document_type or '-' }}</td>
                                     <td>
-                                        <span class="status-badge status-verified">Verified</span>
+                                        <!-- Using status classes from base.html -->
+                                        <span class="status-badge status-success">Verified</span>
                                     </td>
-                                    <td>
-                                        <div class="action-btns">
-                                            <a href="{{ doc.file_url }}" target="_blank" class="btn-icon" title="View">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                            </a>
-                                            <!-- Assuming delete route exists, otherwise link to '#' -->
-                                            <a href="#" onclick="alert('Delete functionality needs a route')" class="btn-icon delete" title="Delete">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                            </a>
-                                        </div>
+                                    <td class="text-end">
+                                        <a href="{{ doc.file_url }}" target="_blank" class="action-link" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <!-- Replace # with actual delete route -->
+                                        <a href="#" onclick="alert('Delete route needs to be implemented'); return false;" class="action-link delete" title="Delete">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -421,7 +368,7 @@
                     </div>
                     {% else %}
                     <div class="empty-state">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:1rem;"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                        <i class="fas fa-folder-open"></i>
                         <p>No documents uploaded yet.</p>
                     </div>
                     {% endif %}
@@ -439,15 +386,18 @@
         const fileInput = document.getElementById('documentFile');
         const fileNameDisplay = document.getElementById('fileNameDisplay');
         const dropZone = document.getElementById('dropZone');
+        const uploadIcon = dropZone.querySelector('.upload-icon i');
 
         // Update text when file is selected
         fileInput.addEventListener('change', function(e) {
             if (this.files && this.files.length > 0) {
-                fileNameDisplay.textContent = this.files[0].name;
+                const file = this.files[0];
+                fileNameDisplay.textContent = file.name;
                 fileNameDisplay.style.color = 'var(--primary-color)';
-                fileNameDisplay.style.fontWeight = '600';
                 dropZone.style.borderColor = 'var(--primary-color)';
-                dropZone.style.backgroundColor = '#eef2ff';
+                
+                // Change icon based on file type
+                uploadIcon.className = 'fas fa-check-circle';
             }
         });
 
@@ -467,10 +417,16 @@
             
             if (e.dataTransfer.files.length) {
                 fileInput.files = e.dataTransfer.files;
-                // Trigger change event manually
+                // Trigger change event manually to update UI
                 const event = new Event('change');
                 fileInput.dispatchEvent(event);
             }
+        });
+        
+        // Reset visual state if input is cleared (if you add a clear button later)
+        fileInput.addEventListener('click', function(e) {
+             // This allows the same file to be selected again if needed
+             this.value = null;
         });
     });
 </script>

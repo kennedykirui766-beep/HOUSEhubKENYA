@@ -1,32 +1,34 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+
+{% block title %}My Bookings{% endblock %}
 
 {% block styles %}
 <style>
-    /* --- Page Specific Styles --- */
-    /* These variables can be customized or rely on your base.html variables */
-    :root {
-        --page-primary: #4f46e5;
-        --page-primary-hover: #4338ca;
-        --page-bg: #f3f4f6;
-        --card-bg: #ffffff;
-        --text-main: #1f2937;
-        --text-muted: #6b7280;
-        --border-color: #e5e7eb;
-        --success: #10b981;
-        --warning: #f59e0b;
-        --danger: #ef4444;
-        --info: #3b82f6;
-        --radius: 8px;
+    /* We rely on variables from base.css */
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
 
-    .content-wrapper {
-        padding: 2rem;
-        max-width: 1200px;
-        margin: 0 auto;
-        width: 100%;
+    .page-title h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--text-primary);
     }
 
-    /* --- STATS GRID --- */
+    .page-title p {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin: 0.25rem 0 0;
+    }
+
+    /* --- STATS GRID (Customized for this page) --- */
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -35,42 +37,52 @@
     }
 
     .stat-card {
-        background: var(--card-bg);
-        padding: 1.5rem;
-        border-radius: var(--radius);
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        background-color: var(--card-bg);
         border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
         display: flex;
         align-items: center;
         justify-content: space-between;
+        transition: var(--transition);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--primary-color);
     }
 
     .stat-info h3 {
         font-size: 1.875rem;
         font-weight: 700;
-        color: var(--text-main);
+        color: var(--text-primary);
         margin: 0;
+        line-height: 1;
     }
 
     .stat-info p {
         font-size: 0.875rem;
-        color: var(--text-muted);
-        margin: 0;
+        color: var(--text-secondary);
+        margin: 0.5rem 0 0 0;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
     }
 
-    .stat-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
+    .stat-icon-box {
+        width: 56px;
+        height: 56px;
+        border-radius: var(--radius-md);
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.5rem;
     }
 
-    .icon-primary { background-color: #e0e7ff; color: var(--page-primary); }
-    .icon-success { background-color: #d1fae5; color: var(--success); }
-    .icon-info { background-color: #dbeafe; color: var(--info); }
+    .icon-primary { background-color: var(--primary-light); color: var(--primary-color); }
+    .icon-success { background-color: var(--success-light); color: var(--success-color); }
+    .icon-info { background-color: var(--info-light); color: var(--info-color); }
 
     /* --- CONTROLS BAR --- */
     .controls-bar {
@@ -80,10 +92,11 @@
         margin-bottom: 1.5rem;
         flex-wrap: wrap;
         gap: 1rem;
-        background: var(--card-bg);
+        background-color: var(--card-bg);
         padding: 1rem;
-        border-radius: var(--radius);
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
     }
 
     .search-wrapper {
@@ -98,73 +111,82 @@
         top: 50%;
         transform: translateY(-50%);
         color: var(--text-muted);
-        width: 18px;
-        height: 18px;
     }
 
     .search-input {
         width: 100%;
-        padding: 0.625rem 1rem 0.625rem 2.5rem;
+        padding: 0.65rem 1rem 0.65rem 2.5rem;
         border: 1px solid var(--border-color);
-        border-radius: var(--radius);
+        border-radius: var(--radius-md);
         font-size: 0.95rem;
+        background-color: var(--card-bg);
+        color: var(--text-primary);
         outline: none;
+        transition: var(--transition);
     }
 
     .search-input:focus {
-        border-color: var(--page-primary);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px var(--primary-light);
     }
 
     .filter-select {
-        padding: 0.625rem 1rem;
+        padding: 0.65rem 1rem;
         border: 1px solid var(--border-color);
-        border-radius: var(--radius);
-        background-color: white;
+        border-radius: var(--radius-md);
+        background-color: var(--card-bg);
+        color: var(--text-primary);
         font-size: 0.95rem;
         cursor: pointer;
+        outline: none;
     }
 
-    /* --- BOOKINGS TABLE --- */
+    .filter-select:focus {
+        border-color: var(--primary-color);
+    }
+
+    /* --- TABLE STYLING --- */
     .table-container {
-        background: var(--card-bg);
-        border-radius: var(--radius);
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        background-color: var(--card-bg);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
         border: 1px solid var(--border-color);
         overflow: hidden;
     }
 
-    table {
+    .table-custom {
         width: 100%;
         border-collapse: collapse;
         text-align: left;
     }
 
-    thead {
-        background-color: #f9fafb;
+    .table-custom thead {
+        background-color: var(--sidebar-hover);
         border-bottom: 1px solid var(--border-color);
     }
 
-    th {
+    .table-custom th {
         padding: 1rem;
         font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        color: var(--text-muted);
-        font-weight: 600;
+        color: var(--text-secondary);
+        font-weight: 700;
     }
 
-    td {
+    .table-custom td {
         padding: 1rem;
         border-bottom: 1px solid var(--border-color);
         vertical-align: middle;
+        color: var(--text-primary);
     }
 
-    tr:last-child td {
+    .table-custom tr:last-child td {
         border-bottom: none;
     }
 
-    tr:hover {
-        background-color: #f9fafb;
+    .table-custom tr:hover td {
+        background-color: var(--sidebar-hover);
     }
 
     /* Property Cell */
@@ -177,57 +199,54 @@
     .property-img {
         width: 48px;
         height: 48px;
-        border-radius: var(--radius);
+        border-radius: var(--radius-md);
         object-fit: cover;
-        background-color: #e5e7eb;
+        border: 1px solid var(--border-color);
+        background-color: var(--sidebar-hover);
     }
 
     .property-info h4 {
         font-size: 0.95rem;
         font-weight: 600;
-        color: var(--text-main);
+        color: var(--text-primary);
         margin-bottom: 0.2rem;
     }
 
     .property-info span {
         font-size: 0.85rem;
-        color: var(--text-muted);
-    }
-
-    /* Status Badges */
-    .status-badge {
-        display: inline-flex;
+        color: var(--text-secondary);
+        display: flex;
         align-items: center;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 500;
+        gap: 0.25rem;
     }
 
-    .status-confirmed { background-color: #d1fae5; color: #065f46; }
-    .status-pending { background-color: #fef3c7; color: #92400e; }
-    .status-cancelled { background-color: #fee2e2; color: #991b1b; }
-    .status-completed { background-color: #e0f2fe; color: #075985; }
-    .status-active { background-color: #d1fae5; color: #065f46; }
-
-    /* Buttons */
-    .btn-sm {
+    /* Actions */
+    .btn-sm-custom {
         padding: 0.35rem 0.75rem;
         font-size: 0.8rem;
-        border-radius: 4px;
+        border-radius: var(--radius-sm);
         cursor: pointer;
         border: 1px solid var(--border-color);
-        background: white;
+        background: var(--card-bg);
+        color: var(--text-secondary);
         transition: all 0.2s;
     }
     
-    .btn-sm:hover { background-color: #f3f4f6; }
+    .btn-sm-custom:hover {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
 
     .btn-danger-text {
-        color: var(--danger);
-        border-color: #fecaca;
+        color: var(--danger-color);
+        border-color: var(--danger-light);
     }
-    .btn-danger-text:hover { background-color: #fef2f2; }
+    .btn-danger-text:hover { 
+        background-color: var(--danger-light); 
+        color: var(--danger-color);
+        border-color: var(--danger-color);
+    }
 
     /* Empty State */
     .empty-state {
@@ -238,24 +257,22 @@
 
     /* --- RESPONSIVE DESIGN (Card View) --- */
     @media (max-width: 768px) {
-        .content-wrapper { padding: 1rem; }
-        
-        table, thead, tbody, th, td, tr {
+        .table-custom, .table-custom thead, .table-custom tbody, .table-custom th, .table-custom td, .table-custom tr {
             display: block;
         }
 
-        thead { display: none; }
+        .table-custom thead { display: none; }
 
-        tr {
+        .table-custom tr {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: var(--radius);
+            border-radius: var(--radius-md);
             margin-bottom: 1rem;
             padding: 1rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: var(--shadow-sm);
         }
 
-        td {
+        .table-custom td {
             border: none;
             padding: 0.5rem 0;
             display: flex;
@@ -264,10 +281,10 @@
             text-align: right;
         }
 
-        td::before {
+        .table-custom td::before {
             content: attr(data-label);
             font-weight: 600;
-            color: var(--text-muted);
+            color: var(--text-secondary);
             font-size: 0.85rem;
             margin-right: 1rem;
             text-align: left;
@@ -280,11 +297,11 @@
         }
         
         /* Special handling for Property cell to remove label */
-        td[data-label="Property"] {
+        td[data-label="Property Details"] {
             display: block;
             text-align: left;
         }
-        td[data-label="Property"]::before { display: none; }
+        td[data-label="Property Details"]::before { display: none; }
 
         /* Action buttons alignment */
         td[data-label="Actions"] {
@@ -297,18 +314,17 @@
 {% endblock %}
 
 {% block content %}
-<div class="content-wrapper">
+<div class="container-fluid">
     
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold" style="color: var(--text-main);">My Bookings</h2>
-            <p class="text-muted mb-0">Track your rental applications and lease history.</p>
+    <div class="page-header">
+        <div class="page-title">
+            <h2>My Bookings</h2>
+            <p>Track your rental applications and lease history.</p>
         </div>
-        <!-- Optional: Refresh Button -->
-        <button class="btn btn-sm d-flex align-items-center gap-2" onclick="location.reload()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-            Refresh
+        <!-- Refresh Button -->
+        <button class="btn-sm-custom d-flex align-items-center gap-2" onclick="location.reload()">
+            <i class="fas fa-sync-alt"></i> Refresh
         </button>
     </div>
 
@@ -319,26 +335,26 @@
                 <h3 id="total-count">0</h3>
                 <p>Total Bookings</p>
             </div>
-            <div class="stat-icon icon-primary">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            <div class="stat-icon-box icon-primary">
+                <i class="fas fa-file-invoice"></i>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-info">
-                <h3 id="upcoming-count" style="color: var(--page-primary);">0</h3>
+                <h3 id="upcoming-count" style="color: var(--success-color);">0</h3>
                 <p>Upcoming / Active</p>
             </div>
-            <div class="stat-icon icon-success">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <div class="stat-icon-box icon-success">
+                <i class="fas fa-calendar-check"></i>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-info">
-                <h3 id="completed-count" style="color: var(--info);">0</h3>
+                <h3 id="completed-count" style="color: var(--info-color);">0</h3>
                 <p>Completed History</p>
             </div>
-            <div class="stat-icon icon-info">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <div class="stat-icon-box icon-info">
+                <i class="fas fa-history"></i>
             </div>
         </div>
     </section>
@@ -346,7 +362,7 @@
     <!-- Controls -->
     <section class="controls-bar">
         <div class="search-wrapper">
-            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <i class="fas fa-search search-icon"></i>
             <input type="text" id="search-input" class="search-input" placeholder="Search property name or ID...">
         </div>
         <select id="status-filter" class="filter-select">
@@ -362,7 +378,7 @@
 
     <!-- Bookings List -->
     <section class="table-container">
-        <table>
+        <table class="table-custom">
             <thead>
                 <tr>
                     <th>Property Details</th>
@@ -378,8 +394,8 @@
         </table>
         
         <div id="empty-state" class="empty-state" style="display: none;">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">📂</div>
-            <h5>No bookings found</h5>
+            <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 1rem; color: var(--border-color);"></i>
+            <h5 class="text-muted">No bookings found</h5>
             <p style="font-size: 0.9rem;">Try adjusting your search or filter criteria.</p>
         </div>
     </section>
@@ -395,22 +411,20 @@
         const rawBookings = {{ bookings | tojson | safe }};
 
         // 2. Map DB Data to UI Format
-        // Adjust these keys based on your actual Booking and House model structure
         const bookingsData = rawBookings.map(b => {
-            // Safety check for relationships
             const house = b.house || {};
             const houseTitle = house.title || house.name || "Unknown Property";
             const houseLocation = house.location || "Unknown Location";
             // Use first image if available, else placeholder
             const houseImage = (house.images && house.images.length > 0) 
                                ? house.images[0] 
-                               : "https://via.placeholder.com/100?text=House";
+                               : "{{ url_for('static', filename='images/house_placeholder.jpg') }}"; // Fallback
+            if(houseImage === "{{ url_for('static', filename='images/house_placeholder.jpg') }}") {
+                // If placeholder doesn't exist, use a generic one or base css bg
+            }
             
-            // Format date (assuming b.created_at or b.date is a date string/object)
             const dateStr = b.created_at ? new Date(b.created_at).toLocaleDateString() : "N/A";
-            
-            // Format Amount (assuming b.amount or b.total_price)
-            const amount = b.amount ? "Ksh " + Number(b.amount).toLocaleString() : "N/A";
+            const amount = b.amount ? "KES " + Number(b.amount).toLocaleString() : "N/A";
 
             return {
                 id: b.id,
@@ -440,11 +454,12 @@
         // --- FUNCTIONS ---
 
         function getStatusBadgeClass(status) {
+            // Mapping to Base CSS status classes
             const s = (status || "").toLowerCase();
-            if (s === 'confirmed' || s === 'approved' || s === 'active') return 'status-confirmed'; // Green
-            if (s === 'pending') return 'status-pending'; // Yellow
-            if (s === 'cancelled' || s === 'rejected') return 'status-cancelled'; // Red
-            if (s === 'completed') return 'status-completed'; // Blue
+            if (s === 'confirmed' || s === 'approved' || s === 'active') return 'status-active'; 
+            if (s === 'pending') return 'status-pending'; 
+            if (s === 'cancelled' || s === 'rejected') return 'status-danger'; 
+            if (s === 'completed') return 'status-info'; 
             return '';
         }
 
@@ -480,10 +495,10 @@
                 tr.innerHTML = `
                     <td data-label="Property Details">
                         <div class="property-cell">
-                            <img src="${booking.property_image}" alt="Property" class="property-img">
+                            <img src="${booking.property_image}" alt="Property" class="property-img" onerror="this.src='https://placehold.co/48x48?text=No+Img'">
                             <div class="property-info">
                                 <h4>${booking.property_name}</h4>
-                                <span><i class="fas fa-map-marker-alt me-1"></i> ${booking.location}</span>
+                                <span><i class="fas fa-map-marker-alt" style="font-size:0.8rem; color:var(--primary-color)"></i> ${booking.location}</span>
                             </div>
                         </div>
                     </td>
@@ -495,17 +510,18 @@
                         <strong>${booking.amount}</strong>
                     </td>
                     <td data-label="Status">
+                        <!-- Using Base CSS status-badge -->
                         <span class="status-badge ${getStatusBadgeClass(booking.status)}">
                             ${capitalize(booking.status)}
                         </span>
                     </td>
                     <td data-label="Actions">
-                        <button class="btn btn-sm" onclick="viewDetails(${booking.id})">
-                            View
+                        <button class="btn-sm-custom" onclick="viewDetails(${booking.id})">
+                            <i class="fas fa-eye"></i> View
                         </button>
                         ${!['cancelled', 'rejected', 'completed'].includes(booking.status.toLowerCase()) ? 
-                            `<button class="btn btn-sm btn-danger-text" onclick="cancelBooking(${booking.id})">
-                                Cancel
+                            `<button class="btn-sm-custom btn-danger-text" onclick="cancelBooking(${booking.id})">
+                                <i class="fas fa-times"></i> Cancel
                              </button>` : ''
                         }
                     </td>
@@ -532,19 +548,15 @@
         // --- INTERACTIONS ---
 
         window.viewDetails = function(id) {
-            // Redirect to a details page or open a modal
-            // window.location.href = `/tenant/booking/${id}`;
-            alert(`Viewing details for Booking ID: ${id}`);
+            // Ideally redirect or open modal
+            console.log(`Viewing details for Booking ID: ${id}`);
         };
 
         window.cancelBooking = function(id) {
             const booking = bookingsData.find(b => b.id === id);
             if (booking) {
                 if(confirm(`Are you sure you want to cancel your booking for ${booking.property_name}?`)) {
-                    // In a real app, send DELETE/POST request here
-                    // fetch(`/tenant/api/cancel/${id}`, { method: 'POST' })...
-                    
-                    // UI Feedback only for demo
+                    // Logic to call backend
                     alert("Cancellation request sent (Demo Mode)");
                 }
             }

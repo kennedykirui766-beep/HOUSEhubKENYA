@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block title %}About Us - HOUSEhubKENYA{% endblock %}
 
@@ -13,10 +13,11 @@
     background-size: cover;
     background-position: center;
     color: white;
-    padding: 6rem 0; /* Responsive padding handled below */
+    padding: 5rem 0;
     margin-bottom: 3rem;
-    border-radius: 0 0 var(--radius-xl) var(--radius-xl); /* Rounded bottom corners */
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
     overflow: hidden;
+    box-shadow: var(--shadow-md);
   }
 
   /* Dark Overlay for readability */
@@ -24,7 +25,7 @@
     content: "";
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(67, 97, 238, 0.4) 100%);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(99, 102, 241, 0.4) 100%);
     z-index: 1;
   }
 
@@ -97,7 +98,7 @@
   .info-card:hover .feature-icon-wrapper {
     background: var(--gradient-primary);
     color: white;
-  }
+    }
 
   /* Story Section List */
   .story-list {
@@ -181,7 +182,7 @@
     padding: 4rem 0;
     border-radius: var(--radius-xl);
     margin-top: 4rem;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    box-shadow: var(--shadow-xl);
   }
 
   /* Responsive Adjustments */
@@ -265,13 +266,12 @@
         Property management in Kenya has long been plagued by challenges: late rent payments, communication gaps between landlords and tenants, inefficient maintenance processes, and poor record-keeping.
       </p>
       <p>
-        Recognizing these pain points, our team of real estate professionals and technology experts came together to create         HOUSEhubKENYA is a comprehensive property management platform designed to streamline the rental experience for everyone involved.
-        - a platform that addresses these challenges head-on.
+        Recognizing these pain points, our team of real estate professionals and technology experts came together to create HOUSEhubKENYA - a platform that addresses these challenges head-on.
       </p>
     </div>
 
     <div class="col-lg-6">
-      <div class="info-card" style="background: linear-gradient(135deg, var(--primary-light), white);">
+      <div class="info-card" style="background: linear-gradient(135deg, var(--primary-light), var(--card-bg));">
         <h4 class="mb-4 fw-bold">How We Solve It</h4>
         <ul class="story-list">
           <li>
@@ -559,4 +559,8 @@
   </div>
 </section>
 
+{% endblock %}
+
+{% block scripts %}
+<!-- No page-specific scripts needed for static content -->
 {% endblock %}

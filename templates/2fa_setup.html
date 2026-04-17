@@ -1,83 +1,223 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+
 {% block title %}{{ setup_title|default('Set Up Two-Factor Authentication') }}{% endblock %}
 
+{% block styles %}
+<style>
+    .twofa-wrapper {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    /* Top Email Option Box */
+    .email-option-box {
+        background-color: var(--info-light);
+        border-left: 5px solid var(--info-color);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 2rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    [data-bs-theme="dark"] .email-option-box {
+        background-color: rgba(59, 130, 246, 0.15);
+        border-left-color: var(--info-color);
+    }
+
+    /* Main Card */
+    .twofa-card {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+    }
+
+    .twofa-header {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .twofa-header h4 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .twofa-body {
+        padding: 2.5rem;
+    }
+
+    /* QR Code Area - Needs specific white background for scanning */
+    .qr-wrapper {
+        background-color: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .qr-wrapper img {
+        max-width: 100%;
+        height: auto;
+        border-radius: var(--radius-md);
+    }
+
+    /* Secret Key Box */
+    .secret-box {
+        background-color: var(--sidebar-hover);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .secret-box code {
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        word-break: break-all;
+        font-family: monospace;
+    }
+
+    /* Form Controls */
+    .form-control {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px var(--primary-light);
+        background-color: var(--card-bg);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .email-option-box {
+            flex-direction: column;
+            text-align: center;
+        }
+        .twofa-body {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-4 py-md-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-9 col-xl-8">
+<div class="container py-5">
+    <div class="twofa-wrapper">
+        
+        <!-- Email Option Banner -->
         {% if show_email_option|default(true) %}
-        <div class="alert alert-primary border-0 shadow-sm mb-4">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-          <div>
-            <h5 class="mb-1"><i class="fas fa-envelope me-2"></i>Prefer email instead of an authenticator app?</h5>
-            <p class="mb-0">You can receive 2FA codes by email and confirm them from your inbox.</p>
-          </div>
-          <a href="{{ email_option_url|default(url_for('auth.setup_email_2fa')) }}" class="btn btn-primary">
-            <i class="fas fa-paper-plane me-2"></i>Use Email 2FA
-          </a>
+        <div class="email-option-box">
+            <div>
+                <h5 class="fw-bold mb-2"><i class="fas fa-envelope me-2"></i>Prefer email instead of an authenticator app?</h5>
+                <p class="mb-0 text-secondary">You can receive 2FA codes by email and confirm them from your inbox.</p>
+            </div>
+            <a href="{{ email_option_url|default(url_for('auth.setup_email_2fa')) }}" class="btn btn-primary-custom">
+                <i class="fas fa-paper-plane me-2"></i>Use Email 2FA
+            </a>
         </div>
-      </div>
         {% endif %}
 
-      <div class="card shadow-sm border-0">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-          <h4 class="mb-0"><i class="fas fa-shield-halved me-2"></i>{{ setup_title|default('Set Up Two-Factor Authentication') }}</h4>
-          <a href="{{ back_url|default(url_for('tenant.dashboard')) }}" class="btn btn-sm btn-light">
-            <i class="fas fa-arrow-left me-1"></i>{{ back_label|default('Dashboard') }}
-          </a>
-        </div>
-
-        <div class="card-body p-4 p-md-5">
-          <div class="alert alert-info" role="alert">
-            <strong>Protect your account:</strong> {{ intro_text|default('Scan the QR code with Google Authenticator, Authy, or Microsoft Authenticator, then enter the 6-digit code to activate 2FA.') }}
-          </div>
-
-          <div class="row g-4 align-items-start">
-            <div class="col-md-6 text-center">
-              <h6 class="fw-bold mb-3">1. Scan This QR Code</h6>
-              <img
-                src="data:image/png;base64,{{ qr_code }}"
-                alt="2FA QR Code"
-                class="img-fluid border rounded p-2 bg-white"
-                style="max-width: 260px;"
-              >
+        <!-- Main Setup Card -->
+        <div class="twofa-card">
+            <div class="twofa-header">
+                <h4><i class="fas fa-shield-halved me-2"></i>{{ setup_title|default('Set Up Two-Factor Authentication') }}</h4>
+                <a href="{{ back_url|default(url_for('tenant.dashboard')) }}" class="btn btn-sm" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                    <i class="fas fa-arrow-left me-1"></i>{{ back_label|default('Dashboard') }}
+                </a>
             </div>
 
-            <div class="col-md-6">
-              <h6 class="fw-bold mb-3">2. Or Use Manual Key</h6>
-              <div class="bg-light border rounded p-3 mb-3">
-                <code class="text-break fs-6">{{ secret }}</code>
-              </div>
-
-              <h6 class="fw-bold mb-3">3. Verify Setup</h6>
-              <form method="POST" action="{{ post_url|default(url_for('tenant.twofa_setup')) }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="mb-3">
-                  <label for="verification_code" class="form-label">6-digit verification code</label>
-                  <input
-                    type="text"
-                    id="verification_code"
-                    name="verification_code"
-                    class="form-control"
-                    maxlength="6"
-                    minlength="6"
-                    pattern="[0-9]{6}"
-                    inputmode="numeric"
-                    autocomplete="one-time-code"
-                    placeholder="Enter code from your app"
-                    required
-                  >
+            <div class="twofa-body">
+                
+                <!-- Intro Alert -->
+                <div class="alert alert-info d-flex align-items-start mb-4" role="alert">
+                    <i class="fas fa-info-circle me-3 mt-1"></i>
+                    <div>
+                        <strong class="d-block mb-1">Protect your account:</strong> 
+                        <span>{{ intro_text|default('Scan QR code with Google Authenticator, Authy, or Microsoft Authenticator, then enter 6-digit code to activate 2FA.') }}</span>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn btn-success w-100">
-                  <i class="fas fa-check-circle me-2"></i>Enable 2FA
-                </button>
-              </form>
+                <div class="row g-4">
+                    <!-- Left: QR Code -->
+                    <div class="col-md-6 text-center mb-4 mb-md-0">
+                        <h6 class="fw-bold mb-3 text-primary">1. Scan This QR Code</h6>
+                        <div class="qr-wrapper">
+                            <!-- White background ensures QR works in Dark Mode -->
+                            <img
+                                src="data:image/png;base64,{{ qr_code }}"
+                                alt="2FA QR Code"
+                                style="width: 220px; height: 220px;"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Right: Manual Key & Verification -->
+                    <div class="col-md-6">
+                        <h6 class="fw-bold mb-3 text-primary">2. Or Use Manual Key</h6>
+                        <div class="secret-box">
+                            <code>{{ secret }}</code>
+                        </div>
+
+                        <h6 class="fw-bold mb-3 text-primary mt-4">3. Verify Setup</h6>
+                        <form method="POST" action="{{ post_url|default(url_for('tenant.twofa_setup')) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            
+                            <div class="mb-3">
+                                <label for="verification_code" class="form-label fw-bold">6-digit verification code</label>
+                                <input
+                                    type="text"
+                                    id="verification_code"
+                                    name="verification_code"
+                                    class="form-control text-center fw-bold"
+                                    style="letter-spacing: 0.5rem; font-size: 1.25rem;"
+                                    maxlength="6"
+                                    minlength="6"
+                                    pattern="[0-9]{6}"
+                                    inputmode="numeric"
+                                    autocomplete="one-time-code"
+                                    placeholder="000000"
+                                    required
+                                >
+                            </div>
+
+                            <button type="submit" class="btn btn-primary-custom w-100 py-2">
+                                <i class="fas fa-check-circle me-2"></i>Enable 2FA
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
             </div>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Optional: Auto-focus on the verification code input
+    document.addEventListener('DOMContentLoaded', () => {
+        const codeInput = document.getElementById('verification_code');
+        if (codeInput) {
+            codeInput.focus();
+        }
+    });
+</script>
 {% endblock %}

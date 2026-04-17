@@ -4,51 +4,40 @@
 
 {% block styles %}
 <style>
-    :root {
-        --primary-color: #4361ee;
-        --primary-hover: #3a0ca3;
-        --accent-color: #f59e0b; /* Amber for maintenance/maintenance feel */
-        --success-color: #10b981;
-        --danger-color: #ef4444;
-        --bg-light: #f8f9fa;
-        --text-dark: #212529;
-        --text-muted: #6c757d;
-        --border-color: #e9ecef;
-        --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        --radius-lg: 16px;
-        --radius-md: 10px;
-    }
-
-    .request-wrapper {
+    /* We rely on variables from base.css */
+    
+    .request-container {
         max-width: 800px;
-        margin: 2rem auto;
-        padding: 0 1rem;
+        margin: 0 auto;
     }
 
     .request-card {
-        background: white;
+        background-color: var(--card-bg);
         border-radius: var(--radius-lg);
-        box-shadow: var(--card-shadow);
+        box-shadow: var(--shadow-lg);
         overflow: hidden;
         border: 1px solid var(--border-color);
     }
 
     .card-header-custom {
-        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+        background: var(--gradient-primary);
         color: white;
         padding: 2.5rem 2rem;
         text-align: center;
         position: relative;
+        overflow: hidden;
     }
     
+    /* Decorative background circle for header */
     .icon-bg {
         position: absolute;
-        top: -20px;
-        left: -20px;
-        width: 120px;
-        height: 120px;
-        background: rgba(255,255,255,0.1);
+        top: -30px;
+        left: -30px;
+        width: 150px;
+        height: 150px;
+        background: rgba(255, 255, 255, 0.1);
         border-radius: 50%;
+        z-index: 0;
     }
 
     .card-header-custom h2 {
@@ -67,236 +56,216 @@
         z-index: 1;
     }
 
-    .card-body {
+    .card-body-custom {
         padding: 2.5rem;
     }
 
+    /* Form Controls */
     .form-label {
         font-weight: 600;
-        color: var(--text-dark);
+        color: var(--text-primary);
         font-size: 0.9rem;
         margin-bottom: 0.5rem;
-        display: block;
     }
 
     .form-control, .form-select {
         width: 100%;
-        padding: 0.8rem 1rem;
+        padding: 0.75rem 1rem;
         border: 1px solid var(--border-color);
         border-radius: var(--radius-md);
         font-size: 1rem;
-        transition: all 0.3s ease;
-        background-color: #fcfcfc;
+        background-color: var(--card-bg);
+        color: var(--text-primary);
+        transition: var(--transition);
     }
 
     .form-control:focus, .form-select:focus {
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
+        box-shadow: 0 0 0 4px var(--primary-light);
         outline: none;
-        background-color: white;
     }
 
-    /* Priority Badges styling in Select (Optional enhancement) */
-    .priority-emergency { color: var(--danger-color); font-weight: 600; }
-    .priority-high { color: #d97706; font-weight: 600; }
-    .priority-medium { color: var(--accent-color); font-weight: 600; }
-    .priority-low { color: var(--success-color); font-weight: 600; }
-
-    .btn {
-        padding: 0.8rem 2rem;
-        border-radius: var(--radius-md);
-        font-weight: 600;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 1rem;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-    }
-
-    .btn-primary {
-        background-color: var(--primary-color);
-        color: white;
-        width: 100%;
-    }
-
-    .btn-primary:hover {
-        background-color: var(--primary-hover);
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(67, 97, 238, 0.2);
-    }
-
-    .btn-secondary {
-        background-color: #e5e7eb;
-        color: var(--text-dark);
-    }
-
-    .btn-secondary:hover {
-        background-color: #d1d5db;
-    }
-
-    /* Alert Styling */
-    .alert-custom {
-        padding: 1rem 1.5rem;
-        border-radius: var(--radius-md);
-        margin-bottom: 2rem;
-        border-left: 5px solid;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+    /* Input Group */
+    .input-group-text {
+        background-color: var(--sidebar-hover);
+        border: 1px solid var(--border-color);
+        border-right: none;
+        color: var(--text-secondary);
     }
     
-    .alert-custom svg { margin-right: 10px; }
+    .input-group .form-select {
+        border-left: none;
+    }
+    
+    .input-group .form-select:focus {
+        box-shadow: none;
+        border-color: var(--primary-color);
+    }
+
+    /* Priority Options Coloring */
+    .priority-emergency { color: var(--danger-color); font-weight: 600; }
+    .priority-high { color: #d97706; font-weight: 600; }
+    .priority-medium { color: var(--warning-color); font-weight: 600; }
+    .priority-low { color: var(--success-color); font-weight: 600; }
+
+    /* Helper Alert */
+    .info-alert {
+        background-color: var(--info-light);
+        border-left: 4px solid var(--info-color);
+        color: #1e40af; /* Dark blue for text contrast */
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    [data-bs-theme="dark"] .info-alert {
+        background-color: rgba(59, 130, 246, 0.15);
+        color: #93c5fd;
+    }
 
     /* Empty State */
     .empty-state {
+        padding: 4rem 2rem;
         text-align: center;
-        padding: 3rem 1rem;
-        color: var(--text-muted);
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--border-color);
+        margin-bottom: 1.5rem;
+        display: block;
     }
 
     /* Responsive */
     @media (max-width: 768px) {
-        .card-body { padding: 1.5rem; }
+        .card-body-custom { padding: 1.5rem; }
         .card-header-custom { padding: 2rem 1.5rem; }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="request-wrapper">
+<div class="container-fluid">
+    <div class="request-container">
 
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert-custom alert-{{ category }}" style="border-color: {{ 'var(--success-color)' if category == 'success' else 'var(--danger-color)' }}; background-color: {{ 'rgba(16, 185, 129, 0.1)' if category == 'success' else 'rgba(239, 68, 68, 0.1)' }}; color: {{ 'var(--text-dark)' }};">
-                    <div style="display:flex; align-items:center;">
-                        {% if category == 'success' %}
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                        {% else %}
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                        {% endif %}
-                        <span>{{ message }}</span>
+        {% if bookings %}
+        <div class="request-card">
+            <div class="card-header-custom">
+                <div class="icon-bg"></div>
+                <h2><i class="fas fa-tools"></i> Maintenance Request</h2>
+                <p>Report an issue for one of your properties.</p>
+            </div>
+
+            <div class="card-body-custom">
+                <form method="POST" id="requestForm" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                    <!-- Property Selection -->
+                    <div class="mb-4">
+                        <label for="house_id" class="form-label">Select Property</label>
+                        <select name="house_id" id="house_id" class="form-select" required>
+                            <option value="" disabled selected>-- Choose the property with the issue --</option>
+                            {% for booking in bookings %}
+                                <option value="{{ booking.house.id }}">
+                                    {{ booking.house.name }} ({{ booking.house.location }})
+                                </option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    <button onclick="this.parentElement.style.display='none'" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:inherit;">&times;</button>
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
 
-    {% if bookings %}
-    <div class="request-card">
-        <div class="card-header-custom">
-            <div class="icon-bg"></div>
-            <h2>Maintenance Request</h2>
-            <p>Report an issue for one of your properties.</p>
-        </div>
-
-        <div class="card-body">
-            <form method="POST" id="requestForm" enctype="multipart/form-data">
-                {{ csrf_token() }}
-
-                <!-- Property Selection (Required by Route) -->
-                <div class="mb-4">
-                    <label for="house_id" class="form-label">Select Property</label>
-                    <select name="house_id" id="house_id" class="form-select" required>
-                        <option value="" disabled selected>-- Choose the property with the issue --</option>
-                        {% for booking in bookings %}
-                            <option value="{{ booking.house.id }}">
-                                {{ booking.house.name }} ({{ booking.house.location }})
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <!-- Category (Visual Helper) -->
-                        <div class="mb-4">
-                            <label for="issueCategory" class="form-label">Category</label>
-                            <div class="input-group">
-                                <span class="input-group-text" style="background:#f1f3f5; border:1px solid var(--border-color); border-right:none;">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-                                </span>
-                                <select class="form-select" id="issueCategory" name="category" style="border-left:none;">
-                                    <option value="General">General</option>
-                                    <option value="Plumbing">Plumbing</option>
-                                    <option value="Electrical">Electrical</option>
-                                    <option value="Structural">Structural</option>
-                                    <option value="Appliances">Appliances</option>
-                                    <option value="Pest Control">Pest Control</option>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <!-- Category -->
+                            <div class="mb-4">
+                                <label for="issueCategory" class="form-label">Category</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-wrench"></i>
+                                    </span>
+                                    <select class="form-select" id="issueCategory" name="category">
+                                        <option value="General">General</option>
+                                        <option value="Plumbing">Plumbing</option>
+                                        <option value="Electrical">Electrical</option>
+                                        <option value="Structural">Structural</option>
+                                        <option value="Appliances">Appliances</option>
+                                        <option value="Pest Control">Pest Control</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Priority -->
+                            <div class="mb-4">
+                                <label for="priority" class="form-label">Priority Level</label>
+                                <select class="form-select" id="priority" name="priority">
+                                    <option value="Low" class="priority-low">Low</option>
+                                    <option value="Medium" selected class="priority-medium">Medium</option>
+                                    <option value="High" class="priority-high">High</option>
+                                    <option value="Emergency" class="priority-emergency">Emergency</option>
                                 </select>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <!-- Priority (Visual Helper) -->
-                        <div class="mb-4">
-                            <label for="priority" class="form-label">Priority Level</label>
-                            <select class="form-select" id="priority" name="priority">
-                                <option value="Low" class="priority-low">Low</option>
-                                <option value="Medium" selected class="priority-medium">Medium</option>
-                                <option value="High" class="priority-high">High</option>
-                                <option value="Emergency" class="priority-emergency">Emergency</option>
-                            </select>
+
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <label for="issue" class="form-label">Describe the Issue</label>
+                        <textarea
+                            class="form-control"
+                            id="issue"
+                            name="issue"
+                            rows="5"
+                            placeholder="Please provide details about the problem, location within the property, and when it is available for repair..."
+                            required
+                        ></textarea>
+                    </div>
+
+                    <!-- Info Tip -->
+                    <div class="info-alert mb-4">
+                        <i class="fas fa-info-circle mt-1"></i>
+                        <div>
+                            <strong>Note:</strong> This request will be sent directly to your landlord's inbox.
                         </div>
                     </div>
-                </div>
 
-                <!-- Description (Required by Route) -->
-                <div class="mb-4">
-                    <label for="issue" class="form-label">Describe the Issue</label>
-                    <textarea
-                        class="form-control"
-                        id="issue"
-                        name="issue"
-                        rows="5"
-                        placeholder="Please provide details about the problem, location within the property, and when it is available for repair..."
-                        required
-                    ></textarea>
-                </div>
+                    <hr class="my-4" style="border-top: 1px dashed var(--border-color); opacity: 0.5;">
 
-                <!-- Info Tip -->
-                <div class="alert alert-info d-flex align-items-center" style="background:#f0f9ff; border-color:#bae6fd; color:#0369a1; font-size:0.9rem; padding: 1rem;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:12px; flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                    <span>This request will be sent directly to your landlord's inbox.</span>
-                </div>
+                    <!-- Photo attachments -->
+                    <div class="mb-4">
+                        <label for="photos" class="form-label">Upload Photos (Optional)</label>
+                        <input type="file" name="photos" id="photos" class="form-control" accept="image/*" multiple />
+                    </div>
 
-                <hr class="my-4" style="border-top: 1px dashed var(--border-color);">
+                    <!-- Actions -->
+                    <div class="d-flex justify-content-between align-items-center gap-3">
+                        <a href="{{ url_for('tenant.dashboard') }}" class="btn btn-outline-custom" style="flex: 1;">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary-custom" style="flex: 1;">
+                            Submit Request <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
 
-                <!-- Photo attachments -->
-                <div class="mb-4">
-                    <label for="photos" class="form-label">Upload Photos (optional)</label>
-                    <input type="file" name="photos" id="photos" class="form-control" accept="image/*" multiple />
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center gap-3">
-                    <a href="{{ url_for('tenant.dashboard') }}" class="btn btn-secondary">
-                        Cancel
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                        Submit Request
-                    </button>
-                </div>
-
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
-    {% else %}
-    <div class="request-card">
-        <div class="empty-state">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:1rem;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-            <h3>No Active Bookings</h3>
-            <p>You need an approved booking to submit a maintenance request.</p>
-            <a href="{{ url_for('tenant.dashboard') }}" class="btn btn-secondary mt-3">Return to Dashboard</a>
+        {% else %}
+        <div class="request-card">
+            <div class="empty-state">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3 class="h4 mb-3">No Active Bookings</h3>
+                <p class="text-muted">You need an approved booking to submit a maintenance request.</p>
+                <a href="{{ url_for('tenant.dashboard') }}" class="btn btn-outline-custom mt-3">
+                    Return to Dashboard
+                </a>
+            </div>
         </div>
-    </div>
-    {% endif %}
+        {% endif %}
 
+    </div>
 </div>
 {% endblock %}
 
@@ -310,13 +279,16 @@
 
         form.addEventListener('submit', function(e) {
             // Helper: Prepend Category and Priority to the description so the landlord sees it
-            // even if the backend only strictly stores the 'issue' text field.
+            // clearly even if the backend treats 'issue' as a simple text field.
             const category = categorySelect.value;
             const priority = prioritySelect.value;
             const currentIssue = issueTextarea.value;
 
             if (category && priority) {
-                const prefix = `[${priority} Priority - ${category}] `;
+                // Format: [Priority - Category] Message
+                const prefix = `[${priority} - ${category}] `;
+                
+                // Check if already prefixed to avoid duplicates on re-submission attempts
                 if (!currentIssue.startsWith('[')) {
                     issueTextarea.value = prefix + currentIssue;
                 }

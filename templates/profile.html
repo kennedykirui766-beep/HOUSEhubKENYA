@@ -1,68 +1,52 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block title %}My Profile{% endblock %}
 
 {% block styles %}
 <style>
-    :root {
-        --primary-color: #4361ee;
-        --primary-dark: #3a0ca3;
-        --secondary-color: #7209b7;
-        --bg-light: #f8f9fa;
-        --text-dark: #212529;
-        --text-muted: #6c757d;
-        --border-color: #e9ecef;
-        --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        --transition: all 0.3s ease;
-        --radius-lg: 16px;
-        --radius-md: 10px;
-    }
-
-    /* Layout Container */
+    /* --- Layout Container --- */
     .profile-wrapper {
         max-width: 1200px;
         margin: 0 auto;
-        padding: 2rem 1rem;
     }
 
-    /* --- HERO SECTION OVERHAUL --- */
+    /* --- Profile Header & Cover --- */
     .profile-header-card {
-        background: white;
+        background-color: var(--card-bg);
         border-radius: var(--radius-lg);
-        box-shadow: var(--card-shadow);
-        overflow: visible; /* Changed to visible to allow avatar to stick out if needed, though we use margin */
+        box-shadow: var(--shadow-md);
+        overflow: visible; /* Allows avatar to overlap */
         margin-bottom: 2rem;
         position: relative;
+        border: 1px solid var(--border-color);
     }
 
     .cover-area {
-        height: 180px; /* Increased height slightly for better visual */
-        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), var(--primary-dark));
+        height: 180px;
+        background: var(--gradient-primary);
         position: relative;
-        /* Optional: Add a subtle pattern overlay */
+        border-top-left-radius: var(--radius-lg);
+        border-top-right-radius: var(--radius-lg);
+        /* Subtle pattern overlay */
         background-image: 
             linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 100%),
             radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 0%, transparent 20%);
-        border-top-left-radius: var(--radius-lg);
-        border-top-right-radius: var(--radius-lg);
     }
 
-    /* Container for Avatar and Text */
+    /* Avatar Wrapper */
     .profile-details-wrapper {
         padding: 0 2rem 2rem 2rem;
         display: flex;
         flex-direction: column;
         align-items: center;
         text-align: center;
-        /* Removed the negative margin here to prevent text from entering the dark banner */
     }
 
-    /* Avatar Styling */
     .avatar-wrapper {
         position: relative;
         width: 140px;
         height: 140px;
-        margin-top: -70px; /* Pull ONLY the avatar up to overlap the banner */
+        margin-top: -70px;
         margin-bottom: 1rem;
         z-index: 10;
     }
@@ -72,9 +56,9 @@
         height: 100%;
         border-radius: 50%;
         object-fit: cover;
-        border: 5px solid white; /* White border separates it from banner and white bg */
-        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-        background-color: #f0f0f0;
+        border: 5px solid var(--card-bg);
+        box-shadow: var(--shadow-lg);
+        background-color: var(--sidebar-hover);
         transition: var(--transition);
     }
 
@@ -91,13 +75,13 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        border: 3px solid white;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        border: 3px solid var(--card-bg);
+        box-shadow: var(--shadow-sm);
         transition: var(--transition);
     }
 
     .avatar-upload-label:hover {
-        background-color: var(--primary-dark);
+        background-color: var(--primary-hover);
         transform: scale(1.1);
     }
 
@@ -105,13 +89,12 @@
     .user-name {
         font-size: 1.75rem;
         font-weight: 700;
-        color: var(--text-dark);
+        color: var(--text-primary);
         margin-bottom: 0.25rem;
-        letter-spacing: -0.5px;
     }
 
     .user-email {
-        color: var(--text-muted);
+        color: var(--text-secondary);
         font-size: 1rem;
         margin-bottom: 0.75rem;
     }
@@ -120,39 +103,40 @@
         display: inline-flex;
         align-items: center;
         padding: 0.4rem 1.2rem;
-        background-color: #e0e7ff;
+        background-color: var(--primary-light);
         color: var(--primary-color);
         border-radius: 50px;
         font-size: 0.8rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.8px;
-        box-shadow: 0 2px 5px rgba(67, 97, 238, 0.1);
+        box-shadow: var(--shadow-sm);
     }
 
-    /* Settings Grid */
+    /* --- Settings Grid Layout --- */
     .settings-grid {
         display: grid;
-        grid-template-columns: 1fr 1.5fr;
+        grid-template-columns: 1fr;
         gap: 2rem;
     }
 
-    /* Settings Sidebar */
+    /* --- Sidebar Navigation --- */
     .settings-nav {
-        background: white;
+        background-color: var(--card-bg);
         border-radius: var(--radius-lg);
-        box-shadow: var(--card-shadow);
-        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        padding: 1rem;
         height: fit-content;
         position: sticky;
-        top: 20px;
+        top: 2rem; /* Sticks below navbar padding */
+        border: 1px solid var(--border-color);
     }
 
     .nav-item {
         display: flex;
         align-items: center;
         padding: 0.75rem 1rem;
-        color: var(--text-muted);
+        color: var(--text-secondary);
         text-decoration: none;
         border-radius: var(--radius-md);
         margin-bottom: 0.5rem;
@@ -161,15 +145,15 @@
     }
 
     .nav-item:hover {
-        background-color: #f8f9fa;
+        background-color: var(--sidebar-hover);
         color: var(--primary-color);
         transform: translateX(5px);
     }
 
     .nav-item.active {
-        background-color: #f0f4ff;
+        background-color: var(--primary-light);
         color: var(--primary-color);
-        font-weight: 600;
+        font-weight: 700;
         border-left: 3px solid var(--primary-color);
     }
 
@@ -179,7 +163,7 @@
         text-align: center;
     }
 
-    /* Forms Area */
+    /* --- Content Cards --- */
     .settings-content {
         display: flex;
         flex-direction: column;
@@ -187,17 +171,18 @@
     }
 
     .form-card {
-        background: white;
+        background-color: var(--card-bg);
         border-radius: var(--radius-lg);
-        box-shadow: var(--card-shadow);
+        box-shadow: var(--shadow-sm);
         padding: 2rem;
         border: 1px solid var(--border-color);
+        scroll-margin-top: 100px; /* For smooth scrolling sticky header */
     }
 
     .card-title {
         font-size: 1.25rem;
         font-weight: 700;
-        color: var(--text-dark);
+        color: var(--text-primary);
         margin-bottom: 1.5rem;
         padding-bottom: 1rem;
         border-bottom: 1px solid var(--border-color);
@@ -208,35 +193,37 @@
     
     .card-title i { 
         color: var(--primary-color); 
-        background: #eef2ff;
-        padding: 8px;
-        border-radius: 8px;
+        background: var(--primary-light);
+        padding: 10px;
+        border-radius: var(--radius-sm);
     }
 
+    /* --- Form Elements --- */
     .form-label {
         font-weight: 600;
-        color: var(--text-dark);
+        color: var(--text-primary);
         margin-bottom: 0.5rem;
         font-size: 0.9rem;
     }
 
-    .form-control {
+    .form-control, .form-select {
         padding: 0.75rem 1rem;
         border: 1px solid var(--border-color);
         border-radius: var(--radius-md);
         font-size: 0.95rem;
         transition: var(--transition);
-        background-color: #fcfcfc;
+        background-color: var(--card-bg);
+        color: var(--text-primary);
     }
 
-    .form-control:focus {
+    .form-control:focus, .form-select:focus {
         border-color: var(--primary-color);
-        background-color: white;
-        box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
+        background-color: var(--card-bg);
+        box-shadow: 0 0 0 4px var(--primary-light);
         outline: none;
     }
 
-    /* Buttons */
+    /* --- Buttons --- */
     .btn {
         padding: 0.75rem 1.5rem;
         border-radius: var(--radius-md);
@@ -249,74 +236,55 @@
     }
 
     .btn-primary {
-        background-color: var(--primary-color);
+        background: var(--gradient-primary);
         color: white;
-        box-shadow: 0 4px 10px rgba(67, 97, 238, 0.25);
+        box-shadow: var(--shadow-md);
     }
 
     .btn-primary:hover {
-        background-color: var(--primary-dark);
+        box-shadow: var(--shadow-lg);
         transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(67, 97, 238, 0.35);
     }
-
+    
     .btn-outline-secondary {
         background: transparent;
         border: 1px solid var(--border-color);
-        color: var(--text-muted);
+        color: var(--text-secondary);
     }
     
     .btn-outline-secondary:hover {
-        background: #f1f3f5;
-        color: var(--text-dark);
-        border-color: #ced4da;
+        background: var(--sidebar-hover);
+        color: var(--text-primary);
+        border-color: var(--text-secondary);
     }
 
-    /* Flash Messages */
-    .alert-custom {
-        padding: 1rem 1.5rem;
-        border-radius: var(--radius-md);
-        margin-bottom: 2rem;
-        border-left: 5px solid;
-        display: flex;
-        align-items: center;
-        animation: slideDown 0.4s ease;
-    }
-    
-    @keyframes slideDown {
-        from { opacity: 0; transform: translateY(-20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Responsive Design */
+    /* --- Responsive Design --- */
     @media (min-width: 992px) {
+        .settings-grid {
+            grid-template-columns: 250px 1fr;
+        }
+
         .profile-details-wrapper {
             flex-direction: row;
             text-align: left;
             align-items: flex-end;
             justify-content: space-between;
-            padding-top: 0; /* Reset padding top */
+            padding-top: 0;
             padding-bottom: 2rem;
-            /* Since avatar overlaps cover, we need to adjust container padding 
-               so the text aligns with the avatar visually */
             padding-left: 2rem; 
             padding-right: 2rem;
             position: relative;
-            top: -35px; /* Pull the whole wrapper up slightly to group avatar and text tighter */
+            top: -35px;
         }
         
         .avatar-wrapper {
-            margin-top: -90px; /* Pull avatar up higher on desktop */
+            margin-top: -90px;
             margin-bottom: 0;
             margin-right: 2rem;
         }
     }
 
     @media (max-width: 768px) {
-        .settings-grid {
-            grid-template-columns: 1fr;
-        }
-        
         .settings-nav {
             display: flex;
             overflow-x: auto;
@@ -324,6 +292,7 @@
             white-space: nowrap;
             margin-bottom: 1rem;
             -webkit-overflow-scrolling: touch;
+            position: static; /* Don't sticky on mobile */
         }
 
         .nav-item {
@@ -338,18 +307,7 @@
 {% block content %}
 <div class="profile-wrapper">
     
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert-custom alert-{{ category }}" style="border-color: {{ 'var(--success-color)' if category == 'success' else 'var(--danger-color)' }}; background-color: {{ 'rgba(6, 255, 165, 0.1)' if category == 'success' else 'rgba(239, 68, 68, 0.1)' }}; color: {{ 'var(--text-dark)' }};">
-                    <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }} me-2"></i>
-                    <span style="flex:1">{{ message }}</span>
-                    <button type="button" onclick="this.parentElement.style.display='none'" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:inherit;margin-left:1rem;">&times;</button>
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+    <!-- Flash messages are handled automatically in base.html -->
 
     <!-- Header Profile Card -->
     <div class="profile-header-card">
@@ -358,7 +316,8 @@
         <div class="profile-details-wrapper">
             <!-- Left: Avatar -->
             <div class="avatar-wrapper">
-                <img src="{{ tenant.profile_picture or url_for('static', filename='images/default_avatar.png') }}" 
+                <!-- Using a default fallback image logic -->
+                <img src="{{ tenant.profile_picture if tenant.profile_picture else url_for('static', filename='images/default_avatar.png') }}" 
                      alt="Profile Picture" class="profile-avatar" id="currentAvatar">
                 <label for="profile_picture" class="avatar-upload-label" title="Change Photo">
                     <i class="fas fa-camera" style="font-size: 0.9rem;"></i>
@@ -439,7 +398,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Preferred Language</label>
-                            <select name="language" class="form-control">
+                            <select name="language" class="form-select">
                                 <option value="en" {% if tenant.language == 'en' %}selected{% endif %}>English</option>
                                 <option value="es" {% if tenant.language == 'es' %}selected{% endif %}>Spanish</option>
                                 <option value="fr" {% if tenant.language == 'fr' %}selected{% endif %}>French</option>
@@ -456,14 +415,14 @@
                     <div class="form-check form-switch mb-3">
                         <input class="form-check-input" type="checkbox" name="email_notifications" id="emailNotif" 
                                {% if tenant.email_notifications %}checked{% endif %}>
-                        <label class="form-check-label" for="emailNotif" style="font-weight: 500; color: var(--text-dark);">
+                        <label class="form-check-label" for="emailNotif" style="font-weight: 500; color: var(--text-primary);">
                             Receive email notifications for updates
                         </label>
                     </div>
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" name="message_alerts" id="msgAlert" 
                                {% if tenant.message_alerts %}checked{% endif %}>
-                        <label class="form-check-label" for="msgAlert" style="font-weight: 500; color: var(--text-dark);">
+                        <label class="form-check-label" for="msgAlert" style="font-weight: 500; color: var(--text-primary);">
                             Receive SMS/Message alerts for inquiries
                         </label>
                     </div>
@@ -472,7 +431,7 @@
                 <!-- 4. Security / Password -->
                 <div class="form-card" id="security">
                     <h3 class="card-title"><i class="fas fa-shield-alt"></i> Change Password</h3>
-                    <p class="text-muted small mb-4" style="line-height: 1.5;">Leave blank if you do not want to change your password. Password must be at least 8 characters long.</p>
+                    <p class="text-secondary small mb-4" style="line-height: 1.5;">Leave blank if you do not want to change your password. Password must be at least 8 characters long.</p>
                     
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -552,8 +511,7 @@
                 navLinks.forEach(l => l.classList.remove('active'));
                 this.classList.add('active');
                 
-                // Smooth scroll is handled by CSS scroll-behavior or browser default for anchor links
-                // But let's ensure it works nicely
+                // Smooth scroll
                 const targetId = this.getAttribute('href').substring(1);
                 const targetElement = document.getElementById(targetId);
                 if(targetElement) {

@@ -1,1280 +1,368 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
-{% block title %}Help & Support - HOUSEhubKENYA{% endblock %}
+{% block title %}Contact Us{% endblock %}
 
 {% block styles %}
 <style>
-  /* ========== GLOBAL RESET ========== */
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body {
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background-color: #f8f9fa;
-    color: #1f2937;
-    line-height: 1.6;
-  }
-
-  /* ========== RESPONSIVE FIX (WRAPPER STRATEGY) ========== */
-  /* This wrapper forces the main content to 100vw width, solving layout issues in base.html */
-  .force-mobile-wrapper {
-    width: 100vw;
-    margin-left: calc((100% - 100vw) / 2);
+  /* --- Hero Section --- */
+  .hero-section {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 4rem 0; /* Adjusted for main padding */
     position: relative;
-    left: 0;
-    background-color: #f8f9fa;
-    padding-bottom: 2rem; /* Spacing at bottom */
+    overflow: hidden;
+    margin-top: -1.5rem; /* Slight pull up to touch navbar area visually */
+    margin-bottom: 3rem;
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+    box-shadow: var(--shadow-md);
   }
 
-  /* Desktop Reset */
-  @media (min-width: 768px) {
-    .force-mobile-wrapper {
-      width: 100%;
-      margin-left: 0;
-      position: static;
-      background-color: transparent;
-      padding-bottom: 0;
-    }
-  }
-
-  /* Mobile Adjustments */
-  @media (max-width: 767px) {
-    .help-container {
-      padding: 1rem; /* Reduce padding on mobile */
-    }
-
-    .hero-title {
-      font-size: 2rem;
-    }
-
-    .hero-subtitle {
-      font-size: 1rem;
-    }
-
-    .categories-grid,
-    .faq-grid,
-    .tutorials-grid {
-      grid-template-columns: 1fr !important; /* Single column on mobile */
-      gap: 1rem !important;
-    }
-
-    .contact-content {
-      grid-template-columns: 1fr; /* Stacked contact on mobile */
-    }
-
-    .contact-method {
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-
-    .contact-icon {
-      margin: 0.5rem 0; /* Centering adjustment */
-    }
-
-    .chat-widget {
-      width: calc(100% - 40px);
-      right: 20px;
-      left: 20px; /* Centered on mobile */
-    }
-  }
-
-  /* ========== PROVIDED STYLES (with updates) ========== */
-  /* Note: Preserving your design colors */
-  :root {
-    --primary: #4361ee;
-    --primary-dark: #3a0ca3;
-    --secondary: #7209b7;
-    --accent: #f72585;
-    --light: #f8f9fa;
-    --dark: #212529;
-    --success: #06ffa5;
-    --info: #00b4d8;
-    --warning: #ffbe0b;
-    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    --transition: all 0.3s ease;
-  }
-
-  .help-container {
-    max-width: 1200px;
-    margin: 0 auto;
+  /* --- Cards --- */
+  .contact-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
     padding: 2rem;
-  }
-
-  /* Hero Section */
-  .help-hero {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    color: white;
-    padding: 4rem 2rem;
-    border-radius: 20px;
-    margin-bottom: 3rem;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .help-hero::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139.864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
-    no-repeat bottom;
-    background-size: cover;
-  }
-
-  .hero-content {
-    position: relative;
-    z-index: 1;
-    text-align: center;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-
-  .hero-title {
-    font-size: 2.5rem;
-    font-weight: 800;
-    margin-bottom: 1rem;
-  }
-
-  .hero-subtitle {
-    font-size: 1.2rem;
-    opacity: 0.9;
-    margin-bottom: 2rem;
-  }
-
-  /* Search Section */
-  .search-section {
-    background: white;
-    border-radius: 15px;
-    padding: 2rem;
-    margin-bottom: 3rem;
-    box-shadow: var(--shadow);
-  }
-
-  .search-form {
-    position: relative;
-    max-width: 600px;
-    margin: 0 auto;
-  }
-
-  .search-input {
-    width: 100%;
-    padding: 1rem 3rem 1rem 1.5rem;
-    border: 2px solid #e9ecef;
-    border-radius: 50px;
-    font-size: 1rem;
+    box-shadow: var(--shadow-sm);
     transition: var(--transition);
-  }
-
-  .search-input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0.25rem rgba(67, 97, 238, 0.25);
-    outline: none;
-  }
-
-  .search-btn {
-    position: absolute;
-    right: 5px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: var(--transition);
-  }
-
-  .search-btn:hover {
-    background: var(--primary-dark);
-  }
-
-  .popular-topics {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
-  }
-
-  .topic-tag {
-    padding: 0.5rem 1rem;
-    background: var(--light);
-    border-radius: 50px;
-    font-size: 0.9rem;
-    color: var(--dark);
-    text-decoration: none;
-    transition: var(--transition);
-  }
-
-  .topic-tag:hover {
-    background: var(--primary);
-    color: white;
-    transform: translateY(-2px);
-  }
-
-  /* Help Categories */
-  .categories-section {
-    margin-bottom: 3rem;
-  }
-
-  .section-title {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--dark);
-    margin-bottom: 1.5rem;
-    text-align: center;
-  }
-
-  .categories-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .category-card {
-    background: white;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: var(--shadow);
-    transition: var(--transition);
-    cursor: pointer;
-  }
-
-  .category-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-  }
-
-  .category-header {
-    padding: 1.5rem;
-    text-align: center;
-    color: white;
-  }
-
-  .landlord-header { background: linear-gradient(135deg, #4361ee, #3a0ca3); }
-  .tenant-header { background: linear-gradient(135deg, #06ffa5, #00b4d8); }
-  .provider-header { background: linear-gradient(135deg, #ffbe0b, #fb8500); }
-  .admin-header { background: linear-gradient(135deg, #f72585, #b5179e); }
-  .general-header { background: linear-gradient(135deg, #7209b7, #560bad); }
-
-  .category-icon {
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    margin: 0 auto 1rem;
-    font-size: 1.5rem;
-  }
-
-  .category-title {
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-  }
-
-  .category-body {
-    padding: 1.5rem;
-  }
-
-  .category-description {
-    color: #495057;
-    margin-bottom: 1rem;
-  }
-
-  .topic-list {
-    list-style: none;
-    padding: 0;
-  }
-
-  .topic-list li {
-    padding: 0.75rem 0;
-    border-bottom: 1px solid #e9ecef;
-    display: flex;
-    align-items: center;
-  }
-
-  .topic-list li:last-child {
-    border-bottom: none;
-  }
-
-  .topic-list li i {
-    color: var(--primary);
-    margin-right: 0.75rem;
-  }
-
-  .topic-list a {
-    color: var(--dark);
-    text-decoration: none;
-    transition: var(--transition);
-  }
-
-  .topic-list a:hover {
-    color: var(--primary);
-  }
-
-  /* FAQ Section */
-  .faq-section {
-    background: white;
-    border-radius: 15px;
-    padding: 2rem;
-    margin-bottom: 3rem;
-    box-shadow: var(--shadow);
-  }
-
-  .faq-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .faq-item {
-    border: 1px solid #e9ecef;
-    border-radius: 10px;
-    overflow: hidden;
-  }
-
-  .faq-question {
-    width: 100%;
-    padding: 1rem 1.5rem;
-    background: var(--light);
-    border: none;
-    text-align: left;
-    font-weight:  600;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: var(--transition);
-  }
-
-  .faq-question:hover {
-    background: #e9ecef;
-  }
-
-  .faq-question.active {
-    background: var(--primary);
-    color: white;
-  }
-
-  .faq-question i {
-    transition: var(--transition);
-  }
-
-  .faq-question.active i {
-    transform: rotate(180deg);
-  }
-
-  .faq-answer {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-    background: white;
-  }
-
-  .faq-answer.active {
-    max-height: 500px; /* Open state height */
-    padding: 1rem 1.5rem;
-    margin-top: 0.5rem;
-    border-top: 1px solid #f1f1f1;
-    background-color: #fafafa;
-  }
-
-  .faq-answer p {
-    padding: 1rem 1.5rem;
-    color: #495057;
-  }
-
-  /* Contact Section */
-  .contact-section {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    border-radius: 15px;
-    padding: 3rem 2rem;
-    color: white;
-    margin-bottom: 3rem;
-  }
-
-  .contact-content {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
-  }
-
-  .contact-method {
-    text-align: center;
-  }
-
-  .contact-icon {
-    width: 70px;
-    height: 70px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    margin: 0 auto 1rem;
-    font-size: 1.8rem;
-  }
-
-  .contact-title {
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-  }
-
-  .contact-description {
-    opacity: 0.9;
-    margin-bottom: 1rem;
-  }
-
-  .contact-link {
-    display: inline-block;
-    padding: 0.5rem 1.5rem;
-    background: white;
-    color: var(--primary);
-    border-radius: 50px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: var(--transition);
-  }
-
-  .contact-link:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-  }
-
-  /* Video Tutorials */
-  .tutorials-section {
-    margin-bottom: 3rem;
-  }
-
-  .tutorials-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .tutorial-card {
-    background: white;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: var(--shadow);
-    transition: var(--transition);
-  }
-
-  .tutorial-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-  }
-
-  .tutorial-thumbnail {
-    position: relative;
-    height: 180px;
-    overflow: hidden;
-  }
-
-  .tutorial-thumbnail img {
-    width: 100%;
     height: 100%;
-    object-fit: cover;
-  }
-
-  .tutorial-duration {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.85rem;
-  }
-
-  .tutorial-content {
-    padding: 1.5rem;
-  }
-
-  .tutorial-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-  }
-
-  .tutorial-description {
-    color: #495057;
-    font-size: 0.9rem;
-  }
-
-  /* Still Need Help */
-  .help-cta {
-    background: white;
-    border-radius: 15px;
-    padding: 2rem;
-    text-align: center;
-    box-shadow: var(--shadow);
-  }
-
-  .help-cta h3 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-  }
-
-  .help-cta p {
-    color: #495057;
     margin-bottom: 1.5rem;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
   }
 
-  .help-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    flex-wrap: wrap;
+  .contact-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
   }
 
-  .btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: 50px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: var(--transition);
-    border: none;
-    cursor: pointer;
-    display: inline-block;
-  }
-
-  .btn-primary {
-    background: var(--primary);
-    color: white;
-  }
-
-  .btn-primary:hover {
-    background: var(--primary-dark);
-    transform: translateY(-2px);
-  }
-
-  .btn-outline {
-    background: transparent;
-    color: var(--primary);
-    border: 2px solid var(--primary);
-  }
-
-  .btn-outline:hover {
-    background: var(--primary);
-    color: white;
-  }
-
-  /* Chat Widget */
-  .chat-widget {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 350px;
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    display: none;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .chat-header {
-    background: var(--primary);
-    color: white;
-    padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .chat-header h4 {
-    margin: 0;
-  }
-
-  .chat-header button {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.2rem;
-    cursor: pointer;
-  }
-
-  .chat-body {
-    padding: 1rem;
-    height: 300px;
-    overflow-y: auto;
-    background: #f9f9fa;
-  }
-
-  .chat-messages {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .chat-message {
-    margin-bottom: 1rem;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .user-message {
-    align-items: flex-end;
-  }
-
-  .user-message p {
-    background: var(--primary);
-    color: white;
-    padding: 0.75rem 1rem;
-    border-radius: 18px 18px 0 18px;
-    max-width: 80%;
-    margin: 0;
-  }
-
-  .bot-message p {
-    background: white;
-    color: var(--dark);
-    padding: 0.75rem 1rem;
-    border-radius: 18px 18px 18px 0;
-    max-width: 80%;
-    margin: 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
-
-  .chat-footer {
-    padding: 1rem;
-    border-top: 1px solid #e9ecef;
-    background: white;
-  }
-
-  .chat-form {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .chat-input {
-    flex-grow: 1;
-    padding: 0.75rem;
-    border: 1px solid #e9ecef;
-    border-radius: 20px;
-    font-size: 0.9rem;
-  }
-
-  .chat-send {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--primary);
-    color: white;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-  }
-
-  .chat-button {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
+  /* --- Icons --- */
+  .contact-icon {
     width: 60px;
     height: 60px;
-    border-radius: 50%;
-    background: var(--primary);
-    color: white;
-    border: none;
-    box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto 1.5rem;
     font-size: 1.5rem;
-    cursor: pointer;
-    transition: var(--transition);
-    z-index: 999;
+    color: white;
+    background: var(--gradient-primary);
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+  }
+  
+  .faq-icon {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin-right: 1rem;
+    color: white;
+    background: var(--gradient-primary);
+    flex-shrink: 0;
   }
 
-  .chat-button:hover {
-    transform: scale(1.1);
-    box-shadow: 0 8px 25px rgba(67, 97, 238, 0.6);
+  /* --- Form Elements --- */
+  .form-control, .form-select {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px var(--primary-light);
+    background-color: var(--card-bg);
+  }
+
+  /* --- FAQ Links --- */
+  .faq-link {
+    display: flex;
+    align-items: center;
+    padding: 1.25rem;
+    border-radius: var(--radius-md);
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: var(--transition);
+    height: 100%;
+  }
+
+  .faq-link:hover {
+    background-color: var(--sidebar-hover);
+    transform: translateX(5px);
+    border-color: var(--primary-color);
+  }
+
+  /* --- Info Box --- */
+  .response-note {
+    background-color: var(--info-light);
+    border: 1px solid var(--info-color);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-top: 2rem;
+    text-align: center;
+    color: #1e40af;
+  }
+  
+  [data-bs-theme="dark"] .response-note {
+    background-color: rgba(59, 130, 246, 0.15);
+    color: #93c5fd;
+  }
+
+  /* --- Map --- */
+  .map-container {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    height: 400px;
+    margin-bottom: 3rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero-section {
+      margin-top: -1rem;
+      padding: 3rem 0;
+    }
+    .map-container {
+      height: 300px;
+    }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- THIS WRAPPER FORCES FULL WIDTH ON MOBILE BY CALCULATING VIEWPORT -->
-<div class="force-mobile-wrapper">
-  <div class="help-container">
-    <!-- Hero Section -->
-    <div class="help-hero">
-      <div class="hero-content">
-        <h1 class="hero-title">Help & Support Center</h1>
-        <p class="hero-subtitle">
-          Find answers to your questions and get help you need to make the most of
-          most of HOUSEhubKENYA
+
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container text-center position-relative">
+    <h1 class="display-5 fw-bold mb-3">Contact Support</h1>
+    <p class="lead mb-0">We're here to help</p>
+    <p class="lead opacity-75">Reach out to our team for any questions about HomeHub.</p>
+  </div>
+</section>
+
+<!-- Main Content -->
+<section class="container mb-5">
+  
+  <!-- Flash messages are handled automatically in base.html -->
+
+  <div class="row g-4">
+    <!-- Left Column: Contact Info -->
+    <div class="col-lg-4">
+      <h2 class="h4 mb-4 fw-bold text-primary">Get in Touch</h2>
+
+      <!-- Email Card -->
+      <div class="contact-card text-center">
+        <div class="contact-icon">
+          <i class="fas fa-envelope"></i>
+        </div>
+        <h4 class="h5 mb-2">Email Us</h4>
+        <p class="mb-0">
+          <a href="mailto:Househub.Kenya@outlook.com" class="text-decoration-none fw-bold">
+            Househub.Kenya@outlook.com
+          </a>
+        </p>
+      </div>
+
+      <!-- Phone Card -->
+      <div class="contact-card text-center">
+        <div class="contact-icon">
+          <i class="fas fa-phone-alt"></i>
+        </div>
+        <h4 class="h5 mb-2">Call / WhatsApp</h4>
+        <p class="mb-0">
+          <a href="tel:+254712345678" class="text-decoration-none fw-bold">
+            +254 712 345 678
+          </a>
+        </p>
+      </div>
+
+      <!-- Location Card -->
+      <div class="contact-card text-center">
+        <div class="contact-icon">
+          <i class="fas fa-map-marker-alt"></i>
+        </div>
+        <h4 class="h5 mb-2">Our Office</h4>
+        <p class="mb-0 text-secondary">
+          HomeHub Headquarters<br />
+          Kericho-Bomet Road<br />
+          Kericho, Kenya
         </p>
       </div>
     </div>
 
-    <!-- Search Section -->
-    <div class="search-section">
-      <form
-        class="search-form"
-        action="{{ url_for('main.help_search_results') }}"
-        method="GET"
-      >
-        <input
-          type="text"
-          name="query"
-          class="search-input"
-          placeholder="Search for help articles, FAQs, and more..."
-          required
-        />
-        <button type="submit" class="search-btn">
-          <i class="fas fa-search"></i>
-        </button>
-      </form>
+    <!-- Right Column: Support Form -->
+    <div class="col-lg-8">
+      <div class="contact-card">
+        <h2 class="h4 mb-4 fw-bold text-primary">Send us a Message</h2>
 
-      <div class="popular-topics">
-        <span>Popular topics:</span>
-        <a href="#" class="topic-tag">How to list a property</a>
-        <a href="#" class="topic-tag">Rent payment issues</a>
-        <a href="#" class="topic-tag">Maintenance requests</a>
-        <a href="#" class="topic-tag">Account settings</a>
+        <form id="supportForm" action="{{ url_for('main.contact') }}" method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="fullName" class="form-label">Full Name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="fullName"
+                name="full_name"
+                placeholder="Enter your full name"
+                required
+              />
+            </div>
+
+            <div class="col-md-6">
+              <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                name="email"
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+
+            <div class="col-md-6">
+              <label for="phone" class="form-label">Phone Number</label>
+              <input
+                type="tel"
+                class="form-control"
+                id="phone"
+                name="phone"
+                placeholder="Enter your phone number"
+              />
+            </div>
+
+            <div class="col-md-6">
+              <label for="role" class="form-label">Role</label>
+              <select class="form-select" id="role" name="role" required>
+                <option value="" selected disabled>Select your role</option>
+                <option value="landlord">Landlord</option>
+                <option value="tenant">Tenant</option>
+                <option value="service-provider">Service Provider</option>
+                <option value="admin">Administrator</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div class="col-12">
+              <label for="message" class="form-label">Message / Question</label>
+              <textarea
+                class="form-control"
+                id="message"
+                name="message"
+                rows="5"
+                placeholder="Type your message or question here"
+                required
+              ></textarea>
+            </div>
+
+            <div class="col-12">
+              <button type="submit" class="btn btn-primary-custom w-100 py-2">
+                Send Message <i class="fas fa-paper-plane ms-2"></i>
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <div class="response-note">
+          <p class="mb-0 fw-medium">
+            <i class="fas fa-info-circle me-2"></i>Our support team will get back to you within 24 hours.
+          </p>
+        </div>
       </div>
     </div>
+  </div>
 
-    <!-- Help Categories -->
-    <div class="categories-section">
-      <h2 class="section-title">Browse Help by Category</h2>
+  <!-- FAQ Section -->
+  <div class="row mt-5">
+    <div class="col-12">
+      <h2 class="h4 mb-3 fw-bold text-primary">Frequently Asked Questions</h2>
+      <p class="text-secondary mb-4">
+        Check these resources first - your question might already be answered!
+      </p>
 
-      <div class="categories-grid">
-        <!-- Landlord Category -->
-        <div
-          class="category-card"
-          onclick="window.location.href='{{ url_for('main.help_landlord') }}'"
-        >
-          <div class="category-header landlord-header">
-            <div class="category-icon">
-              <i class="fas fa-home"></i>
-            </div>
-            <h3 class="category-title">For Landlords</h3>
-          </div>
-          <div class="category-body">
-            <p class="category-description">
-              Learn how to manage properties, tenants, and payments
-            </p>
-            <ul class="topic-list">
-              <li>
-                <i class="fas fa-chevron-right"></i>
-                <a href="#">Listing properties</a>
-              </li>
-              <li>
-                <i class="fas fa-chevron-right"></i>
-                <a href="#">Tenant management</a>
-              </li>
-              <li>
-                <i class="fas fa-chevron-right"></i>
-                <a href="#">Rent collection</a>
-              </li>
-              <li>
-                <i class="fas fa-chevron-right"></i>
-                <a href="#">Maintenance requests</a>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Tenant Category -->
-        <div
-          class="category-card"
-          onclick="window.location.href='{{ url_for('main.help_tenant') }}'"
-        >
-          <div class="category-header tenant-header">
-            <div class="category-icon">
-              <i class="fas fa-user"></i>
-            </div>
-            <h3 class="category-title">For Tenants</h3>
-          </div>
-          <div class="category-body">
-            <p class="category-description">
-              Find answers about renting, payments, and leases
-            </p>
-            <ul class="topic-list">
-              <li>
-                <i class="fas fa-chevron-right"></i>
-                <a href="#">Finding properties</a>
-              </li>
-              <li>
-                <i class="fas fa-chevron-right"></i>
-                <a href="#">Application process</a>
-              </li>
-              <li>
-                <i class="fas fa-chevron-right"></i>
-                <a href="#">Paying rent</a>
-              </li>
-              <li>
-                <i class="fas fa-chevron-right"></i>
-                <a href="#">Lease agreements</a>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Service Provider Category -->
-        <div
-          class="category-card"
-          onclick="window.location.href='{{ url_for('main.help_service_provider') }}'"
-        >
-          <div class="category-header provider-header">
-            <div class="category-icon">
-              <i class="fas fa-tools"></i>
-            </div>
-            <h3 class="category-title">For Service Providers</h3>
-          </div>
-          <div class="category-body">
-            <p class="category-description">
-              Learn how to find jobs and manage your services
-            </p>
-            <ul class="topic-list">
-              <li>
-                <i class="fas fa-chevron-right"></i>
-                <a href="#">Creating a profile</a>
-              </li>
-              <li>
-                <i class="fas fa-chevron-right"></i>
-                <a href="#">Bidding on jobs</a>
-              </li>
-              <li>
-                <i class="fas fa-chevron-right"></i>
-                <a href="#">Getting paid</a>
-              </li>
-              <li>
-                <i class="fas fa-chevron-right"></i>
-                <a href="#">Building reputation</a>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Admin Category -->
-        <div
-          class="category-card"
-          onclick="window.location.href='{{ url_for('main.help_admin') }}'"
-        >
-          <div class="category-header admin-header">
-            <div class="category-icon">
-              <i class="fas fa-user-shield"></i>
-            </div>
-            <h3 class="category-title">For Administrators</h3>
-          </div>
-          <div class="category-body">
-            <p class="category-description">
-              Platform management and dispute resolution
-            </p>
-            <ul class="topic-list">
-              <li>
-                <i class="fas fa-chevron-right"></i>
-                <a href="#">User management</a>
-              </li>
-              <li>
-                <i class="fas fa-chevron-right"></i>
-                <a href="#">Dispute resolution</a>
-              </li>
-              <li>
-                <i class="fas fa-chevron-right"></i>
-                <a href="#">Platform settings</a>
-              </li>
-              <li>
-                <i class="fas fa-chevron-right"></i>
-                <a href="#">Analytics</a>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- General Category -->
-        <div
-          class="category-card"
-          onclick="window.location.href='{{ url_for('main.help_general') }}'"
-        >
-          <div class="category-header general-header">
-            <div class="category-icon">
+      <div class="row g-3">
+        <div class="col-md-6 col-lg-3">
+          <a href="#" class="faq-link">
+            <div class="faq-icon">
               <i class="fas fa-question-circle"></i>
             </div>
-            <h3 class="category-title">General Help</h3>
-          </div>
-          <div class="category-body">
-            <p class="category-description">
-              Account, billing, and technical support
-            </p>
-            <ul class="topic-list">
-              <li>
-                <i class="fas fa-chevron-right"></i>
-                <a href="#">Account setup</a>
-              </li>
-              <li>
-                <i class="fas fa-chevron-right"></i>
-                <a href="#">Password reset</a>
-              </li>
-              <li>
-                <i class="fas fa-chevron-right"></i>
-                <a href="#">Billing questions</a>
-              </li>
-              <li>
-                <i class="fas fa-chevron-right"></i>
-                <a href="#">Technical issues</a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Video Tutorials -->
-    <div class="tutorials-section">
-      <h2 class="section-title">Video Tutorials</h2>
-
-      <div class="tutorials-grid">
-        <div class="tutorial-card">
-          <div class="tutorial-thumbnail">
-            <img
-              src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-              alt="Getting Started Tutorial"
-            />
-            <div class="tutorial-duration">5:32</div>
-          </div>
-          <div class="tutorial-content">
-            <h3 class="tutorial-title">Getting Started with HOUSEhubKENYA</h3>
-            <p class="tutorial-description">
-              Learn the basics of setting up your account and navigating the
-              platform
-            </p>
-          </div>
+            <div>
+              <h5 class="h6 mb-1">General FAQs</h5>
+              <p class="mb-0 small text-muted">Common questions about HomeHub</p>
+            </div>
+          </a>
         </div>
 
-        <div class="tutorial-card">
-          <div class="tutorial-thumbnail">
-            <img
-              src="https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-              alt="Property Listing Tutorial"
-            />
-            <div class="tutorial-duration">8:15</div>
-          </div>
-          <div class="div class="tutorial-content">
-            <h3 class="tutorial-title">How to List Your Property</h3>
-            <p class="tutorial-description">
-              Step-by-step guide to creating an attractive property listing
-            </p>
-          </div>
+        <div class="col-md-6 col-lg-3">
+          <a href="{{ url_for('main.how_it_works_landlord') }}" class="faq-link">
+            <div class="faq-icon">
+              <i class="fas fa-home"></i>
+            </div>
+            <div>
+              <h5 class="h6 mb-1">For Landlords</h5>
+              <p class="mb-0 small text-muted">How HomeHub works for landlords</p>
+            </div>
+          </a>
         </div>
 
-        <div class="tutorial-card">
-          <div class="tutorial-thumbnail">
-            <img
-              src="https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-              alt="Payment Tutorial"
-            />
-            <div class="tutorial-duration">6:48</div>
-          </div>
-          <div class="div class="tutorial-content">
-            <h3 class="tutorial-title">Making Payments with M-Pesa</h3>
-            <p class="tutorial-description">
-              Learn how to securely pay rent and service fees
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- FAQ Section -->
-    <div class="faq-section">
-      <h2 class="section-title">Frequently Asked Questions</h2>
-
-      <div class="faq-grid">
-        <div class="faq-item">
-          <button class="faq-question">
-            How do I reset my password?
-            <i class="fas fa-chevron-down"></i>
-          </button>
-          <div class="faq-answer">
-            <p>
-              To reset your password, click on "Forgot Password" link on
-              login page. Enter your email address and we'll send you instructions
-              to reset your password. If you don't receive an email within a few
-              minutes, check your spam folder.
-            </p>
-          </div>
+        <div class="col-md-6 col-lg-3">
+          <a href="{{ url_for('main.how_it_works_tenant') }}" class="faq-link">
+            <div class="faq-icon">
+              <i class="fas fa-user"></i>
+            </div>
+            <div>
+              <h5 class="h6 mb-1">For Tenants</h5>
+              <p class="mb-0 small text-muted">How HomeHub works for tenants</p>
+            </div>
+          </a>
         </div>
 
-        <div class="faq-item">
-          <button class="faq-question">
-            How long does it take for a property to be approved?
-            <i class="fas fa-chevron-down"></i>
-          </button>
-          <div class="faq-answer">
-            <p>
-              Property listings are typically reviewed and approved within 24
-              hours. During peak times, this may take up to 48 hours. You'll
-              receive a notification once your property is live on the platform.
-            </p>
-          </div>
+        <div class="col-md-6 col-lg-3">
+          <a href="{{ url_for('main.how_it_works_provider') }}" class="faq-link">
+            <div class="faq-icon">
+              <i class="fas fa-tools"></i>
+            </div>
+            <div>
+              <h5 class="h6 mb-1">For Service Providers</h5>
+              <p class="mb-0 small text-muted">How HomeHub works for service providers</p>
+            </div>
+          </a>
         </div>
-
-        <div class="faq-item">
-          <button class="faq-question">
-            How do I contact my landlord or tenant?
-            <i class="fas fa-chevron-down"></i>
-          </button>
-          <div class="faq-answer">
-            <p>
-              You can contact your landlord or tenant through the messaging system
-              in your HOUSEhubKENYA dashboard. Simply go to your properties or rentals
-              section, select property, and click on "Message" button.
-            </p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-question">
-            What payment methods are accepted?
-            <i class="fas fa-chevron-down"></i>
-          </button>
-          <div class="faq-answer">
-            <p>
-              HOUSEhubKENYA accepts various payment methods including M-Pesa, bank
-              transfers, and credit/debit cards. The available options may vary
-              depending on your location and type of transaction.
-            </p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-question">
-            How do I report a problem with my rental?
-            <i class="fas fa-chevron-down"></i>
-          </button>
-          <div class="faq-answer">
-            <p>
-              If you're experiencing issues with your rental, you can submit a
-              maintenance request through your dashboard. For urgent issues,
-              contact your landlord directly through the messaging system or call
-              our support team.
-            </p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-question">
-            How do service providers get paid?
-            <i class="fas fa-chevron-down"></i>
-          </button>
-          <div class="faq-answer">
-            <p>
-              Service providers get paid through the platform once a job is
-              completed and approved by the property owner. Payments are typically
-              processed within 24-48 hours after completion and can be withdrawn
-              to your bank account or mobile money wallet.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Contact Section -->
-    <div class="contact-section">
-      <h2 class="section-title" style="color: white; margin-bottom: 2rem">
-        Still Need Help?
-      </h2>
-
-      <div class="contact-content">
-        <div class="contact-method">
-          <div class="contact-icon">
-            <i class="fas fa-comments"></i>
-          </div>
-          <h3 class="contact-title">Live Chat</h3>
-          <p class="contact-description">
-            Chat with our support team in real-time
-          </p>
-          <a href="#" class="contact-link" onclick="openChat()">Start Chat</a>
-        </div>
-
-        <div class="contact-method">
-          <div class="contact-icon">
-            <i class="fas fa-envelope"></i>
-          </div>
-          <h3 class="contact-title">Email Support</h3>
-          <p class="contact-description">Get help via email within 24 hours</p>
-          <a href="mailto:Househub.Kenya@outlook.com" class="contact-link">Send Email</a>
-        </div>
-
-        <div class="contact-method">
-          <div class="contact-icon">
-            <i class="fas fa-phone-alt"></i>
-          </div>
-          <h3 class="contact-title">Phone Support</h3>
-          <p class="contact-description">Call us for immediate assistance</p>
-          <a href="tel:+254712345678" class="contact-link">Call Now</a>
-        </div>
-
-        <div class="contact-method">
-          <div class="contact-icon">
-            <i class="fab fa-whatsapp"></i>
-          </div>
-          <h3 class="contact-title">WhatsApp</h3>
-          <p class="contact-description">Connect with us on WhatsApp</p>
-          <a href="https://wa.me/254712345678" class="contact-link">Message Us</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Help CTA -->
-    <div class="help-cta">
-      <h3>Can't find what you're looking for?</h3>
-      <p>
-        Our support team is here to help you with any questions or issues you may
-        have.
-      </p>
-      <div class="help-buttons">
-        <a href="{{ url_for('main.contact') }}" class="btn btn-primary">
-          >Contact Support
-        </a>
-      </div>
-      <div class="help-buttons">
-        <a href="{{ url_for('main.help_general') }}" class="btn btn-outline">
-          >Browse All Articles
-        </a>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Chat Widget -->
-<div class="chat-widget" id="chat-widget">
-  <div class="chat-header">
-    <h4>Support Chat</h4>
-    <button onclick="toggleChat()">×</button>
+  <!-- Map Section -->
+  <div class="row mt-5">
+    <div class="col-12">
+      <h2 class="h4 mb-3 fw-bold text-primary">Visit Our Office</h2>
+      <div class="map-container">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.486447547632!2d35.28501631475363!3d-0.368319999749814!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182a119e2337a6c7%3A0x6d8b6a7f7d7e8e9f!2sKericho%2C%20Kenya!5e0!3m2!1sen!2sus!4v1629785466789!5m2!1sen!2sus"
+          width="100%"
+          height="100%"
+          style="border: 0; filter: grayscale(0.2) contrast(1.2);"
+          allowfullscreen=""
+          loading="lazy"
+        >
+        </iframe>
+      </div>
+    </div>
   </div>
-  <div class="chat-body">
-    <p>Welcome to HOUSEhubKENYA Support! How can we help you today?</p>
-    <div id="chat-messages" class="chat-messages"></div>
-  </div>
-  <div class="chat-footer">
-    <form id="chat-form" class="chat-form">
-      <input
-        type="text"
-        id="chat-input"
-        class="chat-input"
-        placeholder="Type your message..."
-      />
-      <button type="submit" class="chat-send">
-        <i class="fas fa-paper-plane"></i>
-      </button>
-    </form>
-  </div>
-</div>
 
-<button class="chat-button" id="chat-button" onclick="toggleChat()">
-  <i class="fas fa-comments"></i>
-</button>
+</section>
+
 {% endblock %}
 
-{% block extra_js %}
-<script>
-  // FAQ Accordion
-  document.addEventListener("DOMContentLoaded", function () {
-    const faqQuestions = document.querySelectorAll(".faq-question");
-
-    faqQuestions.forEach((question) => {
-      question.addEventListener("click", () => {
-        const answer = question.nextElementSibling;
-        const icon = question.querySelector("i");
-
-        // Toggle active class
-        question.classList.toggle("active");
-        answer.classList.toggle("active");
-
-        // Close other answers
-        faqQuestions.forEach((otherQuestion) => {
-          if (otherQuestion !== question) {
-            otherQuestion.classList.remove("active");
-            otherQuestion.nextElementSibling.classList.remove("active");
-          }
-        });
-      });
-    });
-  });
-
-  // Chat Widget
-  function toggleChat() {
-    const chatWidget = document.getElementById("chat-widget");
-    const chatButton = document.getElementById("chat-button");
-
-    if (
-      chatWidget.style.display === "none" ||
-      chatWidget.style.display === ""
-    ) {
-      chatWidget.style.display = "flex";
-      chatButton.style.display = "none";
-    } else {
-      chatWidget.style.display = "none";
-      chatButton.style.display = "flex";
-    }
-  }
-
-  function openChat() {
-    toggleChat();
-  }
-
-  // Chat Form
-  document
-    .getElementById("chat-form")
-    .addEventListener("submit", function (e) {
-      e.preventDefault();
-
-      const input = document.getElementById("chat-input");
-      const messages = document.getElementById("chat-messages");
-
-      if (input.value.trim() !== "") {
-        // Add user message
-        const userMessage = document.createElement("div");
-        userMessage.className = "chat-message user-message";
-        userMessage.innerHTML = `<p>${input.value}</p>`;
-        messages.appendChild(userMessage);
-
-        // Clear input
-        input.value = "";
-
-        // Scroll to bottom
-        messages.scrollTop = messages.scrollHeight;
-
-        // Simulate response
-        setTimeout(() => {
-          const botMessage = document.createElement("div");
-          botMessage.className = "chat-message bot-message";
-          botMessage.innerHTML =
-            "<p>Thank you for your message. Our support team will get back to you shortly.</p>";
-          messages.appendChild(botMessage);
-          messages.scrollTop = messages.scrollHeight;
-        }, 1000);
-      }
-    });
-  });
-</script>
+{% block scripts %}
+<!-- No page-specific scripts needed. Chat widget handled in base.html -->
 {% endblock %}
