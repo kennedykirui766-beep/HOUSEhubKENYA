@@ -1,191 +1,1009 @@
 {% extends "base.html" %}
 
+{% block styles %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  /* ============================================================
+     TOKENS
+  ============================================================ */
+  :root {
+    --pay-ink:        #0d1117;
+    --pay-ink-2:      #3d4754;
+    --pay-ink-3:      #7c8694;
+    --pay-bg:         #f4f6f9;
+    --pay-surface:    #ffffff;
+    --pay-border:     #e3e8ef;
+    --pay-accent:     #2563eb;
+    --pay-accent-2:   #1d4ed8;
+    --pay-green:      #059669;
+    --pay-green-bg:   #ecfdf5;
+    --pay-green-ring: #a7f3d0;
+    --pay-amber:      #d97706;
+    --pay-amber-bg:   #fffbeb;
+    --pay-amber-ring: #fde68a;
+    --pay-red:        #dc2626;
+    --pay-red-bg:     #fef2f2;
+    --pay-red-ring:   #fecaca;
+    --pay-slate:      #64748b;
+    --pay-slate-bg:   #f1f5f9;
+    --pay-slate-ring: #cbd5e1;
+    --pay-radius:     14px;
+    --pay-radius-sm:  8px;
+    --pay-shadow-sm:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --pay-shadow:     0 4px 16px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
+    --pay-shadow-lg:  0 12px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+  }
+
+  /* ============================================================
+     PAGE WRAPPER
+  ============================================================ */
+  .pay-page {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--pay-bg);
+    min-height: 100vh;
+    padding: 2.5rem 0 5rem;
+    color: var(--pay-ink);
+  }
+
+  /* ============================================================
+     HEADER
+  ============================================================ */
+  .pay-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2.25rem;
+  }
+
+  .pay-header-left h1 {
+    font-size: 1.65rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--pay-ink);
+    margin: 0 0 0.25rem;
+    line-height: 1.2;
+  }
+
+  .pay-header-left p {
+    color: var(--pay-ink-3);
+    font-size: 0.875rem;
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .pay-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.6rem 1.1rem;
+    border: 1.5px solid var(--pay-border);
+    border-radius: var(--pay-radius-sm);
+    background: var(--pay-surface);
+    color: var(--pay-ink-2);
+    font-size: 0.825rem;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    text-decoration: none;
+    transition: border-color 0.18s, color 0.18s, box-shadow 0.18s;
+    box-shadow: var(--pay-shadow-sm);
+  }
+
+  .pay-back-btn:hover {
+    border-color: var(--pay-accent);
+    color: var(--pay-accent);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+    text-decoration: none;
+  }
+
+  .pay-back-btn svg { flex-shrink: 0; }
+
+  /* ============================================================
+     STATS GRID
+  ============================================================ */
+  .pay-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.1rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .pay-stat {
+    background: var(--pay-surface);
+    border: 1px solid var(--pay-border);
+    border-radius: var(--pay-radius);
+    padding: 1.4rem 1.5rem;
+    box-shadow: var(--pay-shadow-sm);
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.22s, transform 0.22s;
+    animation: payFadeUp 0.45s ease both;
+  }
+
+  .pay-stat:nth-child(1) { animation-delay: 0.05s; }
+  .pay-stat:nth-child(2) { animation-delay: 0.12s; }
+  .pay-stat:nth-child(3) { animation-delay: 0.19s; }
+
+  .pay-stat:hover {
+    box-shadow: var(--pay-shadow);
+    transform: translateY(-2px);
+  }
+
+  /* Accent line at top */
+  .pay-stat::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: var(--pay-radius) var(--pay-radius) 0 0;
+  }
+
+  .pay-stat.green::before  { background: var(--pay-green); }
+  .pay-stat.amber::before  { background: var(--pay-amber); }
+  .pay-stat.blue::before   { background: var(--pay-accent); }
+
+  .pay-stat-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1rem;
+    flex-shrink: 0;
+  }
+
+  .pay-stat.green  .pay-stat-icon { background: var(--pay-green-bg); color: var(--pay-green); }
+  .pay-stat.amber  .pay-stat-icon { background: var(--pay-amber-bg); color: var(--pay-amber); }
+  .pay-stat.blue   .pay-stat-icon { background: rgba(37,99,235,0.08); color: var(--pay-accent); }
+
+  .pay-stat-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--pay-ink-3);
+    margin-bottom: 0.35rem;
+  }
+
+  .pay-stat-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .pay-stat.green .pay-stat-value { color: var(--pay-green); }
+  .pay-stat.amber .pay-stat-value { color: var(--pay-amber); }
+  .pay-stat.blue  .pay-stat-value { color: var(--pay-accent); }
+
+  .pay-stat-sub {
+    font-size: 0.76rem;
+    color: var(--pay-ink-3);
+    margin-top: 0.35rem;
+  }
+
+  /* ============================================================
+     FILTERS BAR
+  ============================================================ */
+  .pay-filters {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.1rem;
+    animation: payFadeUp 0.4s 0.25s ease both;
+  }
+
+  .pay-filters-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .pay-filter-btn {
+    padding: 0.45rem 0.9rem;
+    border-radius: 20px;
+    border: 1.5px solid var(--pay-border);
+    background: var(--pay-surface);
+    font-size: 0.8rem;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--pay-ink-2);
+    cursor: pointer;
+    transition: all 0.16s;
+  }
+
+  .pay-filter-btn:hover,
+  .pay-filter-btn.active {
+    background: var(--pay-accent);
+    border-color: var(--pay-accent);
+    color: white;
+  }
+
+  .pay-search {
+    position: relative;
+  }
+
+  .pay-search input {
+    padding: 0.5rem 0.9rem 0.5rem 2.2rem;
+    border: 1.5px solid var(--pay-border);
+    border-radius: var(--pay-radius-sm);
+    background: var(--pay-surface);
+    font-size: 0.82rem;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--pay-ink);
+    outline: none;
+    width: 200px;
+    transition: border-color 0.18s, box-shadow 0.18s;
+  }
+
+  .pay-search input:focus {
+    border-color: var(--pay-accent);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+  }
+
+  .pay-search input::placeholder { color: var(--pay-ink-3); }
+
+  .pay-search-icon {
+    position: absolute;
+    left: 0.65rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--pay-ink-3);
+    pointer-events: none;
+  }
+
+  /* ============================================================
+     TABLE CARD
+  ============================================================ */
+  .pay-card {
+    background: var(--pay-surface);
+    border: 1px solid var(--pay-border);
+    border-radius: var(--pay-radius);
+    box-shadow: var(--pay-shadow);
+    overflow: hidden;
+    animation: payFadeUp 0.45s 0.3s ease both;
+  }
+
+  .pay-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.15rem 1.5rem;
+    border-bottom: 1px solid var(--pay-border);
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .pay-card-head h5 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--pay-ink);
+    margin: 0;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+
+  .pay-card-head h5 span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(37,99,235,0.09);
+    color: var(--pay-accent);
+    font-size: 0.72rem;
+    font-weight: 700;
+    width: 22px; height: 22px;
+    border-radius: 6px;
+  }
+
+  .pay-export-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.9rem;
+    border: 1.5px solid var(--pay-border);
+    border-radius: var(--pay-radius-sm);
+    background: transparent;
+    color: var(--pay-ink-2);
+    font-size: 0.78rem;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.16s;
+  }
+
+  .pay-export-btn:hover {
+    border-color: var(--pay-accent);
+    color: var(--pay-accent);
+  }
+
+  /* ============================================================
+     TABLE
+  ============================================================ */
+  .pay-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .pay-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 680px;
+  }
+
+  .pay-table thead tr {
+    background: #f8fafc;
+    border-bottom: 1px solid var(--pay-border);
+  }
+
+  .pay-table thead th {
+    padding: 0.75rem 1rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--pay-ink-3);
+    text-align: left;
+    white-space: nowrap;
+    user-select: none;
+    cursor: pointer;
+  }
+
+  .pay-table thead th:first-child { padding-left: 1.5rem; }
+  .pay-table thead th:last-child  { padding-right: 1.5rem; text-align: right; }
+
+  .pay-table thead th .sort-icon {
+    display: inline-block;
+    margin-left: 4px;
+    opacity: 0.4;
+    font-size: 0.65rem;
+    vertical-align: middle;
+  }
+
+  .pay-table thead th:hover { color: var(--pay-ink-2); }
+  .pay-table thead th:hover .sort-icon { opacity: 0.8; }
+
+  .pay-table tbody tr {
+    border-bottom: 1px solid var(--pay-border);
+    transition: background 0.15s;
+  }
+
+  .pay-table tbody tr:last-child { border-bottom: none; }
+
+  .pay-table tbody tr:hover { background: #f8fafc; }
+
+  .pay-table tbody td {
+    padding: 1rem 1rem;
+    font-size: 0.855rem;
+    color: var(--pay-ink-2);
+    vertical-align: middle;
+  }
+
+  .pay-table tbody td:first-child { padding-left: 1.5rem; }
+  .pay-table tbody td:last-child  { padding-right: 1.5rem; text-align: right; }
+
+  /* Row fade-in animation */
+  .pay-table tbody tr {
+    animation: payRowIn 0.3s ease both;
+  }
+
+  /* Tenant cell */
+  .pay-tenant {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .pay-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: white;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  /* Different avatar colors by first letter */
+  .pay-avatar[data-letter="A"],.pay-avatar[data-letter="B"] { background: linear-gradient(135deg,#f093fb,#f5576c); }
+  .pay-avatar[data-letter="C"],.pay-avatar[data-letter="D"] { background: linear-gradient(135deg,#4facfe,#00f2fe); }
+  .pay-avatar[data-letter="E"],.pay-avatar[data-letter="F"] { background: linear-gradient(135deg,#43e97b,#38f9d7); }
+  .pay-avatar[data-letter="G"],.pay-avatar[data-letter="H"] { background: linear-gradient(135deg,#fa709a,#fee140); }
+  .pay-avatar[data-letter="I"],.pay-avatar[data-letter="J"] { background: linear-gradient(135deg,#a18cd1,#fbc2eb); }
+  .pay-avatar[data-letter="K"],.pay-avatar[data-letter="L"] { background: linear-gradient(135deg,#fccb90,#d57eeb); }
+  .pay-avatar[data-letter="M"],.pay-avatar[data-letter="N"] { background: linear-gradient(135deg,#a1c4fd,#c2e9fb); color:#1d4ed8; }
+  .pay-avatar[data-letter="O"],.pay-avatar[data-letter="P"] { background: linear-gradient(135deg,#fd7043,#ff8a65); }
+  .pay-avatar[data-letter="Q"],.pay-avatar[data-letter="R"] { background: linear-gradient(135deg,#26a69a,#80cbc4); }
+  .pay-avatar[data-letter="S"],.pay-avatar[data-letter="T"] { background: linear-gradient(135deg,#5c6bc0,#7986cb); }
+  .pay-avatar[data-letter="U"],.pay-avatar[data-letter="V"] { background: linear-gradient(135deg,#ff6f00,#ffca28); }
+  .pay-avatar[data-letter="W"],.pay-avatar[data-letter="X"] { background: linear-gradient(135deg,#00897b,#26a69a); }
+  .pay-avatar[data-letter="Y"],.pay-avatar[data-letter="Z"] { background: linear-gradient(135deg,#8e24aa,#ab47bc); }
+
+  .pay-tenant-info { min-width: 0; }
+
+  .pay-tenant-name {
+    font-weight: 600;
+    color: var(--pay-ink);
+    font-size: 0.865rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+  }
+
+  .pay-tenant-email {
+    font-size: 0.75rem;
+    color: var(--pay-ink-3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+    margin-top: 1px;
+  }
+
+  /* Property cell */
+  .pay-property {
+    font-weight: 500;
+    color: var(--pay-ink);
+    font-size: 0.855rem;
+    max-width: 160px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Date cell */
+  .pay-date-main { font-weight: 500; color: var(--pay-ink); }
+  .pay-date-time { font-size: 0.72rem; color: var(--pay-ink-3); font-family: 'DM Mono', monospace; margin-top: 2px; }
+
+  /* Amount cell */
+  .pay-amount {
+    font-family: 'DM Mono', monospace;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--pay-ink);
+    white-space: nowrap;
+  }
+
+  /* Status badge */
+  .pay-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+
+  .pay-badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .pay-badge.paid {
+    background: var(--pay-green-bg);
+    color: var(--pay-green);
+    border-color: var(--pay-green-ring);
+  }
+  .pay-badge.paid .pay-badge-dot { background: var(--pay-green); }
+
+  .pay-badge.pending {
+    background: var(--pay-amber-bg);
+    color: var(--pay-amber);
+    border-color: var(--pay-amber-ring);
+  }
+  .pay-badge.pending .pay-badge-dot { background: var(--pay-amber); animation: payPulse 1.5s infinite; }
+
+  .pay-badge.failed {
+    background: var(--pay-red-bg);
+    color: var(--pay-red);
+    border-color: var(--pay-red-ring);
+  }
+  .pay-badge.failed .pay-badge-dot { background: var(--pay-red); }
+
+  .pay-badge.expired,
+  .pay-badge.other {
+    background: var(--pay-slate-bg);
+    color: var(--pay-slate);
+    border-color: var(--pay-slate-ring);
+  }
+  .pay-badge.expired .pay-badge-dot,
+  .pay-badge.other   .pay-badge-dot { background: var(--pay-slate); }
+
+  /* Action buttons */
+  .pay-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--pay-radius-sm);
+    font-size: 0.775rem;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    text-decoration: none;
+    transition: all 0.18s;
+    white-space: nowrap;
+    border: none;
+    cursor: pointer;
+  }
+
+  .pay-action-btn.receipt {
+    background: var(--pay-green-bg);
+    color: var(--pay-green);
+    border: 1.5px solid var(--pay-green-ring);
+  }
+
+  .pay-action-btn.receipt:hover {
+    background: var(--pay-green);
+    color: white;
+    border-color: var(--pay-green);
+    box-shadow: 0 4px 12px rgba(5,150,105,0.25);
+    text-decoration: none;
+  }
+
+  .pay-processing {
+    font-size: 0.775rem;
+    color: var(--pay-amber);
+    font-weight: 500;
+    display: inline-flex; align-items: center; gap: 0.3rem;
+  }
+
+  .pay-processing svg { animation: paySpin 1.2s linear infinite; }
+
+  /* ============================================================
+     PAGINATION
+  ============================================================ */
+  .pay-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--pay-border);
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .pay-pagination-info {
+    font-size: 0.8rem;
+    color: var(--pay-ink-3);
+  }
+
+  .pay-pagination-info strong { color: var(--pay-ink-2); }
+
+  .pay-pager {
+    display: flex;
+    gap: 0.35rem;
+  }
+
+  .pay-pager-btn {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1.5px solid var(--pay-border);
+    border-radius: var(--pay-radius-sm);
+    background: var(--pay-surface);
+    color: var(--pay-ink-2);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.16s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .pay-pager-btn:hover,
+  .pay-pager-btn.active {
+    background: var(--pay-accent);
+    border-color: var(--pay-accent);
+    color: white;
+  }
+
+  .pay-pager-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* ============================================================
+     EMPTY STATE
+  ============================================================ */
+  .pay-empty {
+    padding: 5rem 2rem;
+    text-align: center;
+  }
+
+  .pay-empty-icon {
+    width: 72px; height: 72px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.25rem;
+    color: var(--pay-ink-3);
+  }
+
+  .pay-empty h5 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--pay-ink);
+    margin-bottom: 0.4rem;
+  }
+
+  .pay-empty p {
+    font-size: 0.875rem;
+    color: var(--pay-ink-3);
+    max-width: 300px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* ============================================================
+     ANIMATIONS
+  ============================================================ */
+  @keyframes payFadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes payRowIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  @keyframes payPulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.35; }
+  }
+
+  @keyframes paySpin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ============================================================
+     RESPONSIVE
+  ============================================================ */
+  @media (max-width: 991px) {
+    .pay-stats { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 767px) {
+    .pay-page { padding: 1.5rem 0 4rem; }
+    .pay-header-left h1 { font-size: 1.35rem; }
+    .pay-stats { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .pay-stat { padding: 1.1rem 1.1rem; }
+    .pay-stat-value { font-size: 1.3rem; }
+    .pay-filters { flex-direction: column; align-items: flex-start; }
+    .pay-search input { width: 100%; }
+    .pay-search { width: 100%; }
+    .pay-filters-left { width: 100%; }
+  }
+
+  @media (max-width: 480px) {
+    .pay-stats { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-    
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-        <div>
-            <h2 class="fw-bold text-dark">Payment History</h2>
-            <p class="text-muted mb-0">Track tenant deposits and transactions.</p>
-        </div>
-        <a href="{{ url_for('landlord.dashboard') }}" class="btn btn-outline-secondary rounded-3">
-            Back to Dashboard
-        </a>
+<div class="pay-page">
+<div class="container">
+
+  <!-- ── Header ── -->
+  <header class="pay-header">
+    <div class="pay-header-left">
+      <h1>Payment History</h1>
+      <p>Track all tenant deposits and transactions across your properties</p>
+    </div>
+    <a href="{{ url_for('landlord.dashboard') }}" class="pay-back-btn">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back to Dashboard
+    </a>
+  </header>
+
+  <!-- ── Stats ── -->
+  <div class="pay-stats">
+
+    <!-- Total Collected -->
+    <div class="pay-stat green">
+      <div class="pay-stat-icon">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+      </div>
+      <div class="pay-stat-label">Total Collected</div>
+      <div class="pay-stat-value">{{ "{:,.0f}".format(stats.total_collected) }}</div>
+      <div class="pay-stat-sub">KES · all time</div>
     </div>
 
-    <!-- Summary Stats Row -->
-    <div class="row g-4 mb-4">
-        
-        <!-- 1. Total Collected (Money) -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100 bg-success bg-opacity-10 border-success border-opacity-25">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-success text-white rounded-3 p-3 me-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-wallet2" viewBox="0 0 16 16">
-                                <path d="M12.136.326A1.5 1.5 0 0 1 14 1.78V3h.5A1.5 1.5 0 0 1 16 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 13.5v-9a1.5 1.5 0 0 1 1.432-1.499L12.136.326zM5.562 3H13V1.78a.5.5 0 0 0-.621-.484L5.562 3zM1.5 4a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-13z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-muted small text-uppercase fw-bold mb-1">Total Collected</p>
-                            <h4 class="fw-bold mb-0 text-success">
-                                KES {{ "{:,.2f}".format(stats.total_collected) }}
-                            </h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 2. Pending Transactions (Count) -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100 bg-warning bg-opacity-10 border-warning border-opacity-25">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-warning text-dark rounded-3 p-3 me-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-hourglass-split" viewBox="0 0 16 16">
-                                <path d="M2.5 15a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.07c.262-.125.555-.225.872-.29.285-.06.592-.09.91-.09h.5c.318 0 .625.03.91.09.317.065.61.165.872.29A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1h-11zm2-13v1c0 .537.12 1.045.337 1.5.216.453.524.86.912 1.187.389.328.852.584 1.367.752.514.168 1.07.252 1.645.252h.5c.575 0 1.13-.084 1.645-.252.515-.168.978-.424 1.367-.752.388-.327.696-.734.912-1.187.217-.455.337-.963.337-1.5V2H4.5z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-muted small text-uppercase fw-bold mb-1">Pending Transactions</p>
-                            <h4 class="fw-bold mb-0 text-warning">
-                                {{ stats.pending_count }}
-                            </h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3. Total Records (Optional visual balance) -->
-        <div class="col-md-6 col-lg-4 d-none d-lg-block">
-            <div class="card border-0 shadow-sm rounded-4 h-100 bg-primary bg-opacity-10 border-primary border-opacity-25">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-primary text-white rounded-3 p-3 me-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list-ul" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-muted small text-uppercase fw-bold mb-1">Total Records</p>
-                            <h4 class="fw-bold mb-0 text-primary">
-                                {{ payments | length }}
-                            </h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- Pending -->
+    <div class="pay-stat amber">
+      <div class="pay-stat-icon">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+        </svg>
+      </div>
+      <div class="pay-stat-label">Pending</div>
+      <div class="pay-stat-value">{{ stats.pending_count }}</div>
+      <div class="pay-stat-sub">transactions awaiting</div>
     </div>
 
-    <!-- Payments Table Card -->
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-        <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
-            <h5 class="fw-bold mb-0">Recent Transactions</h5>
-            <!-- Optional: Filter buttons could go here -->
-        </div>
-        <div class="card-body p-0">
-            
-            {% if payments %}
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light">
-                        <tr>
-                            <th scope="col" class="ps-4">Tenant</th>
-                            <th scope="col">Property</th>
-                            <th scope="col">Date</th>
-                            <th scope="col">Amount</th>
-                            <th scope="col">Status</th>
-                            <th scope="col" class="text-end pe-4">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for payment, tenant, house in payments %}
-                        <tr>
-                            <!-- Tenant Info -->
-                            <td class="ps-4">
-                                <div class="d-flex align-items-center">
-                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold me-3" style="width: 40px; height: 40px; font-size: 14px;">
-                                        {{ tenant.name[0]|upper if tenant.name else 'U' }}
-                                    </div>
-                                    <div>
-                                        <div class="fw-bold text-dark">{{ tenant.name }}</div>
-                                        <div class="small text-muted text-truncate" style="max-width: 150px;">{{ tenant.email }}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            
-                            <!-- Property Info -->
-                            <td>
-                                <span class="fw-medium text-dark">{{ house.title if house.title else 'N/A' }}</span>
-                            </td>
-
-                            <!-- Date -->
-                            <td>
-                                <span class="text-muted">
-                                    {{ payment.created_at.strftime('%d %b, %Y') }}
-                                    <br class="d-md-none">
-                                    <small class="text-muted">{{ payment.created_at.strftime('%I:%M %p') }}</small>
-                                </span>
-                            </td>
-
-                            <!-- Amount -->
-                            <td>
-                                <span class="fw-bold text-dark">KES {{ "{:,.2f}".format(payment.amount) }}</span>
-                            </td>
-
-                            <!-- Status Badge -->
-                            <td>
-                                {% if payment.status == 'paid' %}
-                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">Paid</span>
-                                {% elif payment.status == 'pending' %}
-                                    <span class="badge bg-warning bg-opacity-10 text-dark rounded-pill px-3 py-2">Pending</span>
-                                {% elif payment.status == 'failed' %}
-                                    <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3 py-2">Failed</span>
-                                {% elif payment.status == 'expired' %}
-                                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2">Expired</span>
-                                {% else %}
-                                    <span class="badge bg-light text-dark border rounded-pill px-3 py-2">{{ payment.status|capitalize }}</span>
-                                {% endif %}
-                            </td>
-
-                            <!-- Action -->
-                            <td class="text-end pe-4">
-                                {% if payment.transaction_id %}
-                                    <a href="{{ url_for('payments.success', token=payment.token) }}" 
-                                    class="btn btn-sm btn-success text-white shadow-sm" target="_blank">
-                                        View Receipt
-                                    </a>
-                                {% elif payment.status == 'pending' %}
-                                    <span class="text-warning small fw-bold">Processing...</span>
-                                {% else %}
-                                    <span class="text-muted small">—</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            
-            <!-- Empty State -->
-            <div class="text-center py-5">
-                <div class="mb-3 text-muted">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-inbox" viewBox="0 0 16 16">
-                        <path d="M4.98 4a.5.5 0 0 0-.39.188L1.54 8H6a.5.5 0 0 1 .5.5 1.5 1.5 0 1 0 3 0A.5.5 0 0 1 10 8h4.46l-3.05-3.812A.5.5 0 0 0 11.02 4H4.98zm9.954 5H10.45a2.5 2.5 0 0 1-4.9 0H1.066l.32 2.562a.5.5 0 0 0 .497.438h12.234a.5.5 0 0 0 .496-.438L14.933 9zM3.809 3.563A1.5 1.5 0 0 1 4.981 3h6.038a1.5 1.5 0 0 1 1.172.563l3.7 4.625a.5.5 0 0 1 .105.374l-.39 3.124A1.5 1.5 0 0 1 14.117 13H1.883a1.5 1.5 0 0 1-1.489-1.314l-.39-3.124a.5.5 0 0 1 .106-.374l3.7-4.625z"/>
-                    </svg>
-                </div>
-                <h5 class="fw-bold">No Payments Found</h5>
-                <p class="text-muted">You haven't received any deposits or pending payments yet.</p>
-            </div>
-            
-            {% endif %}
-        </div>
+    <!-- Total Records -->
+    <div class="pay-stat blue">
+      <div class="pay-stat-icon">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+      </div>
+      <div class="pay-stat-label">Total Records</div>
+      <div class="pay-stat-value">{{ payments | length }}</div>
+      <div class="pay-stat-sub">across all properties</div>
     </div>
 
-</div>
+  </div>
+
+  <!-- ── Filters ── -->
+  <div class="pay-filters">
+    <div class="pay-filters-left">
+      <button class="pay-filter-btn active" onclick="filterTable('all', this)">All</button>
+      <button class="pay-filter-btn" onclick="filterTable('paid', this)">Paid</button>
+      <button class="pay-filter-btn" onclick="filterTable('pending', this)">Pending</button>
+      <button class="pay-filter-btn" onclick="filterTable('failed', this)">Failed</button>
+      <button class="pay-filter-btn" onclick="filterTable('expired', this)">Expired</button>
+    </div>
+    <div class="pay-search">
+      <svg class="pay-search-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" id="paySearch" placeholder="Search tenant or property…" oninput="searchTable(this.value)" />
+    </div>
+  </div>
+
+  <!-- ── Table Card ── -->
+  <div class="pay-card">
+    <div class="pay-card-head">
+      <h5>
+        Transactions
+        <span id="rowCount">{{ payments | length }}</span>
+      </h5>
+      <button class="pay-export-btn" onclick="exportCSV()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Export CSV
+      </button>
+    </div>
+
+    {% if payments %}
+    <div class="pay-table-wrap">
+      <table class="pay-table" id="payTable">
+        <thead>
+          <tr>
+            <th onclick="sortTable(0)">Tenant <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(1)">Property <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(2)">Date <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(3)">Amount <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(4)">Status <span class="sort-icon">↕</span></th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="payTableBody">
+          {% for payment, tenant, house in payments %}
+          <tr
+            data-status="{{ payment.status | lower }}"
+            data-tenant="{{ tenant.name | lower }}"
+            data-property="{{ (house.title if house.title else '') | lower }}"
+            style="animation-delay: {{ loop.index0 * 0.04 }}s"
+          >
+            <!-- Tenant -->
+            <td>
+              <div class="pay-tenant">
+                <div class="pay-avatar" data-letter="{{ (tenant.name[0]|upper) if tenant.name else 'U' }}">
+                  {{ (tenant.name[0]|upper) if tenant.name else 'U' }}
+                </div>
+                <div class="pay-tenant-info">
+                  <div class="pay-tenant-name">{{ tenant.name }}</div>
+                  <div class="pay-tenant-email">{{ tenant.email }}</div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Property -->
+            <td>
+              <span class="pay-property">{{ house.title if house.title else '—' }}</span>
+            </td>
+
+            <!-- Date -->
+            <td>
+              <div class="pay-date-main">{{ payment.created_at.strftime('%d %b %Y') }}</div>
+              <div class="pay-date-time">{{ payment.created_at.strftime('%I:%M %p') }}</div>
+            </td>
+
+            <!-- Amount -->
+            <td>
+              <span class="pay-amount">KES {{ "{:,.2f}".format(payment.amount) }}</span>
+            </td>
+
+            <!-- Status -->
+            <td>
+              {% if payment.status == 'paid' %}
+                <span class="pay-badge paid">
+                  <span class="pay-badge-dot"></span>Paid
+                </span>
+              {% elif payment.status == 'pending' %}
+                <span class="pay-badge pending">
+                  <span class="pay-badge-dot"></span>Pending
+                </span>
+              {% elif payment.status == 'failed' %}
+                <span class="pay-badge failed">
+                  <span class="pay-badge-dot"></span>Failed
+                </span>
+              {% elif payment.status == 'expired' %}
+                <span class="pay-badge expired">
+                  <span class="pay-badge-dot"></span>Expired
+                </span>
+              {% else %}
+                <span class="pay-badge other">
+                  <span class="pay-badge-dot"></span>{{ payment.status | capitalize }}
+                </span>
+              {% endif %}
+            </td>
+
+            <!-- Action -->
+            <td>
+              {% if payment.transaction_id %}
+                <a href="{{ url_for('payments.success', token=payment.token) }}"
+                   class="pay-action-btn receipt" target="_blank">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                  </svg>
+                  Receipt
+                </a>
+              {% elif payment.status == 'pending' %}
+                <span class="pay-processing">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                  </svg>
+                  Processing
+                </span>
+              {% else %}
+                <span style="color:var(--pay-ink-3); font-size:0.8rem;">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination info -->
+    <div class="pay-pagination">
+      <div class="pay-pagination-info">
+        Showing <strong id="visibleCount">{{ payments | length }}</strong> of <strong>{{ payments | length }}</strong> records
+      </div>
+      <div class="pay-pager" id="pager">
+        <!-- JS renders pager buttons if needed -->
+      </div>
+    </div>
+
+    {% else %}
+    <!-- Empty state -->
+    <div class="pay-empty">
+      <div class="pay-empty-icon">
+        <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+          <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+          <line x1="12" y1="12" x2="12" y2="12"/>
+        </svg>
+      </div>
+      <h5>No Payments Yet</h5>
+      <p>You haven't received any deposits or pending payments yet. They'll appear here once tenants start transacting.</p>
+    </div>
+    {% endif %}
+
+  </div><!-- /pay-card -->
+
+</div><!-- /container -->
+</div><!-- /pay-page -->
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // ── Filter by status ──
+  function filterTable(status, btn) {
+    document.querySelectorAll('.pay-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const rows = document.querySelectorAll('#payTableBody tr');
+    let visible = 0;
+    rows.forEach(row => {
+      const match = status === 'all' || row.dataset.status === status;
+      row.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    updateCount(visible);
+  }
+
+  // ── Search ──
+  function searchTable(term) {
+    const q = term.toLowerCase().trim();
+    const rows = document.querySelectorAll('#payTableBody tr');
+    const activeFilter = document.querySelector('.pay-filter-btn.active')?.textContent.toLowerCase().trim() || 'all';
+    let visible = 0;
+
+    rows.forEach(row => {
+      const statusOk = activeFilter === 'all' || row.dataset.status === activeFilter;
+      const textOk   = !q || row.dataset.tenant.includes(q) || row.dataset.property.includes(q);
+      const show = statusOk && textOk;
+      row.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    updateCount(visible);
+  }
+
+  function updateCount(n) {
+    const el = document.getElementById('visibleCount');
+    if (el) el.textContent = n;
+    const rc = document.getElementById('rowCount');
+    if (rc) rc.textContent = n;
+  }
+
+  // ── Sort ──
+  let sortDir = {};
+  function sortTable(colIdx) {
+    const tbody = document.getElementById('payTableBody');
+    if (!tbody) return;
+    const rows  = Array.from(tbody.querySelectorAll('tr'));
+    const asc   = !sortDir[colIdx];
+    sortDir = {};
+    sortDir[colIdx] = asc;
+
+    rows.sort((a, b) => {
+      const at = a.cells[colIdx]?.textContent.trim() || '';
+      const bt = b.cells[colIdx]?.textContent.trim() || '';
+      // Numeric sort for amount column
+      if (colIdx === 3) {
+        return asc
+          ? parseFloat(at.replace(/[^0-9.]/g,'')) - parseFloat(bt.replace(/[^0-9.]/g,''))
+          : parseFloat(bt.replace(/[^0-9.]/g,'')) - parseFloat(at.replace(/[^0-9.]/g,''));
+      }
+      return asc ? at.localeCompare(bt) : bt.localeCompare(at);
+    });
+
+    rows.forEach(r => tbody.appendChild(r));
+  }
+
+  // ── Export CSV ──
+  function exportCSV() {
+    const rows  = Array.from(document.querySelectorAll('#payTableBody tr'));
+    const headers = ['Tenant', 'Email', 'Property', 'Date', 'Amount', 'Status'];
+    const lines   = [headers.join(',')];
+
+    rows.forEach(row => {
+      if (row.style.display === 'none') return;
+      const cells = row.querySelectorAll('td');
+      const tenant   = row.dataset.tenant || '';
+      const email    = cells[0]?.querySelector('.pay-tenant-email')?.textContent.trim() || '';
+      const property = cells[1]?.textContent.trim() || '';
+      const date     = cells[2]?.textContent.trim().replace(/\s+/g,' ') || '';
+      const amount   = cells[3]?.textContent.trim() || '';
+      const status   = cells[4]?.textContent.trim() || '';
+      lines.push([tenant, email, property, `"${date}"`, amount, status].join(','));
+    });
+
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'payments_export.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+</script>
 {% endblock %}
