@@ -1710,6 +1710,8 @@
         </footer>
     </div>
 
+    {% set is_portal_support_context = current_user.is_authenticated and current_user.role in ['tenant', 'landlord'] and request.blueprint in ['tenant', 'landlord'] %}
+    {% if is_portal_support_context %}
     <!-- ========== LIVE SUPPORT BUTTON (Step 1) ========== -->
     <div id="chatSupportBtn" class="chat-support-btn">
         <i class="fas fa-comments"></i>
@@ -1725,7 +1727,10 @@
         <div id="chatMessages" class="chat-messages">
             <div class="bot-message">
                 Welcome to HOUSEhubKENYA Support! 👋 <br>
-                How can we help you today?
+                How can we help you today?<br>
+                Need a human? Type <strong>/support your message</strong><br>
+                Check ticket status: <strong>/support status 123</strong><br>
+                View recent tickets: <strong>/support my tickets</strong>
             </div>
         </div>
 
@@ -1734,6 +1739,7 @@
             <button id="sendChat"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
+    {% endif %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -1815,7 +1821,7 @@
         });
 
         // ========== CHAT SUPPORT LOGIC (Step 3 & 4) ==========
-        
+        {% if is_portal_support_context %}
         // Get User Role from Jinja2
         const userRole = "{{ current_user.role if current_user.is_authenticated else 'guest' }}";
 
@@ -1825,14 +1831,24 @@
         const sendChat = document.getElementById("sendChat");
         const chatInput = document.getElementById("chatInput");
         const chatMessages = document.getElementById("chatMessages");
+        const supportStatusEndpointBase = "{{ url_for('main.live_chat_support_status', ticket_id=0) }}";
+        const supportRecentEndpoint = "{{ url_for('main.live_chat_support_recent') }}";
+
+        function setLiveSupportState(isOpen) {
+            document.body.classList.toggle('live-support-open', isOpen);
+        }
 
         chatBtn.onclick = () => {
             chatBox.style.display = "flex";
+            setLiveSupportState(true);
             // Focus input when opened
             setTimeout(() => chatInput.focus(), 100);
         };
         
-        closeChat.onclick = () => chatBox.style.display = "none";
+        closeChat.onclick = () => {
+            chatBox.style.display = "none";
+            setLiveSupportState(false);
+        };
 
         sendChat.onclick = sendMessage;
         chatInput.addEventListener("keypress", function(e) {
@@ -1845,6 +1861,82 @@
 
             addMessage("user", message);
             chatInput.value = "";
+
+            const supportStatusCmd = message.match(/^\/support\s+status\s+(\d+)\s*$/i);
+            if (supportStatusCmd) {
+                const ticketId = Number(supportStatusCmd[1]);
+                const endpoint = supportStatusEndpointBase.replace(/0$/, String(ticketId));
+
+                fetch(endpoint)
+                .then(r => r.json())
+                .then(j => {
+                    if (j && j.success && j.ticket) {
+                        addMessage("bot", `Ticket #${j.ticket.id} is currently <strong>${j.ticket.status}</strong>.`);
+                    } else {
+                        addMessage("bot", (j && j.error) ? j.error : "Could not fetch ticket status right now.");
+                    }
+                })
+                .catch(() => {
+                    addMessage("bot", "Network error while checking ticket status. Please try again.");
+                });
+                return;
+            }
+
+            const supportRecentCmd = message.match(/^\/support\s+(my\s+tickets|tickets)\s*$/i);
+            if (supportRecentCmd) {
+                fetch(`${supportRecentEndpoint}?limit=5`)
+                .then(r => r.json())
+                .then(j => {
+                    if (j && j.success && Array.isArray(j.tickets)) {
+                        if (j.tickets.length === 0) {
+                            addMessage("bot", "You do not have support tickets yet. Type <strong>/support your message</strong> to create one.");
+                            return;
+                        }
+
+                        const lines = j.tickets.map(t => `#${t.id} - ${t.status} - ${(t.subject || 'No subject')}`);
+                        addMessage("bot", `Your recent tickets:<br>${lines.join('<br>')}`);
+                    } else {
+                        addMessage("bot", (j && j.error) ? j.error : "Could not fetch recent tickets right now.");
+                    }
+                })
+                .catch(() => {
+                    addMessage("bot", "Network error while loading recent tickets. Please try again.");
+                });
+                return;
+            }
+
+            const supportCmd = message.match(/^\/support(?:\s+team)?\s*(.*)$/i);
+            if (supportCmd) {
+                const supportBody = (supportCmd[1] || '').trim();
+                if (!supportBody) {
+                    addMessage("bot", "Please add your support request after the command. Example: <strong>/support Payment failed for April rent</strong>.");
+                    return;
+                }
+
+                fetch("{{ url_for('main.live_chat_support_escalate') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": document.querySelector('meta[name="csrf-token"]')?.content || ''
+                    },
+                    body: JSON.stringify({
+                        message: supportBody,
+                        source: "live_chat_command"
+                    })
+                })
+                .then(r => r.json())
+                .then(j => {
+                    if (j && j.success) {
+                        addMessage("bot", `Support request received. Ticket #${j.ticket_id} has been sent to the HomeHub support team.`);
+                    } else {
+                        addMessage("bot", (j && j.error) ? j.error : "Could not forward to support right now. Please try again.");
+                    }
+                })
+                .catch(() => {
+                    addMessage("bot", "Network error while forwarding to support. Please try again.");
+                });
+                return;
+            }
 
             // Simulate "typing" delay
             setTimeout(() => {
@@ -1909,22 +2001,30 @@
 
             return "Sorry, I didn’t understand that. Try asking about 'rent', 'properties', 'maintenance', or 'account'.";
         }
+        {% endif %}
     </script>
 
-    {% if current_user.is_authenticated and current_user.role == 'tenant' %}
+    {% if current_user.is_authenticated and current_user.role == 'tenant' and request.blueprint == 'tenant' %}
     <!-- Contact Widget: floating support/chat widget (prefill to landlord if tenant) -->
     <style>
-    .contact-widget { position: fixed; right: 20px; bottom: 20px; z-index: 3000; font-family: Inter, sans-serif; }
+    .contact-widget { position: fixed; right: 20px; bottom: 92px; z-index: 3000; font-family: Inter, sans-serif; transition: right 0.25s ease; }
+    body.live-support-open .contact-widget { right: 340px; }
     .cw-button { width:56px; height:56px; border-radius:50%; background:var(--gradient-primary); color:#fff; border:none; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); cursor:pointer; }
     .cw-menu { margin-top:10px; display:flex; flex-direction:column; gap:8px; align-items:flex-end; }
     .cw-action { display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:10px; background:var(--card-bg); color:var(--text-primary); text-decoration:none; box-shadow:var(--shadow-sm); border:1px solid var(--border-color); }
     .cw-action i { width:18px; text-align:center; }
     .cw-primary { background: var(--gradient-primary); color: #fff; border: none; }
-    .cw-modal { position: fixed; right: 20px; bottom: 96px; width: 340px; max-width: calc(100% - 40px); background: var(--card-bg); border-radius: 12px; box-shadow: var(--shadow-lg); padding: 12px; display:none; z-index:3100; }
+    .cw-modal { position: fixed; right: 20px; bottom: 168px; width: 340px; max-width: calc(100% - 40px); background: var(--card-bg); border-radius: 12px; box-shadow: var(--shadow-lg); padding: 12px; display:none; z-index:3100; }
     .cw-modal.active { display:block; }
     .cw-modal textarea { width:100%; min-height:110px; border-radius:8px; border:1px solid var(--border-color); padding:8px; resize:vertical; }
     .cw-row { display:flex; gap:8px; margin-top:8px; justify-content:flex-end; }
-    .cw-toast { position: fixed; right: 20px; bottom: 86px; background: rgba(0,0,0,0.8); color: #fff; padding:8px 12px; border-radius:8px; z-index:3200; display:none; }
+    .cw-toast { position: fixed; right: 20px; bottom: 158px; background: rgba(0,0,0,0.8); color: #fff; padding:8px 12px; border-radius:8px; z-index:3200; display:none; }
+    @media (max-width: 576px) {
+        .contact-widget { right: 14px; bottom: 88px; }
+        body.live-support-open .contact-widget { right: min(270px, calc(100vw - 76px)); }
+        .cw-modal { right: 14px; bottom: 156px; max-width: calc(100% - 28px); }
+        .cw-toast { right: 14px; bottom: 146px; }
+    }
     </style>
 
     <div class="contact-widget" id="contactWidget">

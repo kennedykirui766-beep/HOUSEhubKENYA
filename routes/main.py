@@ -1,13 +1,136 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from flask_login import current_user, login_required
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import inspect
-from models.models import House, SystemUpdateSubscriber
-from extensions import db
+from models.models import House, SystemUpdateSubscriber, SupportMessage, SupportTicket
+from extensions import db, csrf
 from utils_email_2fa import send_support_contact_email, verify_email_format
 
 main_bp = Blueprint('main', __name__)
 
 import json
+
+
+@main_bp.route('/api/live-chat/support', methods=['POST'])
+@csrf.exempt
+@login_required
+def live_chat_support_escalate():
+    """Escalate a live-chat command message to the support team."""
+    if current_user.role not in ['tenant', 'landlord']:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+
+    payload = request.get_json(silent=True) or {}
+    raw_message = (payload.get('message') or '').strip()
+    source = (payload.get('source') or 'live_chat_command').strip()[:50]
+
+    name = (payload.get('name') or '').strip() or (current_user.name or '').strip()
+    email = (payload.get('email') or '').strip() or (current_user.email or '').strip()
+    phone = (getattr(current_user, 'phone_number', None) or '').strip()
+    role = (current_user.role or '').strip()
+
+    if not raw_message:
+        return jsonify({'success': False, 'error': 'Message is required'}), 400
+    if not name or not email:
+        return jsonify({'success': False, 'error': 'Name and email are required'}), 400
+    if not verify_email_format(email):
+        return jsonify({'success': False, 'error': 'Invalid email format'}), 400
+
+    support_text = f"[via {source}] {raw_message}"
+
+    try:
+        ticket = SupportTicket(
+            user_id=current_user.id,
+            subject=f"Live chat escalation from {name}",
+            description=support_text,
+            status='open'
+        )
+        db.session.add(ticket)
+
+        support_msg = SupportMessage(
+            full_name=name,
+            email=email,
+            phone=phone,
+            role=role,
+            message=support_text,
+            user_id=current_user.id
+        )
+        db.session.add(support_msg)
+        db.session.commit()
+
+        try:
+            from services.notification import enqueue_support_email
+            enqueue_support_email(
+                full_name=name,
+                sender_email=email,
+                phone=phone,
+                role=role,
+                message=support_text,
+            )
+        except Exception:
+            main_bp.logger.exception('Failed to enqueue live-chat support email')
+
+        return jsonify({'success': True, 'ticket_id': ticket.id})
+    except Exception:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': 'Failed to create support ticket'}), 500
+
+
+@main_bp.route('/api/live-chat/support/status/<int:ticket_id>', methods=['GET'])
+@login_required
+def live_chat_support_status(ticket_id):
+    """Return support ticket status for the current authenticated user."""
+    if current_user.role not in ['tenant', 'landlord']:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+
+    ticket = SupportTicket.query.get(ticket_id)
+    if not ticket or ticket.user_id != current_user.id:
+        return jsonify({'success': False, 'error': 'Ticket not found'}), 404
+
+    return jsonify({
+        'success': True,
+        'ticket': {
+            'id': ticket.id,
+            'subject': ticket.subject,
+            'status': ticket.status,
+            'created_at': ticket.created_at.isoformat() if ticket.created_at else None,
+            'updated_at': ticket.updated_at.isoformat() if ticket.updated_at else None,
+        }
+    })
+
+
+@main_bp.route('/api/live-chat/support/recent', methods=['GET'])
+@login_required
+def live_chat_support_recent():
+    """Return recent support tickets for the current authenticated user."""
+    if current_user.role not in ['tenant', 'landlord']:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+
+    try:
+        limit = int(request.args.get('limit', 5))
+    except (TypeError, ValueError):
+        limit = 5
+    limit = max(1, min(limit, 10))
+
+    tickets = (
+        SupportTicket.query
+        .filter_by(user_id=current_user.id)
+        .order_by(SupportTicket.created_at.desc())
+        .limit(limit)
+        .all()
+    )
+
+    return jsonify({
+        'success': True,
+        'tickets': [
+            {
+                'id': t.id,
+                'status': t.status,
+                'subject': t.subject,
+                'created_at': t.created_at.isoformat() if t.created_at else None,
+            }
+            for t in tickets
+        ]
+    })
 
 @main_bp.route('/')
 @main_bp.route('/index')
