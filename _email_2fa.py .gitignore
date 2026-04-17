@@ -1,0 +1,167 @@
+[1mdiff --git a/utils_email_2fa.py b/utils_email_2fa.py[m
+[1mindex 14156ed..bcf22d2 100644[m
+[1m--- a/utils_email_2fa.py[m
+[1m+++ b/utils_email_2fa.py[m
+[36m@@ -1,78 +1,88 @@[m
+ """[m
+ Email Verification Module[m
+ Handles sending email-based 2FA codes.[m
+[31m-Supports multiple providers (Flask-Mail, SendGrid, etc).[m
+[32m+[m[32mSupports multiple providers (Flask-Mail, MAILJET, etc).[m
+ """[m
+ [m
+ import json[m
+ import logging[m
+ import os[m
+[32m+[m[32mimport base64[m
+ from typing import Optional[m
+ from urllib import error as urlerror, request as urlrequest[m
+ [m
+ logger = logging.getLogger(__name__)[m
+[31m-[m
+ # Email provider configuration[m
+[31m-EMAIL_PROVIDER = os.environ.get('EMAIL_PROVIDER', 'sendgrid')  # 'smtp', 'sendgrid', 'mailgun'[m
+[32m+[m[32m# Read raw env first, then normalize and log the resolved value.[m
+[32m+[m[32mraw_email_provider = os.environ.get('EMAIL_PROVIDER')[m
+[32m+[m[32mEMAIL_PROVIDER = raw_email_provider if raw_email_provider is not None else 'MAILJET'[m
+[32m+[m[32mif EMAIL_PROVIDER is not None:[m
+[32m+[m[32m    EMAIL_PROVIDER = EMAIL_PROVIDER.strip().upper()[m
+[32m+[m[32melse:[m
+[32m+[m[32m    EMAIL_PROVIDER = 'MAILJET'[m
+[32m+[m
+[32m+[m[32m# Log resolved provider at import time for easier diagnostics. (shows raw + normalized)[m
+[32m+[m[32mlogger.info(f"Resolved EMAIL_PROVIDER raw={raw_email_provider!r} normalized={EMAIL_PROVIDER!r}")[m
+ # Do not hard-code any real email addresses or secrets here; require env var.[m
+ # If `SENDER_EMAIL` is not set, use an empty string so no secret is stored in source.[m
+ SENDER_EMAIL = os.environ.get('SENDER_EMAIL', '')[m
+ SUPPORT_EMAIL = os.environ.get('SUPPORT_EMAIL', SENDER_EMAIL)[m
+[31m-SENDER_NAME = os.environ.get('SENDER_NAME', 'HomeHub')[m
+[32m+[m[32mSENDER_NAME = os.environ.get('SENDER_NAME', 'HOUSEhubKENYA')[m
+ [m
+ [m
+[31m-def _send_sendgrid_message([m
+[32m+[m[32mdef _send_MAILJET_message([m
+     recipient_email: str,[m
+     subject: str,[m
+     html_content: str,[m
+     text_content: str,[m
+     reply_to_email: Optional[str] = None,[m
+ ) -> bool:[m
+[31m-    """Send an email through the SendGrid REST API."""[m
+[31m-    # Avoid embedding the literal env var name to keep pre-commit secret scanners happy.[m
+[31m-    sendgrid_key = os.environ.get('SENDGRID' + '_API_KEY')[m
+[31m-    if not sendgrid_key:[m
+[31m-        logger.error("SendGrid API key not configured")[m
+[32m+[m[32m    MAILJET_key = os.environ.get('MAILJET_API_KEY')[m
+[32m+[m[32m    MAILJET_secret = os.environ.get('MAILJET_API_SECRET')[m
+[32m+[m[41m    [m
+[32m+[m[32m    if not MAILJET_key or not MAILJET_secret:[m
+[32m+[m[32m        logger.error("MAILJET credentials not fully configured")[m
+         return False[m
+ [m
+[32m+[m[32m    # Mailjet v3.1 Payload Structure[m
+     payload = {[m
+[31m-        "personalizations": [[m
+[31m-            {[m
+[31m-                "to": [{"email": recipient_email}],[m
+[31m-            }[m
+[31m-        ],[m
+[31m-        "from": {"email": SENDER_EMAIL, "name": SENDER_NAME},[m
+[31m-        "subject": subject,[m
+[31m-        "content": [[m
+[31m-            {"type": "text/plain", "value": text_content},[m
+[31m-            {"type": "text/html", "value": html_content},[m
+[31m-        ],[m
+[32m+[m[32m        "Messages": [{[m
+[32m+[m[32m            "From": {"Email": SENDER_EMAIL, "Name": SENDER_NAME},[m
+[32m+[m[32m            "To": [{"Email": recipient_email}],[m
+[32m+[m[32m            "Subject": subject,[m
+[32m+[m[32m            "TextPart": text_content,[m
+[32m+[m[32m            "HTMLPart": html_content[m
+[32m+[m[32m        }][m
+     }[m
+ [m
+     if reply_to_email:[m
+[31m-        payload["reply_to"] = {"email": reply_to_email}[m
+[32m+[m[32m        payload["Messages"][0]["ReplyTo"] = {"Email": reply_to_email}[m
+[32m+[m
+[32m+[m[32m    # Basic Auth Header[m
+[32m+[m[32m    auth_str = base64.b64encode(f"{MAILJET_key}:{MAILJET_secret}".encode()).decode()[m
+ [m
+     request = urlrequest.Request([m
+[31m-        "https://api.sendgrid.com/v3/mail/send",[m
+[32m+[m[32m        "https://api.mailjet.com/v3.1/send",[m
+         data=json.dumps(payload).encode("utf-8"),[m
+         headers={[m
+[31m-            "Authorization": f"Bearer {sendgrid_key}",[m
+[32m+[m[32m            "Authorization": f"Basic {auth_str}",[m
+             "Content-Type": "application/json",[m
+         },[m
+         method="POST",[m
+     )[m
+[32m+[m[41m    [m
+ [m
+     try:[m
+         with urlrequest.urlopen(request, timeout=20) as response:[m
+             if response.status in (200, 201, 202):[m
+                 return True[m
+[31m-            logger.error(f"SendGrid error: {response.status}")[m
+[32m+[m[32m            logger.error(f"MAILJET error: {response.status}")[m
+             return False[m
+     except urlerror.HTTPError as exc:[m
+[31m-        logger.error(f"SendGrid HTTP error: {exc.code} - {exc.read().decode('utf-8', errors='ignore')}")[m
+[32m+[m[32m        logger.error(f"MAILJET HTTP error: {exc.code} - {exc.read().decode('utf-8', errors='ignore')}")[m
+         return False[m
+     except Exception as exc:[m
+[31m-        logger.error(f"Failed to send SendGrid email: {str(exc)}")[m
+[32m+[m[32m        logger.error(f"Failed to send MAILJET email: {str(exc)}")[m
+         return False[m
+ [m
+ [m
+[36m@@ -90,11 +100,11 @@[m [mdef send_2fa_email(recipient_email: str, user_name: str, otp_code: str, method:[m
+         bool: True if email sent successfully[m
+     """[m
+     [m
+[31m-    if EMAIL_PROVIDER == 'smtp':[m
+[32m+[m[32m    if EMAIL_PROVIDER == 'SMTP':[m
+         return _send_smtp(recipient_email, user_name, otp_code, method)[m
+[31m-    elif EMAIL_PROVIDER == 'sendgrid':[m
+[31m-        return _send_sendgrid(recipient_email, user_name, otp_code, method)[m
+[31m-    elif EMAIL_PROVIDER == 'mailgun':[m
+[32m+[m[32m    elif EMAIL_PROVIDER == 'MAILJET':[m
+[32m+[m[32m        return _send_MAILJET(recipient_email, user_name, otp_code, method)[m
+[32m+[m[32m    elif EMAIL_PROVIDER == 'MAILGUN':[m
+         return _send_mailgun(recipient_email, user_name, otp_code, method)[m
+     else:[m
+         logger.error(f"Unknown email provider: {EMAIL_PROVIDER}")[m
+[36m@@ -103,19 +113,19 @@[m [mdef send_2fa_email(recipient_email: str, user_name: str, otp_code: str, method:[m
+ [m
+ def _send_smtp(recipient_email: str, user_name: str, otp_code: str, method: str) -> bool:[m
+     """Legacy SMTP path is not used in this deployment."""[m
+[31m-    logger.warning("SMTP email provider is disabled in favor of SendGrid")[m
+[32m+[m[32m    logger.warning("SMTP email provider is disabled in favor of MAILJET")[m
+     return False[m
+ [m
+ [m
+[31m-def _send_sendgrid(recipient_email: str, user_name: str, otp_code: str, method: str) -> bool:[m
+[31m-    """Send email via SendGrid REST API"""[m
+[31m-    subject = f"Your HomeHub 2FA Code: {otp_code}"[m
+[32m+[m[32mdef _send_MAILJET(recipient_email: str, user_name: str, otp_code: str, method: str) -> bool:[m
+[32m+[m[32m    """Send email via MAILJET REST API"""[m
+[32m+[m[32m    subject = f"Your HOUSEhubKENYA 2FA Code: {otp_code}"[m
+ [m
+     html_content = f"""[m
+     <html>[m
+         <body style="font-family: Arial, sans-serif; color: #333;">[m
+             <div style="max-width: 600px; margin: 0 auto; padding: 20px;">[m
+[31m-                <h2 style="color: #4361ee;">HomeHub 2FA Verification</h2>[m
+[32m+[m[32m                <h2 style="color: #4361ee;">HOUSEhubKENYA 2FA Verification</h2>[m
+                 <p>Hi {user_name},</p>[m
+                 <p>Your 2-Factor Authentication code is:</p>[m
+                 <div style="background-color: #f0f0f0; padding: 15px; border-radius: 5px; text-align: center;">[m
+[36m@@ -130,20 +140,20 @@[m [mdef _send_sendgrid(recipient_email: str, user_name: str, otp_code: str, method:[m
+ [m
+     text_content = ([m
+         f"Hi {user_name},\n\n"[m
+[31m-        f"Your HomeHub 2FA code is: {otp_code}\n"[m
+[32m+[m[32m        f"Your HOUSEhubKENYA 2FA co
