@@ -1,6 +1,89 @@
-{% extends "base.html" %} {% block title %}Help & Support - HOUSEhubKENYA{% endblock
-%} {% block content %}
+{% extends "base.html" %}
+
+{% block title %}Help & Support - HOUSEhubKENYA{% endblock %}
+
+{% block styles %}
 <style>
+  /* ========== GLOBAL RESET ========== */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #f8f9fa;
+    color: #1f2937;
+    line-height: 1.6;
+  }
+
+  /* ========== RESPONSIVE FIX (WRAPPER STRATEGY) ========== */
+  /* This wrapper forces the main content to 100vw width, solving layout issues in base.html */
+  .force-mobile-wrapper {
+    width: 100vw;
+    margin-left: calc((100% - 100vw) / 2);
+    position: relative;
+    left: 0;
+    background-color: #f8f9fa;
+    padding-bottom: 2rem; /* Spacing at bottom */
+  }
+
+  /* Desktop Reset */
+  @media (min-width: 768px) {
+    .force-mobile-wrapper {
+      width: 100%;
+      margin-left: 0;
+      position: static;
+      background-color: transparent;
+      padding-bottom: 0;
+    }
+  }
+
+  /* Mobile Adjustments */
+  @media (max-width: 767px) {
+    .help-container {
+      padding: 1rem; /* Reduce padding on mobile */
+    }
+
+    .hero-title {
+      font-size: 2rem;
+    }
+
+    .hero-subtitle {
+      font-size: 1rem;
+    }
+
+    .categories-grid,
+    .faq-grid,
+    .tutorials-grid {
+      grid-template-columns: 1fr !important; /* Single column on mobile */
+      gap: 1rem !important;
+    }
+
+    .contact-content {
+      grid-template-columns: 1fr; /* Stacked contact on mobile */
+    }
+
+    .contact-method {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .contact-icon {
+      margin: 0.5rem 0; /* Centering adjustment */
+    }
+
+    .chat-widget {
+      width: calc(100% - 40px);
+      right: 20px;
+      left: 20px; /* Centered on mobile */
+    }
+  }
+
+  /* ========== PROVIDED STYLES (with updates) ========== */
+  /* Note: Preserving your design colors */
   :root {
     --primary: #4361ee;
     --primary-dark: #3a0ca3;
@@ -15,14 +98,6 @@
     --transition: all 0.3s ease;
   }
 
-  body {
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      sans-serif;
-    background-color: #f8f9fa;
-    color: var(--dark);
-    line-height: 1.6;
-  }
-
   .help-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -31,11 +106,7 @@
 
   /* Hero Section */
   .help-hero {
-    background: linear-gradient(
-      135deg,
-      var(--primary) 0%,
-      var(--primary-dark) 100%
-    );
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: white;
     padding: 4rem 2rem;
     border-radius: 20px;
@@ -51,8 +122,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')
-      no-repeat bottom;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139.864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+    no-repeat bottom;
     background-size: cover;
   }
 
@@ -102,7 +173,7 @@
 
   .search-input:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+    box-shadow: 0 0 0.25rem rgba(67, 97, 238, 0.25);
     outline: none;
   }
 
@@ -191,21 +262,11 @@
     color: white;
   }
 
-  .landlord-header {
-    background: linear-gradient(135deg, #4361ee, #3a0ca3);
-  }
-  .tenant-header {
-    background: linear-gradient(135deg, #06ffa5, #00b4d8);
-  }
-  .provider-header {
-    background: linear-gradient(135deg, #ffbe0b, #fb8500);
-  }
-  .admin-header {
-    background: linear-gradient(135deg, #f72585, #b5179e);
-  }
-  .general-header {
-    background: linear-gradient(135deg, #7209b7, #560bad);
-  }
+  .landlord-header { background: linear-gradient(135deg, #4361ee, #3a0ca3); }
+  .tenant-header { background: linear-gradient(135deg, #06ffa5, #00b4d8); }
+  .provider-header { background: linear-gradient(135deg, #ffbe0b, #fb8500); }
+  .admin-header { background: linear-gradient(135deg, #f72585, #b5179e); }
+  .general-header { background: linear-gradient(135deg, #7209b7, #560bad); }
 
   .category-icon {
     width: 60px;
@@ -292,7 +353,7 @@
     background: var(--light);
     border: none;
     text-align: left;
-    font-weight: 600;
+    font-weight:  600;
     cursor: pointer;
     display: flex;
     justify-content: space-between;
@@ -325,7 +386,11 @@
   }
 
   .faq-answer.active {
-    max-height: 500px;
+    max-height: 500px; /* Open state height */
+    padding: 1rem 1.5rem;
+    margin-top: 0.5rem;
+    border-top: 1px solid #f1f1f1;
+    background-color: #fafafa;
   }
 
   .faq-answer p {
@@ -335,11 +400,7 @@
 
   /* Contact Section */
   .contact-section {
-    background: linear-gradient(
-      135deg,
-      var(--primary) 0%,
-      var(--primary-dark) 100%
-    );
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     border-radius: 15px;
     padding: 3rem 2rem;
     color: white;
@@ -559,7 +620,7 @@
     padding: 1rem;
     height: 300px;
     overflow-y: auto;
-    background: #f9f9f9;
+    background: #f9f9fa;
   }
 
   .chat-messages {
@@ -653,478 +714,453 @@
     transform: scale(1.1);
     box-shadow: 0 8px 25px rgba(67, 97, 238, 0.6);
   }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .help-container {
-      padding: 1rem;
-    }
-
-    .hero-title {
-      font-size: 2rem;
-    }
-
-    .hero-subtitle {
-      font-size: 1rem;
-    }
-
-    .categories-grid,
-    .faq-grid,
-    .tutorials-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .help-buttons {
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .help-buttons .btn {
-      width: 100%;
-      max-width: 300px;
-    }
-
-    .chat-widget {
-      width: calc(100% - 40px);
-      right: 20px;
-      left: 20px;
-    }
-  }
 </style>
-<div class="help-container">
-  <!-- Hero Section -->
-  <div class="help-hero">
-    <div class="hero-content">
-      <h1 class="hero-title">Help & Support Center</h1>
-      <p class="hero-subtitle">
-        Find answers to your questions and get the help you need to make the
-        most of HOUSEhubKENYA
-      </p>
-    </div>
-  </div>
+{% endblock %}
 
-  <!-- Search Section -->
-  <div class="search-section">
-    <form
-      class="search-form"
-      action="{{ url_for('main.help_search_results') }}"
-      method="GET"
-    >
-      <input
-        type="text"
-        name="query"
-        class="search-input"
-        placeholder="Search for help articles, FAQs, and more..."
-        required
-      />
-      <button type="submit" class="search-btn">
-        <i class="fas fa-search"></i>
-      </button>
-    </form>
-
-    <div class="popular-topics">
-      <span>Popular topics:</span>
-      <a href="#" class="topic-tag">How to list a property</a>
-      <a href="#" class="topic-tag">Rent payment issues</a>
-      <a href="#" class="topic-tag">Maintenance requests</a>
-      <a href="#" class="topic-tag">Account settings</a>
-    </div>
-  </div>
-
-  <!-- Help Categories -->
-  <div class="categories-section">
-    <h2 class="section-title">Browse Help by Category</h2>
-
-    <div class="categories-grid">
-      <!-- Landlord Category -->
-      <div
-        class="category-card"
-        onclick="window.location.href='{{ url_for('main.help_landlord') }}'"
-      >
-        <div class="category-header landlord-header">
-          <div class="category-icon">
-            <i class="fas fa-home"></i>
-          </div>
-          <h3 class="category-title">For Landlords</h3>
-        </div>
-        <div class="category-body">
-          <p class="category-description">
-            Learn how to manage properties, tenants, and payments
-          </p>
-          <ul class="topic-list">
-            <li>
-              <i class="fas fa-chevron-right"></i>
-              <a href="#">Listing properties</a>
-            </li>
-            <li>
-              <i class="fas fa-chevron-right"></i>
-              <a href="#">Tenant management</a>
-            </li>
-            <li>
-              <i class="fas fa-chevron-right"></i>
-              <a href="#">Rent collection</a>
-            </li>
-            <li>
-              <i class="fas fa-chevron-right"></i>
-              <a href="#">Maintenance requests</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Tenant Category -->
-      <div
-        class="category-card"
-        onclick="window.location.href='{{ url_for('main.help_tenant') }}'"
-      >
-        <div class="category-header tenant-header">
-          <div class="category-icon">
-            <i class="fas fa-user"></i>
-          </div>
-          <h3 class="category-title">For Tenants</h3>
-        </div>
-        <div class="category-body">
-          <p class="category-description">
-            Find answers about renting, payments, and leases
-          </p>
-          <ul class="topic-list">
-            <li>
-              <i class="fas fa-chevron-right"></i>
-              <a href="#">Finding properties</a>
-            </li>
-            <li>
-              <i class="fas fa-chevron-right"></i>
-              <a href="#">Application process</a>
-            </li>
-            <li>
-              <i class="fas fa-chevron-right"></i> <a href="#">Paying rent</a>
-            </li>
-            <li>
-              <i class="fas fa-chevron-right"></i>
-              <a href="#">Lease agreements</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Service Provider Category -->
-      <div
-        class="category-card"
-        onclick="window.location.href='{{ url_for('main.help_service_provider') }}'"
-      >
-        <div class="category-header provider-header">
-          <div class="category-icon">
-            <i class="fas fa-tools"></i>
-          </div>
-          <h3 class="category-title">For Service Providers</h3>
-        </div>
-        <div class="category-body">
-          <p class="category-description">
-            Learn how to find jobs and manage your services
-          </p>
-          <ul class="topic-list">
-            <li>
-              <i class="fas fa-chevron-right"></i>
-              <a href="#">Creating a profile</a>
-            </li>
-            <li>
-              <i class="fas fa-chevron-right"></i>
-              <a href="#">Bidding on jobs</a>
-            </li>
-            <li>
-              <i class="fas fa-chevron-right"></i> <a href="#">Getting paid</a>
-            </li>
-            <li>
-              <i class="fas fa-chevron-right"></i>
-              <a href="#">Building reputation</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Admin Category -->
-      <div
-        class="category-card"
-        onclick="window.location.href='{{ url_for('main.help_admin') }}'"
-      >
-        <div class="category-header admin-header">
-          <div class="category-icon">
-            <i class="fas fa-user-shield"></i>
-          </div>
-          <h3 class="category-title">For Administrators</h3>
-        </div>
-        <div class="category-body">
-          <p class="category-description">
-            Platform management and dispute resolution
-          </p>
-          <ul class="topic-list">
-            <li>
-              <i class="fas fa-chevron-right"></i>
-              <a href="#">User management</a>
-            </li>
-            <li>
-              <i class="fas fa-chevron-right"></i>
-              <a href="#">Dispute resolution</a>
-            </li>
-            <li>
-              <i class="fas fa-chevron-right"></i>
-              <a href="#">Platform settings</a>
-            </li>
-            <li>
-              <i class="fas fa-chevron-right"></i> <a href="#">Analytics</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- General Category -->
-      <div
-        class="category-card"
-        onclick="window.location.href='{{ url_for('main.help_general') }}'"
-      >
-        <div class="category-header general-header">
-          <div class="category-icon">
-            <i class="fas fa-question-circle"></i>
-          </div>
-          <h3 class="category-title">General Help</h3>
-        </div>
-        <div class="category-body">
-          <p class="category-description">
-            Account, billing, and technical support
-          </p>
-          <ul class="topic-list">
-            <li>
-              <i class="fas fa-chevron-right"></i> <a href="#">Account setup</a>
-            </li>
-            <li>
-              <i class="fas fa-chevron-right"></i>
-              <a href="#">Password reset</a>
-            </li>
-            <li>
-              <i class="fas fa-chevron-right"></i>
-              <a href="#">Billing questions</a>
-            </li>
-            <li>
-              <i class="fas fa-chevron-right"></i>
-              <a href="#">Technical issues</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Video Tutorials -->
-  <div class="tutorials-section">
-    <h2 class="section-title">Video Tutorials</h2>
-
-    <div class="tutorials-grid">
-      <div class="tutorial-card">
-        <div class="tutorial-thumbnail">
-          <img
-            src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-            alt="Getting Started Tutorial"
-          />
-          <div class="tutorial-duration">5:32</div>
-        </div>
-        <div class="tutorial-content">
-          <h3 class="tutorial-title">Getting Started with HOUSEhubKENYA</h3>
-          <p class="tutorial-description">
-            Learn the basics of setting up your account and navigating the
-            platform
-          </p>
-        </div>
-      </div>
-
-      <div class="tutorial-card">
-        <div class="tutorial-thumbnail">
-          <img
-            src="https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-            alt="Property Listing Tutorial"
-          />
-          <div class="tutorial-duration">8:15</div>
-        </div>
-        <div class="tutorial-content">
-          <h3 class="tutorial-title">How to List Your Property</h3>
-          <p class="tutorial-description">
-            Step-by-step guide to creating an attractive property listing
-          </p>
-        </div>
-      </div>
-
-      <div class="tutorial-card">
-        <div class="tutorial-thumbnail">
-          <img
-            src="https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-            alt="Payment Tutorial"
-          />
-          <div class="tutorial-duration">6:48</div>
-        </div>
-        <div class="tutorial-content">
-          <h3 class="tutorial-title">Making Payments with M-Pesa</h3>
-          <p class="tutorial-description">
-            Learn how to securely pay rent and service fees
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- FAQ Section -->
-  <div class="faq-section">
-    <h2 class="section-title">Frequently Asked Questions</h2>
-
-    <div class="faq-grid">
-      <div class="faq-item">
-        <button class="faq-question">
-          How do I reset my password?
-          <i class="fas fa-chevron-down"></i>
-        </button>
-        <div class="faq-answer">
-          <p>
-            To reset your password, click on the "Forgot Password" link on the
-            login page. Enter your email address and we'll send you instructions
-            to reset your password. If you don't receive the email within a few
-            minutes, check your spam folder.
-          </p>
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question">
-          How long does it take for a property to be approved?
-          <i class="fas fa-chevron-down"></i>
-        </button>
-        <div class="faq-answer">
-          <p>
-            Property listings are typically reviewed and approved within 24
-            hours. During peak times, this may take up to 48 hours. You'll
-            receive a notification once your property is live on the platform.
-          </p>
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question">
-          How do I contact my landlord or tenant?
-          <i class="fas fa-chevron-down"></i>
-        </button>
-        <div class="faq-answer">
-          <p>
-            You can contact your landlord or tenant through the messaging system
-            in your HOUSEhubKENYA dashboard. Simply go to your properties or rentals
-            section, select the property, and click on the "Message" button.
-          </p>
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question">
-          What payment methods are accepted?
-          <i class="fas fa-chevron-down"></i>
-        </button>
-        <div class="faq-answer">
-          <p>
-            HOUSEhubKENYA accepts various payment methods including M-Pesa, bank
-            transfers, and credit/debit cards. The available options may vary
-            depending on your location and the type of transaction.
-          </p>
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question">
-          How do I report a problem with my rental?
-          <i class="fas fa-chevron-down"></i>
-        </button>
-        <div class="faq-answer">
-          <p>
-            If you're experiencing issues with your rental, you can submit a
-            maintenance request through your dashboard. For urgent issues,
-            contact your landlord directly through the messaging system or call
-            our support team.
-          </p>
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question">
-          How do service providers get paid?
-          <i class="fas fa-chevron-down"></i>
-        </button>
-        <div class="faq-answer">
-          <p>
-            Service providers get paid through the platform once a job is
-            completed and approved by the property owner. Payments are typically
-            processed within 24-48 hours after completion and can be withdrawn
-            to your bank account or mobile money wallet.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Contact Section -->
-  <div class="contact-section">
-    <h2 class="section-title" style="color: white; margin-bottom: 2rem">
-      Still Need Help?
-    </h2>
-
-    <div class="contact-content">
-      <div class="contact-method">
-        <div class="contact-icon">
-          <i class="fas fa-comments"></i>
-        </div>
-        <h3 class="contact-title">Live Chat</h3>
-        <p class="contact-description">
-          Chat with our support team in real-time
+{% block content %}
+<!-- THIS WRAPPER FORCES FULL WIDTH ON MOBILE BY CALCULATING VIEWPORT -->
+<div class="force-mobile-wrapper">
+  <div class="help-container">
+    <!-- Hero Section -->
+    <div class="help-hero">
+      <div class="hero-content">
+        <h1 class="hero-title">Help & Support Center</h1>
+        <p class="hero-subtitle">
+          Find answers to your questions and get help you need to make the most of
+          most of HOUSEhubKENYA
         </p>
-        <a href="#" class="contact-link" onclick="openChat()">Start Chat</a>
-      </div>
-
-      <div class="contact-method">
-        <div class="contact-icon">
-          <i class="fas fa-envelope"></i>
-        </div>
-        <h3 class="contact-title">Email Support</h3>
-        <p class="contact-description">Get help via email within 24 hours</p>
-        <a href="mailto:Househub.Kenya@outlook.com" class="contact-link">Send Email</a>
-      </div>
-
-      <div class="contact-method">
-        <div class="contact-icon">
-          <i class="fas fa-phone-alt"></i>
-        </div>
-        <h3 class="contact-title">Phone Support</h3>
-        <p class="contact-description">Call us for immediate assistance</p>
-        <a href="tel:+254712345678" class="contact-link">Call Now</a>
-      </div>
-
-      <div class="contact-method">
-        <div class="contact-icon">
-          <i class="fab fa-whatsapp"></i>
-        </div>
-        <h3 class="contact-title">WhatsApp</h3>
-        <p class="contact-description">Connect with us on WhatsApp</p>
-        <a href="https://wa.me/254712345678" class="contact-link">Message Us</a>
       </div>
     </div>
-  </div>
 
-  <!-- Help CTA -->
-  <div class="help-cta">
-    <h3>Can't find what you're looking for?</h3>
-    <p>
-      Our support team is here to help you with any questions or issues you may
-      have.
-    </p>
-    <div class="help-buttons">
-      <a href="{{ url_for('main.contact') }}" class="btn btn-primary"
-        >Contact Support</a
+    <!-- Search Section -->
+    <div class="search-section">
+      <form
+        class="search-form"
+        action="{{ url_for('main.help_search_results') }}"
+        method="GET"
       >
-      <a href="{{ url_for('main.help_general') }}" class="btn btn-outline"
-        >Browse All Articles</a
-      >
+        <input
+          type="text"
+          name="query"
+          class="search-input"
+          placeholder="Search for help articles, FAQs, and more..."
+          required
+        />
+        <button type="submit" class="search-btn">
+          <i class="fas fa-search"></i>
+        </button>
+      </form>
+
+      <div class="popular-topics">
+        <span>Popular topics:</span>
+        <a href="#" class="topic-tag">How to list a property</a>
+        <a href="#" class="topic-tag">Rent payment issues</a>
+        <a href="#" class="topic-tag">Maintenance requests</a>
+        <a href="#" class="topic-tag">Account settings</a>
+      </div>
+    </div>
+
+    <!-- Help Categories -->
+    <div class="categories-section">
+      <h2 class="section-title">Browse Help by Category</h2>
+
+      <div class="categories-grid">
+        <!-- Landlord Category -->
+        <div
+          class="category-card"
+          onclick="window.location.href='{{ url_for('main.help_landlord') }}'"
+        >
+          <div class="category-header landlord-header">
+            <div class="category-icon">
+              <i class="fas fa-home"></i>
+            </div>
+            <h3 class="category-title">For Landlords</h3>
+          </div>
+          <div class="category-body">
+            <p class="category-description">
+              Learn how to manage properties, tenants, and payments
+            </p>
+            <ul class="topic-list">
+              <li>
+                <i class="fas fa-chevron-right"></i>
+                <a href="#">Listing properties</a>
+              </li>
+              <li>
+                <i class="fas fa-chevron-right"></i>
+                <a href="#">Tenant management</a>
+              </li>
+              <li>
+                <i class="fas fa-chevron-right"></i>
+                <a href="#">Rent collection</a>
+              </li>
+              <li>
+                <i class="fas fa-chevron-right"></i>
+                <a href="#">Maintenance requests</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Tenant Category -->
+        <div
+          class="category-card"
+          onclick="window.location.href='{{ url_for('main.help_tenant') }}'"
+        >
+          <div class="category-header tenant-header">
+            <div class="category-icon">
+              <i class="fas fa-user"></i>
+            </div>
+            <h3 class="category-title">For Tenants</h3>
+          </div>
+          <div class="category-body">
+            <p class="category-description">
+              Find answers about renting, payments, and leases
+            </p>
+            <ul class="topic-list">
+              <li>
+                <i class="fas fa-chevron-right"></i>
+                <a href="#">Finding properties</a>
+              </li>
+              <li>
+                <i class="fas fa-chevron-right"></i>
+                <a href="#">Application process</a>
+              </li>
+              <li>
+                <i class="fas fa-chevron-right"></i>
+                <a href="#">Paying rent</a>
+              </li>
+              <li>
+                <i class="fas fa-chevron-right"></i>
+                <a href="#">Lease agreements</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Service Provider Category -->
+        <div
+          class="category-card"
+          onclick="window.location.href='{{ url_for('main.help_service_provider') }}'"
+        >
+          <div class="category-header provider-header">
+            <div class="category-icon">
+              <i class="fas fa-tools"></i>
+            </div>
+            <h3 class="category-title">For Service Providers</h3>
+          </div>
+          <div class="category-body">
+            <p class="category-description">
+              Learn how to find jobs and manage your services
+            </p>
+            <ul class="topic-list">
+              <li>
+                <i class="fas fa-chevron-right"></i>
+                <a href="#">Creating a profile</a>
+              </li>
+              <li>
+                <i class="fas fa-chevron-right"></i>
+                <a href="#">Bidding on jobs</a>
+              </li>
+              <li>
+                <i class="fas fa-chevron-right"></i>
+                <a href="#">Getting paid</a>
+              </li>
+              <li>
+                <i class="fas fa-chevron-right"></i>
+                <a href="#">Building reputation</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Admin Category -->
+        <div
+          class="category-card"
+          onclick="window.location.href='{{ url_for('main.help_admin') }}'"
+        >
+          <div class="category-header admin-header">
+            <div class="category-icon">
+              <i class="fas fa-user-shield"></i>
+            </div>
+            <h3 class="category-title">For Administrators</h3>
+          </div>
+          <div class="category-body">
+            <p class="category-description">
+              Platform management and dispute resolution
+            </p>
+            <ul class="topic-list">
+              <li>
+                <i class="fas fa-chevron-right"></i>
+                <a href="#">User management</a>
+              </li>
+              <li>
+                <i class="fas fa-chevron-right"></i>
+                <a href="#">Dispute resolution</a>
+              </li>
+              <li>
+                <i class="fas fa-chevron-right"></i>
+                <a href="#">Platform settings</a>
+              </li>
+              <li>
+                <i class="fas fa-chevron-right"></i>
+                <a href="#">Analytics</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- General Category -->
+        <div
+          class="category-card"
+          onclick="window.location.href='{{ url_for('main.help_general') }}'"
+        >
+          <div class="category-header general-header">
+            <div class="category-icon">
+              <i class="fas fa-question-circle"></i>
+            </div>
+            <h3 class="category-title">General Help</h3>
+          </div>
+          <div class="category-body">
+            <p class="category-description">
+              Account, billing, and technical support
+            </p>
+            <ul class="topic-list">
+              <li>
+                <i class="fas fa-chevron-right"></i>
+                <a href="#">Account setup</a>
+              </li>
+              <li>
+                <i class="fas fa-chevron-right"></i>
+                <a href="#">Password reset</a>
+              </li>
+              <li>
+                <i class="fas fa-chevron-right"></i>
+                <a href="#">Billing questions</a>
+              </li>
+              <li>
+                <i class="fas fa-chevron-right"></i>
+                <a href="#">Technical issues</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video Tutorials -->
+    <div class="tutorials-section">
+      <h2 class="section-title">Video Tutorials</h2>
+
+      <div class="tutorials-grid">
+        <div class="tutorial-card">
+          <div class="tutorial-thumbnail">
+            <img
+              src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+              alt="Getting Started Tutorial"
+            />
+            <div class="tutorial-duration">5:32</div>
+          </div>
+          <div class="tutorial-content">
+            <h3 class="tutorial-title">Getting Started with HOUSEhubKENYA</h3>
+            <p class="tutorial-description">
+              Learn the basics of setting up your account and navigating the
+              platform
+            </p>
+          </div>
+        </div>
+
+        <div class="tutorial-card">
+          <div class="tutorial-thumbnail">
+            <img
+              src="https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+              alt="Property Listing Tutorial"
+            />
+            <div class="tutorial-duration">8:15</div>
+          </div>
+          <div class="div class="tutorial-content">
+            <h3 class="tutorial-title">How to List Your Property</h3>
+            <p class="tutorial-description">
+              Step-by-step guide to creating an attractive property listing
+            </p>
+          </div>
+        </div>
+
+        <div class="tutorial-card">
+          <div class="tutorial-thumbnail">
+            <img
+              src="https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+              alt="Payment Tutorial"
+            />
+            <div class="tutorial-duration">6:48</div>
+          </div>
+          <div class="div class="tutorial-content">
+            <h3 class="tutorial-title">Making Payments with M-Pesa</h3>
+            <p class="tutorial-description">
+              Learn how to securely pay rent and service fees
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="faq-section">
+      <h2 class="section-title">Frequently Asked Questions</h2>
+
+      <div class="faq-grid">
+        <div class="faq-item">
+          <button class="faq-question">
+            How do I reset my password?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>
+              To reset your password, click on "Forgot Password" link on
+              login page. Enter your email address and we'll send you instructions
+              to reset your password. If you don't receive an email within a few
+              minutes, check your spam folder.
+            </p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            How long does it take for a property to be approved?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>
+              Property listings are typically reviewed and approved within 24
+              hours. During peak times, this may take up to 48 hours. You'll
+              receive a notification once your property is live on the platform.
+            </p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            How do I contact my landlord or tenant?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>
+              You can contact your landlord or tenant through the messaging system
+              in your HOUSEhubKENYA dashboard. Simply go to your properties or rentals
+              section, select property, and click on "Message" button.
+            </p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            What payment methods are accepted?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>
+              HOUSEhubKENYA accepts various payment methods including M-Pesa, bank
+              transfers, and credit/debit cards. The available options may vary
+              depending on your location and type of transaction.
+            </p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            How do I report a problem with my rental?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>
+              If you're experiencing issues with your rental, you can submit a
+              maintenance request through your dashboard. For urgent issues,
+              contact your landlord directly through the messaging system or call
+              our support team.
+            </p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            How do service providers get paid?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>
+              Service providers get paid through the platform once a job is
+              completed and approved by the property owner. Payments are typically
+              processed within 24-48 hours after completion and can be withdrawn
+              to your bank account or mobile money wallet.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="contact-section">
+      <h2 class="section-title" style="color: white; margin-bottom: 2rem">
+        Still Need Help?
+      </h2>
+
+      <div class="contact-content">
+        <div class="contact-method">
+          <div class="contact-icon">
+            <i class="fas fa-comments"></i>
+          </div>
+          <h3 class="contact-title">Live Chat</h3>
+          <p class="contact-description">
+            Chat with our support team in real-time
+          </p>
+          <a href="#" class="contact-link" onclick="openChat()">Start Chat</a>
+        </div>
+
+        <div class="contact-method">
+          <div class="contact-icon">
+            <i class="fas fa-envelope"></i>
+          </div>
+          <h3 class="contact-title">Email Support</h3>
+          <p class="contact-description">Get help via email within 24 hours</p>
+          <a href="mailto:Househub.Kenya@outlook.com" class="contact-link">Send Email</a>
+        </div>
+
+        <div class="contact-method">
+          <div class="contact-icon">
+            <i class="fas fa-phone-alt"></i>
+          </div>
+          <h3 class="contact-title">Phone Support</h3>
+          <p class="contact-description">Call us for immediate assistance</p>
+          <a href="tel:+254712345678" class="contact-link">Call Now</a>
+        </div>
+
+        <div class="contact-method">
+          <div class="contact-icon">
+            <i class="fab fa-whatsapp"></i>
+          </div>
+          <h3 class="contact-title">WhatsApp</h3>
+          <p class="contact-description">Connect with us on WhatsApp</p>
+          <a href="https://wa.me/254712345678" class="contact-link">Message Us</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help CTA -->
+    <div class="help-cta">
+      <h3>Can't find what you're looking for?</h3>
+      <p>
+        Our support team is here to help you with any questions or issues you may
+        have.
+      </p>
+      <div class="help-buttons">
+        <a href="{{ url_for('main.contact') }}" class="btn btn-primary">
+          >Contact Support
+        </a>
+      </div>
+      <div class="help-buttons">
+        <a href="{{ url_for('main.help_general') }}" class="btn btn-outline">
+          >Browse All Articles
+        </a>
+      </div>
     </div>
   </div>
 </div>
@@ -1157,10 +1193,12 @@
 <button class="chat-button" id="chat-button" onclick="toggleChat()">
   <i class="fas fa-comments"></i>
 </button>
-{% endblock %} {% block extra_js %}
+{% endblock %}
+
+{% block extra_js %}
 <script>
+  // FAQ Accordion
   document.addEventListener("DOMContentLoaded", function () {
-    // FAQ Accordion
     const faqQuestions = document.querySelectorAll(".faq-question");
 
     faqQuestions.forEach((question) => {
@@ -1181,61 +1219,62 @@
         });
       });
     });
+  });
 
-    // Chat Widget
-    function toggleChat() {
-      const chatWidget = document.getElementById("chat-widget");
-      const chatButton = document.getElementById("chat-button");
+  // Chat Widget
+  function toggleChat() {
+    const chatWidget = document.getElementById("chat-widget");
+    const chatButton = document.getElementById("chat-button");
 
-      if (
-        chatWidget.style.display === "none" ||
-        chatWidget.style.display === ""
-      ) {
-        chatWidget.style.display = "flex";
-        chatButton.style.display = "none";
-      } else {
-        chatWidget.style.display = "none";
-        chatButton.style.display = "flex";
-      }
+    if (
+      chatWidget.style.display === "none" ||
+      chatWidget.style.display === ""
+    ) {
+      chatWidget.style.display = "flex";
+      chatButton.style.display = "none";
+    } else {
+      chatWidget.style.display = "none";
+      chatButton.style.display = "flex";
     }
+  }
 
-    function openChat() {
-      toggleChat();
-    }
+  function openChat() {
+    toggleChat();
+  }
 
-    // Chat Form
-    document
-      .getElementById("chat-form")
-      .addEventListener("submit", function (e) {
-        e.preventDefault();
+  // Chat Form
+  document
+    .getElementById("chat-form")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
 
-        const input = document.getElementById("chat-input");
-        const messages = document.getElementById("chat-messages");
+      const input = document.getElementById("chat-input");
+      const messages = document.getElementById("chat-messages");
 
-        if (input.value.trim() !== "") {
-          // Add user message
-          const userMessage = document.createElement("div");
-          userMessage.className = "chat-message user-message";
-          userMessage.innerHTML = `<p>${input.value}</p>`;
-          messages.appendChild(userMessage);
+      if (input.value.trim() !== "") {
+        // Add user message
+        const userMessage = document.createElement("div");
+        userMessage.className = "chat-message user-message";
+        userMessage.innerHTML = `<p>${input.value}</p>`;
+        messages.appendChild(userMessage);
 
-          // Clear input
-          input.value = "";
+        // Clear input
+        input.value = "";
 
-          // Scroll to bottom
+        // Scroll to bottom
+        messages.scrollTop = messages.scrollHeight;
+
+        // Simulate response
+        setTimeout(() => {
+          const botMessage = document.createElement("div");
+          botMessage.className = "chat-message bot-message";
+          botMessage.innerHTML =
+            "<p>Thank you for your message. Our support team will get back to you shortly.</p>";
+          messages.appendChild(botMessage);
           messages.scrollTop = messages.scrollHeight;
-
-          // Simulate response
-          setTimeout(() => {
-            const botMessage = document.createElement("div");
-            botMessage.className = "chat-message bot-message";
-            botMessage.innerHTML =
-              "<p>Thank you for your message. Our support team will get back to you shortly.</p>";
-            messages.appendChild(botMessage);
-            messages.scrollTop = messages.scrollHeight;
-          }, 1000);
-        }
-      });
+        }, 1000);
+      }
+    });
   });
 </script>
 {% endblock %}
