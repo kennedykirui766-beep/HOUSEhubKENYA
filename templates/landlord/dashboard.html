@@ -130,6 +130,7 @@
     padding: 0.85rem 1rem 0.75rem;
     border-bottom: 1px solid var(--border-color);
     background: var(--body-bg);
+    gap: 0.5rem;
   }
 
   .notif-dropdown-header h5 {
@@ -140,11 +141,67 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
+    flex-shrink: 0;
   }
 
   .notif-dropdown-header h5 i {
     color: var(--primary-color);
     font-size: 0.8rem;
+  }
+
+  /* Actions group: mark-read + close */
+  .notif-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-shrink: 0;
+  }
+
+  .notif-mark-read-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 0.2rem 0.55rem;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: var(--transition);
+    white-space: nowrap;
+  }
+
+  .notif-mark-read-btn:hover {
+    background: var(--primary-light);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  .notif-mark-read-btn i { font-size: 0.65rem; }
+
+  .notif-close-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: var(--transition);
+    flex-shrink: 0;
+  }
+
+  .notif-close-btn:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    color: #ef4444;
   }
 
   .notif-unread-pill {
@@ -1239,6 +1296,16 @@
             <span class="notif-unread-pill">{{ unread_count }} unread</span>
             {% endif %}
           </h5>
+          <div class="notif-header-actions">
+            {% if unread_count and unread_count > 0 %}
+            <button class="notif-mark-read-btn" onclick="markAllNotifRead(event)" title="Mark all as read">
+              <i class="fas fa-check-double"></i> Mark read
+            </button>
+            {% endif %}
+            <button class="notif-close-btn" onclick="closeNotifDropdown()" aria-label="Close notifications">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
         </div>
 
         <div class="notif-dropdown-body">
@@ -1692,6 +1759,44 @@
   function closeNotifDropdown() {
     notifDropdown.classList.remove('open');
     notifBell.setAttribute('aria-expanded', 'false');
+  }
+
+  function markAllNotifRead(e) {
+    e.stopPropagation(); // don't close via outside-click handler
+
+    var csrfToken = document.querySelector('meta[name="csrf-token"]') 
+                    ? document.querySelector('meta[name="csrf-token"]').content 
+                    : (document.querySelector('input[name="csrf_token"]') 
+                       ? document.querySelector('input[name="csrf_token"]').value 
+                       : '');
+
+    fetch('/landlord/mark_all_read', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken }
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.success) {
+        // Remove the badge from the bell
+        var badge = notifBell.querySelector('.dash-notif-badge');
+        if (badge) badge.remove();
+
+        // Remove unread pill from header
+        var pill = notifDropdown.querySelector('.notif-unread-pill');
+        if (pill) pill.remove();
+
+        // Remove the mark-read button itself (nothing left to mark)
+        var btn = notifDropdown.querySelector('.notif-mark-read-btn');
+        if (btn) btn.remove();
+
+        // Replace items with the "all caught up" empty state
+        var body = notifDropdown.querySelector('.notif-dropdown-body');
+        if (body) {
+          body.innerHTML = '<div class="notif-empty"><i class="fas fa-bell-slash"></i>You\'re all caught up!</div>';
+        }
+      }
+    })
+    .catch(function(err) { console.warn('Mark-read failed:', err); });
   }
 
   // Close when clicking outside
