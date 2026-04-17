@@ -1,8 +1,6 @@
 from datetime import datetime
-
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, Email
 import os
+from mailjet_rest import Client
 
 def send_payment_email(to_email, tenant_name, payment_url, amount):
     """
@@ -120,43 +118,53 @@ def send_payment_email(to_email, tenant_name, payment_url, amount):
     </html>
     """
 
-    # Initialize the message object
-    message = Mail(
-        from_email=Email(
-            email=os.environ.get("SENDER_EMAIL"),
-            name="HouseHub Kenya"
-        ),
-        to_emails=to_email,
-        subject="Action Required: Deposit Payment Request",
-        html_content=html_content
-    )
+    # Initialize the message payload for Mailjet v3.1
+    sender_email = os.environ.get("SENDER_EMAIL", "noreply@homehub.app")
+    sender_name = os.environ.get("SENDER_NAME", "HouseHub Kenya")
+
+    data = {
+        "Messages": [
+            {
+                "From": {"Email": sender_email, "Name": sender_name},
+                "To": [{"Email": to_email, "Name": tenant_name}],
+                "Subject": "Action Required: Deposit Payment Request",
+                "HTMLPart": html_content,
+                "TextPart": f"Please complete payment of KES {amount}: {payment_url}",
+            }
+        ]
+    }
 
     try:
-        # Initialize SendGrid Client
-        sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
-        
-        # Send Email
-        response = sg.send(message)
-        
+        # Initialize Mailjet SDK client
+        mailjet = Client(auth=(os.environ.get("MAILJET_API_KEY"), os.environ.get("MAILJET_API_SECRET")), version="v3.1")
+
+        # Send message
+        result = mailjet.send.create(data=data)
+
         # Logging success
+        status = getattr(result, "status_code", None)
         print("✅ EMAIL SENT SUCCESSFULLY")
         print(f"📧 To: {to_email}")
-        print(f"📊 Status Code: {response.status_code}")
+        print(f"📊 Status Code: {status}")
+
+        return result
 
     except Exception as e:
-        # Detailed Error Logging as requested
-        import traceback
-        print("❌ SENDGRID ERROR OCCURRED:")
+        # Detailed Error Logging
+        import traceback, json
+        print("❌ MAILJET ERROR OCCURRED:")
         traceback.print_exc()
 
-        if hasattr(e, 'body'):
-            try:
-                # Try to parse JSON body for cleaner error printing if possible
-                import json
-                error_body = json.loads(e.body)
-                print("❌ SENDGRID API DETAILS:", error_body)
-            except:
-                # Fallback to raw string if parsing fails
-                print("❌ SENDGRID RESPONSE BODY:", e.body)
+        # Try to show response body if available
+        try:
+            body = getattr(e, 'response', None) or getattr(e, 'body', None)
+            if body:
+                try:
+                    parsed = json.loads(body)
+                    print("❌ MAILJET API DETAILS:", parsed)
+                except Exception:
+                    print("❌ MAILJET RESPONSE BODY:", body)
+        except Exception:
+            pass
 
         raise

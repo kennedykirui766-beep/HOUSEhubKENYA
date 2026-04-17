@@ -23,10 +23,10 @@ class Config:
     }
     
     # ========== EMAIL CONFIGURATION ==========
-    # Email provider: 'smtp', 'sendgrid', 'mailgun'
+    # Email provider: 'smtp', 'MAILJET', 'mailgun'
     EMAIL_PROVIDER = os.environ.get('EMAIL_PROVIDER', 'smtp')
     SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'noreply@homehub.app')
-    SENDER_NAME = os.environ.get('SENDER_NAME', 'HomeHub')
+    SENDER_NAME = os.environ.get('SENDER_NAME', 'HOUSEhubKENYA')
     
     # SMTP Configuration (used if EMAIL_PROVIDER='smtp')
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
@@ -36,8 +36,10 @@ class Config:
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME', '')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')
     
-    # SendGrid API Key (if EMAIL_PROVIDER='sendgrid')
-    SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY', '')
+    # MAILJET API Key (if EMAIL_PROVIDER='MAILJET')
+    MAILJET_API_KEY = os.environ.get('MAILJET_API_KEY', '')
+    # MAILJET API Secret (used by SDK)
+    MAILJET_API_SECRET = os.environ.get('MAILJET_API_SECRET', '')
     
     # Mailgun Configuration (if EMAIL_PROVIDER='mailgun')
     MAILGUN_DOMAIN = os.environ.get('MAILGUN_DOMAIN', '')
