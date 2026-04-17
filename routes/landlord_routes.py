@@ -10,7 +10,7 @@ from models.models import Message, PaymentLink, User, House, Booking, Payment, M
 import cloudinary.uploader
 import json
 
-from services.email_service import send_payment_email
+# Import email sender lazily inside handlers to avoid import-time failures
 
 
 # Logging setup
@@ -426,8 +426,10 @@ def api_generate_payment_link():
             _external=True
         )
 
-        # ✅ SEND EMAIL
+        # ✅ SEND EMAIL (import lazily to avoid raising on module import)
         try:
+            from services.email_service import send_payment_email
+
             send_payment_email(
                 to_email=booking.tenant.email,
                 tenant_name=booking.tenant.name,
