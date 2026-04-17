@@ -587,48 +587,106 @@
     box-shadow: 0 4px 16px rgba(0,0,0,0.05);
   }
 
+  /* ---- Preview gallery: empty state ---- */
   .ap-preview-gallery {
-    height: 180px;
+    height: 120px;
     background-color: var(--body-bg);
     display: flex; align-items: center; justify-content: center;
     border-bottom: 1px solid var(--border-color);
-    overflow: hidden; position: relative;
+    position: relative;
   }
-
-  .ap-preview-gallery.has-images {
-    height: auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 100px 100px;
-    gap: 2px;
-  }
-
-  .ap-preview-gallery.has-images .ap-pv-gallery-img:first-child {
-    grid-column: 1 / -1;
-    grid-row: 1 / -1;
-  }
-
-  .ap-preview-gallery.has-images .ap-pv-gallery-img:nth-child(n+4) { display: none; }
 
   .ap-preview-gallery i { font-size: 2rem; color: var(--text-muted); opacity: 0.4; }
 
-  .ap-pv-gallery-img { width: 100%; height: 100%; object-fit: cover; }
+  /* ---- Preview gallery: has images ---- */
+  .ap-preview-gallery.has-images {
+    /* Remove fixed height — let the grid set it */
+    height: auto;
+    /* Scrollable wrapper so images never overflow the card */
+    max-height: 260px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: block;       /* grid lives inside via .ap-pv-grid */
+    padding: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,0.15) transparent;
+  }
+
+  .ap-preview-gallery.has-images::-webkit-scrollbar { width: 4px; }
+  .ap-preview-gallery.has-images::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.15); border-radius: 2px;
+  }
+
+  /* Inner grid — 3 equal columns, each cell is a fixed square */
+  .ap-pv-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3px;
+    width: 100%;
+  }
+
+  .ap-pv-grid-cell {
+    position: relative;
+    width: 100%;
+    /* Square cells that never overflow */
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 3px;
+    background: var(--body-bg);
+  }
+
+  .ap-pv-gallery-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Cover badge on first image */
+  .ap-pv-grid-cell:first-child::after {
+    content: 'Cover';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 2px 4px;
+    background: rgba(99,102,241,0.85);
+    color: white;
+    font-size: 0.58rem;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.03em;
+  }
+
+  /* Index badge on every other image */
+  .ap-pv-grid-cell .ap-pv-cell-num {
+    position: absolute;
+    top: 3px; right: 3px;
+    background: rgba(0,0,0,0.55);
+    color: white;
+    font-size: 0.58rem;
+    font-weight: 700;
+    padding: 1px 4px;
+    border-radius: 3px;
+    line-height: 1.4;
+  }
 
   .ap-preview-gallery-badge {
-    position: absolute; top: 0.6rem; left: 0.6rem;
-    padding: 0.2rem 0.6rem;
+    position: absolute; top: 0.5rem; left: 0.5rem;
+    padding: 0.18rem 0.5rem;
     border-radius: var(--radius-sm);
-    font-size: 0.68rem; font-weight: 600; z-index: 2;
+    font-size: 0.65rem; font-weight: 600; z-index: 2;
     background: var(--gradient-primary); color: white;
+    pointer-events: none;
   }
 
-  .ap-preview-gallery-count {
-    position: absolute; bottom: 0.6rem; right: 0.6rem;
-    padding: 0.2rem 0.55rem;
-    border-radius: var(--radius-full);
-    font-size: 0.68rem; font-weight: 600; z-index: 2;
-    background: rgba(0,0,0,0.6); color: white;
+  /* Count label shown below the grid (inside .has-images wrapper) */
+  .ap-pv-gallery-footer {
+    padding: 4px 4px 2px;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-align: right;
   }
+
+  .ap-pv-gallery-footer strong { color: var(--primary-color); }
 
   .ap-preview-body { padding: 1.15rem; }
 
@@ -855,7 +913,7 @@
     .ap-step-label { font-size: 0.68rem; }
     .ap-step-indicator { width: 22px; height: 22px; font-size: 0.6rem; }
     .ap-step-connector { width: 10px; }
-    .ap-preview-gallery.has-images { grid-template-rows: 80px 80px; }
+    .ap-preview-gallery.has-images { max-height: 200px; }
     .ap-step { padding: 0.3rem 0.4rem; gap: 0.25rem; }
   }
 
@@ -1720,27 +1778,49 @@ document.addEventListener('DOMContentLoaded', () => {
     el('previewBaths').textContent = inputs.bathrooms.value ? `${inputs.bathrooms.value} Bath${inputs.bathrooms.value > 1 ? 's' : ''}` : '0 Baths';
     el('previewSqft').textContent  = inputs.squareFootage.value ? `${Number(inputs.squareFootage.value).toLocaleString()} sq ft` : '-- sq ft';
 
-    // Gallery
+    // Gallery — show ALL uploaded images in the 3-col grid
     const gallery = el('previewGallery');
-    gallery.querySelectorAll('img').forEach(img => img.remove());
-    const existingCount = gallery.querySelector('.ap-preview-gallery-count');
-    if (existingCount) existingCount.remove();
+
+    // Clear everything except the static badge
+    Array.from(gallery.children).forEach(child => {
+      if (!child.classList.contains('ap-preview-gallery-badge')) child.remove();
+    });
 
     if (allFiles.length > 0) {
       gallery.classList.add('has-images');
-      const showCount = Math.min(allFiles.length, 4);
-      for (let i = 0; i < showCount; i++) {
+
+      // Build inner grid
+      const grid = document.createElement('div');
+      grid.className = 'ap-pv-grid';
+
+      allFiles.forEach((file, idx) => {
+        const cell     = document.createElement('div');
+        cell.className = 'ap-pv-grid-cell';
+
         const img     = document.createElement('img');
         img.className = 'ap-pv-gallery-img';
-        img.src       = URL.createObjectURL(allFiles[i]);
-        gallery.appendChild(img);
-      }
-      if (allFiles.length > 1) {
-        const countBadge     = document.createElement('span');
-        countBadge.className = 'ap-preview-gallery-count';
-        countBadge.textContent = `+${allFiles.length - 1} more`;
-        gallery.appendChild(countBadge);
-      }
+        img.src       = URL.createObjectURL(file);
+        cell.appendChild(img);
+
+        // Show index number on every image except the first (which gets the CSS "Cover" badge)
+        if (idx > 0) {
+          const num     = document.createElement('span');
+          num.className = 'ap-pv-cell-num';
+          num.textContent = `#${idx + 1}`;
+          cell.appendChild(num);
+        }
+
+        grid.appendChild(cell);
+      });
+
+      gallery.appendChild(grid);
+
+      // Footer count line
+      const footer     = document.createElement('div');
+      footer.className = 'ap-pv-gallery-footer';
+      footer.innerHTML = `<strong>${allFiles.length}</strong> image${allFiles.length !== 1 ? 's' : ''} uploaded`;
+      gallery.appendChild(footer);
+
     } else {
       gallery.classList.remove('has-images');
     }
