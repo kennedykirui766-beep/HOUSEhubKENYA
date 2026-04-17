@@ -336,7 +336,23 @@
   .btn-cancel { background:transparent; color: #667781; }
   .btn-confirm { background: #ef4444; color: white; }
 
-  /* --- 7. RESPONSIVE / MOBILE FIX --- */
+  /* --- 7. HIDE GLOBAL FOOTER ELEMENTS --- */
+  /* Hide base.html elements (like live support, whatsapp, messages nav) that 
+     interfere with the chat input area on this page. */
+  footer, 
+  .site-footer,
+  .bottom-nav,
+  .app-footer,
+  .fixed-bottom,
+  .live-support-widget,
+  .whatsapp-float,
+  .support-float {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  /* --- 8. RESPONSIVE / MOBILE FIX --- */
   @media (max-width: 768px) {
     body.mobile-chat-open { overflow: hidden; }
 
