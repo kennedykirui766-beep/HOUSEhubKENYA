@@ -24,7 +24,8 @@ class Config:
     
     # ========== EMAIL CONFIGURATION ==========
     # Email provider: 'smtp', 'MAILJET', 'mailgun'
-    EMAIL_PROVIDER = os.environ.get('EMAIL_PROVIDER', 'smtp')
+    # Default to Mailjet for this deployment
+    EMAIL_PROVIDER = os.environ.get('EMAIL_PROVIDER', 'MAILJET')
     SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'noreply@homehub.app')
     SENDER_NAME = os.environ.get('SENDER_NAME', 'HOUSEhubKENYA')
     
