@@ -1770,7 +1770,7 @@
                        ? document.querySelector('input[name="csrf_token"]').value 
                        : '');
 
-    fetch('/landlord/mark_all_read', {
+    fetch('/landlord/messages/mark_all_read', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken }
     })
