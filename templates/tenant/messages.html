@@ -336,23 +336,7 @@
   .btn-cancel { background:transparent; color: #667781; }
   .btn-confirm { background: #ef4444; color: white; }
 
-  /* --- 7. HIDE GLOBAL FOOTER ELEMENTS --- */
-  /* Hide base.html elements (like live support, whatsapp, messages nav) that 
-     interfere with the chat input area on this page. */
-  footer, 
-  .site-footer,
-  .bottom-nav,
-  .app-footer,
-  .fixed-bottom,
-  .live-support-widget,
-  .whatsapp-float,
-  .support-float {
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
-
-  /* --- 8. RESPONSIVE / MOBILE FIX --- */
+  /* --- 7. RESPONSIVE / MOBILE FIX --- */
   @media (max-width: 768px) {
     body.mobile-chat-open { overflow: hidden; }
 
@@ -402,6 +386,26 @@
       z-index: 100;
       padding: 10px 10px;
     }
+  }
+
+  /* =====================================================
+     Hide ALL fixed / floating elements on this page
+     so nothing overlaps the chat input area.
+     Covers: dashboard support chat button, any FABs,
+     access badges, and other position:fixed widgets.
+  ===================================================== */
+  .dash-chat,
+  .dash-chat-toggle,
+  .ap-access-badge,
+  [class*="chat-support"],
+  [class*="fab-"],
+  [class*="float-btn"],
+  [class*="live-chat"],
+  [class*="support-btn"],
+  [class*="whatsapp"],
+  [class*="crisp"],
+  [class*="intercom"] {
+    display: none !important;
   }
 
   ::-webkit-scrollbar { width: 6px !important; }
