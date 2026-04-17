@@ -3,6 +3,7 @@ from flask_login import UserMixin
 from sqlalchemy import event, func, select
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
+import json
 import secrets
 import string
 
@@ -537,6 +538,122 @@ class SystemSetting(db.Model):
             except Exception:
                 pass
             raise
+
+
+class EmailTemplate(db.Model):
+    """Reusable email template definition for admin-managed outbound emails."""
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(100), unique=True, nullable=False, index=True)
+    name = db.Column(db.String(150), nullable=False, index=True)
+    description = db.Column(db.String(255), nullable=True)
+    category = db.Column(db.String(80), nullable=False, default='general', index=True)
+    subject = db.Column(db.String(255), nullable=False)
+    html_body = db.Column(db.Text, nullable=False)
+    text_body = db.Column(db.Text, nullable=True)
+    variables_json = db.Column(db.Text, nullable=True)
+    is_active = db.Column(db.Boolean, nullable=False, default=True, index=True)
+    is_default = db.Column(db.Boolean, nullable=False, default=False, index=True)
+    created_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True, index=True)
+    updated_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True, index=True)
+    last_used_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    created_by = db.relationship('User', foreign_keys=[created_by_id], lazy=True)
+    updated_by = db.relationship('User', foreign_keys=[updated_by_id], lazy=True)
+    versions = db.relationship('EmailTemplateVersion', back_populates='template', lazy=True, cascade='all, delete-orphan')
+    send_logs = db.relationship('EmailTemplateSendLog', back_populates='template', lazy=True, cascade='all, delete-orphan')
+
+    def get_variables(self):
+        try:
+            return json.loads(self.variables_json) if self.variables_json else []
+        except Exception:
+            return []
+
+    def set_variables(self, variables):
+        self.variables_json = json.dumps(list(variables or []))
+
+
+class EmailTemplateVersion(db.Model):
+    """Versioned snapshot of an email template."""
+    id = db.Column(db.Integer, primary_key=True)
+    template_id = db.Column(db.Integer, db.ForeignKey('email_template.id'), nullable=False, index=True)
+    version_number = db.Column(db.Integer, nullable=False, default=1, index=True)
+    subject = db.Column(db.String(255), nullable=False)
+    html_body = db.Column(db.Text, nullable=False)
+    text_body = db.Column(db.Text, nullable=True)
+    variables_json = db.Column(db.Text, nullable=True)
+    change_notes = db.Column(db.Text, nullable=True)
+    created_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True, index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    template = db.relationship('EmailTemplate', back_populates='versions', lazy=True)
+    created_by = db.relationship('User', foreign_keys=[created_by_id], lazy=True)
+
+    def get_variables(self):
+        try:
+            return json.loads(self.variables_json) if self.variables_json else []
+        except Exception:
+            return []
+
+    def set_variables(self, variables):
+        self.variables_json = json.dumps(list(variables or []))
+
+
+class EmailTemplateSendLog(db.Model):
+    """Tracks preview/test sends and live template deliveries."""
+    id = db.Column(db.Integer, primary_key=True)
+    template_id = db.Column(db.Integer, db.ForeignKey('email_template.id'), nullable=True, index=True)
+    recipient_email = db.Column(db.String(120), nullable=False, index=True)
+    subject = db.Column(db.String(255), nullable=False)
+    mode = db.Column(db.String(30), nullable=False, default='send', index=True)
+    status = db.Column(db.String(30), nullable=False, default='queued', index=True)
+    response_text = db.Column(db.Text, nullable=True)
+    error_text = db.Column(db.Text, nullable=True)
+    payload_json = db.Column(db.Text, nullable=True)
+    created_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True, index=True)
+    sent_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    template = db.relationship('EmailTemplate', back_populates='send_logs', lazy=True)
+    created_by = db.relationship('User', foreign_keys=[created_by_id], lazy=True)
+
+    def set_payload(self, payload):
+        self.payload_json = json.dumps(payload or {}, default=str)
+
+    def get_payload(self):
+        try:
+            return json.loads(self.payload_json) if self.payload_json else {}
+        except Exception:
+            return {}
+
+
+class AuditLog(db.Model):
+    """Append-only audit log for critical security and admin events."""
+    id = db.Column(db.Integer, primary_key=True)
+    actor_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True, index=True)
+    actor_email = db.Column(db.String(120), nullable=True, index=True)
+    category = db.Column(db.String(50), nullable=False, default='admin', index=True)
+    action = db.Column(db.String(120), nullable=False, index=True)
+    target_type = db.Column(db.String(80), nullable=True, index=True)
+    target_id = db.Column(db.String(64), nullable=True, index=True)
+    status = db.Column(db.String(20), nullable=False, default='success', index=True)
+    ip_address = db.Column(db.String(64), nullable=True)
+    user_agent = db.Column(db.String(255), nullable=True)
+    details_json = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    actor = db.relationship('User', backref='audit_events', lazy=True)
+
+
+@event.listens_for(AuditLog, 'before_update')
+def prevent_auditlog_update(mapper, connection, target):
+    raise ValueError('AuditLog is immutable and cannot be updated.')
+
+
+@event.listens_for(AuditLog, 'before_delete')
+def prevent_auditlog_delete(mapper, connection, target):
+    raise ValueError('AuditLog is immutable and cannot be deleted.')
         
 
 class PaymentLink(db.Model):

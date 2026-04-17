@@ -103,8 +103,81 @@
                 <label for="maintenance_end">End (local):</label>
                 <input type="datetime-local" id="maintenance_end" name="maintenance_end" value="{{ settings.maintenance_end if settings is defined else '' }}">
             </div>
+
+            <hr>
+            <h4>Feature Flags</h4>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="feature_signup_enabled" {% if settings is defined and settings.feature_signup_enabled %}checked{% endif %}>
+                    Enable New Signups
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="feature_live_chat_enabled" {% if settings is defined and settings.feature_live_chat_enabled %}checked{% endif %}>
+                    Enable Live Chat Widget
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="feature_support_escalation_enabled" {% if settings is defined and settings.feature_support_escalation_enabled %}checked{% endif %}>
+                    Enable Live Chat Support Escalation
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="feature_dark_mode_enabled" {% if settings is defined and settings.feature_dark_mode_enabled %}checked{% endif %}>
+                    Allow Dark Mode Toggle
+                </label>
+                <small>When disabled, the interface stays in light mode and the user theme toggle is hidden.</small>
+            </div>
+            <div class="form-group">
+                <label for="signup_allowed_roles">Allowed Signup Roles (comma-separated):</label>
+                <input type="text" id="signup_allowed_roles" name="signup_allowed_roles" value="{{ settings.signup_allowed_roles if settings is defined else 'tenant,landlord,service' }}" placeholder="tenant,landlord,service">
+            </div>
+
+            <hr>
+            <h4>Report Scheduling Jobs</h4>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="report_schedule_enabled" {% if settings is defined and settings.report_schedule_enabled %}checked{% endif %}>
+                    Enable Scheduled Report Jobs
+                </label>
+            </div>
+            <div class="form-group">
+                <label for="report_schedule_interval_minutes">Run Interval (minutes):</label>
+                <input type="number" id="report_schedule_interval_minutes" name="report_schedule_interval_minutes" min="15" value="{{ settings.report_schedule_interval_minutes if settings is defined else 1440 }}">
+            </div>
+            <div class="form-group">
+                <label for="report_schedule_datasets">Datasets (comma-separated):</label>
+                <input type="text" id="report_schedule_datasets" name="report_schedule_datasets" value="{{ settings.report_schedule_datasets if settings is defined else 'summary,finance,occupancy,maintenance' }}" placeholder="summary,finance,occupancy,maintenance">
+                <small>Allowed values: summary, finance, occupancy, maintenance</small>
+            </div>
+            <div class="form-group">
+                <label for="report_schedule_format">Output Format:</label>
+                <select id="report_schedule_format" name="report_schedule_format">
+                    <option value="csv" {% if settings is defined and settings.report_schedule_format == 'csv' %}selected{% endif %}>CSV only</option>
+                    <option value="xlsx" {% if settings is defined and settings.report_schedule_format == 'xlsx' %}selected{% endif %}>Excel (XLSX) only</option>
+                    <option value="both" {% if settings is defined and settings.report_schedule_format == 'both' %}selected{% endif %}>Both CSV and XLSX</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Last Run (UTC):</label>
+                <input type="text" value="{{ settings.report_schedule_last_run_at if settings is defined else '' }}" readonly>
+            </div>
+            <div class="form-group">
+                <label>Last Result:</label>
+                <input type="text" value="{{ settings.report_schedule_last_result if settings is defined else '' }}" readonly>
+            </div>
             <button type="submit">Save Changes</button>
         </form>
+        <form method="POST" action="{{ url_for('admin.run_report_schedule_now') }}" style="margin-top: 10px;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit">Run Scheduled Report Job Now</button>
+        </form>
+        <p style="text-align: center; margin-top: 16px;">
+            <a href="{{ url_for('admin.email_templates') }}">Manage Email Templates</a>
+        </p>
         <p style="text-align: center;">
             <a href="{{ url_for('admin.manage_users') }}">Back to Manage Users</a> |
             <a href="{{ url_for('index') }}">Home</a>

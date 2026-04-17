@@ -1,0 +1,213 @@
+{% extends 'admin.html' %}
+{% block title %}Email Templates{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+    <div>
+      <h1 class="mb-1">Email Templates</h1>
+      <p class="text-muted mb-0">Manage reusable email content, preview output, and keep version history for platform messages.</p>
+    </div>
+    <div>
+      <a href="{{ url_for('admin.platform_settings') }}" class="btn btn-outline-secondary">Back to Settings</a>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white">
+          <strong>Templates</strong>
+        </div>
+        <div class="list-group list-group-flush">
+          {% for template in templates %}
+          <a href="{{ url_for('admin.email_templates', template_id=template.id) }}" class="list-group-item list-group-item-action {% if selected_template and selected_template.id == template.id %}active{% endif %}">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-semibold">{{ template.name }}</div>
+                <small class="{% if selected_template and selected_template.id == template.id %}text-light{% else %}text-muted{% endif %}">{{ template.key }}</small>
+              </div>
+              <span class="badge {% if template.is_active %}bg-success{% else %}bg-secondary{% endif %}">{{ 'Active' if template.is_active else 'Inactive' }}</span>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+
+      {% if selected_template and selected_template.versions %}
+      <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <strong>Version History</strong>
+        </div>
+        <div class="card-body p-0">
+          <ul class="list-group list-group-flush">
+            {% for version in selected_template.versions|sort(attribute='version_number', reverse=true) %}
+            <li class="list-group-item">
+              <div class="d-flex justify-content-between">
+                <span>Version {{ version.version_number }}</span>
+                <small class="text-muted">{{ version.created_at }}</small>
+              </div>
+              {% if version.change_notes %}<div class="small text-muted">{{ version.change_notes }}</div>{% endif %}
+              <div class="mt-2 d-flex gap-2 flex-wrap">
+                <form method="POST" action="{{ url_for('admin.email_template_version_restore', template_id=selected_template.id, version_id=version.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-sm btn-outline-primary">Restore</button>
+                </form>
+                <form method="POST" action="{{ url_for('admin.email_template_version_delete', template_id=selected_template.id, version_id=version.id) }}" onsubmit="return confirm('Delete this version permanently?');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="col-lg-8">
+      <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white">
+          <strong>{% if selected_template %}Edit Template{% else %}Create Template{% endif %}</strong>
+        </div>
+        <div class="card-body">
+          <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% if selected_template %}
+            <input type="hidden" name="template_id" value="{{ selected_template.id }}">
+            {% endif %}
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Key</label>
+                <input type="text" name="key" class="form-control" value="{{ selected_template.key if selected_template else '' }}" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Name</label>
+                <input type="text" name="name" class="form-control" value="{{ selected_template.name if selected_template else '' }}" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Category</label>
+                <input type="text" name="category" class="form-control" value="{{ selected_template.category if selected_template else 'general' }}" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Variables</label>
+                <input type="text" name="variables" class="form-control" value="{{ selected_template.get_variables()|join(',') if selected_template else '' }}" placeholder="name,email,reset_url">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Description</label>
+                <input type="text" name="description" class="form-control" value="{{ selected_template.description if selected_template else '' }}">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Subject</label>
+                <input type="text" name="subject" class="form-control" value="{{ selected_template.subject if selected_template else '' }}" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label">HTML Body</label>
+                <textarea name="html_body" class="form-control" rows="8" required>{{ selected_template.html_body if selected_template else '' }}</textarea>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Text Body</label>
+                <textarea name="text_body" class="form-control" rows="5">{{ selected_template.text_body if selected_template and selected_template.text_body else '' }}</textarea>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label d-block">
+                  <input type="checkbox" name="is_active" {% if not selected_template or selected_template.is_active %}checked{% endif %}>
+                  Active
+                </label>
+                <label class="form-label d-block">
+                  <input type="checkbox" name="is_default" {% if selected_template and selected_template.is_default %}checked{% endif %}>
+                  Default
+                </label>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Change Notes</label>
+                <textarea name="change_notes" class="form-control" rows="3" placeholder="What changed in this revision?"></textarea>
+              </div>
+            </div>
+            <div class="mt-3 d-flex gap-2">
+              <button type="submit" class="btn btn-primary">Save Template</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white">
+          <strong>Preview</strong>
+        </div>
+        <div class="card-body">
+          <div class="mb-2"><strong>Context</strong></div>
+          <pre class="bg-light p-3 rounded small mb-3">{{ preview_context | tojson(indent=2) }}</pre>
+          <div class="mb-2"><strong>Subject</strong></div>
+          <div class="border rounded p-2 mb-3">{{ preview_rendered.subject if preview_rendered else '' }}</div>
+          <div class="mb-2"><strong>HTML Body</strong></div>
+          <div class="border rounded p-3 mb-3 bg-white">{{ (preview_rendered.html_body if preview_rendered else '') | safe }}</div>
+          <div class="mb-2"><strong>Text Body</strong></div>
+          <pre class="bg-light p-3 rounded small mb-0">{{ preview_rendered.text_body if preview_rendered else '' }}</pre>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white">
+          <strong>Test Send</strong>
+        </div>
+        <div class="card-body">
+          {% if selected_template %}
+          <form method="POST" action="{{ url_for('admin.email_template_test_send', template_id=selected_template.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Recipient Email</label>
+                <input type="email" name="recipient_email" class="form-control" placeholder="test@example.com" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Recipient Name</label>
+                <input type="text" name="recipient_name" class="form-control" placeholder="Admin User" value="{{ preview_context.name if preview_context else '' }}">
+              </div>
+            </div>
+            <div class="mt-3">
+              <button type="submit" class="btn btn-outline-primary">Send Test Email</button>
+            </div>
+          </form>
+          {% else %}
+          <p class="text-muted mb-0">Select or create a template before sending a test email.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <strong>Send Log</strong>
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-sm mb-0">
+            <thead>
+              <tr>
+                <th>Recipient</th>
+                <th>Mode</th>
+                <th>Status</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for log in selected_template.send_logs[:10] if selected_template %}
+              <tr>
+                <td>{{ log.recipient_email }}</td>
+                <td>{{ log.mode }}</td>
+                <td>{{ log.status }}</td>
+                <td>{{ log.created_at }}</td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="4" class="text-muted text-center py-4">No send history yet.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

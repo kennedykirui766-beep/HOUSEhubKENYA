@@ -153,6 +153,15 @@
             <option value="notify">Notify</option>
             <option value="delete_users">Delete Users</option>
           </select>
+          <div class="mt-3 mb-3" id="users-bulk-email-fields" style="display:none; max-width: 720px;">
+            <div class="mb-2">
+              <input type="text" name="subject" class="form-control" placeholder="Email subject">
+            </div>
+            <div class="mb-2">
+              <textarea name="message" class="form-control" rows="4" placeholder="Email message"></textarea>
+            </div>
+            <small class="text-muted">Used when the Notify action is selected.</small>
+          </div>
           <input type="hidden" name="confirm" value="soft">
           <button type="button" id="users-bulk-apply" class="btn btn-primary" style="background: #3D8B40;">Apply Bulk Action</button>
           <button type="submit" name="dry_run" value="1" class="btn btn-outline-secondary ms-2">Preview</button>
@@ -182,6 +191,9 @@
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <button name="action" value="deactivate" style="background: #B22222; color: white;">Suspend</button>
                   <button name="action" value="activate" style="background: #3D8B40; color: white;">Reactivate</button>
+                  {% if user.role|lower == 'admin' %}
+                  <button name="action" value="reset_password" style="background: #4A90E2; color: white;">Reset Link</button>
+                  {% endif %}
                 </form>
                 <form action="{{ url_for('admin.impersonate', user_id=user.id) }}" method="POST" style="display:inline; margin-left:6px;">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -314,6 +326,7 @@
       <h2>Quick Links</h2>
       <a href="{{ url_for('admin.manage_users') }}" class="btn btn-primary" style="background: #3D8B40; color: white;">Manage Users</a>
       <a href="{{ url_for('admin.export_reports') }}" class="btn btn-primary" style="background: #3D8B40; color: white;">View Reports</a>
+      <a href="{{ url_for('admin.email_templates') }}" class="btn btn-primary" style="background: #3D8B40; color: white;">Email Templates</a>
       <form action="{{ url_for('admin.export_financial') }}" method="GET" style="display:inline-block; margin-left:8px;">
         <input type="hidden" name="start" id="financial-start">
         <input type="hidden" name="end" id="financial-end">
@@ -499,9 +512,23 @@
     if(pspan) pspan.textContent = pCount;
   }
 
+  function toggleUsersBulkEmailFields(){
+    const form = document.getElementById('users-bulk-form');
+    const fields = document.getElementById('users-bulk-email-fields');
+    if(!form || !fields) return;
+    const action = (form.querySelector('select[name="action"]')?.value || '').toLowerCase();
+    fields.style.display = action === 'notify' ? 'block' : 'none';
+  }
+
   document.addEventListener('DOMContentLoaded', function(){
     // attach change handlers to checkboxes to update counts
     document.querySelectorAll("input[name='ids']").forEach(cb=>cb.addEventListener('change', updateSelectedCounts));
+
+    const usersActionSelect = document.querySelector('#users-bulk-form select[name="action"]');
+    if(usersActionSelect){
+      usersActionSelect.addEventListener('change', toggleUsersBulkEmailFields);
+      toggleUsersBulkEmailFields();
+    }
 
     // intercept preview buttons and use visual modal
     document.querySelectorAll('button[name="dry_run"]').forEach(btn=>{
@@ -602,7 +629,11 @@
     if(usersBulkBtn){
       usersBulkBtn.addEventListener('click', function(){
         const form = document.getElementById('users-bulk-form');
-        confirmFormSubmission('users-bulk-form', 'Apply selected bulk action to chosen users? Check "Permanently delete" to hard-delete.');
+        const action = (form?.querySelector('select[name="action"]')?.value || '').toLowerCase();
+        const message = action === 'notify'
+          ? 'Queue the email message for the selected users?'
+          : 'Apply selected bulk action to chosen users? Check "Permanently delete" to hard-delete.';
+        confirmFormSubmission('users-bulk-form', message);
       });
     }
     if(propsBulkBtn){

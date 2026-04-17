@@ -5,6 +5,15 @@
   <h2>Bulk Action Preview</h2>
   <p>Review the proposed changes below. This is a dry-run: no database changes have been made.</p>
 
+  {% if bulk_subject is defined %}
+  <div class="alert alert-info">
+    <strong>Subject:</strong> {{ bulk_subject }}<br>
+    <strong>Recipients:</strong> {{ bulk_recipient_count or items|length }}<br>
+    <strong>Message:</strong>
+    <div style="white-space: pre-wrap; margin-top: 0.5rem;">{{ bulk_message }}</div>
+  </div>
+  {% endif %}
+
   <table class="table">
     <thead>
       <tr>

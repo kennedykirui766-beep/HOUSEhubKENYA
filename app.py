@@ -66,9 +66,16 @@ def create_app():
     # Start background notification worker (best-effort)
     try:
         from services.notification import start_worker
-        start_worker()
+        start_worker(app)
     except Exception:
         app.logger.exception('Failed to start notification worker')
+
+    # Start report scheduling worker (best-effort)
+    try:
+        from services.report_scheduler import start_scheduler
+        start_scheduler(app)
+    except Exception:
+        app.logger.exception('Failed to start report scheduler')
 
     # Exempt Socket.IO routes from CSRF (since chat.html uses WebSocket)
     csrf.exempt('routes.support_routes.support_bp')
@@ -153,7 +160,12 @@ def create_app():
         except Exception:
             logo_url = '/static/images/homehub.jpg'
         # Provide both the raw config value and the resolved URL for templates and services.
-        return dict(APP_LOGO=logo, APP_LOGO_URL=logo_url)
+        try:
+            from models.models import SystemSetting
+            dark_mode_enabled = SystemSetting.get('feature_dark_mode_enabled', '1') == '1'
+        except Exception:
+            dark_mode_enabled = True
+        return dict(APP_LOGO=logo, APP_LOGO_URL=logo_url, feature_dark_mode_enabled=dark_mode_enabled)
 
     # Blueprints
     from routes.auth_routes import auth_bp
@@ -237,6 +249,11 @@ def create_app():
     def check_maintenance():
         # Allow static, socket, and admin endpoints for admins.
         try:
+            # Enforce read-only mode while admin impersonation is active.
+            if session.get('is_impersonating'):
+                if request.method not in ('GET', 'HEAD', 'OPTIONS') and request.endpoint not in ('admin.stop_impersonate', 'auth.logout'):
+                    return ("Action disabled while impersonating. Stop impersonation to make changes.", 403)
+
             mode = SystemSetting.get('maintenance_mode', '0') == '1'
             start = SystemSetting.get('maintenance_start', '')
             end = SystemSetting.get('maintenance_end', '')
@@ -275,11 +292,6 @@ def create_app():
             except Exception:
                 pass
             app.logger.error(f"Error checking maintenance mode: {e}")
-            # If admin started impersonation, prevent state-changing requests (read-only impersonation)
-            if session.get('is_impersonating'):
-                if request.method not in ('GET', 'HEAD', 'OPTIONS') and request.endpoint not in ('admin.stop_impersonate', 'auth.logout'):
-                    return ("Action disabled while impersonating. Stop impersonation to make changes.", 403)
-
             return None
 
     return app, socketio
