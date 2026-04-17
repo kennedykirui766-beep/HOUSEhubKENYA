@@ -40,13 +40,16 @@
     flex-wrap: nowrap;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
+
+  .ap-steps-bar::-webkit-scrollbar { display: none; }
 
   .ap-step {
     display: flex;
     align-items: center;
-    gap: 0.45rem;
-    padding: 0.4rem 0.65rem;
+    gap: 0.4rem;
+    padding: 0.35rem 0.55rem;
     border-radius: var(--radius-full);
     cursor: pointer;
     transition: var(--transition);
@@ -71,43 +74,43 @@
     border: 2px solid var(--border-color);
     color: var(--text-muted);
     background: var(--body-bg);
-    transition: var(--transition);
+    transition: all 0.25s ease;
     flex-shrink: 0;
   }
 
-  .ap-step-indicator i {
-    font-size: 0.65rem;
-  }
+  .ap-step-indicator i { font-size: 0.65rem; }
 
+  /* --- COMPLETED: green fill + checkmark --- */
   .ap-step.completed .ap-step-indicator {
-    background: #28a745;
-    border-color: #28a745;
+    background: #22c55e;
+    border-color: #22c55e;
     color: white;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
   }
 
   .ap-step-label {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 500;
     color: var(--text-muted);
     transition: var(--transition);
   }
 
   .ap-step.completed .ap-step-label {
-    color: #28a745;
+    color: #22c55e;
     font-weight: 600;
   }
 
   .ap-step-connector {
-    width: 20px;
+    width: 16px;
     height: 2px;
     background: var(--border-color);
     flex-shrink: 0;
-    transition: var(--transition);
+    transition: background 0.3s ease;
     border-radius: 1px;
   }
 
   .ap-step-connector.completed {
-    background: #28a745;
+    background: #22c55e;
   }
 
   /* ---------- Form Sections ---------- */
@@ -117,11 +120,16 @@
     border-radius: var(--radius-lg);
     padding: 1.75rem;
     margin-bottom: 1.25rem;
-    transition: var(--transition);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
   }
 
   .ap-section:hover {
     border-color: color-mix(in srgb, var(--primary-color) 40%, transparent);
+  }
+
+  /* Green left border when section is complete */
+  .ap-section.section-complete {
+    border-left: 3px solid #22c55e;
   }
 
   .ap-section-header {
@@ -144,6 +152,13 @@
     justify-content: center;
     font-size: 1rem;
     flex-shrink: 0;
+    transition: all 0.25s ease;
+  }
+
+  /* Green icon when section complete */
+  .ap-section.section-complete .ap-section-icon {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
   }
 
   .ap-section-title {
@@ -157,6 +172,24 @@
     color: var(--text-muted);
     font-size: 0.78rem;
     margin: 0;
+  }
+
+  /* Section complete checkmark badge */
+  .ap-section-complete-badge {
+    margin-left: auto;
+    display: none;
+    align-items: center;
+    gap: 0.35rem;
+    color: #22c55e;
+    font-size: 0.78rem;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .ap-section-complete-badge i { font-size: 0.9rem; }
+
+  .ap-section.section-complete .ap-section-complete-badge {
+    display: flex;
   }
 
   /* ---------- Form Fields ---------- */
@@ -361,7 +394,7 @@
   }
 
   .ap-upload-counter .count-num.has-images {
-    color: #28a745;
+    color: #22c55e;
   }
 
   .ap-image-previews {
@@ -382,21 +415,13 @@
     transition: var(--transition);
   }
 
-  .ap-thumb:hover {
-    border-color: var(--primary-color);
-  }
+  .ap-thumb:hover { border-color: var(--primary-color); }
 
-  .ap-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+  .ap-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
   .ap-thumb-badge {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    bottom: 0; left: 0; right: 0;
     padding: 0.15rem 0.3rem;
     background: rgba(0,0,0,0.55);
     color: white;
@@ -407,27 +432,20 @@
 
   .ap-thumb-remove {
     position: absolute;
-    top: 3px;
-    right: 3px;
-    width: 22px;
-    height: 22px;
+    top: 3px; right: 3px;
+    width: 22px; height: 22px;
     border-radius: 50%;
     background: rgba(220, 53, 69, 0.9);
     color: white;
     border: none;
     font-size: 0.6rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     cursor: pointer;
     transition: var(--transition);
     line-height: 1;
   }
 
-  .ap-thumb-remove:hover {
-    background: #dc3545;
-    transform: scale(1.15);
-  }
+  .ap-thumb-remove:hover { background: #dc3545; transform: scale(1.15); }
 
   .ap-upload-error {
     color: #dc3545;
@@ -436,9 +454,7 @@
     display: none;
   }
 
-  .ap-upload-error.visible {
-    display: block;
-  }
+  .ap-upload-error.visible { display: block; }
 
   /* ---------- Spec Grid ---------- */
   .ap-spec-grid {
@@ -455,13 +471,8 @@
     margin-top: 0.25rem;
   }
 
-  .ap-char-count.warning {
-    color: #f59e0b;
-  }
-
-  .ap-char-count.danger {
-    color: #dc3545;
-  }
+  .ap-char-count.warning { color: #f59e0b; }
+  .ap-char-count.danger  { color: #dc3545; }
 
   /* ---------- Form Actions ---------- */
   .ap-actions {
@@ -473,18 +484,13 @@
 
   .btn-ap-submit {
     background: var(--gradient-primary);
-    border: none;
-    color: white;
+    border: none; color: white;
     padding: 0.75rem 2rem;
     border-radius: var(--radius-md);
-    font-weight: 600;
-    font-size: 0.95rem;
+    font-weight: 600; font-size: 0.95rem;
     transition: var(--transition);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    font-family: inherit;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    cursor: pointer; font-family: inherit;
   }
 
   .btn-ap-submit:hover {
@@ -494,10 +500,8 @@
   }
 
   .btn-ap-submit:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
+    opacity: 0.55; cursor: not-allowed;
+    transform: none; box-shadow: none;
   }
 
   .btn-ap-draft {
@@ -506,20 +510,13 @@
     color: var(--text-primary);
     padding: 0.75rem 1.5rem;
     border-radius: var(--radius-md);
-    font-weight: 500;
-    font-size: 0.95rem;
+    font-weight: 500; font-size: 0.95rem;
     transition: var(--transition);
-    cursor: pointer;
-    font-family: inherit;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
+    cursor: pointer; font-family: inherit;
+    display: inline-flex; align-items: center; gap: 0.5rem;
   }
 
-  .btn-ap-draft:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-  }
+  .btn-ap-draft:hover { border-color: var(--primary-color); color: var(--primary-color); }
 
   .btn-ap-cancel {
     background: transparent;
@@ -527,25 +524,17 @@
     color: var(--text-secondary);
     padding: 0.75rem 1.5rem;
     border-radius: var(--radius-md);
-    font-weight: 500;
-    font-size: 0.95rem;
+    font-weight: 500; font-size: 0.95rem;
     transition: var(--transition);
     text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
+    display: inline-flex; align-items: center; gap: 0.5rem;
   }
 
-  .btn-ap-cancel:hover {
-    border-color: #dc3545;
-    color: #dc3545;
-    text-decoration: none;
-  }
+  .btn-ap-cancel:hover { border-color: #dc3545; color: #dc3545; text-decoration: none; }
 
   .ap-spinner {
     display: none;
-    width: 16px;
-    height: 16px;
+    width: 16px; height: 16px;
     border: 2.5px solid rgba(255,255,255,0.3);
     border-top-color: white;
     border-radius: 50%;
@@ -553,9 +542,7 @@
     flex-shrink: 0;
   }
 
-  @keyframes apSpin {
-    to { transform: rotate(360deg); }
-  }
+  @keyframes apSpin { to { transform: rotate(360deg); } }
 
   /* ---------- Feedback Alert ---------- */
   .ap-feedback {
@@ -569,14 +556,12 @@
     border: none;
   }
 
-  .ap-feedback.visible {
-    display: flex;
-  }
+  .ap-feedback.visible { display: flex; }
 
   .ap-feedback.alert-success {
-    background-color: rgba(40, 167, 69, 0.07);
-    color: #28a745;
-    border: 1px solid rgba(40, 167, 69, 0.12);
+    background-color: rgba(34, 197, 94, 0.07);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.15);
   }
 
   .ap-feedback.alert-danger {
@@ -591,7 +576,7 @@
     border: 1px solid rgba(99, 102, 241, 0.12);
   }
 
-  /* ========== COMPREHENSIVE PREVIEW CARD ========== */
+  /* ========== PREVIEW CARD ========== */
   .ap-preview-card {
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -605,12 +590,9 @@
   .ap-preview-gallery {
     height: 180px;
     background-color: var(--body-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     border-bottom: 1px solid var(--border-color);
-    overflow: hidden;
-    position: relative;
+    overflow: hidden; position: relative;
   }
 
   .ap-preview-gallery.has-images {
@@ -626,228 +608,148 @@
     grid-row: 1 / -1;
   }
 
-  .ap-preview-gallery.has-images .ap-pv-gallery-img:nth-child(n+4) {
-    display: none;
-  }
+  .ap-preview-gallery.has-images .ap-pv-gallery-img:nth-child(n+4) { display: none; }
 
-  .ap-preview-gallery i {
-    font-size: 2rem;
-    color: var(--text-muted);
-    opacity: 0.4;
-  }
+  .ap-preview-gallery i { font-size: 2rem; color: var(--text-muted); opacity: 0.4; }
 
-  .ap-pv-gallery-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    position: relative;
-  }
+  .ap-pv-gallery-img { width: 100%; height: 100%; object-fit: cover; }
 
   .ap-preview-gallery-badge {
-    position: absolute;
-    top: 0.6rem;
-    left: 0.6rem;
+    position: absolute; top: 0.6rem; left: 0.6rem;
     padding: 0.2rem 0.6rem;
     border-radius: var(--radius-sm);
-    font-size: 0.68rem;
-    font-weight: 600;
-    z-index: 2;
-    background: var(--gradient-primary);
-    color: white;
+    font-size: 0.68rem; font-weight: 600; z-index: 2;
+    background: var(--gradient-primary); color: white;
   }
 
   .ap-preview-gallery-count {
-    position: absolute;
-    bottom: 0.6rem;
-    right: 0.6rem;
+    position: absolute; bottom: 0.6rem; right: 0.6rem;
     padding: 0.2rem 0.55rem;
     border-radius: var(--radius-full);
-    font-size: 0.68rem;
-    font-weight: 600;
-    z-index: 2;
-    background: rgba(0,0,0,0.6);
-    color: white;
+    font-size: 0.68rem; font-weight: 600; z-index: 2;
+    background: rgba(0,0,0,0.6); color: white;
   }
 
-  .ap-preview-body {
-    padding: 1.15rem;
-  }
+  .ap-preview-body { padding: 1.15rem; }
 
   .ap-pv-section {
-    margin-bottom: 0.9rem;
-    padding-bottom: 0.9rem;
+    margin-bottom: 0.9rem; padding-bottom: 0.9rem;
     border-bottom: 1px solid var(--border-color);
   }
 
-  .ap-pv-section:last-child {
-    margin-bottom: 0;
-    padding-bottom: 0;
-    border-bottom: none;
-  }
+  .ap-pv-section:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
 
   .ap-pv-section-title {
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
+    font-size: 0.7rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--text-muted); margin-bottom: 0.5rem;
+    display: flex; align-items: center; gap: 0.35rem;
   }
 
-  .ap-pv-section-title i {
-    color: var(--primary-color);
-    font-size: 0.65rem;
-  }
+  .ap-pv-section-title i { color: var(--primary-color); font-size: 0.65rem; }
 
   .ap-pv-title-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 0.5rem;
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 0.5rem;
     margin-bottom: 0.4rem;
   }
 
   .ap-preview-title {
-    color: var(--text-primary);
-    font-weight: 600;
-    font-size: 1rem;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex: 1;
-    min-width: 0;
+    color: var(--text-primary); font-weight: 600; font-size: 1rem; margin: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    flex: 1; min-width: 0;
   }
 
   .ap-pv-type-badge {
-    font-size: 0.65rem;
-    padding: 0.18rem 0.5rem;
+    font-size: 0.65rem; padding: 0.18rem 0.5rem;
     border-radius: var(--radius-full);
-    background: var(--primary-light);
-    color: var(--primary-color);
-    font-weight: 600;
-    white-space: nowrap;
-    flex-shrink: 0;
-    display: none;
+    background: var(--primary-light); color: var(--primary-color);
+    font-weight: 600; white-space: nowrap; flex-shrink: 0; display: none;
   }
 
-  .ap-pv-type-badge.visible {
-    display: inline-block;
-  }
+  .ap-pv-type-badge.visible { display: inline-block; }
 
   .ap-preview-desc {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    line-height: 1.55;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    margin: 0;
+    font-size: 0.8rem; color: var(--text-muted); line-height: 1.55;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+    overflow: hidden; margin: 0;
   }
 
   .ap-preview-location {
-    color: var(--text-secondary);
-    font-size: 0.82rem;
-    margin: 0;
-    line-height: 1.5;
-    word-break: break-word;
+    color: var(--text-secondary); font-size: 0.82rem; margin: 0;
+    line-height: 1.5; word-break: break-word;
   }
 
-  .ap-preview-location i {
-    color: var(--primary-color);
-    margin-right: 0.25rem;
-  }
+  .ap-preview-location i { color: var(--primary-color); margin-right: 0.25rem; }
 
   .ap-pv-price-main {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-bottom: 0.3rem;
+    font-size: 1.15rem; font-weight: 700; color: var(--primary-color); margin-bottom: 0.3rem;
   }
 
-  .ap-pv-price-details {
-    font-size: 0.78rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
-  }
+  .ap-pv-price-details { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.6; }
 
-  .ap-pv-price-details span {
-    display: inline-block;
-    margin-right: 0.75rem;
-  }
+  .ap-pv-price-details span { display: inline-block; margin-right: 0.75rem; }
 
-  .ap-pv-price-details i {
-    color: var(--primary-color);
-    margin-right: 0.2rem;
-    font-size: 0.7rem;
-  }
+  .ap-pv-price-details i { color: var(--primary-color); margin-right: 0.2rem; font-size: 0.7rem; }
 
-  .ap-preview-specs {
-    display: flex;
-    gap: 0.85rem;
-    flex-wrap: wrap;
-  }
+  .ap-preview-specs { display: flex; gap: 0.85rem; flex-wrap: wrap; }
 
   .ap-preview-spec {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
+    font-size: 0.8rem; color: var(--text-secondary);
+    display: flex; align-items: center; gap: 0.3rem;
   }
 
-  .ap-preview-spec i {
-    color: var(--primary-color);
-    font-size: 0.72rem;
-  }
+  .ap-preview-spec i { color: var(--primary-color); font-size: 0.72rem; }
 
-  .ap-preview-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-  }
+  .ap-preview-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; }
 
   .ap-preview-tag {
-    font-size: 0.65rem;
-    padding: 0.18rem 0.5rem;
+    font-size: 0.65rem; padding: 0.18rem 0.5rem;
     border-radius: var(--radius-full);
-    background-color: var(--primary-light);
-    color: var(--primary-color);
-    font-weight: 500;
-    white-space: nowrap;
+    background-color: var(--primary-light); color: var(--primary-color);
+    font-weight: 500; white-space: nowrap;
   }
 
   .ap-pv-policy-row {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    margin-bottom: 0.3rem;
+    display: flex; align-items: center; gap: 0.6rem;
+    font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.3rem;
   }
 
-  .ap-pv-policy-row:last-child {
-    margin-bottom: 0;
-  }
+  .ap-pv-policy-row:last-child { margin-bottom: 0; }
 
   .ap-pv-policy-row i {
-    color: var(--primary-color);
-    font-size: 0.7rem;
-    width: 16px;
-    text-align: center;
-    flex-shrink: 0;
+    color: var(--primary-color); font-size: 0.7rem;
+    width: 16px; text-align: center; flex-shrink: 0;
   }
 
-  .ap-pv-empty {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    font-style: italic;
-    opacity: 0.7;
+  .ap-pv-empty { font-size: 0.78rem; color: var(--text-muted); font-style: italic; opacity: 0.7; }
+
+  /* ---------- Progress summary pill in preview ---------- */
+  .ap-pv-progress {
+    padding: 0.65rem 1.15rem;
+    background: var(--body-bg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 0.75rem;
   }
+
+  .ap-pv-progress-label { color: var(--text-secondary); font-weight: 500; }
+
+  .ap-pv-progress-bar-wrap {
+    flex: 1; height: 6px;
+    background: var(--border-color);
+    border-radius: 3px; margin: 0 0.75rem;
+    overflow: hidden;
+  }
+
+  .ap-pv-progress-bar {
+    height: 100%; border-radius: 3px;
+    background: #22c55e;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .ap-pv-progress-pct { color: #22c55e; font-weight: 700; min-width: 28px; text-align: right; }
 
   /* ---------- Tips Card ---------- */
   .ap-tips-card {
@@ -856,235 +758,117 @@
     border-radius: var(--radius-lg);
     padding: 1.5rem;
     margin-bottom: 1.25rem;
-    transition: var(--transition);
   }
 
   .ap-tips-card h5 {
-    color: var(--text-primary);
-    font-weight: 600;
-    font-size: 1rem;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    color: var(--text-primary); font-weight: 600; font-size: 1rem;
+    margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;
   }
 
-  .ap-tips-card h5 i {
-    color: var(--primary-color);
-  }
+  .ap-tips-card h5 i { color: var(--primary-color); }
 
-  .ap-tips-list {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 1rem;
-  }
+  .ap-tips-list { list-style: none; padding: 0; margin: 0 0 1rem; }
 
   .ap-tips-list li {
     padding: 0.6rem 0;
     border-bottom: 1px solid var(--border-color);
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: flex-start;
-    gap: 0.6rem;
-    line-height: 1.5;
+    font-size: 0.85rem; color: var(--text-secondary);
+    display: flex; align-items: flex-start; gap: 0.6rem; line-height: 1.5;
   }
 
-  .ap-tips-list li:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-  }
+  .ap-tips-list li:last-child { border-bottom: none; padding-bottom: 0; }
 
-  .ap-tips-list li i {
-    color: var(--primary-color);
-    margin-top: 0.15rem;
-    flex-shrink: 0;
-    font-size: 0.75rem;
-  }
+  .ap-tips-list li i { color: var(--primary-color); margin-top: 0.15rem; flex-shrink: 0; font-size: 0.75rem; }
 
   .ap-tips-toggle {
-    background: none;
-    border: none;
-    color: var(--primary-color);
-    font-weight: 500;
-    font-size: 0.82rem;
-    cursor: pointer;
-    padding: 0;
-    font-family: inherit;
-    transition: var(--transition);
+    background: none; border: none; color: var(--primary-color);
+    font-weight: 500; font-size: 0.82rem; cursor: pointer;
+    padding: 0; font-family: inherit; transition: var(--transition);
   }
 
-  .ap-tips-toggle:hover {
-    color: var(--secondary-color);
-  }
+  .ap-tips-toggle:hover { color: var(--secondary-color); }
 
-  .ap-tips-body {
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-  }
-
-  .ap-tips-body.collapsed {
-    max-height: 0 !important;
-  }
+  .ap-tips-body { overflow: hidden; transition: max-height 0.3s ease; }
+  .ap-tips-body.collapsed { max-height: 0 !important; }
 
   .ap-help-link {
-    color: var(--text-muted);
-    text-decoration: none;
-    font-size: 0.82rem;
-    font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    transition: var(--transition);
-    margin-top: 1rem;
+    color: var(--text-muted); text-decoration: none; font-size: 0.82rem;
+    font-weight: 500; display: inline-flex; align-items: center; gap: 0.35rem;
+    transition: var(--transition); margin-top: 1rem;
   }
 
-  .ap-help-link:hover {
-    color: var(--primary-color);
-  }
+  .ap-help-link:hover { color: var(--primary-color); }
 
   /* ---------- Access Badge ---------- */
   .ap-access-badge {
-    position: fixed;
-    bottom: 1.25rem;
-    right: 1.25rem;
-    padding: 0.4rem 0.85rem;
-    border-radius: var(--radius-full);
-    background: var(--gradient-primary);
-    color: white;
-    font-size: 0.72rem;
-    font-weight: 600;
+    position: fixed; bottom: 1.25rem; right: 1.25rem;
+    padding: 0.4rem 0.85rem; border-radius: var(--radius-full);
+    background: var(--gradient-primary); color: white;
+    font-size: 0.72rem; font-weight: 600;
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
+    z-index: 100; display: flex; align-items: center; gap: 0.35rem;
   }
 
-  /* ---------- Flash Alert Override ---------- */
+  /* ---------- Flash Alert ---------- */
   .ap-flash {
-    border-radius: var(--radius-md);
-    padding: 0.85rem 1rem;
-    margin-bottom: 1.25rem;
-    border: none;
-    font-size: 0.85rem;
-    display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-    line-height: 1.5;
+    border-radius: var(--radius-md); padding: 0.85rem 1rem;
+    margin-bottom: 1.25rem; border: none; font-size: 0.85rem;
+    display: flex; align-items: flex-start; gap: 0.5rem; line-height: 1.5;
   }
 
-  .ap-flash i {
-    margin-top: 0.15rem;
-    flex-shrink: 0;
-  }
+  .ap-flash i { margin-top: 0.15rem; flex-shrink: 0; }
 
   .ap-flash.alert-danger {
-    background-color: rgba(220, 53, 69, 0.07);
-    color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.07); color: #dc3545;
     border: 1px solid rgba(220, 53, 69, 0.12);
   }
 
   .ap-flash.alert-success {
-    background-color: rgba(40, 167, 69, 0.07);
-    color: #28a745;
-    border: 1px solid rgba(40, 167, 69, 0.12);
+    background-color: rgba(34, 197, 94, 0.07); color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.12);
   }
 
-  .ap-flash .btn-close {
-    padding: 0;
-    margin-left: auto;
-    flex-shrink: 0;
-  }
+  .ap-flash .btn-close { padding: 0; margin-left: auto; flex-shrink: 0; }
 
   /* ========== RESPONSIVE ========== */
   @media (max-width: 1199px) {
-    .ap-spec-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
+    .ap-spec-grid { grid-template-columns: repeat(3, 1fr); }
   }
 
   @media (max-width: 991px) {
-    .add-property-page {
-      padding: 1.5rem 0 3rem;
-    }
-    .ap-header h1 {
-      font-size: 1.45rem;
-    }
-    .ap-preview-card {
-      position: static;
-    }
-    .ap-access-badge {
-      display: none;
-    }
-    .ap-steps-bar {
-      position: sticky;
-      top: var(--navbar-height, 70px);
-      justify-content: flex-start;
-      padding: 0.5rem 0.75rem;
-    }
+    .add-property-page { padding: 1.5rem 0 3rem; }
+    .ap-header h1 { font-size: 1.45rem; }
+    .ap-preview-card { position: static; }
+    .ap-access-badge { display: none; }
+    .ap-steps-bar { position: sticky; top: var(--navbar-height, 70px); justify-content: flex-start; padding: 0.5rem 0.75rem; }
   }
 
   @media (max-width: 767px) {
-    .ap-section {
-      padding: 1.25rem;
-    }
-    .ap-address-grid {
-      grid-template-columns: 1fr;
-    }
-    .ap-spec-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-    .ap-check-group {
-      grid-template-columns: 1fr 1fr;
-    }
-    .ap-actions {
-      flex-direction: column;
-    }
+    .ap-section { padding: 1.25rem; }
+    .ap-address-grid { grid-template-columns: 1fr; }
+    .ap-spec-grid { grid-template-columns: 1fr 1fr; }
+    .ap-check-group { grid-template-columns: 1fr 1fr; }
+    .ap-actions { flex-direction: column; }
     .ap-actions .btn-ap-submit,
     .ap-actions .btn-ap-draft,
-    .ap-actions .btn-ap-cancel {
-      width: 100%;
-      justify-content: center;
-    }
-    .ap-step-label {
-      font-size: 0.72rem;
-    }
-    .ap-step-indicator {
-      width: 22px;
-      height: 22px;
-      font-size: 0.6rem;
-    }
-    .ap-step-connector {
-      width: 12px;
-    }
-    .ap-preview-gallery.has-images {
-      grid-template-rows: 80px 80px;
-    }
+    .ap-actions .btn-ap-cancel { width: 100%; justify-content: center; }
+    .ap-step-label { font-size: 0.68rem; }
+    .ap-step-indicator { width: 22px; height: 22px; font-size: 0.6rem; }
+    .ap-step-connector { width: 10px; }
+    .ap-preview-gallery.has-images { grid-template-rows: 80px 80px; }
+    .ap-step { padding: 0.3rem 0.4rem; gap: 0.25rem; }
   }
 
   @media (max-width: 480px) {
-    .ap-check-group {
-      grid-template-columns: 1fr;
-    }
-    .ap-spec-grid {
-      grid-template-columns: 1fr;
-    }
-    .ap-section-icon {
-      width: 34px;
-      height: 34px;
-      font-size: 0.85rem;
-    }
-    .ap-section-title {
-      font-size: 0.95rem;
-    }
-    .ap-steps-bar {
-      gap: 0;
-    }
-    .ap-step {
-      padding: 0.3rem 0.4rem;
-      gap: 0.3rem;
-    }
+    .ap-check-group { grid-template-columns: 1fr; }
+    .ap-spec-grid { grid-template-columns: 1fr; }
+    .ap-section-icon { width: 34px; height: 34px; font-size: 0.85rem; }
+    .ap-section-title { font-size: 0.95rem; }
+    .ap-steps-bar { gap: 0; }
+    /* On very small screens hide labels, only show numbers/checks */
+    .ap-step-label { display: none; }
+    .ap-step { padding: 0.3rem 0.3rem; }
+    .ap-step-connector { width: 8px; }
   }
 </style>
 {% endblock %}
@@ -1112,32 +896,58 @@
       <p>Fill out the details below to attract tenants quickly.</p>
     </header>
 
-    <!-- Sticky Steps Bar -->
+    <!-- =====================================================
+         STICKY STEPS BAR — 7 sections + Submit = 8 steps
+         ===================================================== -->
     <nav class="ap-steps-bar" id="stepsBar" aria-label="Form progress">
+
       <a class="ap-step" data-step-target="section-details" href="#section-details">
-        <div class="ap-step-indicator" id="stepIndicator1">1</div>
+        <div class="ap-step-indicator" id="si1">1</div>
         <span class="ap-step-label">Details</span>
       </a>
-      <div class="ap-step-connector" id="stepConn1"></div>
+      <div class="ap-step-connector" id="sc1"></div>
+
       <a class="ap-step" data-step-target="section-location" href="#section-location">
-        <div class="ap-step-indicator" id="stepIndicator2">2</div>
+        <div class="ap-step-indicator" id="si2">2</div>
         <span class="ap-step-label">Location</span>
       </a>
-      <div class="ap-step-connector" id="stepConn2"></div>
+      <div class="ap-step-connector" id="sc2"></div>
+
       <a class="ap-step" data-step-target="section-pricing" href="#section-pricing">
-        <div class="ap-step-indicator" id="stepIndicator3">3</div>
+        <div class="ap-step-indicator" id="si3">3</div>
         <span class="ap-step-label">Pricing</span>
       </a>
-      <div class="ap-step-connector" id="stepConn3"></div>
+      <div class="ap-step-connector" id="sc3"></div>
+
       <a class="ap-step" data-step-target="section-images" href="#section-images">
-        <div class="ap-step-indicator" id="stepIndicator4">4</div>
+        <div class="ap-step-indicator" id="si4">4</div>
         <span class="ap-step-label">Images</span>
       </a>
-      <div class="ap-step-connector" id="stepConn4"></div>
+      <div class="ap-step-connector" id="sc4"></div>
+
+      <a class="ap-step" data-step-target="section-specs" href="#section-specs">
+        <div class="ap-step-indicator" id="si5">5</div>
+        <span class="ap-step-label">Specs</span>
+      </a>
+      <div class="ap-step-connector" id="sc5"></div>
+
+      <a class="ap-step" data-step-target="section-features" href="#section-features">
+        <div class="ap-step-indicator" id="si6">6</div>
+        <span class="ap-step-label">Features</span>
+      </a>
+      <div class="ap-step-connector" id="sc6"></div>
+
+      <a class="ap-step" data-step-target="section-policies" href="#section-policies">
+        <div class="ap-step-indicator" id="si7">7</div>
+        <span class="ap-step-label">Policies</span>
+      </a>
+      <div class="ap-step-connector" id="sc7"></div>
+
       <a class="ap-step" data-step-target="section-submit" href="#section-submit">
-        <div class="ap-step-indicator" id="stepIndicator5">5</div>
+        <div class="ap-step-indicator" id="si8">✓</div>
         <span class="ap-step-label">Submit</span>
       </a>
+
     </nav>
 
     <div class="row g-4">
@@ -1146,13 +956,16 @@
         <form id="addPropertyForm" enctype="multipart/form-data" method="POST" action="{{ url_for('landlord.add_property') }}" novalidate>
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
-          <!-- SECTION 1: Property Details -->
-          <div class="ap-section" id="section-details" data-progress-group="1">
+          <!-- ── SECTION 1: Property Details ── -->
+          <div class="ap-section" id="section-details">
             <div class="ap-section-header">
               <div class="ap-section-icon"><i class="fas fa-building"></i></div>
               <div>
                 <h3 class="ap-section-title">Property Details</h3>
                 <p class="ap-section-subtitle">Basic information about your property</p>
+              </div>
+              <div class="ap-section-complete-badge">
+                <i class="fas fa-check-circle"></i> Complete
               </div>
             </div>
             <div class="ap-field">
@@ -1181,13 +994,16 @@
             </div>
           </div>
 
-          <!-- SECTION 2: Location -->
-          <div class="ap-section" id="section-location" data-progress-group="2">
+          <!-- ── SECTION 2: Location ── -->
+          <div class="ap-section" id="section-location">
             <div class="ap-section-header">
               <div class="ap-section-icon"><i class="fas fa-map-marker-alt"></i></div>
               <div>
                 <h3 class="ap-section-title">Location</h3>
                 <p class="ap-section-subtitle">Where is the property located?</p>
+              </div>
+              <div class="ap-section-complete-badge">
+                <i class="fas fa-check-circle"></i> Complete
               </div>
             </div>
             <div class="ap-address-grid">
@@ -1229,13 +1045,16 @@
             </div>
           </div>
 
-          <!-- SECTION 3: Pricing & Terms -->
-          <div class="ap-section" id="section-pricing" data-progress-group="3">
+          <!-- ── SECTION 3: Pricing & Terms ── -->
+          <div class="ap-section" id="section-pricing">
             <div class="ap-section-header">
               <div class="ap-section-icon"><i class="fas fa-tag"></i></div>
               <div>
                 <h3 class="ap-section-title">Pricing &amp; Terms</h3>
                 <p class="ap-section-subtitle">Rent, lease terms, and deposit</p>
+              </div>
+              <div class="ap-section-complete-badge">
+                <i class="fas fa-check-circle"></i> Complete
               </div>
             </div>
             <div class="row g-3">
@@ -1275,13 +1094,16 @@
             </div>
           </div>
 
-          <!-- SECTION 4: Images -->
-          <div class="ap-section" id="section-images" data-progress-group="4">
+          <!-- ── SECTION 4: Images ── -->
+          <div class="ap-section" id="section-images">
             <div class="ap-section-header">
               <div class="ap-section-icon"><i class="fas fa-camera"></i></div>
               <div>
                 <h3 class="ap-section-title">Property Images</h3>
                 <p class="ap-section-subtitle">Upload photos to showcase your property</p>
+              </div>
+              <div class="ap-section-complete-badge">
+                <i class="fas fa-check-circle"></i> Complete
               </div>
             </div>
             <div class="ap-upload-area" id="uploadArea">
@@ -1298,13 +1120,16 @@
             <div class="ap-image-previews" id="imagePreview"></div>
           </div>
 
-          <!-- SECTION 5: Specifications -->
-          <div class="ap-section" data-progress-group="1">
+          <!-- ── SECTION 5: Specifications ── -->
+          <div class="ap-section" id="section-specs">
             <div class="ap-section-header">
               <div class="ap-section-icon"><i class="fas fa-ruler-combined"></i></div>
               <div>
                 <h3 class="ap-section-title">Specifications</h3>
                 <p class="ap-section-subtitle">Room count and size details</p>
+              </div>
+              <div class="ap-section-complete-badge">
+                <i class="fas fa-check-circle"></i> Complete
               </div>
             </div>
             <div class="ap-spec-grid">
@@ -1325,13 +1150,16 @@
             </div>
           </div>
 
-          <!-- SECTION 6: Features & Amenities -->
-          <div class="ap-section" data-progress-group="1">
+          <!-- ── SECTION 6: Features & Amenities ── -->
+          <div class="ap-section" id="section-features">
             <div class="ap-section-header">
               <div class="ap-section-icon"><i class="fas fa-star"></i></div>
               <div>
                 <h3 class="ap-section-title">Features &amp; Amenities</h3>
                 <p class="ap-section-subtitle">Select what's included with the property</p>
+              </div>
+              <div class="ap-section-complete-badge">
+                <i class="fas fa-check-circle"></i> Complete
               </div>
             </div>
 
@@ -1373,17 +1201,26 @@
                 <label class="ap-check-item"><input type="checkbox" name="amenities" value="Gym" /> <i class="fas fa-dumbbell me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Gym</label>
                 <label class="ap-check-item"><input type="checkbox" name="amenities" value="Swimming Pool" /> <i class="fas fa-swimming-pool me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Pool</label>
                 <label class="ap-check-item"><input type="checkbox" name="amenities" value="Garden" /> <i class="fas fa-leaf me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Garden</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="CCTV Security" /> <i class="fas fa-video me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>CCTV</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Borehole Water" /> <i class="fas fa-water me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Borehole</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Solar Power" /> <i class="fas fa-solar-panel me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Solar</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Generator Backup" /> <i class="fas fa-plug me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Generator</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Rooftop Terrace" /> <i class="fas fa-city me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Rooftop</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Servant Quarters" /> <i class="fas fa-home me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>SQ</label>
               </div>
             </div>
           </div>
 
-          <!-- SECTION 7: Policies -->
-          <div class="ap-section" data-progress-group="1">
+          <!-- ── SECTION 7: Policies & Accessibility ── -->
+          <div class="ap-section" id="section-policies">
             <div class="ap-section-header">
               <div class="ap-section-icon"><i class="fas fa-shield-alt"></i></div>
               <div>
                 <h3 class="ap-section-title">Policies &amp; Accessibility</h3>
                 <p class="ap-section-subtitle">Rules and accessibility features</p>
+              </div>
+              <div class="ap-section-complete-badge">
+                <i class="fas fa-check-circle"></i> Complete
               </div>
             </div>
 
@@ -1419,7 +1256,15 @@
                 <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Wheelchair Access" /> <i class="fas fa-wheelchair me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Wheelchair Access</label>
                 <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Elevator" /> <i class="fas fa-arrows-alt-v me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Elevator</label>
                 <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Grab Bars" /> <i class="fas fa-hand-paper me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Grab Bars</label>
+                <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Wide Doorways" /> <i class="fas fa-door-closed me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Wide Doorways</label>
+                <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Step-Free Entry" /> <i class="fas fa-walking me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Step-Free Entry</label>
               </div>
+            </div>
+
+            <div class="ap-field">
+              <label>Additional House Rules</label>
+              <textarea class="ap-textarea" id="houseRules" name="house_rules" rows="3" placeholder="e.g., No loud music after 10pm, no subletting allowed..."></textarea>
+              <p class="ap-hint">Optional: any additional rules tenants should know before applying.</p>
             </div>
           </div>
 
@@ -1438,7 +1283,7 @@
             </div>
           </div>
 
-          <!-- Submit Section -->
+          <!-- ── Submit Section ── -->
           <div id="section-submit">
             <div class="ap-actions">
               <button type="submit" class="btn-ap-submit" id="submitProperty">
@@ -1479,6 +1324,15 @@
         </aside>
 
         <div class="ap-preview-card" aria-label="Property preview">
+          <!-- Progress bar at top of preview -->
+          <div class="ap-pv-progress">
+            <span class="ap-pv-progress-label">Progress</span>
+            <div class="ap-pv-progress-bar-wrap">
+              <div class="ap-pv-progress-bar" id="pvProgressBar"></div>
+            </div>
+            <span class="ap-pv-progress-pct" id="pvProgressPct">0%</span>
+          </div>
+
           <div class="ap-preview-gallery" id="previewGallery">
             <i class="fas fa-image"></i>
             <span class="ap-preview-gallery-badge">Preview</span>
@@ -1543,50 +1397,180 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('addPropertyForm');
-  const feedback = document.getElementById('addPropertyFeedback');
-  const submitButton = document.getElementById('submitProperty');
-  const submitBtnText = document.getElementById('submitBtnText');
-  const submitSpinner = document.getElementById('submitSpinner');
-  const saveDraftButton = document.getElementById('saveDraft');
+  const form             = document.getElementById('addPropertyForm');
+  const feedback         = document.getElementById('addPropertyFeedback');
+  const submitButton     = document.getElementById('submitProperty');
+  const submitBtnText    = document.getElementById('submitBtnText');
+  const submitSpinner    = document.getElementById('submitSpinner');
+  const saveDraftButton  = document.getElementById('saveDraft');
   const toggleTipsButton = document.getElementById('toggleTips');
-  const tipsBody = document.getElementById('tipsBody');
+  const tipsBody         = document.getElementById('tipsBody');
 
   const MAX_IMAGES = 10;
-
-  // Global file store — single source of truth for image accumulation
   let allFiles = [];
 
   const el = (id) => document.getElementById(id);
+
   const inputs = {
-    name: el('propertyName'),
-    type: el('propertyType'),
-    description: el('propertyDescription'),
-    addressLine1: el('addressLine1'),
-    addressLine2: el('addressLine2'),
-    city: el('city'),
-    stateProvince: el('stateProvince'),
-    postalCode: el('postalCode'),
-    country: el('country'),
-    rent: el('rentAmount'),
-    deposit: el('securityDeposit'),
-    leaseTerm: el('leaseTerm'),
+    name:             el('propertyName'),
+    type:             el('propertyType'),
+    description:      el('propertyDescription'),
+    addressLine1:     el('addressLine1'),
+    addressLine2:     el('addressLine2'),
+    city:             el('city'),
+    stateProvince:    el('stateProvince'),
+    postalCode:       el('postalCode'),
+    country:          el('country'),
+    rent:             el('rentAmount'),
+    deposit:          el('securityDeposit'),
+    leaseTerm:        el('leaseTerm'),
     availabilityDate: el('availabilityDate'),
-    images: el('propertyImages'),
-    bedrooms: el('bedrooms'),
-    bathrooms: el('bathrooms'),
-    squareFootage: el('squareFootage'),
-    parking: el('parkingAvailability'),
-    furnished: document.querySelectorAll('input[name="furnished_status"]'),
-    utilities: document.querySelectorAll('input[name="utilities"]'),
-    amenities: document.querySelectorAll('input[name="amenities"]'),
-    pets: document.querySelectorAll('input[name="pets_allowed"]'),
-    petRestrictions: el('petRestrictions'),
-    smoking: document.querySelectorAll('input[name="smoking_policy"]'),
-    accessibility: document.querySelectorAll('input[name="accessibility_features"]')
+    images:           el('propertyImages'),
+    bedrooms:         el('bedrooms'),
+    bathrooms:        el('bathrooms'),
+    squareFootage:    el('squareFootage'),
+    parking:          el('parkingAvailability'),
+    furnished:        document.querySelectorAll('input[name="furnished_status"]'),
+    utilities:        document.querySelectorAll('input[name="utilities"]'),
+    amenities:        document.querySelectorAll('input[name="amenities"]'),
+    pets:             document.querySelectorAll('input[name="pets_allowed"]'),
+    petRestrictions:  el('petRestrictions'),
+    smoking:          document.querySelectorAll('input[name="smoking_policy"]'),
+    accessibility:    document.querySelectorAll('input[name="accessibility_features"]'),
+    houseRules:       el('houseRules'),
   };
 
-  // ---- Check item visual toggle ----
+  // ================================================================
+  // STEP / SECTION COMPLETION CHECKS
+  // Each returns true when the section is sufficiently filled.
+  // ================================================================
+  function isDetailsComplete() {
+    return !!(
+      inputs.name.value.trim() &&
+      inputs.type.value &&
+      inputs.description.value.trim() &&
+      inputs.description.value.length <= 500
+    );
+  }
+
+  function isLocationComplete() {
+    return !!(
+      inputs.addressLine1.value.trim() &&
+      inputs.city.value.trim() &&
+      inputs.stateProvince.value.trim() &&
+      inputs.country.value
+    );
+  }
+
+  function isPricingComplete() {
+    return !!(
+      inputs.rent.value &&
+      Number(inputs.rent.value) > 0 &&
+      inputs.leaseTerm.value &&
+      inputs.availabilityDate.value
+    );
+  }
+
+  function isImagesComplete() {
+    return allFiles.length > 0;
+  }
+
+  function isSpecsComplete() {
+    return !!(
+      inputs.bedrooms.value !== '' && Number(inputs.bedrooms.value) >= 0 &&
+      inputs.bathrooms.value !== '' && Number(inputs.bathrooms.value) >= 0
+    );
+  }
+
+  // Features & Amenities: always considered complete (all fields are optional)
+  // — turns green as soon as the user visits/interacts with any option.
+  function isFeaturesComplete() {
+    const hasParking    = inputs.parking.value !== 'None';
+    const hasFurnished  = Array.from(inputs.furnished).some(f => f.checked && f.value !== 'Unfurnished');
+    const hasUtility    = Array.from(inputs.utilities).some(u => u.checked);
+    const hasAmenity    = Array.from(inputs.amenities).some(a => a.checked);
+    // Section is "acknowledged" if any non-default selection was made,
+    // OR the user left everything at default (still valid — mark complete).
+    // We treat it as complete always since none are required.
+    return true;
+  }
+
+  // Policies: always complete (all fields have defaults)
+  function isPoliciesComplete() {
+    return true;
+  }
+
+  // ================================================================
+  // UPDATE STEPS BAR + SECTION BORDERS + PREVIEW PROGRESS BAR
+  // ================================================================
+  function updateSteps() {
+    const states = [
+      isDetailsComplete(),
+      isLocationComplete(),
+      isPricingComplete(),
+      isImagesComplete(),
+      isSpecsComplete(),
+      isFeaturesComplete(),
+      isPoliciesComplete(),
+    ];
+
+    const completedCount = states.filter(Boolean).length;
+    const total = states.length;
+    const pct = Math.round((completedCount / total) * 100);
+
+    // --- Progress bar in preview ---
+    el('pvProgressBar').style.width = pct + '%';
+    el('pvProgressPct').textContent  = pct + '%';
+
+    // --- Section ids in DOM order ---
+    const sectionIds = [
+      'section-details',
+      'section-location',
+      'section-pricing',
+      'section-images',
+      'section-specs',
+      'section-features',
+      'section-policies',
+    ];
+
+    states.forEach((done, i) => {
+      const stepEl    = document.querySelectorAll('.ap-step')[i];
+      const indicator = el(`si${i + 1}`);
+      const connector = el(`sc${i + 1}`);
+      const section   = el(sectionIds[i]);
+
+      if (done) {
+        // Step pill
+        stepEl.classList.add('completed');
+        indicator.innerHTML = '<i class="fas fa-check"></i>';
+        // Connector to next step
+        if (connector) connector.classList.add('completed');
+        // Section card
+        section.classList.add('section-complete');
+      } else {
+        stepEl.classList.remove('completed');
+        indicator.textContent = i + 1;
+        if (connector) connector.classList.remove('completed');
+        section.classList.remove('section-complete');
+      }
+    });
+
+    // Submit step (index 7, id si8) — lights up when everything is done
+    const allDone    = states.every(Boolean);
+    const submitStep = document.querySelectorAll('.ap-step')[7];
+    const submitInd  = el('si8');
+    if (allDone) {
+      submitStep.classList.add('completed');
+      submitInd.innerHTML = '<i class="fas fa-check"></i>';
+    } else {
+      submitStep.classList.remove('completed');
+      submitInd.innerHTML = '✓';
+    }
+  }
+
+  // ================================================================
+  // CHECK ITEM VISUAL TOGGLE
+  // ================================================================
   document.querySelectorAll('.ap-check-item input').forEach(inp => {
     inp.addEventListener('change', () => {
       const item = inp.closest('.ap-check-item');
@@ -1602,21 +1586,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (inp.checked) inp.closest('.ap-check-item').classList.add('selected');
   });
 
-  // ---- Character count ----
+  // ================================================================
+  // CHARACTER COUNT
+  // ================================================================
   const charCount = el('charCount');
   inputs.description.addEventListener('input', () => {
     const len = inputs.description.value.length;
     charCount.textContent = `${len} / 500 characters`;
-    charCount.className = 'ap-char-count' + (len > 450 ? (len > 500 ? ' danger' : ' warning') : '');
+    charCount.className   = 'ap-char-count' + (len > 450 ? (len > 500 ? ' danger' : ' warning') : '');
     inputs.description.classList.toggle('is-invalid', len > 500);
     updatePreview();
     updateSteps();
   });
 
-  // ---- Image upload ----
-  const uploadArea = el('uploadArea');
-  const imagePreview = el('imagePreview');
-  const uploadError = el('uploadError');
+  // ================================================================
+  // IMAGE UPLOAD
+  // ================================================================
+  const uploadArea    = el('uploadArea');
+  const imagePreview  = el('imagePreview');
+  const uploadError   = el('uploadError');
   const imageCountNum = el('imageCountNum');
 
   ['dragover', 'dragenter'].forEach(evt => {
@@ -1632,16 +1620,14 @@ document.addEventListener('DOMContentLoaded', () => {
     updateFileInput();
   });
 
-  inputs.images.addEventListener('change', (e) => {
-    const newFiles = Array.from(e.target.files);
-    allFiles = [...allFiles, ...newFiles].slice(0, MAX_IMAGES);
+  inputs.images.addEventListener('change', () => {
+    allFiles = [...allFiles, ...Array.from(inputs.images.files)].slice(0, MAX_IMAGES);
     updateFileInput();
   });
 
-  // Sync allFiles into the native input so traditional form submit picks them up
   function updateFileInput() {
     const dt = new DataTransfer();
-    allFiles.forEach(file => dt.items.add(file));
+    allFiles.forEach(f => dt.items.add(f));
     inputs.images.files = dt.files;
     handleImages();
   }
@@ -1653,36 +1639,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const count = allFiles.length;
     imageCountNum.textContent = count;
-    imageCountNum.className = 'count-num' + (count > 0 ? ' has-images' : '');
+    imageCountNum.className   = 'count-num' + (count > 0 ? ' has-images' : '');
 
     if (count > MAX_IMAGES) {
       uploadError.textContent = `Maximum ${MAX_IMAGES} images allowed. You have ${count}.`;
       uploadError.classList.add('visible');
     }
 
-    for (const file of allFiles) {
+    allFiles.forEach((file, idx) => {
       if (!['image/jpeg', 'image/png'].includes(file.type)) {
         uploadError.textContent = `"${file.name}" is not a valid format. Use JPG or PNG.`;
         uploadError.classList.add('visible');
-        continue;
+        return;
       }
       if (file.size > 5 * 1024 * 1024) {
         uploadError.textContent = `"${file.name}" exceeds the 5MB limit.`;
         uploadError.classList.add('visible');
-        continue;
+        return;
       }
-    }
 
-    allFiles.forEach((file, idx) => {
-      const wrap = document.createElement('div');
-      wrap.className = 'ap-thumb';
-      const img = document.createElement('img');
-      img.src = URL.createObjectURL(file);
-      const badge = document.createElement('div');
+      const wrap      = document.createElement('div');
+      wrap.className  = 'ap-thumb';
+      const img       = document.createElement('img');
+      img.src         = URL.createObjectURL(file);
+      const badge     = document.createElement('div');
       badge.className = 'ap-thumb-badge';
       badge.textContent = idx === 0 ? 'Cover' : `#${idx + 1}`;
-      const removeBtn = document.createElement('button');
-      removeBtn.type = 'button';
+      const removeBtn   = document.createElement('button');
+      removeBtn.type    = 'button';
       removeBtn.className = 'ap-thumb-remove';
       removeBtn.innerHTML = '<i class="fas fa-times"></i>';
       removeBtn.addEventListener('click', () => {
@@ -1699,9 +1683,12 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSteps();
   }
 
-  // ---- Real-time preview ----
+  // ================================================================
+  // REAL-TIME PREVIEW
+  // ================================================================
   function updatePreview() {
     el('previewTitle').textContent = inputs.name.value || 'Property Name';
+
     const typeBadge = el('previewTypeBadge');
     if (inputs.type.value) {
       typeBadge.textContent = inputs.type.value;
@@ -1715,14 +1702,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const shortLoc = [inputs.city.value, inputs.country.value].filter(Boolean).join(', ');
     el('previewLocation').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${shortLoc || 'City, Country'}`;
 
-    el('previewPrice').textContent = inputs.rent.value ? `KES ${Number(inputs.rent.value).toLocaleString()}/mo` : 'KES 0/mo';
-    el('previewDeposit').innerHTML = `<i class="fas fa-lock"></i> Deposit: ${inputs.deposit.value ? 'KES ' + Number(inputs.deposit.value).toLocaleString() : '--'}`;
+    el('previewPrice').textContent = inputs.rent.value
+      ? `KES ${Number(inputs.rent.value).toLocaleString()}/mo`
+      : 'KES 0/mo';
 
-    if (inputs.leaseTerm.value) {
-      el('previewLease').innerHTML = `<i class="fas fa-file-contract"></i> Lease: ${inputs.leaseTerm.value}`;
-    } else {
-      el('previewLease').innerHTML = `<i class="fas fa-file-contract"></i> Lease: --`;
-    }
+    el('previewDeposit').innerHTML = `<i class="fas fa-lock"></i> Deposit: ${inputs.deposit.value ? 'KES ' + Number(inputs.deposit.value).toLocaleString() : '--'}`;
+    el('previewLease').innerHTML   = `<i class="fas fa-file-contract"></i> Lease: ${inputs.leaseTerm.value || '--'}`;
 
     if (inputs.availabilityDate.value) {
       const d = new Date(inputs.availabilityDate.value + 'T00:00:00');
@@ -1731,27 +1716,27 @@ document.addEventListener('DOMContentLoaded', () => {
       el('previewAvail').innerHTML = `<i class="fas fa-calendar"></i> Available: --`;
     }
 
-    el('previewBeds').textContent = inputs.bedrooms.value ? `${inputs.bedrooms.value} Bed${inputs.bedrooms.value > 1 ? 's' : ''}` : '0 Beds';
+    el('previewBeds').textContent  = inputs.bedrooms.value  ? `${inputs.bedrooms.value} Bed${inputs.bedrooms.value > 1 ? 's' : ''}`   : '0 Beds';
     el('previewBaths').textContent = inputs.bathrooms.value ? `${inputs.bathrooms.value} Bath${inputs.bathrooms.value > 1 ? 's' : ''}` : '0 Baths';
-    el('previewSqft').textContent = inputs.squareFootage.value ? `${Number(inputs.squareFootage.value).toLocaleString()} sq ft` : '-- sq ft';
+    el('previewSqft').textContent  = inputs.squareFootage.value ? `${Number(inputs.squareFootage.value).toLocaleString()} sq ft` : '-- sq ft';
 
-    // Gallery from allFiles
+    // Gallery
     const gallery = el('previewGallery');
     gallery.querySelectorAll('img').forEach(img => img.remove());
-    const existingCountBadge = gallery.querySelector('.ap-preview-gallery-count');
-    if (existingCountBadge) existingCountBadge.remove();
+    const existingCount = gallery.querySelector('.ap-preview-gallery-count');
+    if (existingCount) existingCount.remove();
 
     if (allFiles.length > 0) {
       gallery.classList.add('has-images');
       const showCount = Math.min(allFiles.length, 4);
       for (let i = 0; i < showCount; i++) {
-        const img = document.createElement('img');
+        const img     = document.createElement('img');
         img.className = 'ap-pv-gallery-img';
-        img.src = URL.createObjectURL(allFiles[i]);
+        img.src       = URL.createObjectURL(allFiles[i]);
         gallery.appendChild(img);
       }
       if (allFiles.length > 1) {
-        const countBadge = document.createElement('span');
+        const countBadge     = document.createElement('span');
         countBadge.className = 'ap-preview-gallery-count';
         countBadge.textContent = `+${allFiles.length - 1} more`;
         gallery.appendChild(countBadge);
@@ -1769,118 +1754,76 @@ document.addEventListener('DOMContentLoaded', () => {
     Array.from(inputs.amenities).filter(a => a.checked).forEach(a => tags.push(a.value));
 
     const featuresEl = el('previewFeatures');
-    if (tags.length > 0) {
-      featuresEl.innerHTML = tags.map(t => `<span class="ap-preview-tag">${t}</span>`).join('');
-    } else {
-      featuresEl.innerHTML = '<span class="ap-pv-empty">No features selected</span>';
-    }
+    featuresEl.innerHTML = tags.length > 0
+      ? tags.map(t => `<span class="ap-preview-tag">${t}</span>`).join('')
+      : '<span class="ap-pv-empty">No features selected</span>';
 
     // Policies
-    const petsVal = Array.from(inputs.pets).find(p => p.checked);
+    const petsVal  = Array.from(inputs.pets).find(p => p.checked);
     el('previewPets').textContent = `Pets: ${petsVal ? petsVal.value : 'No'}`;
+
     const smokeVal = Array.from(inputs.smoking).find(s => s.checked);
     el('previewSmoking').textContent = `Smoking: ${smokeVal ? smokeVal.value : 'Non-Smoking'}`;
+
     const accessVals = Array.from(inputs.accessibility).filter(a => a.checked).map(a => a.value);
     el('previewAccess').textContent = `Accessibility: ${accessVals.length > 0 ? accessVals.join(', ') : 'None'}`;
   }
 
-  // ---- Steps bar ----
-  function updateSteps() {
-    const detailsFilled = inputs.name.value.trim() &&
-                          inputs.type.value &&
-                          inputs.description.value.trim() &&
-                          inputs.bedrooms.value &&
-                          inputs.bathrooms.value;
-
-    const locationFilled = inputs.addressLine1.value.trim() &&
-                           inputs.city.value.trim() &&
-                           inputs.stateProvince.value.trim() &&
-                           inputs.country.value;
-
-    const pricingFilled = inputs.rent.value &&
-                          inputs.leaseTerm.value &&
-                          inputs.availabilityDate.value;
-
-    const imagesFilled = allFiles.length > 0;
-
-    const states = [detailsFilled, locationFilled, pricingFilled, imagesFilled];
-    const allFilled = states.every(Boolean);
-
-    for (let i = 0; i < 4; i++) {
-      const stepEl = document.querySelectorAll('.ap-step')[i];
-      const indicator = el(`stepIndicator${i + 1}`);
-      if (states[i]) {
-        stepEl.classList.add('completed');
-        indicator.innerHTML = '<i class="fas fa-check"></i>';
-      } else {
-        stepEl.classList.remove('completed');
-        indicator.textContent = i + 1;
-      }
-    }
-
-    for (let i = 0; i < 4; i++) {
-      const conn = el(`stepConn${i + 1}`);
-      if (conn) conn.classList.toggle('completed', states[i]);
-    }
-
-    const submitStep = document.querySelectorAll('.ap-step')[4];
-    const submitIndicator = el('stepIndicator5');
-    if (allFilled) {
-      submitStep.classList.add('completed');
-      submitIndicator.innerHTML = '<i class="fas fa-check"></i>';
-    } else {
-      submitStep.classList.remove('completed');
-      submitIndicator.textContent = '5';
-    }
-  }
-
-  // ---- Steps click-to-scroll ----
+  // ================================================================
+  // STEP CLICK-TO-SCROLL
+  // ================================================================
   document.querySelectorAll('.ap-step').forEach(step => {
     step.addEventListener('click', (e) => {
       e.preventDefault();
       const targetId = step.getAttribute('data-step-target');
-      const target = document.getElementById(targetId);
-      if (target) {
-        const stepsBar = el('stepsBar');
-        const stepsBarHeight = stepsBar ? stepsBar.offsetHeight : 0;
-        const navHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--navbar-height')) || 70;
-        const offset = navHeight + stepsBarHeight + 12;
-        const top = target.getBoundingClientRect().top + window.scrollY - offset;
-        window.scrollTo({ top, behavior: 'smooth' });
-      }
+      const target   = document.getElementById(targetId);
+      if (!target) return;
+      const stepsBar       = el('stepsBar');
+      const stepsBarHeight = stepsBar ? stepsBar.offsetHeight : 0;
+      const navHeight      = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--navbar-height')) || 70;
+      const offset         = navHeight + stepsBarHeight + 12;
+      const top            = target.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top, behavior: 'smooth' });
     });
   });
 
-  // Listen on all text/select inputs
-  [inputs.name, inputs.type, inputs.description, inputs.addressLine1, inputs.addressLine2,
-   inputs.city, inputs.stateProvince, inputs.postalCode, inputs.country, inputs.rent,
-   inputs.deposit, inputs.leaseTerm, inputs.availabilityDate, inputs.bedrooms, inputs.bathrooms,
-   inputs.squareFootage, inputs.parking, inputs.petRestrictions
+  // ================================================================
+  // LISTEN ON ALL INPUTS
+  // ================================================================
+  [
+    inputs.name, inputs.type, inputs.description,
+    inputs.addressLine1, inputs.addressLine2,
+    inputs.city, inputs.stateProvince, inputs.postalCode, inputs.country,
+    inputs.rent, inputs.deposit, inputs.leaseTerm, inputs.availabilityDate,
+    inputs.bedrooms, inputs.bathrooms, inputs.squareFootage,
+    inputs.parking, inputs.petRestrictions, inputs.houseRules,
   ].forEach(inp => {
     if (!inp) return;
-    inp.addEventListener('input', () => { updatePreview(); updateSteps(); });
+    inp.addEventListener('input',  () => { updatePreview(); updateSteps(); });
     inp.addEventListener('change', () => { updatePreview(); updateSteps(); });
   });
 
-  // ---- Toggle tips ----
+  // ================================================================
+  // TIPS TOGGLE
+  // ================================================================
   toggleTipsButton.addEventListener('click', () => {
     const isHidden = tipsBody.classList.toggle('collapsed');
     toggleTipsButton.textContent = isHidden ? 'Show Tips' : 'Hide Tips';
     toggleTipsButton.setAttribute('aria-expanded', !isHidden);
   });
 
-  // ---- Min date ----
-  const today = new Date().toISOString().split('T')[0];
-  inputs.availabilityDate.setAttribute('min', today);
+  // ================================================================
+  // MIN DATE
+  // ================================================================
+  inputs.availabilityDate.setAttribute('min', new Date().toISOString().split('T')[0]);
 
-  // =============================================
-  // FORM SUBMIT — traditional POST, lets Flask
-  // handle the redirect natively
-  // =============================================
+  // ================================================================
+  // FORM SUBMIT
+  // ================================================================
   form.addEventListener('submit', (event) => {
-    // Client-side validation only — if invalid, stop the native submit
     const requiredFields = form.querySelectorAll('[required]');
     let valid = true;
+
     requiredFields.forEach(f => {
       if (!f.value || (f.tagName === 'SELECT' && f.value === '')) {
         f.classList.add('is-invalid');
@@ -1896,36 +1839,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (!valid) {
-      event.preventDefault(); // Block submit
+      event.preventDefault();
       showFeedback('Please fill in all required fields correctly.', 'danger');
       const firstInvalid = form.querySelector('.is-invalid');
       if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
-    // Valid — sync allFiles into the input one final time, then let the
-    // browser do its normal POST. Flask receives the multipart form data,
-    // processes it, and returns the redirect.
     updateFileInput();
-
-    // Show loading state while the browser navigates away
-    submitButton.disabled = true;
-    submitBtnText.textContent = 'Listing...';
-    submitSpinner.style.display = 'block';
-
-    // NO event.preventDefault() here — the browser submits natively.
-    // Flask's redirect(response) will take over.
+    submitButton.disabled        = true;
+    submitBtnText.textContent    = 'Listing...';
+    submitSpinner.style.display  = 'block';
   });
 
-  // ---- Save draft (still async — separate endpoint, no redirect needed) ----
+  // ================================================================
+  // SAVE DRAFT
+  // ================================================================
   saveDraftButton.addEventListener('click', async () => {
     saveDraftButton.disabled = true;
     showFeedback('Saving draft...', 'info');
-
-    // Sync files before sending
     updateFileInput();
 
-    const formData = new FormData(form);
+    const formData  = new FormData(form);
     formData.append('user_id', {{ current_user.id }});
     const csrfToken = form.querySelector('input[name="csrf_token"]').value;
 
@@ -1936,14 +1871,8 @@ document.addEventListener('DOMContentLoaded', () => {
         body: formData,
         credentials: 'include'
       });
-
       const result = await response.json();
-
-      if (response.ok) {
-        showFeedback(result.message || 'Draft saved successfully!', 'success');
-      } else {
-        showFeedback(result.message || 'Error saving draft.', 'danger');
-      }
+      showFeedback(result.message || (response.ok ? 'Draft saved successfully!' : 'Error saving draft.'), response.ok ? 'success' : 'danger');
     } catch (error) {
       showFeedback(`Error: ${error.message}`, 'danger');
     } finally {
@@ -1951,14 +1880,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // ---- Feedback helper ----
+  // ================================================================
+  // FEEDBACK HELPER
+  // ================================================================
   function showFeedback(msg, type) {
     const iconMap = { success: 'check-circle', danger: 'exclamation-circle', info: 'spinner fa-spin' };
     feedback.className = `ap-feedback alert-${type} visible`;
     feedback.innerHTML = `<i class="fas fa-${iconMap[type] || 'info-circle'}"></i><span>${msg}</span>`;
   }
 
-  // Initial state
+  // ================================================================
+  // INIT
+  // ================================================================
   updatePreview();
   updateSteps();
 });
