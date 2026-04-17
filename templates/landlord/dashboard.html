@@ -86,7 +86,7 @@
   .notif-dropdown {
     position: absolute;
     top: calc(100% + 10px);
-    left: 0;
+    right: 0;           /* Desktop: opens leftward from bell — nothing clips off-screen */
     width: 320px;
     background: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -108,12 +108,12 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* Small caret arrow — points up toward the bell */
+  /* Caret arrow — sits above the bell on desktop (right-aligned) */
   .notif-dropdown::before {
     content: '';
     position: absolute;
     top: -7px;
-    left: 12px;
+    right: 12px;        /* Matches right:0 alignment */
     width: 13px;
     height: 13px;
     background: var(--card-bg);
@@ -1154,9 +1154,11 @@
     /* Responsive: notification dropdown on small screens */
     .notif-dropdown {
       width: calc(100vw - 2rem);
+      right: auto;
       left: 0;
     }
     .notif-dropdown::before {
+      right: auto;
       left: 12px;
     }
   }
