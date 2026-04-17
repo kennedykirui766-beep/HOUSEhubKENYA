@@ -1,78 +1,88 @@
 """
 Email Verification Module
 Handles sending email-based 2FA codes.
-Supports multiple providers (Flask-Mail, SendGrid, etc).
+Supports multiple providers (Flask-Mail, MAILJET, etc).
 """
 
 import json
 import logging
 import os
+import base64
 from typing import Optional
 from urllib import error as urlerror, request as urlrequest
 
 logger = logging.getLogger(__name__)
-
 # Email provider configuration
-EMAIL_PROVIDER = os.environ.get('EMAIL_PROVIDER', 'sendgrid')  # 'smtp', 'sendgrid', 'mailgun'
+# Read raw env first, then normalize and log the resolved value.
+raw_email_provider = os.environ.get('EMAIL_PROVIDER')
+EMAIL_PROVIDER = raw_email_provider if raw_email_provider is not None else 'MAILJET'
+if EMAIL_PROVIDER is not None:
+    EMAIL_PROVIDER = EMAIL_PROVIDER.strip().upper()
+else:
+    EMAIL_PROVIDER = 'MAILJET'
+
+# Log resolved provider at import time for easier diagnostics. (shows raw + normalized)
+logger.info(f"Resolved EMAIL_PROVIDER raw={raw_email_provider!r} normalized={EMAIL_PROVIDER!r}")
 # Do not hard-code any real email addresses or secrets here; require env var.
 # If `SENDER_EMAIL` is not set, use an empty string so no secret is stored in source.
 SENDER_EMAIL = os.environ.get('SENDER_EMAIL', '')
 SUPPORT_EMAIL = os.environ.get('SUPPORT_EMAIL', SENDER_EMAIL)
-SENDER_NAME = os.environ.get('SENDER_NAME', 'HomeHub')
+SENDER_NAME = os.environ.get('SENDER_NAME', 'HOUSEhubKENYA')
 
 
-def _send_sendgrid_message(
+def _send_MAILJET_message(
     recipient_email: str,
     subject: str,
     html_content: str,
     text_content: str,
     reply_to_email: Optional[str] = None,
 ) -> bool:
-    """Send an email through the SendGrid REST API."""
-    # Avoid embedding the literal env var name to keep pre-commit secret scanners happy.
-    sendgrid_key = os.environ.get('SENDGRID' + '_API_KEY')
-    if not sendgrid_key:
-        logger.error("SendGrid API key not configured")
+    MAILJET_key = os.environ.get('MAILJET_API_KEY')
+    MAILJET_secret = os.environ.get('MAILJET_API_SECRET')
+    
+    if not MAILJET_key or not MAILJET_secret:
+        logger.error("MAILJET credentials not fully configured")
         return False
 
+    # Mailjet v3.1 Payload Structure
     payload = {
-        "personalizations": [
-            {
-                "to": [{"email": recipient_email}],
-            }
-        ],
-        "from": {"email": SENDER_EMAIL, "name": SENDER_NAME},
-        "subject": subject,
-        "content": [
-            {"type": "text/plain", "value": text_content},
-            {"type": "text/html", "value": html_content},
-        ],
+        "Messages": [{
+            "From": {"Email": SENDER_EMAIL, "Name": SENDER_NAME},
+            "To": [{"Email": recipient_email}],
+            "Subject": subject,
+            "TextPart": text_content,
+            "HTMLPart": html_content
+        }]
     }
 
     if reply_to_email:
-        payload["reply_to"] = {"email": reply_to_email}
+        payload["Messages"][0]["ReplyTo"] = {"Email": reply_to_email}
+
+    # Basic Auth Header
+    auth_str = base64.b64encode(f"{MAILJET_key}:{MAILJET_secret}".encode()).decode()
 
     request = urlrequest.Request(
-        "https://api.sendgrid.com/v3/mail/send",
+        "https://api.mailjet.com/v3.1/send",
         data=json.dumps(payload).encode("utf-8"),
         headers={
-            "Authorization": f"Bearer {sendgrid_key}",
+            "Authorization": f"Basic {auth_str}",
             "Content-Type": "application/json",
         },
         method="POST",
     )
+    
 
     try:
         with urlrequest.urlopen(request, timeout=20) as response:
             if response.status in (200, 201, 202):
                 return True
-            logger.error(f"SendGrid error: {response.status}")
+            logger.error(f"MAILJET error: {response.status}")
             return False
     except urlerror.HTTPError as exc:
-        logger.error(f"SendGrid HTTP error: {exc.code} - {exc.read().decode('utf-8', errors='ignore')}")
+        logger.error(f"MAILJET HTTP error: {exc.code} - {exc.read().decode('utf-8', errors='ignore')}")
         return False
     except Exception as exc:
-        logger.error(f"Failed to send SendGrid email: {str(exc)}")
+        logger.error(f"Failed to send MAILJET email: {str(exc)}")
         return False
 
 
@@ -90,11 +100,11 @@ def send_2fa_email(recipient_email: str, user_name: str, otp_code: str, method: 
         bool: True if email sent successfully
     """
     
-    if EMAIL_PROVIDER == 'smtp':
+    if EMAIL_PROVIDER == 'SMTP':
         return _send_smtp(recipient_email, user_name, otp_code, method)
-    elif EMAIL_PROVIDER == 'sendgrid':
-        return _send_sendgrid(recipient_email, user_name, otp_code, method)
-    elif EMAIL_PROVIDER == 'mailgun':
+    elif EMAIL_PROVIDER == 'MAILJET':
+        return _send_MAILJET(recipient_email, user_name, otp_code, method)
+    elif EMAIL_PROVIDER == 'MAILGUN':
         return _send_mailgun(recipient_email, user_name, otp_code, method)
     else:
         logger.error(f"Unknown email provider: {EMAIL_PROVIDER}")
@@ -103,19 +113,19 @@ def send_2fa_email(recipient_email: str, user_name: str, otp_code: str, method: 
 
 def _send_smtp(recipient_email: str, user_name: str, otp_code: str, method: str) -> bool:
     """Legacy SMTP path is not used in this deployment."""
-    logger.warning("SMTP email provider is disabled in favor of SendGrid")
+    logger.warning("SMTP email provider is disabled in favor of MAILJET")
     return False
 
 
-def _send_sendgrid(recipient_email: str, user_name: str, otp_code: str, method: str) -> bool:
-    """Send email via SendGrid REST API"""
-    subject = f"Your HomeHub 2FA Code: {otp_code}"
+def _send_MAILJET(recipient_email: str, user_name: str, otp_code: str, method: str) -> bool:
+    """Send email via MAILJET REST API"""
+    subject = f"Your HOUSEhubKENYA 2FA Code: {otp_code}"
 
     html_content = f"""
     <html>
         <body style="font-family: Arial, sans-serif; color: #333;">
             <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #4361ee;">HomeHub 2FA Verification</h2>
+                <h2 style="color: #4361ee;">HOUSEhubKENYA 2FA Verification</h2>
                 <p>Hi {user_name},</p>
                 <p>Your 2-Factor Authentication code is:</p>
                 <div style="background-color: #f0f0f0; padding: 15px; border-radius: 5px; text-align: center;">
@@ -130,20 +140,20 @@ def _send_sendgrid(recipient_email: str, user_name: str, otp_code: str, method: 
 
     text_content = (
         f"Hi {user_name},\n\n"
-        f"Your HomeHub 2FA code is: {otp_code}\n"
+        f"Your HOUSEhubKENYA 2FA code is: {otp_code}\n"
         "This code expires in 5 minutes.\n\n"
         "If you didn't request this code, ignore this email."
     )
 
-    success = _send_sendgrid_message(recipient_email, subject, html_content, text_content)
+    success = _send_MAILJET_message(recipient_email, subject, html_content, text_content)
     if success:
-        logger.info(f"2FA email sent via SendGrid to {recipient_email}")
+        logger.info(f"2FA email sent via MAILJET to {recipient_email}")
     return success
 
 
 def send_support_contact_email(full_name: str, sender_email: str, phone: str, role: str, message: str) -> bool:
-    """Send a contact/support message to the configured support inbox via SendGrid."""
-    subject = f"HomeHub Contact Message from {full_name}"
+    """Send a contact/support message to the configured support inbox via MAILJET."""
+    subject = f"HOUSEhubKENYA Contact Message from {full_name}"
 
     safe_phone = phone or "Not provided"
     safe_role = role or "Not provided"
@@ -153,7 +163,7 @@ def send_support_contact_email(full_name: str, sender_email: str, phone: str, ro
     <html>
         <body style="font-family: Arial, sans-serif; color: #333;">
             <div style="max-width: 640px; margin: 0 auto; padding: 24px;">
-                <h2 style="color: #4361ee;">New HomeHub Support Message</h2>
+                <h2 style="color: #4361ee;">New HOUSEhubKENYA Support Message</h2>
                 <p><strong>Name:</strong> {full_name}</p>
                 <p><strong>Email:</strong> {sender_email}</p>
                 <p><strong>Phone:</strong> {safe_phone}</p>
@@ -166,7 +176,7 @@ def send_support_contact_email(full_name: str, sender_email: str, phone: str, ro
     """
 
     text_content = (
-        f"New HomeHub Support Message\n\n"
+        f"New HOUSEhubKENYA Support Message\n\n"
         f"Name: {full_name}\n"
         f"Email: {sender_email}\n"
         f"Phone: {safe_phone}\n"
@@ -174,7 +184,7 @@ def send_support_contact_email(full_name: str, sender_email: str, phone: str, ro
         f"Message:\n{safe_message}"
     )
 
-    return _send_sendgrid_message(
+    return _send_MAILJET_message(
         SUPPORT_EMAIL,
         subject,
         html_content,
@@ -185,7 +195,7 @@ def send_support_contact_email(full_name: str, sender_email: str, phone: str, ro
 
 def send_system_update_email(recipient_email: str, title: str, body: str) -> bool:
         """Send a platform/system update email to one subscriber."""
-        subject = f"HomeHub Update: {title}"
+        subject = f"HOUSEhubKENYA Update: {title}"
         safe_body = body or "No update details provided."
 
         html_content = f"""
@@ -196,20 +206,20 @@ def send_system_update_email(recipient_email: str, title: str, body: str) -> boo
                     <div style="white-space: pre-wrap; line-height: 1.6;">{safe_body}</div>
                     <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
                     <p style="font-size: 12px; color: #6b7280;">
-                        You are receiving this because you subscribed to HomeHub system updates.
+                        You are receiving this because you subscribed to HOUSEhubKENYA system updates.
                     </p>
                 </div>
             </body>
         </html>
         """
 
-        text_content = f"{title}\n\n{safe_body}\n\nYou are receiving this because you subscribed to HomeHub system updates."
-        return _send_sendgrid_message(recipient_email, subject, html_content, text_content)
+        text_content = f"{title}\n\n{safe_body}\n\nYou are receiving this because you subscribed to HOUSEhubKENYA system updates."
+        return _send_MAILJET_message(recipient_email, subject, html_content, text_content)
 
 
 def _send_mailgun(recipient_email: str, user_name: str, otp_code: str, method: str) -> bool:
     """Legacy Mailgun path is not used in this deployment."""
-    logger.warning("Mailgun email provider is disabled in favor of SendGrid")
+    logger.warning("Mailgun email provider is disabled in favor of MAILJET")
     return False
 
 
