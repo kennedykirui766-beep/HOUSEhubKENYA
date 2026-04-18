@@ -384,39 +384,98 @@ def tenants():
 def api_generate_payment_link():
     try:
         data = request.get_json()
-        booking_id = data.get("booking_id")
 
-        if not booking_id:
+        booking_id = data.get("booking_id")
+        house_id = data.get("house_id")
+        payment_type = data.get("payment_type")  # 🔥 NEW
+
+        if not payment_type:
             return jsonify({
                 "success": False,
-                "message": "Missing booking ID"
+                "message": "Missing payment_type"
             }), 400
 
-        booking = Booking.query.get_or_404(booking_id)
-
-        # 🚫 Authorization check
-        if booking.house.owner_id != current_user.id:
-            return jsonify({
-                "success": False,
-                "message": "Unauthorized access"
-            }), 403
-
         import uuid
-        from datetime import datetime, timedelta  # ✅ ADD THIS
+        from datetime import datetime, timedelta
 
         token = str(uuid.uuid4())
 
-        link = PaymentLink(
-            token=token,
-            landlord_id=current_user.id,
-            booking_id=booking.id,
-            tenant_id=booking.tenant_id,
-            house_id=booking.house_id,
-            amount=booking.house.security_deposit,
-            status="pending",
-            expires_at=datetime.utcnow() + timedelta(minutes=10)  # ✅ 10 MIN EXPIRY
-        )
+        link = None
 
+        # =========================
+        # 🏠 DEPOSIT PAYMENT
+        # =========================
+        if payment_type == "deposit":
+
+            if not booking_id:
+                return jsonify({
+                    "success": False,
+                    "message": "Missing booking ID"
+                }), 400
+
+            booking = Booking.query.get_or_404(booking_id)
+
+            # 🚫 Authorization
+            if booking.house.owner_id != current_user.id:
+                return jsonify({
+                    "success": False,
+                    "message": "Unauthorized"
+                }), 403
+
+            link = PaymentLink(
+                token=token,
+                landlord_id=current_user.id,
+                booking_id=booking.id,
+                tenant_id=booking.tenant_id,
+                house_id=booking.house_id,
+                amount=booking.house.security_deposit,
+                payment_type="deposit",   # 🔥 IMPORTANT
+                status="pending",
+                expires_at=datetime.utcnow() + timedelta(minutes=10)
+            )
+
+        # =========================
+        # 🌟 FEATURED PAYMENT
+        # =========================
+        elif payment_type == "featured":
+
+            if not house_id:
+                return jsonify({
+                    "success": False,
+                    "message": "Missing house ID"
+                }), 400
+
+            house = House.query.get_or_404(house_id)
+
+            # 🚫 Authorization
+            if house.owner_id != current_user.id:
+                return jsonify({
+                    "success": False,
+                    "message": "Unauthorized"
+                }), 403
+
+            # 🔥 You can define fixed price
+            FEATURE_PRICE = 500  # example KES
+
+            link = PaymentLink(
+                token=token,
+                landlord_id=current_user.id,
+                house_id=house.id,
+                amount=FEATURE_PRICE,
+                payment_type="featured",   # 🔥 IMPORTANT
+                status="pending",
+                expires_at=datetime.utcnow() + timedelta(minutes=10)
+            )
+
+        else:
+            return jsonify({
+                "success": False,
+                "message": "Invalid payment_type"
+            }), 400
+
+        # =========================
+        # SAVE LINK
+        # =========================
         db.session.add(link)
         db.session.commit()
 
@@ -426,30 +485,33 @@ def api_generate_payment_link():
             _external=True
         )
 
-        # ✅ SEND EMAIL (import lazily to avoid raising on module import)
-        try:
-            from services.email_service import send_payment_email
+        # =========================
+        # EMAIL (ONLY FOR DEPOSIT)
+        # =========================
+        if payment_type == "deposit":
+            try:
+                from services.email_service import send_payment_email
 
-            send_payment_email(
-                to_email=booking.tenant.email,
-                tenant_name=booking.tenant.name,
-                payment_url=payment_url,
-                amount=link.amount
-            )
-        except Exception as e:
-            import traceback
-            print("❌ EMAIL FAILED:")
-            traceback.print_exc()
+                send_payment_email(
+                    to_email=booking.tenant.email,
+                    tenant_name=booking.tenant.name,
+                    payment_url=payment_url,
+                    amount=link.amount
+                )
+            except Exception as e:
+                import traceback
+                print("❌ EMAIL FAILED:")
+                traceback.print_exc()
 
-            # ❗ Return failure instead of pretending success
-            return jsonify({
-                "success": False,
-                "message": f"Email sending failed: {str(e)}"
-            }), 500
+                return jsonify({
+                    "success": False,
+                    "message": f"Email failed: {str(e)}"
+                }), 500
 
         return jsonify({
             "success": True,
-            "payment_url": payment_url
+            "payment_url": payment_url,
+            "token": token
         })
 
     except Exception as e:
@@ -459,7 +521,7 @@ def api_generate_payment_link():
 
         return jsonify({
             "success": False,
-            "message": f"Server error: {str(e)}"
+            "message": str(e)
         }), 500
 
 # ---------------- Payments ----------------
