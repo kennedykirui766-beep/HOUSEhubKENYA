@@ -679,6 +679,9 @@ class PaymentLink(db.Model):
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     checkout_request_id = db.Column(db.String(100), nullable=True)
+    
+    payment_type = db.Column(db.String(20))  # deposit / featured
+    house_id = db.Column(db.Integer, db.ForeignKey('house.id'))
 
     # ⏳ NEW: expiry
     expires_at = db.Column(
