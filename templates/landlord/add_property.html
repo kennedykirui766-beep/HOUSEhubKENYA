@@ -1914,16 +1914,17 @@
                     <span class="feat-crown">★</span>
                     Feature This Property
                   </h4>
-                  <p id="featuredBannerDesc">Boost visibility on the homepage &amp; all listings. Get 10× more tenant enquiries.</p>
+                  <p id="featuredBannerDesc">
+                    Boost visibility on the homepage &amp; all listings for
+                    <strong style="color:#fbbf24;">KES {{ "{:,.0f}".format(featured_price | default(500)) }}</strong>.
+                    Get 10× more tenant enquiries.
+                  </p>
                 </div>
                 <button type="button" class="btn-feature-property" id="btnOpenFeatured">
                   <i class="fas fa-bolt"></i> Feature It
                 </button>
               </div>
             </div>
-
-            <!-- Hidden field sent with form to mark property as featured -->
-            <input type="hidden" name="is_featured" id="isFeaturedField" value="0" />
 
             <div class="ap-actions">
               <button type="submit" class="btn-ap-submit" id="submitProperty">
@@ -2098,7 +2099,7 @@
         <div class="feat-price-callout">
           <div class="feat-price-callout-left">
             <div class="feat-price-callout-label">One-time fee</div>
-            <div class="feat-price-amount">KES <span id="featPriceDisplay">2,500</span></div>
+            <div class="feat-price-amount">KES {{ "{:,.0f}".format(featured_price | default(500)) }}</div>
             <div class="feat-price-desc">Paid once per property listing</div>
           </div>
           <span class="feat-duration-badge"><i class="fas fa-clock"></i> 30 days</span>
@@ -2134,7 +2135,7 @@
         <div class="feat-price-callout">
           <div class="feat-price-callout-left">
             <div class="feat-price-callout-label">Featured listing fee</div>
-            <div class="feat-price-amount">KES <span class="feat-pay-amount-inline">500</span></div>
+            <div class="feat-price-amount">KES {{ "{:,.0f}".format(featured_price | default(500)) }}</div>
             <div class="feat-price-desc">One-time payment · 30 days featured</div>
           </div>
           <span class="feat-duration-badge"><i class="fas fa-mobile-alt"></i> M-Pesa</span>
@@ -2723,28 +2724,18 @@ document.addEventListener('DOMContentLoaded', () => {
   updateSteps();
   // ================================================================
   // FEATURED PROPERTY MODAL
-  // Uses the real backend route: /landlord/feature/new
-  // which creates a PaymentLink and redirects to payments.pay
+  // Flow: Benefits → Confirm → Save draft to get house_id
+  //       → redirect to /landlord/feature/<house_id>
+  //       → standard payments.pay page handles M-Pesa
+  //       → callback marks house.is_featured = True
+  //
+  // Price is set by admin via SystemSetting and passed from Flask
+  // as {{ featured_price }} — no hardcoding in JS.
   // ================================================================
-
-  const FEATURED_PRICE = {{ featured_price | default(500) }};
-
-  function fmtPrice(n) { return n.toLocaleString('en-KE'); }
-
-  // Seed all price display elements
-  document.querySelectorAll('#featPriceDisplay, .feat-pay-amount-inline').forEach(el => {
-    el.textContent = fmtPrice(FEATURED_PRICE);
-  });
-
-  // Check if returning from a successful featured payment
-  // Flask passes ?featured_paid=1 after the callback marks the link as paid
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('featured_paid') === '1') {
-    markFeaturedPaid();
-  }
 
   const featOverlay = document.getElementById('featModalOverlay');
 
+  // Open modal
   document.getElementById('btnOpenFeatured').addEventListener('click', () => {
     featOverlay.classList.add('open');
     goFeatStep(1);
@@ -2756,7 +2747,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.style.overflow = '';
   };
 
-  // No "success" close needed — success redirects back to this page
   window.closeFeatModalSuccess = function() {
     featOverlay.classList.remove('open');
     document.body.style.overflow = '';
@@ -2767,17 +2757,20 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById(`featStep${step}`).classList.add('active');
   };
 
+  // Close on backdrop click
   featOverlay.addEventListener('click', (e) => {
     if (e.target === featOverlay) closeFeatModal();
   });
 
+  // Close on Escape
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && featOverlay.classList.contains('open')) {
-      closeFeatModal();
-    }
+    if (e.key === 'Escape' && featOverlay.classList.contains('open')) closeFeatModal();
   });
 
-  // ── Step 2: "Proceed to Payment" — creates PaymentLink & redirects ──
+  // ── Step 2: "Proceed to Payment" ──
+  // Saves the form as a draft to create the House record,
+  // then redirects to /landlord/feature/<house_id> which creates
+  // the PaymentLink (with admin-set price) and forwards to payments.pay
   window.proceedToFeatPayment = function() {
     const btn     = document.getElementById('btnFeatProceed');
     const spinner = document.getElementById('featPaySpinner');
@@ -2785,28 +2778,55 @@ document.addEventListener('DOMContentLoaded', () => {
     const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || '';
 
     errEl.style.display = 'none';
+
+    // Validate required fields before saving draft
+    const requiredFields = form.querySelectorAll('[required]');
+    let valid = true;
+    requiredFields.forEach(f => {
+      if (!f.value || (f.tagName === 'SELECT' && f.value === '')) {
+        f.classList.add('is-invalid');
+        valid = false;
+      } else {
+        f.classList.remove('is-invalid');
+      }
+    });
+
+    if (!valid) {
+      errEl.textContent = 'Please complete all required fields before featuring your property.';
+      errEl.style.display = 'block';
+      closeFeatModal();
+      showFeedback('Please fill in all required fields before featuring your property.', 'danger');
+      const firstInvalid = form.querySelector('.is-invalid');
+      if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
     btn.disabled = true;
     spinner.style.display = 'inline-block';
 
-    // POST to /landlord/feature/new  — creates a PaymentLink with
-    // payment_type="featured" and returns { redirect_url: "..." }
-    fetch('{{ url_for("landlord.feature_house_new") }}', {
+    // Sync image files into the input before submitting
+    updateFileInput();
+
+    // Build the form data and POST to save_draft to create the house record
+    const formData = new FormData(form);
+    formData.append('user_id', '{{ current_user.id }}');
+    formData.append('save_for_featured', '1'); // signal to backend to save & return house_id
+
+    fetch('{{ url_for("landlord.save_draft") }}', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrfToken
-      },
-      body: JSON.stringify({ amount: FEATURED_PRICE })
+      headers: { 'X-CSRFToken': csrfToken },
+      body: formData,
+      credentials: 'include'
     })
     .then(res => res.json())
     .then(data => {
-      if (data.redirect_url) {
-        // Save any draft form data to sessionStorage so it survives the redirect
-        saveDraftToSession();
-        // Redirect to the standard payments.pay page
-        window.location.href = data.redirect_url;
+      if (data.house_id) {
+        // Draft saved — redirect to the feature_house route
+        // That route creates the PaymentLink with the admin price
+        // and redirects to payments.pay/<token>
+        window.location.href = '/landlord/feature/' + data.house_id;
       } else {
-        errEl.textContent = data.error || 'Could not start payment. Please try again.';
+        errEl.textContent = data.message || data.error || 'Could not save your property. Please try again.';
         errEl.style.display = 'block';
         btn.disabled = false;
         spinner.style.display = 'none';
@@ -2819,81 +2839,6 @@ document.addEventListener('DOMContentLoaded', () => {
       spinner.style.display = 'none';
     });
   };
-
-  // Save key form fields to sessionStorage so the landlord doesn't
-  // lose their work after coming back from the payments page
-  function saveDraftToSession() {
-    const fields = [
-      'propertyName','propertyType','propertyDescription',
-      'addressLine1','addressLine2','city','stateProvince','postalCode','country',
-      'rentAmount','securityDeposit','leaseTerm','availabilityDate',
-      'bedrooms','bathrooms','squareFootage','parkingAvailability',
-      'petRestrictions','houseRules'
-    ];
-    const draft = {};
-    fields.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) draft[id] = el.value;
-    });
-    // Radio / checkbox state
-    ['furnished_status','pets_allowed','smoking_policy'].forEach(name => {
-      const checked = document.querySelector(`input[name="${name}"]:checked`);
-      if (checked) draft[`radio_${name}`] = checked.value;
-    });
-    ['utilities','amenities','accessibility_features'].forEach(name => {
-      draft[`checks_${name}`] = Array.from(
-        document.querySelectorAll(`input[name="${name}"]:checked`)
-      ).map(el => el.value);
-    });
-    sessionStorage.setItem('ap_draft', JSON.stringify(draft));
-  }
-
-  // Restore draft from sessionStorage (called on page load after redirect)
-  function restoreDraftFromSession() {
-    const raw = sessionStorage.getItem('ap_draft');
-    if (!raw) return;
-    try {
-      const draft = JSON.parse(raw);
-      Object.entries(draft).forEach(([key, value]) => {
-        if (key.startsWith('radio_')) {
-          const name = key.replace('radio_', '');
-          const el = document.querySelector(`input[name="${name}"][value="${value}"]`);
-          if (el) { el.checked = true; el.closest('.ap-check-item')?.classList.add('selected'); }
-        } else if (key.startsWith('checks_')) {
-          const name = key.replace('checks_', '');
-          (value || []).forEach(val => {
-            const el = document.querySelector(`input[name="${name}"][value="${val}"]`);
-            if (el) { el.checked = true; el.closest('.ap-check-item')?.classList.add('selected'); }
-          });
-        } else {
-          const el = document.getElementById(key);
-          if (el) el.value = value;
-        }
-      });
-      sessionStorage.removeItem('ap_draft');
-      updatePreview();
-      updateSteps();
-    } catch(e) { console.warn('Draft restore failed:', e); }
-  }
-
-  // Mark banner as paid (called when ?featured_paid=1 is in URL)
-  function markFeaturedPaid() {
-    document.getElementById('isFeaturedField').value = '1';
-
-    const banner = document.getElementById('featuredBanner');
-    const icon   = document.getElementById('featuredIcon');
-    const desc   = document.getElementById('featuredBannerDesc');
-    const btn    = document.getElementById('btnOpenFeatured');
-    if (!banner) return;
-
-    banner.classList.add('is-featured');
-    if (icon) icon.innerHTML = '<i class="fas fa-check"></i>';
-    if (desc) desc.textContent = 'Payment confirmed ✓ — this property will be featured on the homepage once listed.';
-    if (btn)  btn.outerHTML = `<div class="ap-featured-paid-badge"><i class="fas fa-check-circle"></i> Featured — Paid</div>`;
-  }
-
-  // Run restore on load
-  restoreDraftFromSession();
 
 });
 </script>
