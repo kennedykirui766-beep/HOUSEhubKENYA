@@ -44,11 +44,24 @@ def pay(token):
         flash("Previous payment failed. Please try again.", "danger")
         return redirect(url_for("payments.failed", token=token))
 
-    # Optional: If user is logged in, verify ownership
+    # Optional: If user is logged in, verify ownership (ROLE-AWARE FIX)
     if current_user.is_authenticated:
-        if link.tenant_id != current_user.id:
-            flash("Unauthorized access to this payment link.", "danger")
-            return redirect(url_for("tenant.dashboard"))
+
+        # =========================
+        # FEATURED PAYMENT (LANDLORD ONLY)
+        # =========================
+        if link.payment_type == "featured":
+            if link.landlord_id != current_user.id:
+                flash("Unauthorized access to this payment link.", "danger")
+                return redirect(url_for("landlord.dashboard"))
+
+        # =========================
+        # DEPOSIT / BOOKING PAYMENT (TENANT ONLY)
+        # =========================
+        elif link.payment_type == "deposit":
+            if link.tenant_id != current_user.id:
+                flash("Unauthorized access to this payment link.", "danger")
+                return redirect(url_for("tenant.dashboard"))
 
     if request.method == "POST":
         phone = request.form.get("phone")
