@@ -763,6 +763,14 @@ def verify_2fa_login():
             elif user.role == "service":
                 return redirect(url_for("main.index"))
             elif user.role == "admin":
+                # Keep the private admin entry session alive across the email OTP step.
+                session['admin_entry_granted'] = True
+                session['admin_entry_granted_at'] = int(time.time())
+                session.modified = True
+
+                if user.two_factor_enabled and user.two_factor_secret and not has_admin_totp_verified(user):
+                    return redirect(url_for("auth.admin_2fa_verify"))
+
                 return redirect(url_for("admin.dashboard"))
             else:
                 return redirect(url_for("main.index"))
