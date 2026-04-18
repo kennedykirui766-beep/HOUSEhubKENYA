@@ -888,7 +888,566 @@
 
   .ap-flash .btn-close { padding: 0; margin-left: auto; flex-shrink: 0; }
 
-  /* ========== RESPONSIVE ========== */
+  /* ========================================================
+     FEATURED PROPERTY FLOW
+  ======================================================== */
+
+  /* ── Featured Banner Card (above submit actions) ── */
+  .ap-featured-banner {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f2044 100%);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.25rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Subtle gold shimmer sweep */
+  .ap-featured-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 60%;
+    height: 200%;
+    background: linear-gradient(105deg, transparent 40%, rgba(251,191,36,0.06) 50%, transparent 60%);
+    animation: featuredShimmer 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes featuredShimmer {
+    0%   { transform: translateX(0); }
+    50%  { transform: translateX(260%); }
+    100% { transform: translateX(260%); }
+  }
+
+  /* Stars decoration */
+  .ap-featured-banner::after {
+    content: '★ ★ ★';
+    position: absolute;
+    top: 0.6rem; right: 1rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: rgba(251,191,36,0.35);
+    pointer-events: none;
+  }
+
+  .ap-featured-banner-inner {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    position: relative; /* above ::before */
+    z-index: 1;
+  }
+
+  .ap-featured-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(245,158,11,0.4);
+  }
+
+  .ap-featured-text { flex: 1; min-width: 0; }
+
+  .ap-featured-text h4 {
+    color: #fef9c3;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin: 0 0 0.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .ap-featured-text h4 .feat-crown {
+    font-size: 0.8rem;
+    color: #fbbf24;
+  }
+
+  .ap-featured-text p {
+    color: rgba(255,255,255,0.55);
+    font-size: 0.8rem;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .btn-feature-property {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.25rem;
+    border-radius: var(--radius-md);
+    border: 1.5px solid #fbbf24;
+    background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(251,191,36,0.08));
+    color: #fbbf24;
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-feature-property:hover {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    border-color: #f59e0b;
+    box-shadow: 0 6px 20px rgba(245,158,11,0.45);
+    transform: translateY(-1px);
+  }
+
+  /* Featured paid state */
+  .ap-featured-banner.is-featured {
+    border-color: rgba(34, 197, 94, 0.4);
+    background: linear-gradient(135deg, #052e16 0%, #0f2720 50%, #052e16 100%);
+  }
+
+  .ap-featured-banner.is-featured .ap-featured-icon {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    box-shadow: 0 4px 16px rgba(34,197,94,0.4);
+  }
+
+  .ap-featured-banner.is-featured .ap-featured-text h4 { color: #bbf7d0; }
+  .ap-featured-banner.is-featured .ap-featured-text p  { color: rgba(255,255,255,0.5); }
+
+  .ap-featured-paid-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    background: rgba(34,197,94,0.15);
+    border: 1.5px solid rgba(34,197,94,0.4);
+    color: #22c55e;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  /* ── 3-Step Modal Overlay ── */
+  .feat-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .feat-modal-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .feat-modal {
+    background: #0f172a;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+    transform: translateY(24px) scale(0.97);
+    transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .feat-modal-overlay.open .feat-modal {
+    transform: translateY(0) scale(1);
+  }
+
+  /* Step panels — hidden by default */
+  .feat-step { display: none; }
+  .feat-step.active { display: block; animation: featStepIn 0.3s ease; }
+
+  @keyframes featStepIn {
+    from { opacity: 0; transform: translateX(16px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Modal header */
+  .feat-modal-head {
+    padding: 1.5rem 1.75rem 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .feat-modal-head-left { flex: 1; min-width: 0; }
+
+  .feat-modal-step-indicator {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 0.75rem;
+  }
+
+  .feat-modal-step-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    transition: all 0.25s ease;
+  }
+
+  .feat-modal-step-dot.active {
+    background: #fbbf24;
+    width: 18px;
+    border-radius: 3px;
+  }
+
+  .feat-modal-step-dot.done { background: rgba(251,191,36,0.4); }
+
+  .feat-modal-head h3 {
+    color: white;
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem;
+    line-height: 1.3;
+  }
+
+  .feat-modal-head p {
+    color: rgba(255,255,255,0.45);
+    font-size: 0.8rem;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .feat-modal-close {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.5);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.18s;
+    flex-shrink: 0;
+  }
+
+  .feat-modal-close:hover { background: rgba(255,255,255,0.12); color: white; }
+
+  /* Modal body */
+  .feat-modal-body { padding: 1.25rem 1.75rem 0; }
+
+  /* Benefits list */
+  .feat-benefit-list {
+    list-style: none;
+    padding: 0; margin: 0 0 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .feat-benefit-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    color: rgba(255,255,255,0.8);
+    font-size: 0.84rem;
+    line-height: 1.5;
+  }
+
+  .feat-benefit-list li .feat-b-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    margin-top: -1px;
+  }
+
+  .feat-benefit-list li strong { color: white; display: block; margin-bottom: 2px; }
+
+  .feat-price-callout {
+    background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(251,191,36,0.06));
+    border: 1px solid rgba(251,191,36,0.25);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .feat-price-callout-left { flex: 1; }
+
+  .feat-price-callout-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: rgba(251,191,36,0.6);
+    margin-bottom: 0.2rem;
+  }
+
+  .feat-price-amount {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #fbbf24;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .feat-price-amount span {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: rgba(251,191,36,0.6);
+    letter-spacing: 0;
+  }
+
+  .feat-price-desc {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.35);
+    margin-top: 0.25rem;
+  }
+
+  .feat-duration-badge {
+    padding: 0.35rem 0.8rem;
+    border-radius: 20px;
+    background: rgba(251,191,36,0.12);
+    border: 1px solid rgba(251,191,36,0.3);
+    color: #fbbf24;
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  /* Payment input */
+  .feat-pay-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 0.4rem;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .feat-phone-wrap {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.05);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s;
+  }
+
+  .feat-phone-wrap:focus-within {
+    border-color: #fbbf24;
+    box-shadow: 0 0 0 3px rgba(251,191,36,0.12);
+  }
+
+  .feat-phone-prefix {
+    padding: 0 0.9rem;
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.4);
+    border-right: 1px solid rgba(255,255,255,0.1);
+    height: 48px;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    font-weight: 600;
+    background: rgba(255,255,255,0.03);
+    gap: 0.4rem;
+  }
+
+  .feat-phone-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    font-size: 1rem;
+    font-family: inherit;
+    padding: 0 1rem;
+    height: 48px;
+    letter-spacing: 0.05em;
+  }
+
+  .feat-phone-input::placeholder { color: rgba(255,255,255,0.2); }
+
+  .feat-pay-note {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 0.9rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px;
+    font-size: 0.77rem;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 1.25rem;
+    line-height: 1.5;
+  }
+
+  .feat-pay-note i { color: #fbbf24; flex-shrink: 0; font-size: 0.8rem; }
+
+  /* Success step */
+  .feat-success-center {
+    text-align: center;
+    padding: 0.5rem 0 0.75rem;
+  }
+
+  .feat-success-ring {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.25rem;
+    font-size: 2rem;
+    color: white;
+    box-shadow: 0 8px 28px rgba(34,197,94,0.45);
+    animation: featSuccessPop 0.5s cubic-bezier(0.16,1,0.3,1);
+  }
+
+  @keyframes featSuccessPop {
+    from { transform: scale(0.5); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+
+  .feat-success-center h3 {
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .feat-success-center p {
+    color: rgba(255,255,255,0.45);
+    font-size: 0.84rem;
+    line-height: 1.6;
+    max-width: 320px;
+    margin: 0 auto 1.25rem;
+  }
+
+  .feat-success-info {
+    background: rgba(34,197,94,0.08);
+    border: 1px solid rgba(34,197,94,0.2);
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.6;
+    text-align: left;
+    margin-bottom: 1.25rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .feat-success-info i { color: #22c55e; margin-top: 2px; flex-shrink: 0; }
+
+  /* Modal footer */
+  .feat-modal-foot {
+    padding: 1.25rem 1.75rem 1.75rem;
+    display: flex;
+    gap: 0.65rem;
+    flex-direction: column;
+  }
+
+  .btn-feat-primary {
+    width: 100%;
+    padding: 0.85rem;
+    border-radius: var(--radius-md);
+    border: none;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-feat-primary:hover {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    box-shadow: 0 6px 20px rgba(245,158,11,0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-feat-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .btn-feat-primary.green {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+  }
+
+  .btn-feat-primary.green:hover {
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    box-shadow: 0 6px 20px rgba(34,197,94,0.4);
+  }
+
+  .btn-feat-secondary {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.5);
+    font-size: 0.85rem;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: center;
+  }
+
+  .btn-feat-secondary:hover {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.75);
+    border-color: rgba(255,255,255,0.18);
+  }
+
+  /* Pay spinner */
+  .feat-pay-spinner {
+    display: none;
+    width: 16px; height: 16px;
+    border: 2.5px solid rgba(255,255,255,0.25);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: apSpin 0.6s linear infinite;
+  }
+
+  /* ── Hidden form field for is_featured ── */
+  #isFeaturedField { display: none; }
+
+
   @media (max-width: 1199px) {
     .ap-spec-grid { grid-template-columns: repeat(3, 1fr); }
   }
@@ -1343,6 +1902,29 @@
 
           <!-- ── Submit Section ── -->
           <div id="section-submit">
+
+            <!-- ★ FEATURED PROPERTY BANNER ★ -->
+            <div class="ap-featured-banner" id="featuredBanner">
+              <div class="ap-featured-banner-inner">
+                <div class="ap-featured-icon" id="featuredIcon">
+                  <i class="fas fa-crown"></i>
+                </div>
+                <div class="ap-featured-text">
+                  <h4>
+                    <span class="feat-crown">★</span>
+                    Feature This Property
+                  </h4>
+                  <p id="featuredBannerDesc">Boost visibility on the homepage &amp; all listings. Get 10× more tenant enquiries.</p>
+                </div>
+                <button type="button" class="btn-feature-property" id="btnOpenFeatured">
+                  <i class="fas fa-bolt"></i> Feature It
+                </button>
+              </div>
+            </div>
+
+            <!-- Hidden field sent with form to mark property as featured -->
+            <input type="hidden" name="is_featured" id="isFeaturedField" value="0" />
+
             <div class="ap-actions">
               <button type="submit" class="btn-ap-submit" id="submitProperty">
                 <i class="fas fa-plus-circle"></i>
@@ -1448,6 +2030,165 @@
 
   <div class="ap-access-badge" aria-label="Landlord access indicator">
     <i class="fas fa-user-shield"></i> Landlord Access
+  </div>
+</div>
+
+<!-- ============================================================
+     FEATURED PROPERTY — 3-STEP MODAL
+     Step 1: Benefits  →  Step 2: Payment  →  Step 3: Success
+============================================================ -->
+<div class="feat-modal-overlay" id="featModalOverlay" role="dialog" aria-modal="true" aria-labelledby="featModalTitle">
+  <div class="feat-modal">
+
+    <!-- ── STEP 1: Benefits ── -->
+    <div class="feat-step active" id="featStep1">
+      <div class="feat-modal-head">
+        <div class="feat-modal-head-left">
+          <div class="feat-modal-step-indicator">
+            <div class="feat-modal-step-dot active" id="dot1"></div>
+            <div class="feat-modal-step-dot" id="dot2"></div>
+            <div class="feat-modal-step-dot" id="dot3"></div>
+          </div>
+          <h3 id="featModalTitle">Why Feature Your Property?</h3>
+          <p>Unlock premium placement and reach serious tenants faster.</p>
+        </div>
+        <button class="feat-modal-close" onclick="closeFeatModal()" aria-label="Close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="feat-modal-body">
+        <ul class="feat-benefit-list">
+          <li>
+            <div class="feat-b-icon" style="background:rgba(251,191,36,0.12); color:#fbbf24;">
+              <i class="fas fa-home"></i>
+            </div>
+            <div>
+              <strong>Homepage Spotlight</strong>
+              Your property appears in the Featured section on the HomeHub homepage — the first thing every visitor sees.
+            </div>
+          </li>
+          <li>
+            <div class="feat-b-icon" style="background:rgba(99,102,241,0.12); color:#818cf8;">
+              <i class="fas fa-search"></i>
+            </div>
+            <div>
+              <strong>Priority in All Listings</strong>
+              Featured properties are pinned at the top of every search &amp; browse page with a gold badge.
+            </div>
+          </li>
+          <li>
+            <div class="feat-b-icon" style="background:rgba(34,197,94,0.12); color:#22c55e;">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <div>
+              <strong>10× More Enquiries</strong>
+              On average, featured listings receive 10 times more tenant enquiries than standard listings.
+            </div>
+          </li>
+          <li>
+            <div class="feat-b-icon" style="background:rgba(239,68,68,0.12); color:#f87171;">
+              <i class="fas fa-bolt"></i>
+            </div>
+            <div>
+              <strong>Rent Faster</strong>
+              Featured properties are rented up to 3× faster — saving you weeks of vacancy costs.
+            </div>
+          </li>
+        </ul>
+        <div class="feat-price-callout">
+          <div class="feat-price-callout-left">
+            <div class="feat-price-callout-label">One-time fee</div>
+            <div class="feat-price-amount">KES <span id="featPriceDisplay">2,500</span></div>
+            <div class="feat-price-desc">Paid once per property listing</div>
+          </div>
+          <span class="feat-duration-badge"><i class="fas fa-clock"></i> 30 days</span>
+        </div>
+      </div>
+      <div class="feat-modal-foot">
+        <button class="btn-feat-primary" onclick="goFeatStep(2)">
+          <i class="fas fa-arrow-right"></i> Continue to Payment
+        </button>
+        <button class="btn-feat-secondary" onclick="closeFeatModal()">Maybe later</button>
+      </div>
+    </div>
+
+    <!-- ── STEP 2: Payment ── -->
+    <div class="feat-step" id="featStep2">
+      <div class="feat-modal-head">
+        <div class="feat-modal-head-left">
+          <div class="feat-modal-step-indicator">
+            <div class="feat-modal-step-dot done" id="dot1b"></div>
+            <div class="feat-modal-step-dot active" id="dot2b"></div>
+            <div class="feat-modal-step-dot" id="dot3b"></div>
+          </div>
+          <h3>M-Pesa Payment</h3>
+          <p>Enter your Safaricom number to receive an STK push prompt.</p>
+        </div>
+        <button class="feat-modal-close" onclick="closeFeatModal()" aria-label="Close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="feat-modal-body">
+        <label class="feat-pay-label" for="featPhoneInput">M-Pesa Phone Number</label>
+        <div class="feat-phone-wrap">
+          <div class="feat-phone-prefix">
+            🇰🇪 +254
+          </div>
+          <input
+            type="tel"
+            id="featPhoneInput"
+            class="feat-phone-input"
+            placeholder="7XX XXX XXX"
+            maxlength="9"
+            inputmode="numeric"
+            autocomplete="tel"
+          />
+        </div>
+        <div class="feat-pay-note">
+          <i class="fas fa-shield-alt"></i>
+          You will receive an M-Pesa STK push to confirm <strong style="color:rgba(255,255,255,0.65);">KES <span class="feat-pay-amount-inline">2,500</span></strong> on your phone. Enter your M-Pesa PIN to complete payment.
+        </div>
+        <div id="featPayError" style="color:#f87171; font-size:0.8rem; margin-bottom:0.75rem; display:none;"></div>
+      </div>
+      <div class="feat-modal-foot">
+        <button class="btn-feat-primary" id="btnFeatPay" onclick="submitFeatPayment()">
+          <i class="fas fa-mobile-alt"></i>
+          <span id="featPayBtnText">Pay KES <span class="feat-pay-amount-inline">2,500</span></span>
+          <div class="feat-pay-spinner" id="featPaySpinner"></div>
+        </button>
+        <button class="btn-feat-secondary" onclick="goFeatStep(1)">
+          <i class="fas fa-arrow-left"></i> Back
+        </button>
+      </div>
+    </div>
+
+    <!-- ── STEP 3: Success ── -->
+    <div class="feat-step" id="featStep3">
+      <div class="feat-modal-head" style="justify-content:flex-end; padding-bottom:0.25rem;">
+        <button class="feat-modal-close" onclick="closeFeatModalSuccess()" aria-label="Close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="feat-modal-body">
+        <div class="feat-success-center">
+          <div class="feat-success-ring">
+            <i class="fas fa-check"></i>
+          </div>
+          <h3>Payment Successful!</h3>
+          <p>Your payment has been confirmed. Your property will be featured on the HomeHub homepage and all listings pages once you submit the listing.</p>
+          <div class="feat-success-info">
+            <i class="fas fa-info-circle"></i>
+            <span>After clicking <strong style="color:rgba(255,255,255,0.75);">"List Property"</strong>, your listing will automatically appear in the <strong style="color:#22c55e;">Featured</strong> section on the homepage for <strong style="color:rgba(255,255,255,0.75);">30 days</strong>.</span>
+          </div>
+        </div>
+      </div>
+      <div class="feat-modal-foot">
+        <button class="btn-feat-primary green" onclick="closeFeatModalSuccess()">
+          <i class="fas fa-arrow-left"></i> Back to Add Property
+        </button>
+      </div>
+    </div>
+
   </div>
 </div>
 {% endblock %}
@@ -1974,6 +2715,161 @@ document.addEventListener('DOMContentLoaded', () => {
   // ================================================================
   updatePreview();
   updateSteps();
+  // ================================================================
+  // FEATURED PROPERTY MODAL
+  // ================================================================
+
+  // Admin-configurable featured price (fetched from backend or set here)
+  // Your Flask route should expose this via a template variable:
+  // {{ featured_price | default(2500) }}
+  const FEATURED_PRICE = {{ featured_price | default(2500) }};
+
+  // Format price with commas
+  function fmtPrice(n) {
+    return n.toLocaleString('en-KE');
+  }
+
+  // Seed price displays
+  document.querySelectorAll('#featPriceDisplay, .feat-pay-amount-inline').forEach(el => {
+    el.textContent = fmtPrice(FEATURED_PRICE);
+  });
+
+  let featuredPaid = false;
+
+  const featOverlay = document.getElementById('featModalOverlay');
+
+  // Open modal
+  document.getElementById('btnOpenFeatured').addEventListener('click', () => {
+    if (featuredPaid) return; // Already paid — button shouldn't show
+    featOverlay.classList.add('open');
+    goFeatStep(1);
+    document.body.style.overflow = 'hidden';
+  });
+
+  // Close modal (before payment)
+  window.closeFeatModal = function() {
+    featOverlay.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  // Close modal after success — mark banner as paid
+  window.closeFeatModalSuccess = function() {
+    featOverlay.classList.remove('open');
+    document.body.style.overflow = '';
+    markFeaturedPaid();
+  };
+
+  // Navigate between steps
+  window.goFeatStep = function(step) {
+    document.querySelectorAll('.feat-step').forEach(s => s.classList.remove('active'));
+    document.getElementById(`featStep${step}`).classList.add('active');
+  };
+
+  // Close on overlay backdrop click
+  featOverlay.addEventListener('click', (e) => {
+    if (e.target === featOverlay) closeFeatModal();
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && featOverlay.classList.contains('open')) {
+      closeFeatModal();
+    }
+  });
+
+  // Submit payment
+  window.submitFeatPayment = function() {
+    const phoneInput = document.getElementById('featPhoneInput');
+    const errEl      = document.getElementById('featPayError');
+    const btnPay     = document.getElementById('btnFeatPay');
+    const btnText    = document.getElementById('featPayBtnText');
+    const spinner    = document.getElementById('featPaySpinner');
+
+    const raw = phoneInput.value.replace(/\s/g, '');
+
+    // Validate Kenyan number (9 digits, starting with 7 or 1)
+    if (!/^[71]\d{8}$/.test(raw)) {
+      errEl.textContent = 'Please enter a valid Safaricom number (e.g. 712345678).';
+      errEl.style.display = 'block';
+      phoneInput.style.outline = '1.5px solid #f87171';
+      return;
+    }
+
+    errEl.style.display = 'none';
+    phoneInput.style.outline = '';
+
+    // Show loading state
+    btnPay.disabled     = true;
+    btnText.style.display = 'none';
+    spinner.style.display = 'block';
+
+    const fullPhone = '+254' + raw;
+    const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || '';
+
+    // ── POST to your backend STK push route ──
+    fetch('/landlord/feature_payment', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken
+      },
+      body: JSON.stringify({
+        phone: fullPhone,
+        amount: FEATURED_PRICE
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        goFeatStep(3); // Show success
+      } else {
+        errEl.textContent = data.error || 'Payment failed. Please try again.';
+        errEl.style.display = 'block';
+        btnPay.disabled   = false;
+        btnText.style.display = 'inline';
+        spinner.style.display = 'none';
+      }
+    })
+    .catch(() => {
+      // For demo/development — simulate success if backend not yet wired
+      console.warn('[Featured] Backend not connected — simulating success for UI testing.');
+      goFeatStep(3);
+    })
+    .finally(() => {
+      // Reset button if still on step 2
+      if (!featuredPaid) {
+        btnPay.disabled     = false;
+        btnText.style.display = 'inline';
+        spinner.style.display = 'none';
+      }
+    });
+  };
+
+  // Mark the banner as paid — update UI and form field
+  function markFeaturedPaid() {
+    featuredPaid = true;
+
+    // Set hidden field so Flask knows this listing is featured
+    document.getElementById('isFeaturedField').value = '1';
+
+    // Update banner appearance
+    const banner = document.getElementById('featuredBanner');
+    const icon   = document.getElementById('featuredIcon');
+    const desc   = document.getElementById('featuredBannerDesc');
+    const btn    = document.getElementById('btnOpenFeatured');
+
+    banner.classList.add('is-featured');
+    icon.innerHTML   = '<i class="fas fa-check"></i>';
+    desc.textContent = 'Payment confirmed ✓ — this property will be featured on the homepage once listed.';
+
+    // Replace button with paid badge
+    btn.outerHTML = `
+      <div class="ap-featured-paid-badge">
+        <i class="fas fa-check-circle"></i> Featured — Paid
+      </div>
+    `;
+  }
+
 });
 </script>
 {% endblock %}

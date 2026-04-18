@@ -192,6 +192,8 @@ class House(db.Model):
     security_deposit = db.Column(db.Float)
     smoking_policy = db.Column(db.String(50))
     accessibility_features = db.Column(db.Text)
+    is_featured = db.Column(db.Boolean, default=False)
+    featured_until = db.Column(db.DateTime, nullable=True)
     
 
 class ServiceRequest(db.Model):
@@ -573,3 +575,11 @@ class PaymentLink(db.Model):
     @property
     def is_expired(self):
         return datetime.utcnow() > self.expires_at
+    
+class FeaturedPayment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    house_id = db.Column(db.Integer, db.ForeignKey('house.id'))
+    amount = db.Column(db.Float)
+    phone = db.Column(db.String(20))
+    status = db.Column(db.String(20))  # pending, success, failed
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
