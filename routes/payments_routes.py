@@ -92,7 +92,7 @@ def pay(token):
 
         try:
             # TRIGGER STK PUSH
-            stk_response = stk_push(phone, link.amount)
+            stk_response = stk_push(phone, link.amount, link.id)
             print("📲 STK RESPONSE:", stk_response)
 
             # ✅ FIX: Proper extraction of CheckoutRequestID
@@ -110,7 +110,6 @@ def pay(token):
 
             # Save details (DO NOT mark as paid)
             link.phone = phone
-            link.transaction_id = f"TXN-{datetime.utcnow().timestamp()}"
 
             # ❌ REMOVE THIS (wrong to set before payment)
             # link.paid_at = datetime.utcnow()
