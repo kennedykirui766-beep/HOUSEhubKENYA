@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 from extensions import db, csrf
 from werkzeug.utils import secure_filename
 from datetime import datetime
-from models.models import FeaturedPayment, Message, PaymentLink, User, House, Booking, Payment, MaintenanceRequest
+from models.models import FeaturedPayment, Message, PaymentLink, SystemSetting, User, House, Booking, Payment, MaintenanceRequest
 import cloudinary.uploader
 import json
 
@@ -1313,6 +1313,7 @@ def bookings():
 def feature_house(house_id):
     from datetime import datetime, timedelta
     import uuid
+    from services.settings_service import get_featured_price
 
     house = House.query.get_or_404(house_id)
 
@@ -1323,11 +1324,15 @@ def feature_house(house_id):
 
     token = str(uuid.uuid4())
 
+    # 🔥 GET ADMIN CONTROLLED PRICE
+    price = float(SystemSetting.get("featured_price", 500))
+
+
     link = PaymentLink(
         token=token,
         house_id=house.id,
         landlord_id=current_user.id,
-        amount=10,  # or admin-controlled
+        amount=price,  # ✅ FIXED
         payment_type="featured",
         expires_at=datetime.utcnow() + timedelta(minutes=30),
         status="pending"
