@@ -1,11 +1,12 @@
 import os
 import logging
+import uuid
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import login_required, current_user
 from extensions import db, csrf
 from werkzeug.utils import secure_filename
-from datetime import datetime
+from datetime import datetime, timedelta
 from models.models import FeaturedPayment, Message, PaymentLink, SystemSetting, User, House, Booking, Payment, MaintenanceRequest
 import cloudinary.uploader
 import json
@@ -197,6 +198,7 @@ def properties():
 @landlord_bp.route("/properties/add", methods=["GET", "POST"])
 @login_required
 def add_property():
+    featured_price = float(SystemSetting.get("featured_price", 500))
     if current_user.role != "landlord":
         return {"message": "Access denied"}, 403
 
@@ -316,7 +318,7 @@ def add_property():
             db.session.rollback()
             return {"message": str(e)}, 500
 
-    return render_template("landlord/add_property.html", stats={})
+    return render_template("landlord/add_property.html", featured_price=featured_price,stats={})
 
 # ---------------- Manage Tenants ----------------
 @landlord_bp.route("/tenants")
@@ -1311,9 +1313,6 @@ def bookings():
 @landlord_bp.route("/feature/<int:house_id>")
 @login_required
 def feature_house(house_id):
-    from datetime import datetime, timedelta
-    import uuid
-    from services.settings_service import get_featured_price
 
     house = House.query.get_or_404(house_id)
 
@@ -1342,6 +1341,21 @@ def feature_house(house_id):
     db.session.commit()
 
     return redirect(url_for("payments.pay", token=token))
+
+@landlord_bp.route("/save_draft", methods=["POST"])
+@login_required
+def save_draft():
+    # ... your existing save logic ...
+    house = House(...)  # create from form data
+    house.status = "draft"
+    db.session.add(house)
+    db.session.commit()
+
+    if request.form.get("save_for_featured") == "1":
+        # Return house_id so the frontend can redirect to feature_house
+        return jsonify({"success": True, "house_id": house.id})
+
+    return jsonify({"message": "Draft saved successfully!"})
 
 @landlord_bp.route("/feature/new", methods=["POST"])
 @login_required
