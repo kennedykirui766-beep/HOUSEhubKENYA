@@ -405,17 +405,23 @@ def failed(token):
 def pending(token):
     link = PaymentLink.query.filter_by(token=token).first_or_404()
 
-    print("Current status:", link.status)  # 🔍 debug
+    # 🔥 Ensure fresh DB value
+    db.session.refresh(link)
 
-    # ✅ If paid → go to success/already paid page
+    print("Current status:", link.status)
+
+    # ✅ Paid
     if link.status == "paid":
         print("Redirecting to success page")
         return redirect(url_for("payments.already_paid", token=token))
 
-    # ❌ If failed → go to failed page (YOU WERE MISSING THIS)
+    # ❌ Failed
     elif link.status == "failed":
         print("Redirecting to failed page")
         return redirect(url_for("payments.failed", token=token))
+
+    # ⏳ STILL PENDING (THIS WAS MISSING)
+    return render_template("payments/pending.html", link=link)
 
     # ⏳ Still pending
     return render_template("payments/pending.html", link=link)

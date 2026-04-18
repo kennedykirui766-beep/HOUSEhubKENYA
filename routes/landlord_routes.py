@@ -1265,7 +1265,7 @@ def feature_house(house_id):
         token=token,
         house_id=house.id,
         landlord_id=current_user.id,
-        amount=500,  # or admin-controlled
+        amount=10,  # or admin-controlled
         payment_type="featured",
         expires_at=datetime.utcnow() + timedelta(minutes=30),
         status="pending"
