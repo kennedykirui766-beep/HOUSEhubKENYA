@@ -4,7 +4,7 @@ from flask import (
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
-from models.models import User, TwoFactorCode, TwoFactorVerification
+from models.models import User, TwoFactorCode, TwoFactorVerification, SystemSetting
 from extensions import db
 from utils_2fa import (
     create_verification_code,
@@ -15,6 +15,7 @@ from utils_2fa import (
     get_enabled_2fa_methods
 )
 from utils_email_2fa import send_2fa_email, verify_email_format
+from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from utils_security import (
     consume_rate_limit,
     is_approved_admin,
@@ -36,12 +37,47 @@ from flask import current_app
 import cloudinary.uploader
 import qrcode
 from extensions import db, csrf
+from services.notification import enqueue_password_reset_email
 
 # ------------------- LOGGING -------------------
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 auth_bp = Blueprint("auth", __name__)
+
+PASSWORD_RESET_SALT = "homehub-password-reset"
+
+
+def _get_password_reset_serializer():
+    secret_key = current_app.config.get('SECRET_KEY') or current_app.secret_key
+    if not secret_key:
+        raise RuntimeError('SECRET_KEY is required for password reset tokens.')
+    return URLSafeTimedSerializer(secret_key)
+
+
+def _build_password_reset_token(user):
+    serializer = _get_password_reset_serializer()
+    return serializer.dumps({'user_id': user.id, 'email': user.email}, salt=PASSWORD_RESET_SALT)
+
+
+def _verify_password_reset_token(token, max_age_seconds=3600):
+    serializer = _get_password_reset_serializer()
+    data = serializer.loads(token, salt=PASSWORD_RESET_SALT, max_age=max_age_seconds)
+    user_id = data.get('user_id')
+    email = (data.get('email') or '').strip().lower()
+    if not user_id or not email:
+        return None
+    user = User.query.get(user_id)
+    if not user or (user.email or '').strip().lower() != email:
+        return None
+    return user
+
+
+def _queue_password_reset(user):
+    reset_token = _build_password_reset_token(user)
+    reset_url = url_for('auth.reset_password', token=reset_token, _external=True)
+    enqueue_password_reset_email(user.email, user.name, reset_url, expires_minutes=60)
+    return reset_url
 
 
 def _purge_reserved_admin_email_accounts():
@@ -188,6 +224,10 @@ def semantic_admin_continue():
 # ------------------- SIGNUP -------------------
 @auth_bp.route("/signup", methods=["GET", "POST"])
 def signup():
+    if SystemSetting.get('feature_signup_enabled', '1') != '1':
+        flash('Signups are temporarily disabled by the platform administrator.', 'warning')
+        return redirect(url_for('auth.login'))
+
     if request.method == "POST":
         try:
             _purge_reserved_admin_email_accounts()
@@ -225,7 +265,17 @@ def signup():
                 return redirect(url_for("auth.signup"))
 
             # Role validation
-            if role not in ["tenant", "landlord", "service"]:
+            allowed_roles_raw = SystemSetting.get('signup_allowed_roles', 'tenant,landlord,service')
+            allowed_roles = []
+            for item in (allowed_roles_raw or '').split(','):
+                clean_role = item.strip().lower()
+                if clean_role in ['tenant', 'landlord', 'service'] and clean_role not in allowed_roles:
+                    allowed_roles.append(clean_role)
+
+            if not allowed_roles:
+                allowed_roles = ['tenant', 'landlord', 'service']
+
+            if role not in allowed_roles:
                 flash("Invalid role.", "danger")
                 return redirect(url_for("auth.signup"))
 
@@ -315,12 +365,66 @@ def forgot_password():
             flash("Email/phone not found.", "danger")
             return render_template("forgot_password.html")
 
-        # TODO: Send real reset link (email/SMS)
+        if not getattr(user, 'email', None):
+            flash("No email address is available for this account.", "danger")
+            return render_template("forgot_password.html")
+
+        _queue_password_reset(user)
         flash("Password reset link sent.", "success")
         logger.debug(f"Password reset requested for {identifier}")
         return redirect(url_for("auth.login"))
 
     return render_template("forgot_password.html")
+
+
+# ------------------- RESET PASSWORD -------------------
+@auth_bp.route("/reset_password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    try:
+        user = _verify_password_reset_token(token)
+    except SignatureExpired:
+        flash("Password reset link expired. Please request a new one.", "warning")
+        return redirect(url_for("auth.forgot_password"))
+    except BadSignature:
+        flash("Invalid password reset link.", "danger")
+        return redirect(url_for("auth.forgot_password"))
+    except Exception:
+        logger.exception('Failed to verify password reset token')
+        flash("Could not verify the password reset link.", "danger")
+        return redirect(url_for("auth.forgot_password"))
+
+    if not user:
+        flash("Password reset link is no longer valid.", "danger")
+        return redirect(url_for("auth.forgot_password"))
+
+    if request.method == 'POST':
+        password = request.form.get('password') or ''
+        confirm_password = request.form.get('confirm_password') or ''
+
+        if len(password) < 8:
+            flash('Password must be at least 8 characters long.', 'danger')
+            return render_template('reset_password.html', token=token, user=user)
+
+        if password != confirm_password:
+            flash('Passwords do not match.', 'danger')
+            return render_template('reset_password.html', token=token, user=user)
+
+        user.set_password(password)
+        db.session.commit()
+
+        if user.role == 'admin':
+            session.pop('admin_entry_granted', None)
+            session.pop('admin_entry_granted_at', None)
+            session.pop('admin_last_seen_at', None)
+            session.pop('admin_session_nonce', None)
+            session.pop('admin_id', None)
+            session.pop('is_impersonating', None)
+            clear_admin_totp_verification()
+
+        flash('Password reset successfully. Please log in with your new password.', 'success')
+        return redirect(url_for('auth.login'))
+
+    return render_template('reset_password.html', token=token, user=user)
 
 
 # ------------------- SUPPORT -------------------

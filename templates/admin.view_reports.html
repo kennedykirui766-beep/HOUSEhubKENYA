@@ -9,6 +9,182 @@
     <li>Total properties: {{ stats.total_properties if stats and stats.total_properties is defined else 'N/A' }}</li>
     <li>Total transactions: {{ stats.total_transactions if stats and stats.total_transactions is defined else 'N/A' }}</li>
   </ul>
-  <a href="{{ url_for('admin.export_reports') }}" class="btn btn-primary">Back</a>
+
+  <h4 class="mt-4">Occupancy</h4>
+  <ul>
+    <li>Occupied properties: {{ stats.occupied_properties if stats and stats.occupied_properties is defined else 0 }}</li>
+    <li>Vacant properties: {{ stats.vacant_properties if stats and stats.vacant_properties is defined else 0 }}</li>
+    <li>Occupancy rate: {{ stats.occupancy_rate if stats and stats.occupancy_rate is defined else 0 }}%</li>
+  </ul>
+
+  <h4 class="mt-4">Finance</h4>
+  <ul>
+    <li>Paid amount total: KES {{ stats.paid_amount_total if stats and stats.paid_amount_total is defined else 0 }}</li>
+    <li>Revenue (month-to-date): KES {{ stats.revenue_mtd if stats and stats.revenue_mtd is defined else 0 }}</li>
+    <li>Transactions (month-to-date): {{ stats.transactions_mtd if stats and stats.transactions_mtd is defined else 0 }}</li>
+    <li>Payments success rate: {{ stats.payment_success_rate if stats and stats.payment_success_rate is defined else 0 }}%</li>
+    <li>Pending payments: {{ stats.payments_pending_count if stats and stats.payments_pending_count is defined else 0 }}</li>
+    <li>Payment failures: {{ stats.payment_failures if stats and stats.payment_failures is defined else 0 }}</li>
+  </ul>
+
+  <h4 class="mt-4">Maintenance</h4>
+  <ul>
+    <li>Total requests: {{ stats.maintenance_total if stats and stats.maintenance_total is defined else 0 }}</li>
+    <li>Open requests: {{ stats.maintenance_open if stats and stats.maintenance_open is defined else 0 }}</li>
+    <li>Pending: {{ stats.maintenance_pending if stats and stats.maintenance_pending is defined else 0 }}</li>
+    <li>In progress: {{ stats.maintenance_in_progress if stats and stats.maintenance_in_progress is defined else 0 }}</li>
+    <li>Resolved: {{ stats.maintenance_resolved if stats and stats.maintenance_resolved is defined else 0 }}</li>
+  </ul>
+
+  <h4 class="mt-4">Support</h4>
+  <ul>
+    <li>Total tickets: {{ stats.support_total if stats and stats.support_total is defined else 0 }}</li>
+    <li>Open tickets: {{ stats.support_open if stats and stats.support_open is defined else 0 }}</li>
+    <li>Escalated tickets: {{ stats.support_escalated if stats and stats.support_escalated is defined else 0 }}</li>
+    <li>Resolved tickets: {{ stats.support_resolved if stats and stats.support_resolved is defined else 0 }}</li>
+  </ul>
+
+  <h4 class="mt-4">Last 30 Days</h4>
+  <ul>
+    <li>Payments recorded: {{ stats.payments_30d if stats and stats.payments_30d is defined else 0 }}</li>
+    <li>Maintenance requests filed: {{ stats.maintenance_30d if stats and stats.maintenance_30d is defined else 0 }}</li>
+    <li>Support tickets opened: {{ stats.support_30d if stats and stats.support_30d is defined else 0 }}</li>
+  </ul>
+
+  <h4 class="mt-4">User Role Distribution</h4>
+  <ul>
+    <li>Tenants: {{ stats.role_counts.tenant if stats and stats.role_counts is defined and stats.role_counts.tenant is defined else 0 }}</li>
+    <li>Landlords: {{ stats.role_counts.landlord if stats and stats.role_counts is defined and stats.role_counts.landlord is defined else 0 }}</li>
+    <li>Service providers: {{ stats.role_counts.service if stats and stats.role_counts is defined and stats.role_counts.service is defined else 0 }}</li>
+    <li>Admins: {{ stats.role_counts.admin if stats and stats.role_counts is defined and stats.role_counts.admin is defined else 0 }}</li>
+  </ul>
+
+  <h4 class="mt-4">Trend Charts (Last 6 Months)</h4>
+  <div class="row">
+    <div class="col-md-6 mb-4">
+      <canvas id="paymentsTrendChart" height="220"></canvas>
+    </div>
+    <div class="col-md-6 mb-4">
+      <canvas id="revenueTrendChart" height="220"></canvas>
+    </div>
+    <div class="col-md-6 mb-4">
+      <canvas id="maintenanceSupportTrendChart" height="220"></canvas>
+    </div>
+    <div class="col-md-6 mb-4">
+      <canvas id="occupancyRoleChart" height="220"></canvas>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <a href="{{ url_for('admin.export_reports', dataset='summary', format='csv') }}" class="btn btn-primary">Export Summary CSV</a>
+    <a href="{{ url_for('admin.export_reports', dataset='summary', format='xlsx') }}" class="btn btn-outline-success">Export Summary XLSX</a>
+    <a href="{{ url_for('admin.export_reports', dataset='finance', format='csv') }}" class="btn btn-outline-primary">Export Finance CSV</a>
+    <a href="{{ url_for('admin.export_reports', dataset='finance', format='xlsx') }}" class="btn btn-outline-success">Export Finance XLSX</a>
+    <a href="{{ url_for('admin.export_reports', dataset='occupancy', format='csv') }}" class="btn btn-outline-primary">Export Occupancy CSV</a>
+    <a href="{{ url_for('admin.export_reports', dataset='occupancy', format='xlsx') }}" class="btn btn-outline-success">Export Occupancy XLSX</a>
+    <a href="{{ url_for('admin.export_reports', dataset='maintenance', format='csv') }}" class="btn btn-outline-primary">Export Maintenance CSV</a>
+    <a href="{{ url_for('admin.export_reports', dataset='maintenance', format='xlsx') }}" class="btn btn-outline-success">Export Maintenance XLSX</a>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+  </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const trendLabels = {{ (stats.trend_labels if stats and stats.trend_labels is defined else []) | tojson }};
+  const paymentsTrend = {{ (stats.payments_trend if stats and stats.payments_trend is defined else []) | tojson }};
+  const revenueTrend = {{ (stats.revenue_trend if stats and stats.revenue_trend is defined else []) | tojson }};
+  const maintenanceTrend = {{ (stats.maintenance_trend if stats and stats.maintenance_trend is defined else []) | tojson }};
+  const supportTrend = {{ (stats.support_trend if stats and stats.support_trend is defined else []) | tojson }};
+
+  const occupiedProperties = {{ stats.occupied_properties if stats and stats.occupied_properties is defined else 0 }};
+  const vacantProperties = {{ stats.vacant_properties if stats and stats.vacant_properties is defined else 0 }};
+  const roleTenant = {{ stats.role_counts.tenant if stats and stats.role_counts is defined and stats.role_counts.tenant is defined else 0 }};
+  const roleLandlord = {{ stats.role_counts.landlord if stats and stats.role_counts is defined and stats.role_counts.landlord is defined else 0 }};
+  const roleService = {{ stats.role_counts.service if stats and stats.role_counts is defined and stats.role_counts.service is defined else 0 }};
+  const roleAdmin = {{ stats.role_counts.admin if stats and stats.role_counts is defined and stats.role_counts.admin is defined else 0 }};
+
+  new Chart(document.getElementById('paymentsTrendChart'), {
+    type: 'line',
+    data: {
+      labels: trendLabels,
+      datasets: [{
+        label: 'Payments Count',
+        data: paymentsTrend,
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(37, 99, 235, 0.15)',
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { title: { display: true, text: 'Payments Trend' } }
+    }
+  });
+
+  new Chart(document.getElementById('revenueTrendChart'), {
+    type: 'bar',
+    data: {
+      labels: trendLabels,
+      datasets: [{
+        label: 'Revenue (KES)',
+        data: revenueTrend,
+        borderColor: '#16a34a',
+        backgroundColor: 'rgba(22, 163, 74, 0.25)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { title: { display: true, text: 'Revenue Trend' } }
+    }
+  });
+
+  new Chart(document.getElementById('maintenanceSupportTrendChart'), {
+    type: 'line',
+    data: {
+      labels: trendLabels,
+      datasets: [
+        {
+          label: 'Maintenance Requests',
+          data: maintenanceTrend,
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245, 158, 11, 0.15)',
+          tension: 0.3,
+          fill: true
+        },
+        {
+          label: 'Support Tickets',
+          data: supportTrend,
+          borderColor: '#dc2626',
+          backgroundColor: 'rgba(220, 38, 38, 0.15)',
+          tension: 0.3,
+          fill: true
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { title: { display: true, text: 'Maintenance vs Support Trend' } }
+    }
+  });
+
+  new Chart(document.getElementById('occupancyRoleChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Occupied', 'Vacant', 'Tenants', 'Landlords', 'Service', 'Admins'],
+      datasets: [{
+        data: [occupiedProperties, vacantProperties, roleTenant, roleLandlord, roleService, roleAdmin],
+        backgroundColor: ['#0ea5e9', '#94a3b8', '#8b5cf6', '#22c55e', '#f97316', '#ef4444']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { title: { display: true, text: 'Occupancy + Role Distribution' } }
+    }
+  });
+</script>
 {% endblock %}

@@ -61,6 +61,11 @@ class Config:
     ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', '')
     ADMIN_RATE_LIMIT = int(os.environ.get('ADMIN_RATE_LIMIT', 20))
     ADMIN_RATE_LIMIT_WINDOW = int(os.environ.get('ADMIN_RATE_LIMIT_WINDOW', 60))
+    # Comma-separated allowlist of IP/CIDR entries for admin pages.
+    # Example: "127.0.0.1,10.0.0.0/8,41.90.12.33"
+    ADMIN_IP_ALLOWLIST = os.environ.get('ADMIN_IP_ALLOWLIST', '')
+    # Admin idle session timeout (seconds) - default 1 hour
+    ADMIN_SESSION_TIMEOUT_SECONDS = int(os.environ.get('ADMIN_SESSION_TIMEOUT_SECONDS', 3600))
     
     # Upload folders
     UPLOAD_FOLDER = os.environ.get(

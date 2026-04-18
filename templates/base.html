@@ -1488,10 +1488,12 @@
 
             {% endif %}
 
-            <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode">
-                <i class="fas fa-moon"></i>
-                <i class="fas fa-sun"></i>
-            </button>
+            {% if feature_dark_mode_enabled|default(True) %}
+                    <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode">
+                        <i class="fas fa-moon"></i>
+                        <i class="fas fa-sun"></i>
+                    </button>
+            {% endif %}
         </div>
     </nav>
 
@@ -1583,6 +1585,14 @@
                 <li class="nav-item"><a href="{{ url_for('admin.system_settings') }}" class="nav-link"><i class="fas fa-cogs"></i> <span>System Settings</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('admin.view_reports') }}" class="nav-link"><i class="fas fa-chart-line"></i> <span>Reports</span></a></li>
                 <li class="nav-item"><a href="{{ url_for('admin.audit_logs') }}" class="nav-link"><i class="fas fa-history"></i> <span>Audit Logs</span></a></li>
+                <li class="nav-item">
+                    <form action="{{ url_for('admin.revoke_admin_sessions') }}" method="POST" style="display:block; margin:0;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="nav-link text-warning" style="width:100%; text-align:left; border:none; background:transparent;">
+                            <i class="fas fa-user-lock"></i> <span>Revoke Admin Sessions</span>
+                        </button>
+                    </form>
+                </li>
 
                 {% elif current_user.role.lower() == 'service' %}
                 <!-- Service provider role removed; no sidebar items -->
@@ -1787,18 +1797,24 @@
         });
 
         // ========== DARK MODE TOGGLE ==========
-        const darkModeToggle = document.getElementById('darkModeToggle');
         const htmlElement = document.documentElement;
+        const darkModeEnabled = {{ 'true' if feature_dark_mode_enabled|default(True) else 'false' }};
+        const darkModeToggle = document.getElementById('darkModeToggle');
 
         const savedTheme = localStorage.getItem('theme') || 'light';
-        htmlElement.setAttribute('data-bs-theme', savedTheme);
+        const initialTheme = darkModeEnabled ? savedTheme : 'light';
+        htmlElement.setAttribute('data-bs-theme', initialTheme);
 
-        darkModeToggle.addEventListener('click', function() {
-            const currentTheme = htmlElement.getAttribute('data-bs-theme');
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            htmlElement.setAttribute('data-bs-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-        });
+        if (!darkModeEnabled) {
+            localStorage.setItem('theme', 'light');
+        } else if (darkModeToggle) {
+            darkModeToggle.addEventListener('click', function() {
+                const currentTheme = htmlElement.getAttribute('data-bs-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                htmlElement.setAttribute('data-bs-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+        }
 
         // ========== SET CURRENT YEAR ==========
         document.getElementById('currentYear').textContent = new Date().getFullYear();
