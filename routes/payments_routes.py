@@ -258,6 +258,31 @@ def mpesa_callback():
 
             except Exception as inner_error:
                 print("Ownership logic failed:", inner_error)
+                
+            # =========================
+            # 🌟 FEATURED PROPERTY LOGIC (NEW - SAFE ADD)
+            # =========================
+            try:
+                if hasattr(link, "payment_type") and link.payment_type == "featured":
+                    print("Processing FEATURED property payment...")
+
+                    # Ensure house exists
+                    if not house and hasattr(link, "house_id") and link.house_id:
+                        house = House.query.get(link.house_id)
+
+                    if house:
+                        from datetime import timedelta
+
+                        # Mark as featured
+                        house.is_featured = True
+                        house.featured_until = datetime.utcnow() + timedelta(days=7)
+
+                        print(f"✅ House {house.id} is now FEATURED until {house.featured_until}")
+                    else:
+                        print("⚠️ Featured payment but house not found")
+
+            except Exception as feature_error:
+                print("❌ Featured logic failed:", feature_error)
 
             # =========================
             # OPTIONAL: SAVE PAYMENT RECORD

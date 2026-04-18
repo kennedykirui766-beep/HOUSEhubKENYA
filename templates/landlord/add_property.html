@@ -2121,39 +2121,45 @@
             <div class="feat-modal-step-dot active" id="dot2b"></div>
             <div class="feat-modal-step-dot" id="dot3b"></div>
           </div>
-          <h3>M-Pesa Payment</h3>
-          <p>Enter your Safaricom number to receive an STK push prompt.</p>
+          <h3>Complete Payment</h3>
+          <p>You'll be redirected to our secure M-Pesa payment page.</p>
         </div>
         <button class="feat-modal-close" onclick="closeFeatModal()" aria-label="Close">
           <i class="fas fa-times"></i>
         </button>
       </div>
       <div class="feat-modal-body">
-        <label class="feat-pay-label" for="featPhoneInput">M-Pesa Phone Number</label>
-        <div class="feat-phone-wrap">
-          <div class="feat-phone-prefix">
-            🇰🇪 +254
+
+        <!-- Payment summary -->
+        <div class="feat-price-callout">
+          <div class="feat-price-callout-left">
+            <div class="feat-price-callout-label">Featured listing fee</div>
+            <div class="feat-price-amount">KES <span class="feat-pay-amount-inline">500</span></div>
+            <div class="feat-price-desc">One-time payment · 30 days featured</div>
           </div>
-          <input
-            type="tel"
-            id="featPhoneInput"
-            class="feat-phone-input"
-            placeholder="7XX XXX XXX"
-            maxlength="9"
-            inputmode="numeric"
-            autocomplete="tel"
-          />
+          <span class="feat-duration-badge"><i class="fas fa-mobile-alt"></i> M-Pesa</span>
         </div>
-        <div class="feat-pay-note">
-          <i class="fas fa-shield-alt"></i>
-          You will receive an M-Pesa STK push to confirm <strong style="color:rgba(255,255,255,0.65);">KES <span class="feat-pay-amount-inline">2,500</span></strong> on your phone. Enter your M-Pesa PIN to complete payment.
+
+        <!-- How it works -->
+        <div class="feat-pay-note" style="flex-direction:column; gap:0.5rem;">
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <i class="fas fa-info-circle" style="color:#fbbf24; flex-shrink:0;"></i>
+            <strong style="color:rgba(255,255,255,0.65); font-size:0.8rem;">How it works</strong>
+          </div>
+          <ol style="margin:0; padding-left:1.2rem; color:rgba(255,255,255,0.45); font-size:0.78rem; line-height:1.8;">
+            <li>Click <strong style="color:rgba(255,255,255,0.6);">Proceed to Payment</strong> below</li>
+            <li>Enter your M-Pesa number on the payment page</li>
+            <li>Approve the STK push on your phone</li>
+            <li>You'll be returned here automatically once paid</li>
+          </ol>
         </div>
+
         <div id="featPayError" style="color:#f87171; font-size:0.8rem; margin-bottom:0.75rem; display:none;"></div>
       </div>
       <div class="feat-modal-foot">
-        <button class="btn-feat-primary" id="btnFeatPay" onclick="submitFeatPayment()">
-          <i class="fas fa-mobile-alt"></i>
-          <span id="featPayBtnText">Pay KES <span class="feat-pay-amount-inline">2,500</span></span>
+        <button class="btn-feat-primary" id="btnFeatProceed" onclick="proceedToFeatPayment()">
+          <i class="fas fa-lock"></i>
+          Proceed to Payment
           <div class="feat-pay-spinner" id="featPaySpinner"></div>
         </button>
         <button class="btn-feat-secondary" onclick="goFeatStep(1)">
@@ -2717,158 +2723,177 @@ document.addEventListener('DOMContentLoaded', () => {
   updateSteps();
   // ================================================================
   // FEATURED PROPERTY MODAL
+  // Uses the real backend route: /landlord/feature/new
+  // which creates a PaymentLink and redirects to payments.pay
   // ================================================================
 
-  // Admin-configurable featured price (fetched from backend or set here)
-  // Your Flask route should expose this via a template variable:
-  // {{ featured_price | default(2500) }}
-  const FEATURED_PRICE = {{ featured_price | default(2500) }};
+  const FEATURED_PRICE = {{ featured_price | default(500) }};
 
-  // Format price with commas
-  function fmtPrice(n) {
-    return n.toLocaleString('en-KE');
-  }
+  function fmtPrice(n) { return n.toLocaleString('en-KE'); }
 
-  // Seed price displays
+  // Seed all price display elements
   document.querySelectorAll('#featPriceDisplay, .feat-pay-amount-inline').forEach(el => {
     el.textContent = fmtPrice(FEATURED_PRICE);
   });
 
-  let featuredPaid = false;
+  // Check if returning from a successful featured payment
+  // Flask passes ?featured_paid=1 after the callback marks the link as paid
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('featured_paid') === '1') {
+    markFeaturedPaid();
+  }
 
   const featOverlay = document.getElementById('featModalOverlay');
 
-  // Open modal
   document.getElementById('btnOpenFeatured').addEventListener('click', () => {
-    if (featuredPaid) return; // Already paid — button shouldn't show
     featOverlay.classList.add('open');
     goFeatStep(1);
     document.body.style.overflow = 'hidden';
   });
 
-  // Close modal (before payment)
   window.closeFeatModal = function() {
     featOverlay.classList.remove('open');
     document.body.style.overflow = '';
   };
 
-  // Close modal after success — mark banner as paid
+  // No "success" close needed — success redirects back to this page
   window.closeFeatModalSuccess = function() {
     featOverlay.classList.remove('open');
     document.body.style.overflow = '';
-    markFeaturedPaid();
   };
 
-  // Navigate between steps
   window.goFeatStep = function(step) {
     document.querySelectorAll('.feat-step').forEach(s => s.classList.remove('active'));
     document.getElementById(`featStep${step}`).classList.add('active');
   };
 
-  // Close on overlay backdrop click
   featOverlay.addEventListener('click', (e) => {
     if (e.target === featOverlay) closeFeatModal();
   });
 
-  // Close on Escape
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && featOverlay.classList.contains('open')) {
       closeFeatModal();
     }
   });
 
-  // Submit payment
-  window.submitFeatPayment = function() {
-    const phoneInput = document.getElementById('featPhoneInput');
-    const errEl      = document.getElementById('featPayError');
-    const btnPay     = document.getElementById('btnFeatPay');
-    const btnText    = document.getElementById('featPayBtnText');
-    const spinner    = document.getElementById('featPaySpinner');
-
-    const raw = phoneInput.value.replace(/\s/g, '');
-
-    // Validate Kenyan number (9 digits, starting with 7 or 1)
-    if (!/^[71]\d{8}$/.test(raw)) {
-      errEl.textContent = 'Please enter a valid Safaricom number (e.g. 712345678).';
-      errEl.style.display = 'block';
-      phoneInput.style.outline = '1.5px solid #f87171';
-      return;
-    }
-
-    errEl.style.display = 'none';
-    phoneInput.style.outline = '';
-
-    // Show loading state
-    btnPay.disabled     = true;
-    btnText.style.display = 'none';
-    spinner.style.display = 'block';
-
-    const fullPhone = '+254' + raw;
+  // ── Step 2: "Proceed to Payment" — creates PaymentLink & redirects ──
+  window.proceedToFeatPayment = function() {
+    const btn     = document.getElementById('btnFeatProceed');
+    const spinner = document.getElementById('featPaySpinner');
+    const errEl   = document.getElementById('featPayError');
     const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || '';
 
-    // ── POST to your backend STK push route ──
-    fetch('/landlord/feature_payment', {
+    errEl.style.display = 'none';
+    btn.disabled = true;
+    spinner.style.display = 'inline-block';
+
+    // POST to /landlord/feature/new  — creates a PaymentLink with
+    // payment_type="featured" and returns { redirect_url: "..." }
+    fetch('{{ url_for("landlord.feature_house_new") }}', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-CSRFToken': csrfToken
       },
-      body: JSON.stringify({
-        phone: fullPhone,
-        amount: FEATURED_PRICE
-      })
+      body: JSON.stringify({ amount: FEATURED_PRICE })
     })
     .then(res => res.json())
     .then(data => {
-      if (data.success) {
-        goFeatStep(3); // Show success
+      if (data.redirect_url) {
+        // Save any draft form data to sessionStorage so it survives the redirect
+        saveDraftToSession();
+        // Redirect to the standard payments.pay page
+        window.location.href = data.redirect_url;
       } else {
-        errEl.textContent = data.error || 'Payment failed. Please try again.';
+        errEl.textContent = data.error || 'Could not start payment. Please try again.';
         errEl.style.display = 'block';
-        btnPay.disabled   = false;
-        btnText.style.display = 'inline';
+        btn.disabled = false;
         spinner.style.display = 'none';
       }
     })
     .catch(() => {
-      // For demo/development — simulate success if backend not yet wired
-      console.warn('[Featured] Backend not connected — simulating success for UI testing.');
-      goFeatStep(3);
-    })
-    .finally(() => {
-      // Reset button if still on step 2
-      if (!featuredPaid) {
-        btnPay.disabled     = false;
-        btnText.style.display = 'inline';
-        spinner.style.display = 'none';
-      }
+      errEl.textContent = 'Network error. Please check your connection and try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      spinner.style.display = 'none';
     });
   };
 
-  // Mark the banner as paid — update UI and form field
-  function markFeaturedPaid() {
-    featuredPaid = true;
+  // Save key form fields to sessionStorage so the landlord doesn't
+  // lose their work after coming back from the payments page
+  function saveDraftToSession() {
+    const fields = [
+      'propertyName','propertyType','propertyDescription',
+      'addressLine1','addressLine2','city','stateProvince','postalCode','country',
+      'rentAmount','securityDeposit','leaseTerm','availabilityDate',
+      'bedrooms','bathrooms','squareFootage','parkingAvailability',
+      'petRestrictions','houseRules'
+    ];
+    const draft = {};
+    fields.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) draft[id] = el.value;
+    });
+    // Radio / checkbox state
+    ['furnished_status','pets_allowed','smoking_policy'].forEach(name => {
+      const checked = document.querySelector(`input[name="${name}"]:checked`);
+      if (checked) draft[`radio_${name}`] = checked.value;
+    });
+    ['utilities','amenities','accessibility_features'].forEach(name => {
+      draft[`checks_${name}`] = Array.from(
+        document.querySelectorAll(`input[name="${name}"]:checked`)
+      ).map(el => el.value);
+    });
+    sessionStorage.setItem('ap_draft', JSON.stringify(draft));
+  }
 
-    // Set hidden field so Flask knows this listing is featured
+  // Restore draft from sessionStorage (called on page load after redirect)
+  function restoreDraftFromSession() {
+    const raw = sessionStorage.getItem('ap_draft');
+    if (!raw) return;
+    try {
+      const draft = JSON.parse(raw);
+      Object.entries(draft).forEach(([key, value]) => {
+        if (key.startsWith('radio_')) {
+          const name = key.replace('radio_', '');
+          const el = document.querySelector(`input[name="${name}"][value="${value}"]`);
+          if (el) { el.checked = true; el.closest('.ap-check-item')?.classList.add('selected'); }
+        } else if (key.startsWith('checks_')) {
+          const name = key.replace('checks_', '');
+          (value || []).forEach(val => {
+            const el = document.querySelector(`input[name="${name}"][value="${val}"]`);
+            if (el) { el.checked = true; el.closest('.ap-check-item')?.classList.add('selected'); }
+          });
+        } else {
+          const el = document.getElementById(key);
+          if (el) el.value = value;
+        }
+      });
+      sessionStorage.removeItem('ap_draft');
+      updatePreview();
+      updateSteps();
+    } catch(e) { console.warn('Draft restore failed:', e); }
+  }
+
+  // Mark banner as paid (called when ?featured_paid=1 is in URL)
+  function markFeaturedPaid() {
     document.getElementById('isFeaturedField').value = '1';
 
-    // Update banner appearance
     const banner = document.getElementById('featuredBanner');
     const icon   = document.getElementById('featuredIcon');
     const desc   = document.getElementById('featuredBannerDesc');
     const btn    = document.getElementById('btnOpenFeatured');
+    if (!banner) return;
 
     banner.classList.add('is-featured');
-    icon.innerHTML   = '<i class="fas fa-check"></i>';
-    desc.textContent = 'Payment confirmed ✓ — this property will be featured on the homepage once listed.';
-
-    // Replace button with paid badge
-    btn.outerHTML = `
-      <div class="ap-featured-paid-badge">
-        <i class="fas fa-check-circle"></i> Featured — Paid
-      </div>
-    `;
+    if (icon) icon.innerHTML = '<i class="fas fa-check"></i>';
+    if (desc) desc.textContent = 'Payment confirmed ✓ — this property will be featured on the homepage once listed.';
+    if (btn)  btn.outerHTML = `<div class="ap-featured-paid-badge"><i class="fas fa-check-circle"></i> Featured — Paid</div>`;
   }
+
+  // Run restore on load
+  restoreDraftFromSession();
 
 });
 </script>

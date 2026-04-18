@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 from extensions import db, csrf
 from werkzeug.utils import secure_filename
 from datetime import datetime
-from models.models import Message, PaymentLink, User, House, Booking, Payment, MaintenanceRequest
+from models.models import FeaturedPayment, Message, PaymentLink, User, House, Booking, Payment, MaintenanceRequest
 import cloudinary.uploader
 import json
 
@@ -1245,3 +1245,61 @@ def bookings():
         bookings=bookings,
         stats=stats
     )
+    
+@landlord_bp.route("/feature/<int:house_id>")
+@login_required
+def feature_house(house_id):
+    from datetime import datetime, timedelta
+    import uuid
+
+    house = House.query.get_or_404(house_id)
+
+    # 🔐 Ensure owner
+    if house.owner_id != current_user.id:
+        flash("Unauthorized", "danger")
+        return redirect(url_for("landlord.properties"))
+
+    token = str(uuid.uuid4())
+
+    link = PaymentLink(
+        token=token,
+        house_id=house.id,
+        landlord_id=current_user.id,
+        amount=500,  # or admin-controlled
+        payment_type="featured",
+        expires_at=datetime.utcnow() + timedelta(minutes=30),
+        status="pending"
+    )
+
+    db.session.add(link)
+    db.session.commit()
+
+    return redirect(url_for("payments.pay", token=token))
+
+@landlord_bp.route("/feature/new", methods=["POST"])
+@login_required
+def feature_house_new():
+    import uuid
+    from datetime import datetime, timedelta
+
+    data = request.get_json() or {}
+    amount = data.get("amount", 500)
+
+    token = str(uuid.uuid4())
+    link = PaymentLink(
+        token=token,
+        landlord_id=current_user.id,
+        house_id=None,          # no house yet — assigned after listing
+        amount=amount,
+        payment_type="featured",
+        expires_at=datetime.utcnow() + timedelta(minutes=30),
+        status="pending"
+    )
+    db.session.add(link)
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "redirect_url": url_for("payments.pay", token=token, _external=False)
+        + "?return_to=" + url_for("landlord.add_property", featured_paid=1)
+    })
