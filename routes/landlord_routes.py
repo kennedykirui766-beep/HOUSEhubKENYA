@@ -1345,17 +1345,51 @@ def feature_house(house_id):
 @landlord_bp.route("/save_draft", methods=["POST"])
 @login_required
 def save_draft():
-    # ... your existing save logic ...
-    house = House(...)  # create from form data
-    house.status = "draft"
-    db.session.add(house)
-    db.session.commit()
+    try:
+        form = request.form
 
-    if request.form.get("save_for_featured") == "1":
-        # Return house_id so the frontend can redirect to feature_house
-        return jsonify({"success": True, "house_id": house.id})
+        # ✅ Extract only fields you actually need for draft
+        house = House(
+            title=form.get("title"),
+            description=form.get("description"),
+            category=form.get("property_type"),
+            location=", ".join(filter(None, [
+                form.get("address_line1"),
+                form.get("city"),
+                form.get("country")
+            ])),
 
-    return jsonify({"message": "Draft saved successfully!"})
+            rent_amount=float(form.get("rent_amount") or 0),
+            security_deposit=float(form.get("security_deposit") or 0),
+
+            bedrooms=int(form.get("bedrooms") or 0),
+            bathrooms=float(form.get("bathrooms") or 0),
+
+            owner_id=current_user.id,
+            status="draft"   # ✅ important
+        )
+
+        db.session.add(house)
+        db.session.commit()
+
+        # ✅ FEATURE FLOW
+        if form.get("save_for_featured") == "1":
+            return jsonify({
+                "success": True,
+                "house_id": house.id
+            })
+
+        return jsonify({
+            "success": True,
+            "message": "Draft saved successfully!"
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
 @landlord_bp.route("/feature/new", methods=["POST"])
 @login_required
