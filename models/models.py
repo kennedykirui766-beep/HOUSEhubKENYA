@@ -195,6 +195,7 @@ class House(db.Model):
     accessibility_features = db.Column(db.Text)
     is_featured = db.Column(db.Boolean, default=False)
     featured_until = db.Column(db.DateTime, nullable=True)
+    status = db.Column(db.String(20), default="draft")
     
 
 class ServiceRequest(db.Model):
