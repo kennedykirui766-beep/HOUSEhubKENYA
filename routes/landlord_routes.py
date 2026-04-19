@@ -1,5 +1,6 @@
 import os
 import logging
+import traceback
 import uuid
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -1383,8 +1384,6 @@ def save_draft():
             "success": True,
             "message": "Draft saved successfully!"
         })
-
-    import traceback
 
     except Exception as e:
         db.session.rollback()
