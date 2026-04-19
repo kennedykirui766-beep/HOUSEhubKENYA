@@ -92,7 +92,7 @@ def pay(token):
 
         try:
             # TRIGGER STK PUSH
-            stk_response = stk_push(phone, link.amount, link.id)
+            stk_response = stk_push(phone, link.id)
             print("📲 STK RESPONSE:", stk_response)
 
             # ✅ FIX: Proper extraction of CheckoutRequestID

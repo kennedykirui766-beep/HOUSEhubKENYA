@@ -6,7 +6,7 @@ from datetime import datetime
 from models.models import PaymentLink, db
 
 
-def stk_push(phone, amount, link_id):
+def stk_push(phone, link_id):
     consumer_key = os.environ.get("MPESA_CONSUMER_KEY")
     consumer_secret = os.environ.get("MPESA_CONSUMER_SECRET")
     shortcode = os.environ.get("MPESA_SHORTCODE")
@@ -39,7 +39,9 @@ def stk_push(phone, amount, link_id):
         print("❌ PaymentLink not found")
         return None
 
-    # 🔥 Dynamic description (deposit vs featured)
+    amount = link.amount  # ✅ SOURCE OF TRUTH
+
+    # 🔥 Dynamic description
     if link.payment_type == "featured":
         description = "Featured Property Payment"
         account_ref = f"FEATURED-{link.token}"
@@ -57,8 +59,6 @@ def stk_push(phone, amount, link_id):
         "PartyB": shortcode,
         "PhoneNumber": phone,
         "CallBackURL": callback_url,
-
-        # 🔥 VERY IMPORTANT
         "AccountReference": account_ref,
         "TransactionDesc": description
     }
@@ -70,7 +70,6 @@ def stk_push(phone, amount, link_id):
 
     checkout_request_id = res_data.get("CheckoutRequestID")
 
-    # ✅ SAVE TO SAME ROW (FIXED)
     if checkout_request_id:
         link.checkout_request_id = checkout_request_id
         db.session.commit()
