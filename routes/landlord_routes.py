@@ -1384,11 +1384,17 @@ def save_draft():
             "message": "Draft saved successfully!"
         })
 
+    import traceback
+
     except Exception as e:
         db.session.rollback()
+
+        print("❌ SAVE DRAFT ERROR:")
+        traceback.print_exc()   # 🔥 THIS IS IMPORTANT
+
         return jsonify({
             "success": False,
-            "error": str(e)
+            "error": str(e)   # temporarily expose for debugging
         }), 500
 
 @landlord_bp.route("/feature/new", methods=["POST"])
