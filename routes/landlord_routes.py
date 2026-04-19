@@ -199,7 +199,7 @@ def properties():
 @landlord_bp.route("/properties/add", methods=["GET", "POST"])
 @login_required
 def add_property():
-    featured_price = float(SystemSetting.get("featured_price", 500))
+    featured_price = float(SystemSetting.get("featured_price", 10))
     if current_user.role != "landlord":
         return {"message": "Access denied"}, 403
 

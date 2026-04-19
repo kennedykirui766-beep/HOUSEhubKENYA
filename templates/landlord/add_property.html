@@ -1916,7 +1916,7 @@
                   </h4>
                   <p id="featuredBannerDesc">
                     Boost visibility on the homepage &amp; all listings for
-                    <strong style="color:#fbbf24;">KES {{ "{:,.0f}".format(featured_price | default(500)) }}</strong>.
+                    <strong style="color:#fbbf24;">KES {{ "{:,.0f}".format(featured_price) }}</strong>.
                     Get 10× more tenant enquiries.
                   </p>
                 </div>
@@ -2099,8 +2099,7 @@
         <div class="feat-price-callout">
           <div class="feat-price-callout-left">
             <div class="feat-price-callout-label">One-time fee</div>
-            <div class="feat-price-amount">KES {{ "{:,.0f}".format(featured_price | default(500)) }}</div>
-            <div class="feat-price-desc">Paid once per property listing</div>
+            <div class="feat-price-amount">KES {{ "{:,.0f}".format(featured_price) }}</div>
           </div>
           <span class="feat-duration-badge"><i class="fas fa-clock"></i> 30 days</span>
         </div>
@@ -2135,7 +2134,7 @@
         <div class="feat-price-callout">
           <div class="feat-price-callout-left">
             <div class="feat-price-callout-label">Featured listing fee</div>
-            <div class="feat-price-amount">KES {{ "{:,.0f}".format(featured_price | default(500)) }}</div>
+            <div class="feat-price-amount">KES {{ "{:,.0f}".format(featured_price) }}</div>
             <div class="feat-price-desc">One-time payment · 30 days featured</div>
           </div>
           <span class="feat-duration-badge"><i class="fas fa-mobile-alt"></i> M-Pesa</span>
