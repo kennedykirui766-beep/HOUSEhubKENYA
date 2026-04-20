@@ -526,6 +526,7 @@
                 },
                 body: JSON.stringify({
                     booking_id: currentBookingId
+                    payment_type: "deposit"
                 })
             })
             .then(res => res.json())
