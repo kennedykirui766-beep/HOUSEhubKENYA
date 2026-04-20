@@ -457,15 +457,15 @@ def api_generate_payment_link():
                     "message": "Unauthorized"
                 }), 403
 
-            # 🔥 You can define fixed price
-            FEATURE_PRICE = 500  # example KES
+            # 🔥 Admin-controlled price (FIXED)
+            FEATURE_PRICE = float(SystemSetting.get("featured_price", 10))
 
             link = PaymentLink(
                 token=token,
                 landlord_id=current_user.id,
                 house_id=house.id,
                 amount=FEATURE_PRICE,
-                payment_type="featured",   # 🔥 IMPORTANT
+                payment_type="featured",
                 status="pending",
                 expires_at=datetime.utcnow() + timedelta(minutes=10)
             )
@@ -514,7 +514,8 @@ def api_generate_payment_link():
         return jsonify({
             "success": True,
             "payment_url": payment_url,
-            "token": token
+            "token": token,
+            "amount": link.amount  
         })
 
     except Exception as e:
