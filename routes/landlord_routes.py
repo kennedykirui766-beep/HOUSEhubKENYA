@@ -307,6 +307,7 @@ def add_property():
 
                 image_urls=image_urls_json,
                 owner_id=current_user.id,
+                status="published"
             )
 
             db.session.add(house)
