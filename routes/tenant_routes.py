@@ -222,6 +222,11 @@ def properties():
     # Base query with owner
     house_query = House.query.options(joinedload(House.owner))
 
+    # ✅ NEW: Filter only published houses (ADD THIS LINE)
+    house_query = house_query.filter_by(status="published")
+    # OR use this if your model uses boolean:
+    # house_query = house_query.filter_by(is_published=True)
+
     # Search
     if query:
         house_query = house_query.filter(
