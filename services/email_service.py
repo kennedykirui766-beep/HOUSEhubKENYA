@@ -143,9 +143,14 @@ def send_payment_email(to_email, tenant_name, payment_url, amount):
 
         # Logging success
         status = getattr(result, "status_code", None)
-        print("✅ EMAIL SENT SUCCESSFULLY")
-        print(f"📧 To: {to_email}")
-        print(f"📊 Status Code: {status}")
+
+        if status in [200, 201]:
+            print("✅ EMAIL SENT SUCCESSFULLY")
+        else:
+            print("❌ EMAIL FAILED")
+            print("📊 Status Code:", status)
+            print("📩 Response:", result.json())
+            raise Exception(f"Mailjet error: {status}")
 
         return result
 
