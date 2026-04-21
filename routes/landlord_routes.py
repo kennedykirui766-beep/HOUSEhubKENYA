@@ -516,18 +516,23 @@ def api_generate_payment_link():
             "success": True,
             "payment_url": payment_url,
             "token": token,
-            "amount": link.amount  
+            "amount": link.amount,
+            "email_status": email_status
         })
 
     except Exception as e:
-        import traceback
-        print("❌ API ERROR:")
-        traceback.print_exc()
+        email_status = "sent"
 
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+    try:
+        send_payment_email(
+            to_email=booking.tenant.email,
+            tenant_name=booking.tenant.name,
+            payment_url=payment_url,
+            amount=link.amount
+        )
+    except Exception as e:
+        email_status = "failed"
+        print("❌ EMAIL FAILED:", str(e))
 
 # ---------------- Payments ----------------
 from datetime import datetime
