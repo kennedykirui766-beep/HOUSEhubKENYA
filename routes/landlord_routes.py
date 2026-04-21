@@ -405,6 +405,7 @@ def api_generate_payment_link():
         token = str(uuid.uuid4())
 
         link = None
+        email_status = "not_sent"  # ✅ ALWAYS define early
 
         # =========================
         # 🏠 DEPOSIT PAYMENT
@@ -502,16 +503,19 @@ def api_generate_payment_link():
                     payment_url=payment_url,
                     amount=link.amount
                 )
+
+                email_status = "sent"
+
             except Exception as e:
                 import traceback
                 print("❌ EMAIL FAILED:")
                 traceback.print_exc()
 
-                return jsonify({
-                    "success": False,
-                    "message": f"Email failed: {str(e)}"
-                }), 500
+                email_status = "failed"  # ✅ don't crash API
 
+        # =========================
+        # FINAL RESPONSE (ALWAYS RETURN)
+        # =========================
         return jsonify({
             "success": True,
             "payment_url": payment_url,
@@ -521,18 +525,14 @@ def api_generate_payment_link():
         })
 
     except Exception as e:
-        email_status = "sent"
+        import traceback
+        print("❌ API ERROR:")
+        traceback.print_exc()
 
-    try:
-        send_payment_email(
-            to_email=booking.tenant.email,
-            tenant_name=booking.tenant.name,
-            payment_url=payment_url,
-            amount=link.amount
-        )
-    except Exception as e:
-        email_status = "failed"
-        print("❌ EMAIL FAILED:", str(e))
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
 
 # ---------------- Payments ----------------
 from datetime import datetime
