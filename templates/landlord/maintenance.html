@@ -234,6 +234,55 @@
   .bg-blue-light { background-color: var(--info-light); color: var(--info-color); }
   .bg-green-light { background-color: var(--success-light); color: var(--success-color); }
 
+  /* Modal Custom Styling */
+  .modal-header {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1.5rem;
+  }
+  .modal-title {
+    font-weight: 700;
+    color: #111827;
+  }
+  .modal-body {
+    padding: 2rem 1.5rem;
+  }
+  .detail-section {
+    margin-bottom: 1.5rem;
+  }
+  .detail-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--secondary-color);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+  .detail-content {
+    font-size: 1rem;
+    color: #374151;
+    line-height: 1.5;
+    background-color: #f9fafb;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+  }
+  .detail-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .detail-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
 </style>
 {% endblock %}
 
@@ -405,7 +454,24 @@
                 {% endif %}
               </td>
               <td class="text-end">
-                <button class="btn btn-sm btn-light text-primary fw-bold">View</button>
+                <!-- 
+                   Updated View Button: 
+                   - Added data-bs-toggle and data-bs-target to open modal
+                   - Added data attributes to pass row data to the modal 
+                -->
+                <button class="btn btn-sm btn-light text-primary fw-bold"
+                        data-bs-toggle="modal"
+                        data-bs-target="#maintenanceDetailsModal"
+                        data-tenant-name="{{ user.name }}"
+                        data-tenant-id="{{ user.id }}"
+                        data-house-title="{{ house.title }}"
+                        data-house-address="{{ house.address }}"
+                        data-request-title="{{ req.title }}"
+                        data-request-issue="{{ req.issue or 'No description provided.' }}"
+                        data-request-date="{{ req.created_at.strftime('%d %b %Y, %I:%M %p') }}"
+                        data-request-status="{{ req.status }}">
+                    View
+                </button>
               </td>
             </tr>
             {% endfor %}
@@ -425,4 +491,132 @@
   </div>
 
 </div>
+
+<!-- Details Modal -->
+<div class="modal fade" id="maintenanceDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 1rem; border: 1px solid #e5e7eb;">
+      
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h5 class="modal-title">Request Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        
+        <!-- Status & Date Row -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <span id="modalStatus" class="badge badge-pill badge-pending">Pending</span>
+            <span id="modalDate" class="small text-muted">Date</span>
+        </div>
+
+        <!-- Request Title -->
+        <h4 id="modalRequestTitle" class="mb-3 fw-bold text-dark">Issue Title</h4>
+
+        <!-- Grid for Tenant & House -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <span class="detail-label">Tenant</span>
+                <div class="detail-box">
+                    <div class="detail-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <div id="modalTenantName" class="fw-bold text-dark">Tenant Name</div>
+                        <div class="small text-muted">Tenant</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <span class="detail-label">Property</span>
+                <div class="detail-box">
+                    <div class="detail-icon" style="background-color: var(--info-light); color: var(--info-color);">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <div>
+                        <div id="modalHouseTitle" class="fw-bold text-dark">House Title</div>
+                        <div id="modalHouseAddress" class="small text-muted text-truncate-custom" style="max-width: 150px;">Address</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div class="detail-section">
+            <span class="detail-label">Issue Description</span>
+            <div id="modalRequestIssue" class="detail-content">
+                Issue description goes here...
+            </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer" style="border-top: 1px solid #e5e7eb; padding: 1.5rem;">
+        <button type="button" class="btn btn-light text-secondary" data-bs-dismiss="modal">Close</button>
+        <!-- 
+             Message Button: 
+             The 'href' is updated dynamically via JS to navigate to the specific user's chat.
+        -->
+        <a id="modalMessageBtn" href="#" class="btn btn-primary px-4">
+            <i class="fas fa-comment-dots me-2"></i> Message Tenant
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const maintenanceModal = document.getElementById('maintenanceDetailsModal');
+        
+        // Ensure Modal exists before adding event listener
+        if (maintenanceModal) {
+            maintenanceModal.addEventListener('show.bs.modal', function (event) {
+                // Button that triggered the modal
+                const button = event.relatedTarget;
+                
+                // Extract info from data attributes
+                const tenantId = button.getAttribute('data-tenant-id');
+                const tenantName = button.getAttribute('data-tenant-name');
+                const houseTitle = button.getAttribute('data-house-title');
+                const houseAddress = button.getAttribute('data-house-address');
+                const reqTitle = button.getAttribute('data-request-title');
+                const reqIssue = button.getAttribute('data-request-issue');
+                const reqDate = button.getAttribute('data-request-date');
+                const reqStatus = button.getAttribute('data-request-status');
+
+                // Update Modal Content
+                document.getElementById('modalTenantName').textContent = tenantName;
+                document.getElementById('modalHouseTitle').textContent = houseTitle;
+                document.getElementById('modalHouseAddress').textContent = houseAddress;
+                document.getElementById('modalRequestTitle').textContent = reqTitle;
+                document.getElementById('modalRequestIssue').textContent = reqIssue;
+                document.getElementById('modalDate').textContent = reqDate;
+
+                // Update Status Badge Styling
+                const statusBadge = document.getElementById('modalStatus');
+                statusBadge.textContent = reqStatus.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                
+                // Reset classes
+                statusBadge.className = 'badge badge-pill';
+                if (reqStatus === 'pending') statusBadge.classList.add('badge-pending');
+                else if (reqStatus === 'in_progress') statusBadge.classList.add('badge-progress');
+                else if (reqStatus === 'completed') statusBadge.classList.add('badge-completed');
+                else statusBadge.classList.add('bg-secondary', 'text-white');
+
+                // Update Message Button Link
+                // NOTE: Update this string to match your actual message route, e.g., '/messages/chat/' or url_for('messages.view')
+                const messageUrlBase = '/messages?tenant_id=';
+                document.getElementById('modalMessageBtn').href = `${messageUrlBase}${tenantId}`;
+            });
+        }
+    });
+</script>
 {% endblock %}
