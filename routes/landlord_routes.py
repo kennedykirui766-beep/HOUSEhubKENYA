@@ -1356,7 +1356,19 @@ def save_draft():
     try:
         form = request.form
 
-        # ✅ Extract only fields you actually need for draft
+        # 🔥 NEW: Handle image uploads
+        files = request.files.getlist("images")  # name must match your input
+        image_urls = []
+
+        for file in files:
+            if file and file.filename:
+                try:
+                    upload_result = cloudinary.uploader.upload(file)
+                    image_urls.append(upload_result.get("secure_url"))
+                except Exception as upload_error:
+                    print("❌ Cloudinary upload failed:", upload_error)
+
+        # ✅ Create house
         house = House(
             title=form.get("title"),
             description=form.get("description"),
@@ -1374,13 +1386,16 @@ def save_draft():
             bathrooms=float(form.get("bathrooms") or 0),
 
             owner_id=current_user.id,
-            status="draft"   # ✅ important
+            status="draft",
+
+            # 🔥 NEW: Save images
+            image_urls=json.dumps(image_urls) if image_urls else None
         )
 
         db.session.add(house)
         db.session.commit()
 
-        # ✅ FEATURE FLOW
+        # FEATURE FLOW (unchanged)
         if form.get("save_for_featured") == "1":
             return jsonify({
                 "success": True,
@@ -1396,12 +1411,13 @@ def save_draft():
         db.session.rollback()
 
         print("❌ SAVE DRAFT ERROR:")
-        traceback.print_exc()   # 🔥 THIS IS IMPORTANT
+        traceback.print_exc()
 
         return jsonify({
             "success": False,
-            "error": str(e)   # temporarily expose for debugging
+            "error": str(e)
         }), 500
+        
 
 @landlord_bp.route("/feature/new", methods=["POST"])
 @login_required
