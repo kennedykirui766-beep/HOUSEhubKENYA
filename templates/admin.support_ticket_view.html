@@ -31,6 +31,7 @@
 
     <form action="{{ url_for('admin.support_ticket_resolve', ticket_id=ticket.id) }}" method="post">
       {% if ticket.status != 'resolved' %}
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <button class="btn btn-success">Mark Resolved</button>
       {% else %}
       <span class="status-badge status-success">Resolved</span>
