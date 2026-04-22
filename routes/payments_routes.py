@@ -1,3 +1,5 @@
+from os import link
+
 from flask import Blueprint
 
 payments_bp = Blueprint("payments", __name__, url_prefix="/payments")
@@ -39,10 +41,13 @@ def pay(token):
         flash("This payment link has already been used.", "warning")
         return render_template("payments/already_paid.html", link=link)
 
-    # ADD: Redirect if payment already failed
+    # ADD: Allow retry if payment failed
     if link.status == "failed":
-        flash("Previous payment failed. Please try again.", "danger")
-        return redirect(url_for("payments.failed", token=token))
+        flash("Previous payment failed. You can try again.", "warning")
+
+        # 🔥 Reset state so user can retry
+        link.status = "pending"
+        db.session.commit()
 
     # Optional: If user is logged in, verify ownership (ROLE-AWARE FIX)
     if current_user.is_authenticated:
@@ -111,7 +116,6 @@ def pay(token):
             # Save details (DO NOT mark as paid)
             link.phone = phone
 
-            # ❌ REMOVE THIS (wrong to set before payment)
             # link.paid_at = datetime.utcnow()
 
             #  Set to pending (wait for callback)
@@ -420,9 +424,6 @@ def pending(token):
         return redirect(url_for("payments.failed", token=token))
 
     # ⏳ STILL PENDING (THIS WAS MISSING)
-    return render_template("payments/pending.html", link=link)
-
-    # ⏳ Still pending
     return render_template("payments/pending.html", link=link)
 
 @payments_bp.route("/already-paid/<string:token>")
