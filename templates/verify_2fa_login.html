@@ -30,7 +30,7 @@
             {% endif %}
           {% endwith %}
 
-          <form method="POST" action="{{ url_for('auth.verify_2fa_login') }}">
+          <form method="POST" action="{{ post_url|default(url_for('auth.verify_2fa_login')) }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="mb-3">
               <label for="code" class="form-label">Verification Code</label>

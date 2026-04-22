@@ -566,6 +566,7 @@ def admin_2fa_verify():
                 method='totp',
                 masked_email=current_user.email,
                 resend_wait_seconds=0,
+                post_url=url_for('auth.admin_2fa_verify'),
             )
 
         allowed, retry_after = consume_rate_limit(f"admin-totp:{current_user.id}", 5, 60)
@@ -576,6 +577,7 @@ def admin_2fa_verify():
                 method='totp',
                 masked_email=current_user.email,
                 resend_wait_seconds=0,
+                post_url=url_for('auth.admin_2fa_verify'),
             )
 
         totp = pyotp.TOTP(current_user.two_factor_secret)
@@ -595,6 +597,7 @@ def admin_2fa_verify():
         method='totp',
         masked_email=current_user.email,
         resend_wait_seconds=0,
+        post_url=url_for('auth.admin_2fa_verify'),
     )
 
 # ------------------- UPDATE PROFILE -------------------
