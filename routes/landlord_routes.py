@@ -731,7 +731,6 @@ def reports():
 def edit_property(property_id):
     
     featured_price = float(SystemSetting.get("featured_price", 10))
-    return render_template("landlord/edit_property.html", house=House, featured_price=featured_price)
 
     if current_user.role != "landlord":
         flash("Access denied.", "danger")
@@ -830,11 +829,7 @@ def edit_property(property_id):
         if house.availability_date else ""
     )
 
-    return render_template(
-        "landlord/edit_property.html",
-        house=house,
-        stats={}
-    )
+    return render_template("landlord/edit_property.html", house=house, featured_price=featured_price)
 
 
 from extensions import csrf
