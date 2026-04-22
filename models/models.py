@@ -196,6 +196,8 @@ class House(db.Model):
     is_featured = db.Column(db.Boolean, default=False)
     featured_until = db.Column(db.DateTime, nullable=True)
     status = db.Column(db.String(20), default="draft")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
     
 
 class ServiceRequest(db.Model):
