@@ -613,7 +613,7 @@
 
                 // Update Message Button Link
                 // NOTE: Update this string to match your actual message route, e.g., '/messages/chat/' or url_for('messages.view')
-                const messageUrlBase = '/messages?tenant_id=';
+                const messageUrlBase = '/landlord/messages?tenant_id=';
                 document.getElementById('modalMessageBtn').href = `${messageUrlBase}${tenantId}`;
             });
         }
