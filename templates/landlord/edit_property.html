@@ -4,7 +4,7 @@
 
 {% block styles %}
 <style>
-  /* ========== EDIT PROPERTY PAGE STYLES (SHARED) ========== */
+  /* ========== EDIT PROPERTY PAGE ========== */
   .add-property-page {
     padding: 2rem 0 4rem;
     background-color: var(--body-bg);
@@ -17,16 +17,9 @@
     margin-bottom: 0.35rem;
   }
 
-  .ap-header p {
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-  }
+  .ap-header p { color: var(--text-secondary); font-size: 0.95rem; }
 
-  .header-actions {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
-  }
+  .header-actions { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
 
   /* ========== STICKY STEPS BAR ========== */
   .ap-steps-bar {
@@ -46,13 +39,16 @@
     flex-wrap: nowrap;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
+
+  .ap-steps-bar::-webkit-scrollbar { display: none; }
 
   .ap-step {
     display: flex;
     align-items: center;
-    gap: 0.45rem;
-    padding: 0.4rem 0.65rem;
+    gap: 0.4rem;
+    padding: 0.35rem 0.55rem;
     border-radius: var(--radius-full);
     cursor: pointer;
     transition: var(--transition);
@@ -61,60 +57,42 @@
     flex-shrink: 0;
   }
 
-  .ap-step:hover {
-    background: var(--primary-light);
-  }
+  .ap-step:hover { background: var(--primary-light); }
 
   .ap-step-indicator {
-    width: 26px;
-    height: 26px;
+    width: 26px; height: 26px;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.7rem;
-    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 700;
     border: 2px solid var(--border-color);
     color: var(--text-muted);
     background: var(--body-bg);
-    transition: var(--transition);
+    transition: all 0.25s ease;
     flex-shrink: 0;
   }
 
-  .ap-step-indicator i {
-    font-size: 0.65rem;
-  }
+  .ap-step-indicator i { font-size: 0.65rem; }
 
   .ap-step.completed .ap-step-indicator {
-    background: #28a745;
-    border-color: #28a745;
+    background: #22c55e;
+    border-color: #22c55e;
     color: white;
+    box-shadow: 0 0 0 3px rgba(34,197,94,0.15);
   }
 
-  .ap-step-label {
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    transition: var(--transition);
-  }
+  .ap-step-label { font-size: 0.75rem; font-weight: 500; color: var(--text-muted); transition: var(--transition); }
 
-  .ap-step.completed .ap-step-label {
-    color: #28a745;
-    font-weight: 600;
-  }
+  .ap-step.completed .ap-step-label { color: #22c55e; font-weight: 600; }
 
   .ap-step-connector {
-    width: 20px;
-    height: 2px;
+    width: 16px; height: 2px;
     background: var(--border-color);
     flex-shrink: 0;
-    transition: var(--transition);
+    transition: background 0.3s ease;
     border-radius: 1px;
   }
 
-  .ap-step-connector.completed {
-    background: #28a745;
-  }
+  .ap-step-connector.completed { background: #22c55e; }
 
   /* ---------- Form Sections ---------- */
   .ap-section {
@@ -123,74 +101,60 @@
     border-radius: var(--radius-lg);
     padding: 1.75rem;
     margin-bottom: 1.25rem;
-    transition: var(--transition);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
   }
 
-  .ap-section:hover {
-    border-color: color-mix(in srgb, var(--primary-color) 40%, transparent);
-  }
+  .ap-section:hover { border-color: color-mix(in srgb, var(--primary-color) 40%, transparent); }
+
+  .ap-section.section-complete { border-left: 3px solid #22c55e; }
 
   .ap-section-header {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    margin-bottom: 1.35rem;
-    padding-bottom: 0.85rem;
+    display: flex; align-items: center; gap: 0.65rem;
+    margin-bottom: 1.35rem; padding-bottom: 0.85rem;
     border-bottom: 1px solid var(--border-color);
   }
 
   .ap-section-icon {
-    width: 40px;
-    height: 40px;
+    width: 40px; height: 40px;
     border-radius: var(--radius-md);
     background: var(--primary-light);
     color: var(--primary-color);
-    display: flex;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+    transition: all 0.25s ease;
+  }
+
+  .ap-section.section-complete .ap-section-icon { background: rgba(34,197,94,0.1); color: #22c55e; }
+
+  .ap-section-title { color: var(--text-primary); font-weight: 600; font-size: 1.05rem; margin: 0; }
+  .ap-section-subtitle { color: var(--text-muted); font-size: 0.78rem; margin: 0; }
+
+  .ap-section-complete-badge {
+    margin-left: auto;
+    display: none;
     align-items: center;
-    justify-content: center;
-    font-size: 1rem;
+    gap: 0.35rem;
+    color: #22c55e;
+    font-size: 0.78rem;
+    font-weight: 600;
     flex-shrink: 0;
   }
 
-  .ap-section-title {
-    color: var(--text-primary);
-    font-weight: 600;
-    font-size: 1.05rem;
-    margin: 0;
-  }
-
-  .ap-section-subtitle {
-    color: var(--text-muted);
-    font-size: 0.78rem;
-    margin: 0;
-  }
+  .ap-section-complete-badge i { font-size: 0.9rem; }
+  .ap-section.section-complete .ap-section-complete-badge { display: flex; }
 
   /* ---------- Form Fields ---------- */
-  .ap-field {
-    margin-bottom: 1.15rem;
-  }
-
-  .ap-field:last-child {
-    margin-bottom: 0;
-  }
+  .ap-field { margin-bottom: 1.15rem; }
+  .ap-field:last-child { margin-bottom: 0; }
 
   .ap-field label {
-    display: block;
-    font-weight: 500;
-    font-size: 0.85rem;
-    color: var(--text-primary);
-    margin-bottom: 0.35rem;
+    display: block; font-weight: 500; font-size: 0.85rem;
+    color: var(--text-primary); margin-bottom: 0.35rem;
   }
 
-  .ap-field .ap-hint {
-    color: var(--text-muted);
-    font-size: 0.75rem;
-    margin-top: 0.3rem;
-  }
+  .ap-field .ap-hint { color: var(--text-muted); font-size: 0.75rem; margin-top: 0.3rem; }
 
-  .ap-input,
-  .ap-select,
-  .ap-textarea {
+  .ap-input, .ap-select, .ap-textarea {
     width: 100%;
     padding: 0.7rem 1rem;
     border: 2px solid var(--border-color);
@@ -203,437 +167,202 @@
     min-width: 0;
   }
 
-  .ap-input:focus,
-  .ap-select:focus,
-  .ap-textarea:focus {
+  .ap-input:focus, .ap-select:focus, .ap-textarea:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 4px var(--primary-light);
   }
 
-  .ap-input::placeholder,
-  .ap-textarea::placeholder {
-    color: var(--text-muted);
-  }
+  .ap-input::placeholder, .ap-textarea::placeholder { color: var(--text-muted); }
+  .ap-select option { background-color: var(--card-bg); color: var(--text-primary); }
+  .ap-textarea { resize: vertical; min-height: 100px; }
 
-  .ap-select option {
-    background-color: var(--card-bg);
-    color: var(--text-primary);
-  }
+  .ap-textarea.is-invalid, .ap-input.is-invalid, .ap-select.is-invalid { border-color: #dc3545; }
 
-  .ap-textarea {
-    resize: vertical;
-    min-height: 100px;
-  }
+  .invalid-feedback { color: #dc3545; font-size: 0.78rem; margin-top: 0.3rem; display: none; }
+  .is-invalid ~ .invalid-feedback { display: block; }
 
-  .ap-textarea.is-invalid,
-  .ap-input.is-invalid,
-  .ap-select.is-invalid {
-    border-color: #dc3545;
-  }
+  .ap-address-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.15rem; }
+  .ap-address-grid .ap-full { grid-column: 1 / -1; }
 
-  .ap-textarea.is-invalid:focus,
-  .ap-input.is-invalid:focus,
-  .ap-select.is-invalid:focus {
-    box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
-  }
-
-  .invalid-feedback {
-    color: #dc3545;
-    font-size: 0.78rem;
-    margin-top: 0.3rem;
-    display: none;
-  }
-
-  .is-invalid ~ .invalid-feedback {
-    display: block;
-  }
-
-  /* ---------- Address Grid ---------- */
-  .ap-address-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.15rem;
-  }
-
-  .ap-address-grid .ap-full {
-    grid-column: 1 / -1;
-  }
-
-  /* ---------- Checkbox / Radio Groups ---------- */
-  .ap-check-group {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 0.6rem;
-  }
+  .ap-check-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.6rem; }
 
   .ap-check-item {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
+    display: flex; align-items: center; gap: 0.45rem;
     padding: 0.55rem 0.75rem;
     border: 2px solid var(--border-color);
     border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: var(--transition);
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    background-color: var(--body-bg);
-    min-width: 0;
+    cursor: pointer; transition: var(--transition);
+    font-size: 0.85rem; color: var(--text-secondary);
+    background-color: var(--body-bg); min-width: 0;
   }
 
-  .ap-check-item:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-  }
-
-  .ap-check-item input {
-    accent-color: var(--primary-color);
-    flex-shrink: 0;
-    width: 16px;
-    height: 16px;
-  }
-
-  .ap-check-item.selected {
-    border-color: var(--primary-color);
-    background-color: var(--primary-light);
-    color: var(--primary-color);
-    font-weight: 500;
-  }
+  .ap-check-item:hover { border-color: var(--primary-color); color: var(--primary-color); }
+  .ap-check-item input { accent-color: var(--primary-color); flex-shrink: 0; width: 16px; height: 16px; }
+  .ap-check-item.selected { border-color: var(--primary-color); background-color: var(--primary-light); color: var(--primary-color); font-weight: 500; }
 
   /* ---------- Image Upload ---------- */
   .ap-upload-area {
     border: 2px dashed var(--border-color);
     border-radius: var(--radius-md);
-    padding: 2rem;
-    text-align: center;
-    cursor: pointer;
-    transition: var(--transition);
+    padding: 2rem; text-align: center;
+    cursor: pointer; transition: var(--transition);
     background-color: var(--body-bg);
-    position: relative;
-    overflow: hidden;
+    position: relative; overflow: hidden;
   }
 
-  .ap-upload-area:hover,
-  .ap-upload-area.dragover {
+  .ap-upload-area:hover, .ap-upload-area.dragover {
     border-color: var(--primary-color);
     background-color: var(--primary-light);
   }
 
   .ap-upload-area i.fa-cloud-upload-alt {
-    font-size: 2rem;
-    color: var(--text-muted);
-    margin-bottom: 0.5rem;
-    display: block;
-    transition: var(--transition);
+    font-size: 2rem; color: var(--text-muted);
+    margin-bottom: 0.5rem; display: block; transition: var(--transition);
   }
 
   .ap-upload-area:hover i.fa-cloud-upload-alt,
-  .ap-upload-area.dragover i.fa-cloud-upload-alt {
-    color: var(--primary-color);
-  }
+  .ap-upload-area.dragover i.fa-cloud-upload-alt { color: var(--primary-color); }
 
-  .ap-upload-area p {
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    margin: 0;
-  }
-
-  .ap-upload-area small {
-    color: var(--text-muted);
-    font-size: 0.72rem;
-    opacity: 0.7;
-  }
-
-  .ap-upload-area input[type="file"] {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    cursor: pointer;
-  }
+  .ap-upload-area p { color: var(--text-muted); font-size: 0.85rem; margin: 0; }
+  .ap-upload-area small { color: var(--text-muted); font-size: 0.72rem; opacity: 0.7; }
+  .ap-upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 
   .ap-upload-counter {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 0.6rem;
-    font-size: 0.78rem;
-    color: var(--text-muted);
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 0.6rem; font-size: 0.78rem; color: var(--text-muted);
   }
 
-  .ap-upload-counter .count-num {
-    font-weight: 600;
-    color: var(--primary-color);
-  }
-
-  .ap-upload-counter .count-num.has-images {
-    color: #28a745;
-  }
+  .ap-upload-counter .count-num { font-weight: 600; color: var(--primary-color); }
+  .ap-upload-counter .count-num.has-images { color: #22c55e; }
 
   .ap-image-previews {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-    gap: 0.6rem;
-    margin-top: 0.75rem;
+    gap: 0.6rem; margin-top: 0.75rem;
   }
 
   .ap-thumb {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 1;
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    border: 2px solid var(--border-color);
-    flex-shrink: 0;
-    transition: var(--transition);
+    position: relative; width: 100%; aspect-ratio: 1;
+    border-radius: var(--radius-sm); overflow: hidden;
+    border: 2px solid var(--border-color); flex-shrink: 0; transition: var(--transition);
   }
 
-  .ap-thumb.is-new {
-    border-color: #28a745; /* Green border for new uploads */
-  }
-
-  .ap-thumb:hover {
-    border-color: var(--primary-color);
-  }
-
-  .ap-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+  .ap-thumb.is-new { border-color: #22c55e; }
+  .ap-thumb:hover { border-color: var(--primary-color); }
+  .ap-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
   .ap-thumb-badge {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 0.15rem 0.3rem;
-    background: rgba(0,0,0,0.55);
-    color: white;
-    font-size: 0.6rem;
-    text-align: center;
-    font-weight: 500;
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 0.15rem 0.3rem; background: rgba(0,0,0,0.55);
+    color: white; font-size: 0.6rem; text-align: center; font-weight: 500;
   }
 
   .ap-thumb-remove {
-    position: absolute;
-    top: 3px;
-    right: 3px;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: rgba(220, 53, 69, 0.9);
-    color: white;
-    border: none;
-    font-size: 0.6rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: var(--transition);
-    line-height: 1;
+    position: absolute; top: 3px; right: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(220,53,69,0.9); color: white; border: none;
+    font-size: 0.6rem; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: var(--transition); line-height: 1;
   }
 
-  .ap-thumb-remove:hover {
-    background: #dc3545;
-    transform: scale(1.15);
-  }
+  .ap-thumb-remove:hover { background: #dc3545; transform: scale(1.15); }
 
-  .ap-upload-error {
-    color: #dc3545;
-    font-size: 0.78rem;
-    margin-top: 0.5rem;
-    display: none;
-  }
+  .ap-upload-error { color: #dc3545; font-size: 0.78rem; margin-top: 0.5rem; display: none; }
+  .ap-upload-error.visible { display: block; }
 
-  .ap-upload-error.visible {
-    display: block;
-  }
-
-  /* ---------- Current Images Section (Read Only) ---------- */
+  /* Current images section */
   .current-images-section {
-    margin-top: 1.5rem;
-    padding-top: 1rem;
+    margin-top: 1.5rem; padding-top: 1rem;
     border-top: 1px dashed var(--border-color);
+    transition: opacity 0.3s ease;
   }
+
   .current-images-title {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    margin-bottom: 0.75rem;
-    display: flex;
-    justify-content: space-between;
+    font-size: 0.8rem; font-weight: 600; color: var(--text-muted);
+    margin-bottom: 0.75rem; display: flex; justify-content: space-between;
   }
+
   .current-images-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
     gap: 0.5rem;
   }
+
   .current-thumb {
-    width: 100%;
-    aspect-ratio: 1;
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    border: 1px solid var(--border-color);
-    opacity: 0.7;
-  }
-  .current-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    width: 100%; aspect-ratio: 1;
+    border-radius: var(--radius-sm); overflow: hidden;
+    border: 1px solid var(--border-color); opacity: 0.7;
   }
 
-  /* ---------- Spec Grid ---------- */
-  .ap-spec-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.15rem;
-  }
+  .current-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
-  /* ---------- Char Count ---------- */
-  .ap-char-count {
-    text-align: right;
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    margin-top: 0.25rem;
-  }
+  .ap-spec-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.15rem; }
 
-  .ap-char-count.warning {
-    color: #f59e0b;
-  }
-
-  .ap-char-count.danger {
-    color: #dc3545;
-  }
+  .ap-char-count { text-align: right; font-size: 0.72rem; color: var(--text-muted); margin-top: 0.25rem; }
+  .ap-char-count.warning { color: #f59e0b; }
+  .ap-char-count.danger  { color: #dc3545; }
 
   /* ---------- Form Actions ---------- */
-  .ap-actions {
-    display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-    padding-top: 0.5rem;
-  }
+  .ap-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; padding-top: 0.5rem; }
 
   .btn-ap-submit {
     background: var(--gradient-primary);
-    border: none;
-    color: white;
-    padding: 0.75rem 2rem;
-    border-radius: var(--radius-md);
-    font-weight: 600;
-    font-size: 0.95rem;
+    border: none; color: white;
+    padding: 0.75rem 2rem; border-radius: var(--radius-md);
+    font-weight: 600; font-size: 0.95rem;
     transition: var(--transition);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    font-family: inherit;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    cursor: pointer; font-family: inherit;
   }
 
-  .btn-ap-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
-    color: white;
-  }
-
-  .btn-ap-submit:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
+  .btn-ap-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(99,102,241,0.35); color: white; }
+  .btn-ap-submit:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
 
   .btn-ap-cancel {
-    background: transparent;
-    border: 2px solid var(--border-color);
-    color: var(--text-secondary);
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--radius-md);
-    font-weight: 500;
-    font-size: 0.95rem;
-    transition: var(--transition);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
+    background: transparent; border: 2px solid var(--border-color);
+    color: var(--text-secondary); padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md); font-weight: 500; font-size: 0.95rem;
+    transition: var(--transition); text-decoration: none;
+    display: inline-flex; align-items: center; gap: 0.5rem;
   }
 
-  .btn-ap-cancel:hover {
-    border-color: #dc3545;
-    color: #dc3545;
-    text-decoration: none;
-  }
+  .btn-ap-cancel:hover { border-color: #dc3545; color: #dc3545; text-decoration: none; }
 
   .btn-delete-prop {
-    background: rgba(220, 53, 69, 0.1);
-    border: 1px solid rgba(220, 53, 69, 0.3);
-    color: var(--danger-color);
-    padding: 0.65rem 1.25rem;
-    border-radius: var(--radius-md);
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: var(--transition);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
+    background: rgba(220,53,69,0.08);
+    border: 1.5px solid rgba(220,53,69,0.3);
+    color: #dc3545; padding: 0.65rem 1.25rem;
+    border-radius: var(--radius-md); font-weight: 600; font-size: 0.9rem;
+    transition: var(--transition); text-decoration: none;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    cursor: pointer; font-family: inherit;
   }
 
-  .btn-delete-prop:hover {
-    background: var(--danger-color);
-    color: white;
-  }
+  .btn-delete-prop:hover { background: #dc3545; color: white; }
 
   .ap-spinner {
-    display: none;
-    width: 16px;
-    height: 16px;
+    display: none; width: 16px; height: 16px;
     border: 2.5px solid rgba(255,255,255,0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: apSpin 0.6s linear infinite;
-    flex-shrink: 0;
+    border-top-color: white; border-radius: 50%;
+    animation: apSpin 0.6s linear infinite; flex-shrink: 0;
   }
 
-  @keyframes apSpin {
-    to { transform: rotate(360deg); }
-  }
+  @keyframes apSpin { to { transform: rotate(360deg); } }
 
-  /* ---------- Feedback Alert ---------- */
   .ap-feedback {
-    border-radius: var(--radius-md);
-    padding: 0.85rem 1rem;
-    margin-top: 1rem;
-    font-size: 0.85rem;
-    display: none;
-    align-items: center;
-    gap: 0.5rem;
-    border: none;
+    border-radius: var(--radius-md); padding: 0.85rem 1rem;
+    margin-top: 1rem; font-size: 0.85rem;
+    display: none; align-items: center; gap: 0.5rem; border: none;
   }
 
-  .ap-feedback.visible {
-    display: flex;
-  }
+  .ap-feedback.visible { display: flex; }
 
-  .ap-feedback.alert-success {
-    background-color: rgba(40, 167, 69, 0.07);
-    color: #28a745;
-    border: 1px solid rgba(40, 167, 69, 0.12);
-  }
+  .ap-feedback.alert-success { background-color: rgba(34,197,94,0.07); color: #22c55e; border: 1px solid rgba(34,197,94,0.15); }
+  .ap-feedback.alert-danger  { background-color: rgba(220,53,69,0.07);  color: #dc3545; border: 1px solid rgba(220,53,69,0.12); }
+  .ap-feedback.alert-info    { background-color: rgba(99,102,241,0.07); color: var(--primary-color); border: 1px solid rgba(99,102,241,0.12); }
 
-  .ap-feedback.alert-danger {
-    background-color: rgba(220, 53, 69, 0.07);
-    color: #dc3545;
-    border: 1px solid rgba(220, 53, 69, 0.12);
-  }
-
-  .ap-feedback.alert-info {
-    background-color: rgba(99, 102, 241, 0.07);
-    color: var(--primary-color);
-    border: 1px solid rgba(99, 102, 241, 0.12);
-  }
-
-  /* ========== COMPREHENSIVE PREVIEW CARD ========== */
+  /* ========== PREVIEW CARD ========== */
   .ap-preview-card {
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -644,608 +373,503 @@
     box-shadow: 0 4px 16px rgba(0,0,0,0.05);
   }
 
-  .ap-preview-gallery {
-    height: 180px;
-    background-color: var(--body-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  /* Progress bar */
+  .ap-pv-progress {
+    padding: 0.65rem 1.15rem;
+    background: var(--body-bg);
     border-bottom: 1px solid var(--border-color);
-    overflow: hidden;
-    position: relative;
-  }
-
-  .ap-preview-gallery.has-images {
-    height: auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 100px 100px;
-    gap: 2px;
-  }
-
-  .ap-preview-gallery.has-images .ap-pv-gallery-img:first-child {
-    grid-column: 1 / -1;
-    grid-row: 1 / -1;
-  }
-
-  .ap-preview-gallery.has-images .ap-pv-gallery-img:nth-child(n+4) {
-    display: none;
-  }
-
-  .ap-preview-gallery i {
-    font-size: 2rem;
-    color: var(--text-muted);
-    opacity: 0.4;
-  }
-
-  .ap-pv-gallery-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    position: relative;
-  }
-
-  .ap-preview-gallery-badge {
-    position: absolute;
-    top: 0.6rem;
-    left: 0.6rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.68rem;
-    font-weight: 600;
-    z-index: 2;
-    background: var(--gradient-primary);
-    color: white;
-  }
-
-  .ap-preview-gallery-count {
-    position: absolute;
-    bottom: 0.6rem;
-    right: 0.6rem;
-    padding: 0.2rem 0.55rem;
-    border-radius: var(--radius-full);
-    font-size: 0.68rem;
-    font-weight: 600;
-    z-index: 2;
-    background: rgba(0,0,0,0.6);
-    color: white;
-  }
-
-  .ap-preview-body {
-    padding: 1.15rem;
-  }
-
-  .ap-pv-section {
-    margin-bottom: 0.9rem;
-    padding-bottom: 0.9rem;
-    border-bottom: 1px solid var(--border-color);
-  }
-
-  .ap-pv-section:last-child {
-    margin-bottom: 0;
-    padding-bottom: 0;
-    border-bottom: none;
-  }
-
-  .ap-pv-section-title {
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-  }
-
-  .ap-pv-section-title i {
-    color: var(--primary-color);
-    font-size: 0.65rem;
-  }
-
-  .ap-pv-title-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 0.5rem;
-    margin-bottom: 0.4rem;
-  }
-
-  .ap-preview-title {
-    color: var(--text-primary);
-    font-weight: 600;
-    font-size: 1rem;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .ap-pv-type-badge {
-    font-size: 0.65rem;
-    padding: 0.18rem 0.5rem;
-    border-radius: var(--radius-full);
-    background: var(--primary-light);
-    color: var(--primary-color);
-    font-weight: 600;
-    white-space: nowrap;
-    flex-shrink: 0;
-    display: none;
-  }
-
-  .ap-pv-type-badge.visible {
-    display: inline-block;
-  }
-
-  .ap-preview-desc {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    line-height: 1.55;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    margin: 0;
-  }
-
-  .ap-preview-location {
-    color: var(--text-secondary);
-    font-size: 0.82rem;
-    margin: 0;
-    line-height: 1.5;
-    word-break: break-word;
-  }
-
-  .ap-preview-location i {
-    color: var(--primary-color);
-    margin-right: 0.25rem;
-  }
-
-  .ap-pv-price-main {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-bottom: 0.3rem;
-  }
-
-  .ap-pv-price-details {
-    font-size: 0.78rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
-  }
-
-  .ap-pv-price-details span {
-    display: inline-block;
-    margin-right: 0.75rem;
-  }
-
-  .ap-pv-price-details i {
-    color: var(--primary-color);
-    margin-right: 0.2rem;
-    font-size: 0.7rem;
-  }
-
-  .ap-preview-specs {
-    display: flex;
-    gap: 0.85rem;
-    flex-wrap: wrap;
-  }
-
-  .ap-preview-spec {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-  }
-
-  .ap-preview-spec i {
-    color: var(--primary-color);
-    font-size: 0.72rem;
-  }
-
-  .ap-preview-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-  }
-
-  .ap-preview-tag {
-    font-size: 0.65rem;
-    padding: 0.18rem 0.5rem;
-    border-radius: var(--radius-full);
-    background-color: var(--primary-light);
-    color: var(--primary-color);
-    font-weight: 500;
-    white-space: nowrap;
-  }
-
-  .ap-pv-policy-row {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    margin-bottom: 0.3rem;
-  }
-
-  .ap-pv-policy-row:last-child {
-    margin-bottom: 0;
-  }
-
-  .ap-pv-policy-row i {
-    color: var(--primary-color);
-    font-size: 0.7rem;
-    width: 16px;
-    text-align: center;
-    flex-shrink: 0;
-  }
-
-  .ap-pv-empty {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    font-style: italic;
-    opacity: 0.7;
-  }
-
-  /* ---------- Tips Card ---------- */
-  .ap-tips-card {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    margin-bottom: 1.25rem;
-    transition: var(--transition);
-  }
-
-  .ap-tips-card h5 {
-    color: var(--text-primary);
-    font-weight: 600;
-    font-size: 1rem;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .ap-tips-card h5 i {
-    color: var(--primary-color);
-  }
-
-  .ap-tips-list {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 1rem;
-  }
-
-  .ap-tips-list li {
-    padding: 0.6rem 0;
-    border-bottom: 1px solid var(--border-color);
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: flex-start;
-    gap: 0.6rem;
-    line-height: 1.5;
-  }
-
-  .ap-tips-list li:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-  }
-
-  .ap-tips-list li i {
-    color: var(--primary-color);
-    margin-top: 0.15rem;
-    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
     font-size: 0.75rem;
   }
 
-  .ap-tips-toggle {
-    background: none;
-    border: none;
-    color: var(--primary-color);
-    font-weight: 500;
-    font-size: 0.82rem;
-    cursor: pointer;
-    padding: 0;
-    font-family: inherit;
-    transition: var(--transition);
+  .ap-pv-progress-label { color: var(--text-secondary); font-weight: 500; }
+
+  .ap-pv-progress-bar-wrap {
+    flex: 1; height: 6px;
+    background: var(--border-color);
+    border-radius: 3px; margin: 0 0.75rem; overflow: hidden;
   }
 
-  .ap-tips-toggle:hover {
-    color: var(--secondary-color);
+  .ap-pv-progress-bar {
+    height: 100%; border-radius: 3px;
+    background: #22c55e;
+    transition: width 0.4s ease;
+    width: 0%;
   }
 
-  .ap-tips-body {
-    overflow: hidden;
-    transition: max-height 0.3s ease;
+  .ap-pv-progress-pct { color: #22c55e; font-weight: 700; min-width: 28px; text-align: right; }
+
+  /* Gallery */
+  .ap-preview-gallery {
+    height: 120px;
+    background-color: var(--body-bg);
+    display: flex; align-items: center; justify-content: center;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
   }
 
-  .ap-tips-body.collapsed {
-    max-height: 0 !important;
+  .ap-preview-gallery i { font-size: 2rem; color: var(--text-muted); opacity: 0.4; }
+
+  .ap-preview-gallery.has-images {
+    height: auto; max-height: 260px;
+    overflow-y: auto; overflow-x: hidden;
+    display: block; padding: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,0.15) transparent;
   }
 
-  .ap-help-link {
-    color: var(--text-muted);
-    text-decoration: none;
-    font-size: 0.82rem;
-    font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    transition: var(--transition);
-    margin-top: 1rem;
+  .ap-preview-gallery.has-images::-webkit-scrollbar { width: 4px; }
+  .ap-preview-gallery.has-images::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 2px; }
+
+  .ap-pv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; width: 100%; }
+
+  .ap-pv-grid-cell {
+    position: relative; width: 100%; aspect-ratio: 1;
+    overflow: hidden; border-radius: 3px; background: var(--body-bg);
   }
 
-  .ap-help-link:hover {
-    color: var(--primary-color);
+  .ap-pv-gallery-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .ap-pv-grid-cell:first-child::after {
+    content: 'Cover';
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 2px 4px;
+    background: rgba(99,102,241,0.85); color: white;
+    font-size: 0.58rem; font-weight: 700; text-align: center;
+    letter-spacing: 0.03em;
   }
 
-  /* ---------- Access Badge ---------- */
-  .ap-access-badge {
-    position: fixed;
-    bottom: 1.25rem;
-    right: 1.25rem;
-    padding: 0.4rem 0.85rem;
-    border-radius: var(--radius-full);
-    background: var(--gradient-primary);
-    color: white;
-    font-size: 0.72rem;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
+  .ap-pv-grid-cell .ap-pv-cell-num {
+    position: absolute; top: 3px; right: 3px;
+    background: rgba(0,0,0,0.55); color: white;
+    font-size: 0.58rem; font-weight: 700;
+    padding: 1px 4px; border-radius: 3px; line-height: 1.4;
   }
 
-  /* ---------- Flash Alert Override ---------- */
-  .ap-flash {
-    border-radius: var(--radius-md);
-    padding: 0.85rem 1rem;
-    margin-bottom: 1.25rem;
-    border: none;
-    font-size: 0.85rem;
-    display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-    line-height: 1.5;
-  }
-
-  .ap-flash i {
-    margin-top: 0.15rem;
-    flex-shrink: 0;
-  }
-
-  .ap-flash.alert-danger {
-    background-color: rgba(220, 53, 69, 0.07);
-    color: #dc3545;
-    border: 1px solid rgba(220, 53, 69, 0.12);
-  }
-
-  .ap-flash.alert-success {
-    background-color: rgba(40, 167, 69, 0.07);
-    color: #28a745;
-    border: 1px solid rgba(40, 167, 69, 0.12);
-  }
-
-  .ap-flash .btn-close {
-    padding: 0;
-    margin-left: auto;
-    flex-shrink: 0;
-  }
-
-  /* ========== DELETE MODAL STYLES (Ported) ========== */
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    z-index: 2000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
+  .ap-preview-gallery-badge {
+    position: absolute; top: 0.5rem; left: 0.5rem;
+    padding: 0.18rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.65rem; font-weight: 600; z-index: 2;
+    background: var(--gradient-primary); color: white;
     pointer-events: none;
-    transition: opacity 0.3s ease;
-    padding: 1rem;
   }
 
-  .modal-overlay.active {
-    opacity: 1;
-    pointer-events: auto;
+  .ap-pv-gallery-footer {
+    padding: 4px 4px 2px; font-size: 0.7rem;
+    color: var(--text-muted); text-align: right;
   }
+
+  .ap-pv-gallery-footer strong { color: var(--primary-color); }
+
+  .ap-preview-body { padding: 1.15rem; }
+
+  .ap-pv-section {
+    margin-bottom: 0.9rem; padding-bottom: 0.9rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .ap-pv-section:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+
+  .ap-pv-section-title {
+    font-size: 0.7rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--text-muted); margin-bottom: 0.5rem;
+    display: flex; align-items: center; gap: 0.35rem;
+  }
+
+  .ap-pv-section-title i { color: var(--primary-color); font-size: 0.65rem; }
+
+  .ap-pv-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.4rem; }
+
+  .ap-preview-title {
+    color: var(--text-primary); font-weight: 600; font-size: 1rem; margin: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0;
+  }
+
+  .ap-pv-type-badge {
+    font-size: 0.65rem; padding: 0.18rem 0.5rem;
+    border-radius: var(--radius-full);
+    background: var(--primary-light); color: var(--primary-color);
+    font-weight: 600; white-space: nowrap; flex-shrink: 0; display: none;
+  }
+
+  .ap-pv-type-badge.visible { display: inline-block; }
+
+  .ap-preview-desc {
+    font-size: 0.8rem; color: var(--text-muted); line-height: 1.55;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+    overflow: hidden; margin: 0;
+  }
+
+  .ap-preview-location { color: var(--text-secondary); font-size: 0.82rem; margin: 0; line-height: 1.5; word-break: break-word; }
+  .ap-preview-location i { color: var(--primary-color); margin-right: 0.25rem; }
+
+  .ap-pv-price-main { font-size: 1.15rem; font-weight: 700; color: var(--primary-color); margin-bottom: 0.3rem; }
+  .ap-pv-price-details { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.6; }
+  .ap-pv-price-details span { display: inline-block; margin-right: 0.75rem; }
+  .ap-pv-price-details i { color: var(--primary-color); margin-right: 0.2rem; font-size: 0.7rem; }
+
+  .ap-preview-specs { display: flex; gap: 0.85rem; flex-wrap: wrap; }
+  .ap-preview-spec { font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.3rem; }
+  .ap-preview-spec i { color: var(--primary-color); font-size: 0.72rem; }
+
+  .ap-preview-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  .ap-preview-tag { font-size: 0.65rem; padding: 0.18rem 0.5rem; border-radius: var(--radius-full); background-color: var(--primary-light); color: var(--primary-color); font-weight: 500; white-space: nowrap; }
+
+  .ap-pv-policy-row { display: flex; align-items: center; gap: 0.6rem; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.3rem; }
+  .ap-pv-policy-row:last-child { margin-bottom: 0; }
+  .ap-pv-policy-row i { color: var(--primary-color); font-size: 0.7rem; width: 16px; text-align: center; flex-shrink: 0; }
+  .ap-pv-empty { font-size: 0.78rem; color: var(--text-muted); font-style: italic; opacity: 0.7; }
+
+  /* ========================================================
+     FEATURED PROPERTY FLOW (identical to add_property)
+  ======================================================== */
+  .ap-featured-banner {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f2044 100%);
+    border: 1px solid rgba(251,191,36,0.3);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.25rem;
+    position: relative; overflow: hidden;
+  }
+
+  .ap-featured-banner::before {
+    content: '';
+    position: absolute; top: -50%; left: -60%; width: 60%; height: 200%;
+    background: linear-gradient(105deg, transparent 40%, rgba(251,191,36,0.06) 50%, transparent 60%);
+    animation: featuredShimmer 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes featuredShimmer {
+    0%   { transform: translateX(0); }
+    50%  { transform: translateX(260%); }
+    100% { transform: translateX(260%); }
+  }
+
+  .ap-featured-banner::after {
+    content: '★ ★ ★';
+    position: absolute; top: 0.6rem; right: 1rem;
+    font-size: 0.6rem; letter-spacing: 0.3em;
+    color: rgba(251,191,36,0.35); pointer-events: none;
+  }
+
+  .ap-featured-banner-inner { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; position: relative; z-index: 1; }
+
+  .ap-featured-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem; color: white; flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(245,158,11,0.4);
+    transition: all 0.25s ease;
+  }
+
+  .ap-featured-text { flex: 1; min-width: 0; }
+
+  .ap-featured-text h4 {
+    color: #fef9c3; font-size: 0.95rem; font-weight: 700;
+    margin: 0 0 0.2rem;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+
+  .ap-featured-text h4 .feat-crown { font-size: 0.8rem; color: #fbbf24; }
+  .ap-featured-text p { color: rgba(255,255,255,0.55); font-size: 0.8rem; margin: 0; line-height: 1.5; }
+
+  .btn-feature-property {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.6rem 1.25rem;
+    border-radius: var(--radius-md);
+    border: 1.5px solid #fbbf24;
+    background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(251,191,36,0.08));
+    color: #fbbf24;
+    font-size: 0.82rem; font-weight: 700; font-family: inherit;
+    cursor: pointer; transition: all 0.2s ease;
+    white-space: nowrap; flex-shrink: 0; letter-spacing: 0.02em;
+  }
+
+  .btn-feature-property:hover {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white; border-color: #f59e0b;
+    box-shadow: 0 6px 20px rgba(245,158,11,0.45);
+    transform: translateY(-1px);
+  }
+
+  .ap-featured-banner.is-featured {
+    border-color: rgba(34,197,94,0.4);
+    background: linear-gradient(135deg, #052e16 0%, #0f2720 50%, #052e16 100%);
+  }
+
+  .ap-featured-banner.is-featured .ap-featured-icon { background: linear-gradient(135deg, #22c55e, #16a34a); box-shadow: 0 4px 16px rgba(34,197,94,0.4); }
+  .ap-featured-banner.is-featured .ap-featured-text h4 { color: #bbf7d0; }
+  .ap-featured-banner.is-featured .ap-featured-text p  { color: rgba(255,255,255,0.5); }
+
+  .ap-featured-paid-badge {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.5rem 1rem; border-radius: var(--radius-md);
+    background: rgba(34,197,94,0.15); border: 1.5px solid rgba(34,197,94,0.4);
+    color: #22c55e; font-size: 0.82rem; font-weight: 700; white-space: nowrap;
+  }
+
+  /* 3-Step Modal */
+  .feat-modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    z-index: 2000;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1.25rem;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .feat-modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .feat-modal {
+    background: #0f172a;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px; width: 100%; max-width: 480px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+    transform: translateY(24px) scale(0.97);
+    transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+    overflow: hidden; position: relative;
+  }
+
+  .feat-modal-overlay.open .feat-modal { transform: translateY(0) scale(1); }
+
+  .feat-step { display: none; }
+  .feat-step.active { display: block; animation: featStepIn 0.3s ease; }
+
+  @keyframes featStepIn {
+    from { opacity: 0; transform: translateX(16px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .feat-modal-head {
+    padding: 1.5rem 1.75rem 0;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
+  }
+
+  .feat-modal-head-left { flex: 1; min-width: 0; }
+
+  .feat-modal-step-indicator { display: flex; gap: 5px; margin-bottom: 0.75rem; }
+
+  .feat-modal-step-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255,255,255,0.15); transition: all 0.25s ease;
+  }
+
+  .feat-modal-step-dot.active { background: #fbbf24; width: 18px; border-radius: 3px; }
+  .feat-modal-step-dot.done { background: rgba(251,191,36,0.4); }
+
+  .feat-modal-head h3 { color: white; font-size: 1.15rem; font-weight: 700; margin: 0 0 0.25rem; line-height: 1.3; }
+  .feat-modal-head p  { color: rgba(255,255,255,0.45); font-size: 0.8rem; margin: 0; line-height: 1.5; }
+
+  .feat-modal-close {
+    width: 32px; height: 32px; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.5);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 0.85rem; transition: all 0.18s; flex-shrink: 0;
+  }
+
+  .feat-modal-close:hover { background: rgba(255,255,255,0.12); color: white; }
+
+  .feat-modal-body { padding: 1.25rem 1.75rem 0; }
+
+  .feat-benefit-list { list-style: none; padding: 0; margin: 0 0 1.25rem; display: flex; flex-direction: column; gap: 0.65rem; }
+
+  .feat-benefit-list li {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    color: rgba(255,255,255,0.8); font-size: 0.84rem; line-height: 1.5;
+  }
+
+  .feat-benefit-list li .feat-b-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; flex-shrink: 0; margin-top: -1px;
+  }
+
+  .feat-benefit-list li strong { color: white; display: block; margin-bottom: 2px; }
+
+  .feat-price-callout {
+    background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(251,191,36,0.06));
+    border: 1px solid rgba(251,191,36,0.25);
+    border-radius: 12px; padding: 1rem 1.25rem;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap;
+  }
+
+  .feat-price-callout-left { flex: 1; }
+  .feat-price-callout-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(251,191,36,0.6); margin-bottom: 0.2rem; }
+  .feat-price-amount { font-size: 1.75rem; font-weight: 800; color: #fbbf24; letter-spacing: -0.03em; line-height: 1; }
+  .feat-price-amount span { font-size: 0.85rem; font-weight: 500; color: rgba(251,191,36,0.6); letter-spacing: 0; }
+  .feat-price-desc { font-size: 0.75rem; color: rgba(255,255,255,0.35); margin-top: 0.25rem; }
+  .feat-duration-badge { padding: 0.35rem 0.8rem; border-radius: 20px; background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); color: #fbbf24; font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+
+  .feat-pay-note {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.65rem 0.9rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px; font-size: 0.77rem; color: rgba(255,255,255,0.4);
+    margin-bottom: 1.25rem; line-height: 1.5;
+  }
+
+  .feat-pay-note i { color: #fbbf24; flex-shrink: 0; font-size: 0.8rem; }
+
+  .feat-success-center { text-align: center; padding: 0.5rem 0 0.75rem; }
+
+  .feat-success-ring {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.25rem; font-size: 2rem; color: white;
+    box-shadow: 0 8px 28px rgba(34,197,94,0.45);
+    animation: featSuccessPop 0.5s cubic-bezier(0.16,1,0.3,1);
+  }
+
+  @keyframes featSuccessPop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  .feat-success-center h3 { color: white; font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .feat-success-center p { color: rgba(255,255,255,0.45); font-size: 0.84rem; line-height: 1.6; max-width: 320px; margin: 0 auto 1.25rem; }
+
+  .feat-success-info {
+    background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2);
+    border-radius: 10px; padding: 0.85rem 1rem;
+    font-size: 0.8rem; color: rgba(255,255,255,0.55);
+    line-height: 1.6; text-align: left; margin-bottom: 1.25rem;
+    display: flex; gap: 0.75rem; align-items: flex-start;
+  }
+
+  .feat-success-info i { color: #22c55e; margin-top: 2px; flex-shrink: 0; }
+
+  .feat-modal-foot { padding: 1.25rem 1.75rem 1.75rem; display: flex; gap: 0.65rem; flex-direction: column; }
+
+  .btn-feat-primary {
+    width: 100%; padding: 0.85rem; border-radius: var(--radius-md);
+    border: none; background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white; font-size: 0.9rem; font-weight: 700; font-family: inherit;
+    cursor: pointer; transition: all 0.2s ease;
+    display: flex; align-items: center; justify-content: center;
+    gap: 0.5rem; letter-spacing: 0.02em;
+  }
+
+  .btn-feat-primary:hover { background: linear-gradient(135deg, #fbbf24, #f59e0b); box-shadow: 0 6px 20px rgba(245,158,11,0.4); transform: translateY(-1px); }
+  .btn-feat-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .btn-feat-primary.green { background: linear-gradient(135deg, #22c55e, #16a34a); }
+  .btn-feat-primary.green:hover { background: linear-gradient(135deg, #4ade80, #22c55e); box-shadow: 0 6px 20px rgba(34,197,94,0.4); }
+
+  .btn-feat-secondary {
+    width: 100%; padding: 0.75rem; border-radius: var(--radius-md);
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.5); font-size: 0.85rem; font-weight: 500;
+    font-family: inherit; cursor: pointer; transition: all 0.18s; text-align: center;
+  }
+
+  .btn-feat-secondary:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.75); border-color: rgba(255,255,255,0.18); }
+
+  .feat-pay-spinner {
+    display: none; width: 16px; height: 16px;
+    border: 2.5px solid rgba(255,255,255,0.25);
+    border-top-color: white; border-radius: 50%;
+    animation: apSpin 0.6s linear infinite;
+  }
+
+  /* ========== DELETE MODAL ========== */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px); z-index: 3000;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease; padding: 1rem;
+  }
+
+  .modal-overlay.active { opacity: 1; pointer-events: auto; }
 
   .modal-box {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    background-color: var(--card-bg); border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg); width: 100%; max-width: 400px;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
     transform: translateY(20px);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+    overflow: hidden; display: flex; flex-direction: column;
   }
 
-  .modal-overlay.active .modal-box {
-    transform: translateY(0);
-  }
+  .modal-overlay.active .modal-box { transform: translateY(0); }
+  .modal-header { padding: 1.25rem 1.5rem 0.5rem; display: flex; align-items: center; gap: 1rem; }
+  .modal-icon { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; background-color: #fee2e2; color: #ef4444; }
+  .modal-title { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin: 0; }
+  .modal-body { padding: 1rem 1.5rem; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; }
+  .modal-footer { padding: 0.75rem 1.5rem 1.5rem; display: flex; justify-content: flex-end; gap: 0.75rem; }
 
-  .modal-header {
-    padding: 1.25rem 1.5rem 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
+  .btn-modal { padding: 0.6rem 1.2rem; border-radius: var(--radius-md); font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: var(--transition); font-family: inherit; border: none; }
+  .btn-modal-cancel { background-color: transparent; color: var(--text-secondary); border: 1px solid var(--border-color); }
+  .btn-modal-cancel:hover { background-color: var(--body-bg); color: var(--text-primary); }
+  .btn-modal-confirm { background-color: #ef4444; color: white; display: flex; align-items: center; gap: 0.5rem; }
+  .btn-modal-confirm:hover { background-color: #dc2626; box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
 
-  .modal-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    flex-shrink: 0;
-    background-color: #fee2e2;
-    color: #ef4444;
-  }
+  /* Tips Card */
+  .ap-tips-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; }
+  .ap-tips-card h5 { color: var(--text-primary); font-weight: 600; font-size: 1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+  .ap-tips-card h5 i { color: var(--primary-color); }
+  .ap-tips-list { list-style: none; padding: 0; margin: 0; }
+  .ap-tips-list li { padding: 0.6rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; color: var(--text-secondary); display: flex; align-items: flex-start; gap: 0.6rem; line-height: 1.5; }
+  .ap-tips-list li:last-child { border-bottom: none; padding-bottom: 0; }
+  .ap-tips-list li i { color: var(--primary-color); margin-top: 0.15rem; flex-shrink: 0; font-size: 0.75rem; }
 
-  .modal-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin: 0;
-  }
+  .ap-access-badge { position: fixed; bottom: 1.25rem; right: 1.25rem; padding: 0.4rem 0.85rem; border-radius: var(--radius-full); background: var(--gradient-primary); color: white; font-size: 0.72rem; font-weight: 600; box-shadow: 0 4px 12px rgba(99,102,241,0.3); z-index: 100; display: flex; align-items: center; gap: 0.35rem; }
 
-  .modal-body {
-    padding: 1rem 1.5rem;
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-    line-height: 1.5;
-  }
-
-  .modal-footer {
-    padding: 0.75rem 1.5rem 1.5rem;
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
-  }
-
-  .btn-modal {
-    padding: 0.6rem 1.2rem;
-    border-radius: var(--radius-md);
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: var(--transition);
-    font-family: inherit;
-    border: none;
-  }
-
-  .btn-modal-cancel {
-    background-color: transparent;
-    color: var(--text-secondary);
-    border: 1px solid var(--border-color);
-  }
-
-  .btn-modal-cancel:hover {
-    background-color: var(--body-bg);
-    color: var(--text-primary);
-    border-color: var(--text-muted);
-  }
-
-  .btn-modal-confirm {
-    background-color: #ef4444;
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .btn-modal-confirm:hover {
-    background-color: #dc2626;
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-  }
+  .ap-flash { border-radius: var(--radius-md); padding: 0.85rem 1rem; margin-bottom: 1.25rem; border: none; font-size: 0.85rem; display: flex; align-items: flex-start; gap: 0.5rem; line-height: 1.5; }
+  .ap-flash i { margin-top: 0.15rem; flex-shrink: 0; }
+  .ap-flash.alert-danger  { background-color: rgba(220,53,69,0.07);  color: #dc3545; border: 1px solid rgba(220,53,69,0.12); }
+  .ap-flash.alert-success { background-color: rgba(34,197,94,0.07);  color: #22c55e; border: 1px solid rgba(34,197,94,0.12); }
+  .ap-flash .btn-close { padding: 0; margin-left: auto; flex-shrink: 0; }
 
   /* ========== RESPONSIVE ========== */
-  @media (max-width: 1199px) {
-    .ap-spec-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
+  @media (max-width: 1199px) { .ap-spec-grid { grid-template-columns: repeat(3, 1fr); } }
 
   @media (max-width: 991px) {
-    .add-property-page {
-      padding: 1.5rem 0 3rem;
-    }
-    .ap-header h1 {
-      font-size: 1.45rem;
-    }
-    .ap-preview-card {
-      position: static;
-    }
-    .ap-access-badge {
-      display: none;
-    }
-    .ap-steps-bar {
-      position: sticky;
-      top: var(--navbar-height, 70px);
-      justify-content: flex-start;
-      padding: 0.5rem 0.75rem;
-    }
+    .add-property-page { padding: 1.5rem 0 3rem; }
+    .ap-header h1 { font-size: 1.45rem; }
+    .ap-preview-card { position: static; }
+    .ap-access-badge { display: none; }
+    .ap-steps-bar { justify-content: flex-start; padding: 0.5rem 0.75rem; }
   }
 
   @media (max-width: 767px) {
-    .ap-section {
-      padding: 1.25rem;
-    }
-    .ap-address-grid {
-      grid-template-columns: 1fr;
-    }
-    .ap-spec-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-    .ap-check-group {
-      grid-template-columns: 1fr 1fr;
-    }
-    .ap-actions {
-      flex-direction: column;
-    }
-    .ap-actions .btn-ap-submit,
-    .ap-actions .btn-ap-cancel,
-    .ap-actions .btn-delete-prop {
-      width: 100%;
-      justify-content: center;
-    }
-    .ap-step-label {
-      font-size: 0.72rem;
-    }
-    .ap-step-indicator {
-      width: 22px;
-      height: 22px;
-      font-size: 0.6rem;
-    }
-    .ap-step-connector {
-      width: 12px;
-    }
-    .ap-preview-gallery.has-images {
-      grid-template-rows: 80px 80px;
-    }
+    .ap-section { padding: 1.25rem; }
+    .ap-address-grid { grid-template-columns: 1fr; }
+    .ap-spec-grid { grid-template-columns: 1fr 1fr; }
+    .ap-check-group { grid-template-columns: 1fr 1fr; }
+    .ap-actions { flex-direction: column; }
+    .ap-actions .btn-ap-submit, .ap-actions .btn-ap-cancel, .ap-actions .btn-delete-prop { width: 100%; justify-content: center; }
+    .ap-step-label { font-size: 0.68rem; }
+    .ap-step-indicator { width: 22px; height: 22px; font-size: 0.6rem; }
+    .ap-step-connector { width: 10px; }
+    .ap-preview-gallery.has-images { max-height: 200px; }
+    .ap-step { padding: 0.3rem 0.4rem; gap: 0.25rem; }
+    .header-actions { width: 100%; }
   }
 
   @media (max-width: 480px) {
-    .ap-check-group {
-      grid-template-columns: 1fr;
-    }
-    .ap-spec-grid {
-      grid-template-columns: 1fr;
-    }
-    .ap-section-icon {
-      width: 34px;
-      height: 34px;
-      font-size: 0.85rem;
-    }
-    .ap-section-title {
-      font-size: 0.95rem;
-    }
-    .ap-steps-bar {
-      gap: 0;
-    }
-    .ap-step {
-      padding: 0.3rem 0.4rem;
-      gap: 0.3rem;
-    }
+    .ap-check-group { grid-template-columns: 1fr; }
+    .ap-spec-grid { grid-template-columns: 1fr; }
+    .ap-section-icon { width: 34px; height: 34px; font-size: 0.85rem; }
+    .ap-section-title { font-size: 0.95rem; }
+    .ap-steps-bar { gap: 0; }
+    .ap-step-label { display: none; }
+    .ap-step { padding: 0.3rem 0.3rem; }
+    .ap-step-connector { width: 8px; }
   }
 </style>
 {% endblock %}
@@ -1254,7 +878,6 @@
 <div class="add-property-page">
   <div class="container">
 
-    <!-- Flashed Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
@@ -1268,10 +891,10 @@
     {% endwith %}
 
     <!-- Header -->
-    <header class="ap-header mb-4">
+    <header class="ap-header mb-4" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
       <div>
         <h1>Edit Property Details</h1>
-        <p>Update the information for your listing.</p>
+        <p>Update the information for <strong>{{ house.title }}</strong></p>
       </div>
       <div class="header-actions">
         <a href="{{ url_for('landlord.properties') }}" class="btn-ap-cancel">
@@ -1283,48 +906,70 @@
       </div>
     </header>
 
-    <!-- Sticky Steps Bar -->
+    <!-- Steps Bar — 7 sections + Submit -->
     <nav class="ap-steps-bar" id="stepsBar" aria-label="Form progress">
-      <a class="ap-step completed" data-step-target="section-details" href="#section-details">
-        <div class="ap-step-indicator" id="stepIndicator1"><i class="fas fa-check"></i></div>
+      <a class="ap-step" data-step-target="section-details" href="#section-details">
+        <div class="ap-step-indicator" id="si1">1</div>
         <span class="ap-step-label">Details</span>
       </a>
-      <div class="ap-step-connector completed" id="stepConn1"></div>
-      <a class="ap-step completed" data-step-target="section-location" href="#section-location">
-        <div class="ap-step-indicator" id="stepIndicator2"><i class="fas fa-check"></i></div>
+      <div class="ap-step-connector" id="sc1"></div>
+
+      <a class="ap-step" data-step-target="section-location" href="#section-location">
+        <div class="ap-step-indicator" id="si2">2</div>
         <span class="ap-step-label">Location</span>
       </a>
-      <div class="ap-step-connector completed" id="stepConn2"></div>
-      <a class="ap-step completed" data-step-target="section-pricing" href="#section-pricing">
-        <div class="ap-step-indicator" id="stepIndicator3"><i class="fas fa-check"></i></div>
+      <div class="ap-step-connector" id="sc2"></div>
+
+      <a class="ap-step" data-step-target="section-pricing" href="#section-pricing">
+        <div class="ap-step-indicator" id="si3">3</div>
         <span class="ap-step-label">Pricing</span>
       </a>
-      <div class="ap-step-connector completed" id="stepConn3"></div>
-      <a class="ap-step completed" data-step-target="section-images" href="#section-images">
-        <div class="ap-step-indicator" id="stepIndicator4"><i class="fas fa-check"></i></div>
+      <div class="ap-step-connector" id="sc3"></div>
+
+      <a class="ap-step" data-step-target="section-images" href="#section-images">
+        <div class="ap-step-indicator" id="si4">4</div>
         <span class="ap-step-label">Images</span>
       </a>
-      <div class="ap-step-connector completed" id="stepConn4"></div>
-      <a class="ap-step completed" data-step-target="section-submit" href="#section-submit">
-        <div class="ap-step-indicator" id="stepIndicator5"><i class="fas fa-check"></i></div>
-        <span class="ap-step-label">Submit</span>
+      <div class="ap-step-connector" id="sc4"></div>
+
+      <a class="ap-step" data-step-target="section-specs" href="#section-specs">
+        <div class="ap-step-indicator" id="si5">5</div>
+        <span class="ap-step-label">Specs</span>
+      </a>
+      <div class="ap-step-connector" id="sc5"></div>
+
+      <a class="ap-step" data-step-target="section-features" href="#section-features">
+        <div class="ap-step-indicator" id="si6">6</div>
+        <span class="ap-step-label">Features</span>
+      </a>
+      <div class="ap-step-connector" id="sc6"></div>
+
+      <a class="ap-step" data-step-target="section-policies" href="#section-policies">
+        <div class="ap-step-indicator" id="si7">7</div>
+        <span class="ap-step-label">Policies</span>
+      </a>
+      <div class="ap-step-connector" id="sc7"></div>
+
+      <a class="ap-step" data-step-target="section-submit" href="#section-submit">
+        <div class="ap-step-indicator" id="si8">✓</div>
+        <span class="ap-step-label">Save</span>
       </a>
     </nav>
 
     <div class="row g-4">
-      <!-- ===== MAIN FORM COLUMN ===== -->
       <div class="col-lg-8">
         <form id="editPropertyForm" enctype="multipart/form-data" method="POST" action="{{ url_for('landlord.edit_property', property_id=house.id) }}" novalidate>
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
-          <!-- SECTION 1: Property Details -->
-          <div class="ap-section" id="section-details" data-progress-group="1">
+          <!-- SECTION 1: Details -->
+          <div class="ap-section" id="section-details">
             <div class="ap-section-header">
               <div class="ap-section-icon"><i class="fas fa-building"></i></div>
               <div>
                 <h3 class="ap-section-title">Property Details</h3>
                 <p class="ap-section-subtitle">Basic information about your property</p>
               </div>
+              <div class="ap-section-complete-badge"><i class="fas fa-check-circle"></i> Complete</div>
             </div>
             <div class="ap-field">
               <label for="propertyName">Property Name <span style="color:#dc3545">*</span></label>
@@ -1335,31 +980,32 @@
               <label for="propertyType">Property Type <span style="color:#dc3545">*</span></label>
               <select class="ap-select" id="propertyType" name="property_type" required>
                 <option value="" disabled>Select property type</option>
-                <option value="Apartment" {% if house.property_type == 'Apartment' %}selected{% endif %}>Apartment</option>
-                <option value="House" {% if house.property_type == 'House' %}selected{% endif %}>House</option>
-                <option value="Studio" {% if house.property_type == 'Studio' %}selected{% endif %}>Studio</option>
-                <option value="Condo" {% if house.property_type == 'Condo' %}selected{% endif %}>Condo</option>
-                <option value="Townhouse" {% if house.property_type == 'Townhouse' %}selected{% endif %}>Townhouse</option>
+                <option value="Apartment"  {% if house.property_type == 'Apartment'  %}selected{% endif %}>Apartment</option>
+                <option value="House"      {% if house.property_type == 'House'      %}selected{% endif %}>House</option>
+                <option value="Studio"     {% if house.property_type == 'Studio'     %}selected{% endif %}>Studio</option>
+                <option value="Condo"      {% if house.property_type == 'Condo'      %}selected{% endif %}>Condo</option>
+                <option value="Townhouse"  {% if house.property_type == 'Townhouse'  %}selected{% endif %}>Townhouse</option>
                 <option value="Commercial" {% if house.property_type == 'Commercial' %}selected{% endif %}>Commercial</option>
               </select>
               <div class="invalid-feedback">Please select a property type.</div>
             </div>
             <div class="ap-field">
               <label for="propertyDescription">Description <span style="color:#dc3545">*</span></label>
-              <textarea class="ap-textarea" id="propertyDescription" name="description" rows="4" required placeholder="e.g., Modern 2-bedroom apartment with balcony..." maxlength="500">{{ house.description }}</textarea>
+              <textarea class="ap-textarea" id="propertyDescription" name="description" rows="4" required placeholder="e.g., Modern 2-bedroom apartment..." maxlength="500">{{ house.description }}</textarea>
               <div class="ap-char-count" id="charCount">0 / 500 characters</div>
               <div class="invalid-feedback">Please provide a description.</div>
             </div>
           </div>
 
           <!-- SECTION 2: Location -->
-          <div class="ap-section" id="section-location" data-progress-group="2">
+          <div class="ap-section" id="section-location">
             <div class="ap-section-header">
               <div class="ap-section-icon"><i class="fas fa-map-marker-alt"></i></div>
               <div>
                 <h3 class="ap-section-title">Location</h3>
                 <p class="ap-section-subtitle">Where is the property located?</p>
               </div>
+              <div class="ap-section-complete-badge"><i class="fas fa-check-circle"></i> Complete</div>
             </div>
             <div class="ap-address-grid">
               <div class="ap-field ap-full">
@@ -1369,7 +1015,7 @@
               </div>
               <div class="ap-field ap-full">
                 <label for="addressLine2">Address Line 2</label>
-                <input type="text" class="ap-input" id="addressLine2" name="address_line2" placeholder="e.g., Apt 4B, Floor 3" value="{{ house.address_line2 or '' }}" />
+                <input type="text" class="ap-input" id="addressLine2" name="address_line2" placeholder="e.g., Apt 4B" value="{{ house.address_line2 or '' }}" />
               </div>
               <div class="ap-field">
                 <label for="city">City <span style="color:#dc3545">*</span></label>
@@ -1388,26 +1034,27 @@
               <div class="ap-field">
                 <label for="country">Country <span style="color:#dc3545">*</span></label>
                 <select class="ap-select" id="country" name="country" required>
-                  <option value="" disabled selected>Select country</option>
-                  <option value="Kenya" {% if house.country == 'Kenya' %}selected{% endif %}>Kenya</option>
-                  <option value="Uganda" {% if house.country == 'Uganda' %}selected{% endif %}>Uganda</option>
+                  <option value="" disabled>Select country</option>
+                  <option value="Kenya"    {% if house.country == 'Kenya'    %}selected{% endif %}>Kenya</option>
+                  <option value="Uganda"   {% if house.country == 'Uganda'   %}selected{% endif %}>Uganda</option>
                   <option value="Tanzania" {% if house.country == 'Tanzania' %}selected{% endif %}>Tanzania</option>
-                  <option value="Rwanda" {% if house.country == 'Rwanda' %}selected{% endif %}>Rwanda</option>
-                  <option value="Other" {% if house.country not in ['Kenya', 'Uganda', 'Tanzania', 'Rwanda'] %}selected{% endif %}>Other</option>
+                  <option value="Rwanda"   {% if house.country == 'Rwanda'   %}selected{% endif %}>Rwanda</option>
+                  <option value="Other"    {% if house.country not in ['Kenya','Uganda','Tanzania','Rwanda'] %}selected{% endif %}>Other</option>
                 </select>
                 <div class="invalid-feedback">Please select a country.</div>
               </div>
             </div>
           </div>
 
-          <!-- SECTION 3: Pricing & Terms -->
-          <div class="ap-section" id="section-pricing" data-progress-group="3">
+          <!-- SECTION 3: Pricing -->
+          <div class="ap-section" id="section-pricing">
             <div class="ap-section-header">
               <div class="ap-section-icon"><i class="fas fa-tag"></i></div>
               <div>
                 <h3 class="ap-section-title">Pricing &amp; Terms</h3>
                 <p class="ap-section-subtitle">Rent, lease terms, and deposit</p>
               </div>
+              <div class="ap-section-complete-badge"><i class="fas fa-check-circle"></i> Complete</div>
             </div>
             <div class="row g-3">
               <div class="col-sm-6">
@@ -1427,9 +1074,9 @@
                 <div class="ap-field">
                   <label for="leaseTerm">Lease Term <span style="color:#dc3545">*</span></label>
                   <select class="ap-select" id="leaseTerm" name="lease_term" required>
-                    <option value="" disabled selected>Select lease term</option>
-                    <option value="Monthly" {% if house.lease_term == 'Monthly' %}selected{% endif %}>Month-to-Month</option>
-                    <option value="6 months" {% if house.lease_term == '6 months' %}selected{% endif %}>6 Months</option>
+                    <option value="" disabled>Select lease term</option>
+                    <option value="Monthly"   {% if house.lease_term == 'Monthly'   %}selected{% endif %}>Month-to-Month</option>
+                    <option value="6 months"  {% if house.lease_term == '6 months'  %}selected{% endif %}>6 Months</option>
                     <option value="12 months" {% if house.lease_term == '12 months' %}selected{% endif %}>12 Months</option>
                     <option value="24 months" {% if house.lease_term == '24 months' %}selected{% endif %}>24 Months</option>
                   </select>
@@ -1447,33 +1094,27 @@
           </div>
 
           <!-- SECTION 4: Images -->
-          <div class="ap-section" id="section-images" data-progress-group="4">
+          <div class="ap-section" id="section-images">
             <div class="ap-section-header">
               <div class="ap-section-icon"><i class="fas fa-camera"></i></div>
               <div>
                 <h3 class="ap-section-title">Property Images</h3>
                 <p class="ap-section-subtitle">Upload new photos to replace the current gallery</p>
               </div>
+              <div class="ap-section-complete-badge"><i class="fas fa-check-circle"></i> Complete</div>
             </div>
-
-            <!-- Upload Input -->
             <div class="ap-upload-area" id="uploadArea">
               <i class="fas fa-cloud-upload-alt"></i>
               <p>Drag &amp; drop new images here or click to browse</p>
-              <small>JPG or PNG, max 5MB each &middot; Up to 10 images</small>
+              <small>JPG or PNG, max 5MB each · Up to 10 images</small>
               <input type="file" id="propertyImages" name="images" accept="image/jpeg,image/png" multiple />
             </div>
-            
             <div class="ap-upload-error" id="uploadError"></div>
-            <div class="ap-upload-counter" id="uploadCounter">
+            <div class="ap-upload-counter">
               <span><span class="count-num" id="imageCountNum">0</span> new images selected</span>
-              <span style="font-size:0.72rem;opacity:0.7;">Note: New uploads will replace all existing images.</span>
+              <span style="font-size:0.72rem;opacity:0.7;">New uploads replace all existing images</span>
             </div>
-
-            <!-- New Uploads Preview -->
             <div class="ap-image-previews" id="imagePreview"></div>
-
-            <!-- Existing Images Display (Read Only) -->
             {% if house.image_list and house.image_list|length > 0 %}
             <div class="current-images-section" id="currentImagesSection">
               <div class="current-images-title">
@@ -1482,9 +1123,7 @@
               </div>
               <div class="current-images-grid">
                 {% for image in house.image_list %}
-                  <div class="current-thumb">
-                    <img src="{{ image }}" alt="Current Property Image">
-                  </div>
+                <div class="current-thumb"><img src="{{ image }}" alt="Current"></div>
                 {% endfor %}
               </div>
             </div>
@@ -1492,13 +1131,14 @@
           </div>
 
           <!-- SECTION 5: Specifications -->
-          <div class="ap-section" data-progress-group="1">
+          <div class="ap-section" id="section-specs">
             <div class="ap-section-header">
               <div class="ap-section-icon"><i class="fas fa-ruler-combined"></i></div>
               <div>
                 <h3 class="ap-section-title">Specifications</h3>
                 <p class="ap-section-subtitle">Room count and size details</p>
               </div>
+              <div class="ap-section-complete-badge"><i class="fas fa-check-circle"></i> Complete</div>
             </div>
             <div class="ap-spec-grid">
               <div class="ap-field">
@@ -1518,75 +1158,72 @@
             </div>
           </div>
 
-          <!-- SECTION 6: Features & Amenities -->
-          <div class="ap-section" data-progress-group="1">
+          <!-- SECTION 6: Features -->
+          <div class="ap-section" id="section-features">
             <div class="ap-section-header">
               <div class="ap-section-icon"><i class="fas fa-star"></i></div>
               <div>
                 <h3 class="ap-section-title">Features &amp; Amenities</h3>
                 <p class="ap-section-subtitle">Select what's included with the property</p>
               </div>
+              <div class="ap-section-complete-badge"><i class="fas fa-check-circle"></i> Complete</div>
             </div>
-
             <div class="ap-field">
               <label>Parking Availability</label>
               <select class="ap-select" id="parkingAvailability" name="parking_availability">
-                <option value="None" {% if house.parking_availability == 'None' or not house.parking_availability %}selected{% endif %}>None</option>
-                <option value="Street Parking" {% if house.parking_availability == 'Street Parking' %}selected{% endif %}>Street Parking</option>
-                <option value="Garage" {% if house.parking_availability == 'Garage' %}selected{% endif %}>Garage</option>
-                <option value="Driveway" {% if house.parking_availability == 'Driveway' %}selected{% endif %}>Driveway</option>
+                <option value="None"          {% if house.parking_availability == 'None' or not house.parking_availability %}selected{% endif %}>None</option>
+                <option value="Street Parking"{% if house.parking_availability == 'Street Parking' %}selected{% endif %}>Street Parking</option>
+                <option value="Garage"        {% if house.parking_availability == 'Garage' %}selected{% endif %}>Garage</option>
+                <option value="Driveway"      {% if house.parking_availability == 'Driveway' %}selected{% endif %}>Driveway</option>
               </select>
             </div>
-
             <div class="ap-field">
               <label>Furnished Status</label>
               <div class="ap-check-group">
-                <label class="ap-check-item"><input type="radio" name="furnished_status" value="Fully Furnished" {% if 'Fully' in (house.furnished_status or '') %}checked{% endif %} /> Fully Furnished</label>
-                <label class="ap-check-item"><input type="radio" name="furnished_status" value="Partially Furnished" {% if 'Partially' in (house.furnished_status or '') %}checked{% endif %} /> Partially</label>
-                <label class="ap-check-item"><input type="radio" name="furnished_status" value="Unfurnished" {% if house.furnished_status == 'Unfurnished' or not house.furnished_status %}checked{% endif %} /> Unfurnished</label>
+                <label class="ap-check-item"><input type="radio" name="furnished_status" value="Fully Furnished"    {% if 'Fully' in (house.furnished_status or '') %}checked{% endif %} /> Fully Furnished</label>
+                <label class="ap-check-item"><input type="radio" name="furnished_status" value="Partially Furnished"{% if 'Partially' in (house.furnished_status or '') %}checked{% endif %} /> Partially</label>
+                <label class="ap-check-item"><input type="radio" name="furnished_status" value="Unfurnished"        {% if house.furnished_status == 'Unfurnished' or not house.furnished_status %}checked{% endif %} /> Unfurnished</label>
               </div>
             </div>
-
             <div class="ap-field">
               <label>Utilities Included</label>
               <div class="ap-check-group">
-                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Water" {% if 'Water' in (house.utilities or []) %}checked{% endif %} /> <i class="fas fa-tint me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Water</label>
+                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Water"       {% if 'Water'       in (house.utilities or []) %}checked{% endif %} /> <i class="fas fa-tint me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Water</label>
                 <label class="ap-check-item"><input type="checkbox" name="utilities" value="Electricity" {% if 'Electricity' in (house.utilities or []) %}checked{% endif %} /> <i class="fas fa-bolt me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Electricity</label>
-                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Gas" {% if 'Gas' in (house.utilities or []) %}checked{% endif %} /> <i class="fas fa-fire me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Gas</label>
-                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Internet" {% if 'Internet' in (house.utilities or []) %}checked{% endif %} /> <i class="fas fa-wifi me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Internet</label>
+                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Gas"         {% if 'Gas'         in (house.utilities or []) %}checked{% endif %} /> <i class="fas fa-fire me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Gas</label>
+                <label class="ap-check-item"><input type="checkbox" name="utilities" value="Internet"    {% if 'Internet'    in (house.utilities or []) %}checked{% endif %} /> <i class="fas fa-wifi me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Internet</label>
               </div>
             </div>
-
             <div class="ap-field">
               <label>Amenities</label>
               <div class="ap-check-group">
                 <label class="ap-check-item"><input type="checkbox" name="amenities" value="Air Conditioning" {% if 'Air Conditioning' in (house.amenities or []) %}checked{% endif %} /> <i class="fas fa-snowflake me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>AC</label>
-                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Washer/Dryer" {% if 'Washer' in (house.amenities or []) %}checked{% endif %} /> <i class="fas fa-tshirt me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Washer/Dryer</label>
-                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Balcony" {% if 'Balcony' in (house.amenities or []) %}checked{% endif %} /> <i class="fas fa-door-open me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Balcony</label>
-                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Gym" {% if 'Gym' in (house.amenities or []) %}checked{% endif %} /> <i class="fas fa-dumbbell me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Gym</label>
-                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Swimming Pool" {% if 'Pool' in (house.amenities or []) %}checked{% endif %} /> <i class="fas fa-swimming-pool me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Pool</label>
-                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Garden" {% if 'Garden' in (house.amenities or []) %}checked{% endif %} /> <i class="fas fa-leaf me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Garden</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Washer/Dryer"     {% if 'Washer' in (house.amenities or []) %}checked{% endif %} /> <i class="fas fa-tshirt me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Washer/Dryer</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Balcony"          {% if 'Balcony' in (house.amenities or []) %}checked{% endif %} /> <i class="fas fa-door-open me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Balcony</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Gym"              {% if 'Gym' in (house.amenities or []) %}checked{% endif %} /> <i class="fas fa-dumbbell me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Gym</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Swimming Pool"    {% if 'Pool' in (house.amenities or []) %}checked{% endif %} /> <i class="fas fa-swimming-pool me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Pool</label>
+                <label class="ap-check-item"><input type="checkbox" name="amenities" value="Garden"           {% if 'Garden' in (house.amenities or []) %}checked{% endif %} /> <i class="fas fa-leaf me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Garden</label>
               </div>
             </div>
           </div>
 
           <!-- SECTION 7: Policies -->
-          <div class="ap-section" data-progress-group="1">
+          <div class="ap-section" id="section-policies">
             <div class="ap-section-header">
               <div class="ap-section-icon"><i class="fas fa-shield-alt"></i></div>
               <div>
                 <h3 class="ap-section-title">Policies &amp; Accessibility</h3>
                 <p class="ap-section-subtitle">Rules and accessibility features</p>
               </div>
+              <div class="ap-section-complete-badge"><i class="fas fa-check-circle"></i> Complete</div>
             </div>
-
             <div class="row g-3">
               <div class="col-sm-6">
                 <div class="ap-field">
                   <label>Pets Allowed</label>
-                  <div class="ap-check-group" style="grid-template-columns: 1fr 1fr;">
+                  <div class="ap-check-group" style="grid-template-columns:1fr 1fr;">
                     <label class="ap-check-item"><input type="radio" name="pets_allowed" value="Yes" {% if house.pets_allowed == 'Yes' %}checked{% endif %} /> Yes</label>
-                    <label class="ap-check-item"><input type="radio" name="pets_allowed" value="No" {% if house.pets_allowed == 'No' or not house.pets_allowed %}checked{% endif %} /> No</label>
+                    <label class="ap-check-item"><input type="radio" name="pets_allowed" value="No"  {% if house.pets_allowed == 'No' or not house.pets_allowed %}checked{% endif %} /> No</label>
                   </div>
                 </div>
               </div>
@@ -1597,27 +1234,57 @@
                 </div>
               </div>
             </div>
-
             <div class="ap-field">
               <label>Smoking Policy</label>
-              <div class="ap-check-group" style="grid-template-columns: 1fr 1fr;">
+              <div class="ap-check-group" style="grid-template-columns:1fr 1fr;">
                 <label class="ap-check-item"><input type="radio" name="smoking_policy" value="Smoking Allowed" {% if 'Allowed' in (house.smoking_policy or '') %}checked{% endif %} /> Smoking Allowed</label>
-                <label class="ap-check-item"><input type="radio" name="smoking_policy" value="Non-Smoking" {% if house.smoking_policy == 'Non-Smoking' or not house.smoking_policy %}checked{% endif %} /> Non-Smoking</label>
+                <label class="ap-check-item"><input type="radio" name="smoking_policy" value="Non-Smoking"     {% if house.smoking_policy == 'Non-Smoking' or not house.smoking_policy %}checked{% endif %} /> Non-Smoking</label>
               </div>
             </div>
-
             <div class="ap-field">
               <label>Accessibility Features</label>
               <div class="ap-check-group">
                 <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Wheelchair Access" {% if 'Wheelchair' in (house.accessibility_features or []) %}checked{% endif %} /> <i class="fas fa-wheelchair me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Wheelchair Access</label>
-                <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Elevator" {% if 'Elevator' in (house.accessibility_features or []) %}checked{% endif %} /> <i class="fas fa-arrows-alt-v me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Elevator</label>
-                <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Grab Bars" {% if 'Grab' in (house.accessibility_features or []) %}checked{% endif %} /> <i class="fas fa-hand-paper me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Grab Bars</label>
+                <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Elevator"          {% if 'Elevator' in (house.accessibility_features or []) %}checked{% endif %} /> <i class="fas fa-arrows-alt-v me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Elevator</label>
+                <label class="ap-check-item"><input type="checkbox" name="accessibility_features" value="Grab Bars"         {% if 'Grab' in (house.accessibility_features or []) %}checked{% endif %} /> <i class="fas fa-hand-paper me-1" style="color:var(--primary-color);font-size:0.75rem;"></i>Grab Bars</label>
               </div>
             </div>
           </div>
 
           <!-- Submit Section -->
           <div id="section-submit">
+
+            <!-- ★ FEATURED BANNER ★ -->
+            <div class="ap-featured-banner {% if house.is_featured %}is-featured{% endif %}" id="featuredBanner">
+              <div class="ap-featured-banner-inner">
+                <div class="ap-featured-icon" id="featuredIcon">
+                  {% if house.is_featured %}<i class="fas fa-check"></i>{% else %}<i class="fas fa-crown"></i>{% endif %}
+                </div>
+                <div class="ap-featured-text">
+                  <h4><span class="feat-crown">★</span> Feature This Property</h4>
+                  <p id="featuredBannerDesc">
+                    {% if house.is_featured %}
+                      Featured ✓ — this property is currently shown in the homepage featured section
+                      {% if house.featured_until %} until {{ house.featured_until.strftime('%d %b %Y') }}{% endif %}.
+                    {% else %}
+                      Boost visibility on the homepage &amp; all listings for
+                      <strong style="color:#fbbf24;">KES {{ "{:,.0f}".format(featured_price) }}</strong>.
+                      Get 10× more tenant enquiries.
+                    {% endif %}
+                  </p>
+                </div>
+                {% if house.is_featured %}
+                  <div class="ap-featured-paid-badge">
+                    <i class="fas fa-check-circle"></i> Currently Featured
+                  </div>
+                {% else %}
+                  <button type="button" class="btn-feature-property" id="btnOpenFeatured">
+                    <i class="fas fa-bolt"></i> Feature It
+                  </button>
+                {% endif %}
+              </div>
+            </div>
+
             <div class="ap-actions">
               <button type="submit" class="btn-ap-submit" id="submitProperty">
                 <i class="fas fa-save"></i>
@@ -1625,8 +1292,7 @@
                 <div class="ap-spinner" id="submitSpinner"></div>
               </button>
               <a href="{{ url_for('landlord.properties') }}" class="btn-ap-cancel">
-                <i class="fas fa-times"></i>
-                Cancel
+                <i class="fas fa-times"></i> Cancel
               </a>
             </div>
             <div class="ap-feedback" id="editPropertyFeedback"></div>
@@ -1634,56 +1300,56 @@
         </form>
       </div>
 
-      <!-- ===== SIDEBAR COLUMN ===== -->
+      <!-- SIDEBAR -->
       <div class="col-lg-4">
-        <!-- Tips -->
-        <aside class="ap-tips-card" aria-label="Listing tips">
+
+        <aside class="ap-tips-card" aria-label="Editing tips">
           <h5><i class="fas fa-lightbulb"></i> Editing Tips</h5>
-          <div class="ap-tips-body" id="tipsBody">
-            <ul class="ap-tips-list">
-              <li><i class="fas fa-circle"></i>Uploading new images replaces the entire current gallery.</li>
-              <li><i class="fas fa-circle"></i>Ensure the first image is your best cover photo.</li>
-              <li><i class="fas fa-circle"></i>Keep your amenities list accurate.</li>
-            </ul>
-          </div>
+          <ul class="ap-tips-list">
+            <li><i class="fas fa-circle"></i>Uploading new images replaces the entire current gallery.</li>
+            <li><i class="fas fa-circle"></i>Ensure the first image is your best cover photo.</li>
+            <li><i class="fas fa-circle"></i>Keep your amenities list accurate to attract the right tenants.</li>
+            <li><i class="fas fa-circle"></i>Feature your property to get 10× more enquiries.</li>
+          </ul>
         </aside>
 
-        <!-- Comprehensive Live Preview -->
+        <!-- Preview Card -->
         <div class="ap-preview-card" aria-label="Property preview">
-          <!-- Image Gallery -->
+          <!-- Progress bar -->
+          <div class="ap-pv-progress">
+            <span class="ap-pv-progress-label">Completeness</span>
+            <div class="ap-pv-progress-bar-wrap">
+              <div class="ap-pv-progress-bar" id="pvProgressBar"></div>
+            </div>
+            <span class="ap-pv-progress-pct" id="pvProgressPct">0%</span>
+          </div>
+
           <div class="ap-preview-gallery" id="previewGallery">
             <i class="fas fa-image"></i>
             <span class="ap-preview-gallery-badge">Preview</span>
           </div>
 
           <div class="ap-preview-body">
-            <!-- Title & Type -->
             <div class="ap-pv-section">
               <div class="ap-pv-title-row">
                 <h4 class="ap-preview-title" id="previewTitle">Property Name</h4>
                 <span class="ap-pv-type-badge" id="previewTypeBadge">--</span>
               </div>
-              <p class="ap-preview-desc" id="previewDesc">Property description will appear here as you type...</p>
+              <p class="ap-preview-desc" id="previewDesc">Description will appear here...</p>
             </div>
-
-            <!-- Location -->
             <div class="ap-pv-section">
               <div class="ap-pv-section-title"><i class="fas fa-map-marker-alt"></i> Location</div>
               <p class="ap-preview-location" id="previewLocation"><i class="fas fa-map-marker-alt"></i> City, Country</p>
             </div>
-
-            <!-- Pricing -->
             <div class="ap-pv-section">
               <div class="ap-pv-section-title"><i class="fas fa-tag"></i> Pricing</div>
               <div class="ap-pv-price-main" id="previewPrice">KES 0/mo</div>
-              <div class="ap-pv-price-details" id="previewPriceDetails">
+              <div class="ap-pv-price-details">
                 <span id="previewDeposit"><i class="fas fa-lock"></i> Deposit: --</span>
                 <span id="previewLease"><i class="fas fa-file-contract"></i> Lease: --</span>
                 <span id="previewAvail"><i class="fas fa-calendar"></i> Available: --</span>
               </div>
             </div>
-
-            <!-- Specifications -->
             <div class="ap-pv-section">
               <div class="ap-pv-section-title"><i class="fas fa-ruler-combined"></i> Specifications</div>
               <div class="ap-preview-specs">
@@ -1692,481 +1358,552 @@
                 <div class="ap-preview-spec"><i class="fas fa-ruler-combined"></i> <span id="previewSqft">-- sq ft</span></div>
               </div>
             </div>
-
-            <!-- Features & Amenities -->
             <div class="ap-pv-section">
               <div class="ap-pv-section-title"><i class="fas fa-star"></i> Features</div>
-              <div class="ap-preview-tags" id="previewFeatures">
-                <span class="ap-pv-empty">No features selected</span>
-              </div>
+              <div class="ap-preview-tags" id="previewFeatures"><span class="ap-pv-empty">No features selected</span></div>
             </div>
-
-            <!-- Policies -->
             <div class="ap-pv-section">
               <div class="ap-pv-section-title"><i class="fas fa-shield-alt"></i> Policies</div>
-              <div id="previewPolicies">
-                <div class="ap-pv-policy-row"><i class="fas fa-paw"></i> <span id="previewPets">Pets: No</span></div>
-                <div class="ap-pv-policy-row"><i class="fas fa-smoking-ban"></i> <span id="previewSmoking">Smoking: Non-Smoking</span></div>
-                <div class="ap-pv-policy-row"><i class="fas fa-wheelchair"></i> <span id="previewAccess">Accessibility: None</span></div>
-              </div>
+              <div class="ap-pv-policy-row"><i class="fas fa-paw"></i> <span id="previewPets">Pets: No</span></div>
+              <div class="ap-pv-policy-row"><i class="fas fa-smoking-ban"></i> <span id="previewSmoking">Smoking: Non-Smoking</span></div>
+              <div class="ap-pv-policy-row"><i class="fas fa-wheelchair"></i> <span id="previewAccess">Accessibility: None</span></div>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
 
-  <!-- Landlord Access Badge -->
-  <div class="ap-access-badge" aria-label="Landlord access indicator">
-    <i class="fas fa-user-shield"></i> Landlord Access
+  <div class="ap-access-badge"><i class="fas fa-user-shield"></i> Landlord Access</div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-icon"><i class="fas fa-exclamation-triangle"></i></div>
+      <h3 class="modal-title">Delete Property?</h3>
+    </div>
+    <div class="modal-body">
+      <p>Are you sure you want to delete <strong>{{ house.title }}</strong>? This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+      <form action="{{ url_for('landlord.delete_property', property_id=house.id) }}" method="POST" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn-modal btn-modal-confirm">
+          <i class="fas fa-trash-alt"></i> Delete
+        </button>
+      </form>
+    </div>
   </div>
 </div>
 
-<!-- DELETE CONFIRMATION MODAL -->
-<div class="modal-overlay" id="deleteModal">
-    <div class="modal-box">
-        <div class="modal-header">
-            <div class="modal-icon">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <h3 class="modal-title">Delete Property?</h3>
+<!-- FEATURED MODAL (only rendered if house is not already featured) -->
+{% if not house.is_featured %}
+<div class="feat-modal-overlay" id="featModalOverlay" role="dialog" aria-modal="true">
+  <div class="feat-modal">
+
+    <!-- Step 1: Benefits -->
+    <div class="feat-step active" id="featStep1">
+      <div class="feat-modal-head">
+        <div class="feat-modal-head-left">
+          <div class="feat-modal-step-indicator">
+            <div class="feat-modal-step-dot active"></div>
+            <div class="feat-modal-step-dot"></div>
+            <div class="feat-modal-step-dot"></div>
+          </div>
+          <h3>Why Feature Your Property?</h3>
+          <p>Unlock premium placement and reach serious tenants faster.</p>
         </div>
-        <div class="modal-body">
-            <p>Are you sure you want to delete <strong>{{ house.title }}</strong>? This action cannot be undone.</p>
+        <button class="feat-modal-close" onclick="closeFeatModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="feat-modal-body">
+        <ul class="feat-benefit-list">
+          <li>
+            <div class="feat-b-icon" style="background:rgba(251,191,36,0.12);color:#fbbf24;"><i class="fas fa-home"></i></div>
+            <div><strong>Homepage Spotlight</strong>Your property appears in the Featured section — first thing every visitor sees.</div>
+          </li>
+          <li>
+            <div class="feat-b-icon" style="background:rgba(99,102,241,0.12);color:#818cf8;"><i class="fas fa-search"></i></div>
+            <div><strong>Priority in All Listings</strong>Pinned at the top of every search & browse page with a gold badge.</div>
+          </li>
+          <li>
+            <div class="feat-b-icon" style="background:rgba(34,197,94,0.12);color:#22c55e;"><i class="fas fa-chart-line"></i></div>
+            <div><strong>10× More Enquiries</strong>Featured listings receive 10× more tenant enquiries on average.</div>
+          </li>
+          <li>
+            <div class="feat-b-icon" style="background:rgba(239,68,68,0.12);color:#f87171;"><i class="fas fa-bolt"></i></div>
+            <div><strong>Rent Faster</strong>Featured properties rent up to 3× faster — saving weeks of vacancy.</div>
+          </li>
+        </ul>
+        <div class="feat-price-callout">
+          <div class="feat-price-callout-left">
+            <div class="feat-price-callout-label">One-time fee</div>
+            <div class="feat-price-amount">KES {{ "{:,.0f}".format(featured_price) }}</div>
+            <div class="feat-price-desc">Paid once · 30 days featured</div>
+          </div>
+          <span class="feat-duration-badge"><i class="fas fa-clock"></i> 30 days</span>
         </div>
-        <div class="modal-footer">
-            <button class="btn-modal btn-modal-cancel" onclick="closeDeleteModal()">Cancel</button>
-            <form id="deleteForm" action="{{ url_for('landlord.delete_property', property_id=house.id) }}" method="POST">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="btn-modal btn-modal-confirm">
-                    <i class="fas fa-trash-alt"></i> Delete
-                </button>
-            </form>
-        </div>
+      </div>
+      <div class="feat-modal-foot">
+        <button class="btn-feat-primary" onclick="goFeatStep(2)">
+          <i class="fas fa-arrow-right"></i> Continue to Payment
+        </button>
+        <button class="btn-feat-secondary" onclick="closeFeatModal()">Maybe later</button>
+      </div>
     </div>
+
+    <!-- Step 2: Confirm & redirect -->
+    <div class="feat-step" id="featStep2">
+      <div class="feat-modal-head">
+        <div class="feat-modal-head-left">
+          <div class="feat-modal-step-indicator">
+            <div class="feat-modal-step-dot done"></div>
+            <div class="feat-modal-step-dot active"></div>
+            <div class="feat-modal-step-dot"></div>
+          </div>
+          <h3>Complete Payment</h3>
+          <p>You'll be redirected to our secure M-Pesa payment page.</p>
+        </div>
+        <button class="feat-modal-close" onclick="closeFeatModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="feat-modal-body">
+        <div class="feat-price-callout">
+          <div class="feat-price-callout-left">
+            <div class="feat-price-callout-label">Featured listing fee</div>
+            <div class="feat-price-amount">KES {{ "{:,.0f}".format(featured_price) }}</div>
+            <div class="feat-price-desc">One-time payment · 30 days featured</div>
+          </div>
+          <span class="feat-duration-badge"><i class="fas fa-mobile-alt"></i> M-Pesa</span>
+        </div>
+        <div class="feat-pay-note" style="flex-direction:column; gap:0.5rem;">
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <i class="fas fa-info-circle" style="color:#fbbf24;flex-shrink:0;"></i>
+            <strong style="color:rgba(255,255,255,0.65);font-size:0.8rem;">How it works</strong>
+          </div>
+          <ol style="margin:0;padding-left:1.2rem;color:rgba(255,255,255,0.45);font-size:0.78rem;line-height:1.8;">
+            <li>Click <strong style="color:rgba(255,255,255,0.6);">Proceed to Payment</strong> below</li>
+            <li>Enter your M-Pesa number on the payment page</li>
+            <li>Approve the STK push on your phone</li>
+            <li>Your property will be featured immediately after payment</li>
+          </ol>
+        </div>
+        <div id="featPayError" style="color:#f87171;font-size:0.8rem;margin-bottom:0.75rem;display:none;"></div>
+      </div>
+      <div class="feat-modal-foot">
+        <button class="btn-feat-primary" id="btnFeatProceed" onclick="proceedToFeatPayment()">
+          <i class="fas fa-lock"></i>
+          Proceed to Payment
+          <div class="feat-pay-spinner" id="featPaySpinner"></div>
+        </button>
+        <button class="btn-feat-secondary" onclick="goFeatStep(1)">
+          <i class="fas fa-arrow-left"></i> Back
+        </button>
+      </div>
+    </div>
+
+  </div>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('editPropertyForm');
-  const feedback = document.getElementById('editPropertyFeedback');
-  const submitButton = document.getElementById('submitProperty');
+  const form          = document.getElementById('editPropertyForm');
+  const feedback      = document.getElementById('editPropertyFeedback');
+  const submitButton  = document.getElementById('submitProperty');
   const submitBtnText = document.getElementById('submitBtnText');
   const submitSpinner = document.getElementById('submitSpinner');
 
   const MAX_IMAGES = 10;
-
-  // =============================================
-  // Global file store for NEW uploads
-  // =============================================
   let newFiles = [];
 
-  // Parse existing images from Jinja
-  // house.image_list comes from the route
   const existingImageUrls = {{ house.image_list | tojson }};
 
-  // References
   const el = (id) => document.getElementById(id);
+
   const inputs = {
-    name: el('propertyName'),
-    type: el('propertyType'),
-    description: el('propertyDescription'),
-    addressLine1: el('addressLine1'),
-    addressLine2: el('addressLine2'),
-    city: el('city'),
-    stateProvince: el('stateProvince'),
-    postalCode: el('postalCode'),
-    country: el('country'),
-    rent: el('rentAmount'),
-    deposit: el('securityDeposit'),
-    leaseTerm: el('leaseTerm'),
+    name:             el('propertyName'),
+    type:             el('propertyType'),
+    description:      el('propertyDescription'),
+    addressLine1:     el('addressLine1'),
+    addressLine2:     el('addressLine2'),
+    city:             el('city'),
+    stateProvince:    el('stateProvince'),
+    postalCode:       el('postalCode'),
+    country:          el('country'),
+    rent:             el('rentAmount'),
+    deposit:          el('securityDeposit'),
+    leaseTerm:        el('leaseTerm'),
     availabilityDate: el('availabilityDate'),
-    images: el('propertyImages'),
-    bedrooms: el('bedrooms'),
-    bathrooms: el('bathrooms'),
-    squareFootage: el('squareFootage'),
-    parking: el('parkingAvailability'),
-    furnished: document.querySelectorAll('input[name="furnished_status"]'),
-    utilities: document.querySelectorAll('input[name="utilities"]'),
-    amenities: document.querySelectorAll('input[name="amenities"]'),
-    pets: document.querySelectorAll('input[name="pets_allowed"]'),
-    petRestrictions: el('petRestrictions'),
-    smoking: document.querySelectorAll('input[name="smoking_policy"]'),
-    accessibility: document.querySelectorAll('input[name="accessibility_features"]')
+    images:           el('propertyImages'),
+    bedrooms:         el('bedrooms'),
+    bathrooms:        el('bathrooms'),
+    squareFootage:    el('squareFootage'),
+    parking:          el('parkingAvailability'),
+    furnished:        document.querySelectorAll('input[name="furnished_status"]'),
+    utilities:        document.querySelectorAll('input[name="utilities"]'),
+    amenities:        document.querySelectorAll('input[name="amenities"]'),
+    pets:             document.querySelectorAll('input[name="pets_allowed"]'),
+    petRestrictions:  el('petRestrictions'),
+    smoking:          document.querySelectorAll('input[name="smoking_policy"]'),
+    accessibility:    document.querySelectorAll('input[name="accessibility_features"]'),
   };
 
-  // ---- Check item visual toggle ----
+  // ── STEP / SECTION COMPLETION CHECKS ──────────────────────────────────
+  function isDetailsComplete()  { return !!(inputs.name.value.trim() && inputs.type.value && inputs.description.value.trim() && inputs.description.value.length <= 500); }
+  function isLocationComplete() { return !!(inputs.addressLine1.value.trim() && inputs.city.value.trim() && inputs.stateProvince.value.trim() && inputs.country.value); }
+  function isPricingComplete()  { return !!(inputs.rent.value && Number(inputs.rent.value) > 0 && inputs.leaseTerm.value && inputs.availabilityDate.value); }
+  // Images: complete if there are new files OR existing images
+  function isImagesComplete()   { return newFiles.length > 0 || existingImageUrls.length > 0; }
+  function isSpecsComplete()    { return !!(inputs.bedrooms.value !== '' && Number(inputs.bedrooms.value) >= 0 && inputs.bathrooms.value !== '' && Number(inputs.bathrooms.value) >= 0); }
+  function isFeaturesComplete() { return true; }  // all optional
+  function isPoliciesComplete() { return true; }  // defaults exist
+
+  // ── UPDATE STEPS + SECTION BORDERS + PROGRESS BAR ──────────────────────
+  function updateSteps() {
+    const states = [
+      isDetailsComplete(),
+      isLocationComplete(),
+      isPricingComplete(),
+      isImagesComplete(),
+      isSpecsComplete(),
+      isFeaturesComplete(),
+      isPoliciesComplete(),
+    ];
+
+    const pct = Math.round((states.filter(Boolean).length / states.length) * 100);
+    el('pvProgressBar').style.width = pct + '%';
+    el('pvProgressPct').textContent  = pct + '%';
+
+    const sectionIds = ['section-details','section-location','section-pricing','section-images','section-specs','section-features','section-policies'];
+
+    states.forEach((done, i) => {
+      const stepEl    = document.querySelectorAll('.ap-step')[i];
+      const indicator = el(`si${i + 1}`);
+      const connector = el(`sc${i + 1}`);
+      const section   = el(sectionIds[i]);
+
+      if (done) {
+        stepEl.classList.add('completed');
+        indicator.innerHTML = '<i class="fas fa-check"></i>';
+        if (connector) connector.classList.add('completed');
+        section.classList.add('section-complete');
+      } else {
+        stepEl.classList.remove('completed');
+        indicator.textContent = i + 1;
+        if (connector) connector.classList.remove('completed');
+        section.classList.remove('section-complete');
+      }
+    });
+
+    const allDone   = states.every(Boolean);
+    const saveStep  = document.querySelectorAll('.ap-step')[7];
+    const saveInd   = el('si8');
+    if (allDone) { saveStep.classList.add('completed'); saveInd.innerHTML = '<i class="fas fa-check"></i>'; }
+    else         { saveStep.classList.remove('completed'); saveInd.innerHTML = '✓'; }
+  }
+
+  // ── CHECK ITEM VISUAL TOGGLE ──────────────────────────────────────────
   document.querySelectorAll('.ap-check-item input').forEach(inp => {
     inp.addEventListener('change', () => {
-      const item = inp.closest('.ap-check-item');
       if (inp.type === 'radio') {
-        document.querySelectorAll(`input[name="${inp.name}"]`).forEach(r => {
-          r.closest('.ap-check-item').classList.remove('selected');
-        });
+        document.querySelectorAll(`input[name="${inp.name}"]`).forEach(r => r.closest('.ap-check-item').classList.remove('selected'));
       }
-      item.classList.toggle('selected', inp.checked);
-      updatePreview();
+      inp.closest('.ap-check-item').classList.toggle('selected', inp.checked);
+      updatePreview(); updateSteps();
     });
     if (inp.checked) inp.closest('.ap-check-item').classList.add('selected');
   });
 
-  // ---- Character count ----
+  // ── CHAR COUNT ─────────────────────────────────────────────────────────
   const charCount = el('charCount');
   inputs.description.addEventListener('input', () => {
     const len = inputs.description.value.length;
     charCount.textContent = `${len} / 500 characters`;
-    charCount.className = 'ap-char-count' + (len > 450 ? (len > 500 ? ' danger' : ' warning') : '');
+    charCount.className   = 'ap-char-count' + (len > 450 ? (len > 500 ? ' danger' : ' warning') : '');
     inputs.description.classList.toggle('is-invalid', len > 500);
-    updatePreview();
+    updatePreview(); updateSteps();
   });
 
-  // ---- Image upload ----
-  const uploadArea = el('uploadArea');
-  const imagePreview = el('imagePreview');
-  const uploadError = el('uploadError');
-  const imageCountNum = el('imageCountNum');
+  // ── IMAGE UPLOAD ───────────────────────────────────────────────────────
+  const uploadArea           = el('uploadArea');
+  const imagePreview         = el('imagePreview');
+  const uploadError          = el('uploadError');
+  const imageCountNum        = el('imageCountNum');
   const currentImagesSection = el('currentImagesSection');
 
-  // Drag & drop visual feedback
-  ['dragover', 'dragenter'].forEach(evt => {
-    uploadArea.addEventListener(evt, (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
-  });
-  ['dragleave', 'drop'].forEach(evt => {
-    uploadArea.addEventListener(evt, (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); });
-  });
+  ['dragover','dragenter'].forEach(evt => uploadArea.addEventListener(evt, e => { e.preventDefault(); uploadArea.classList.add('dragover'); }));
+  ['dragleave','drop'].forEach(evt => uploadArea.addEventListener(evt, e => { e.preventDefault(); uploadArea.classList.remove('dragover'); }));
 
-  // Drag & drop: merge new files into newFiles
-  uploadArea.addEventListener('drop', (e) => {
-    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-    addNewFiles(files);
-  });
-
-  // File input change: merge new selections into newFiles
-  inputs.images.addEventListener('change', (e) => {
-    const files = Array.from(e.target.files);
-    addNewFiles(files);
-  });
+  uploadArea.addEventListener('drop', e => { addNewFiles(Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'))); });
+  inputs.images.addEventListener('change', () => { addNewFiles(Array.from(inputs.images.files)); });
 
   function addNewFiles(files) {
-    // In this edit mode, we might want to replace the queue or append?
-    // Given the backend replaces ALL images, let's just replace the queue for clarity.
-    // Or append up to 10.
-    // Let's append up to 10 total.
     newFiles = [...newFiles, ...files].slice(0, MAX_IMAGES);
-    updateImageInput();
+    syncImageInput();
   }
 
-  // Sync newFiles back into the native file input, then render
-  function updateImageInput() {
+  function syncImageInput() {
     const dt = new DataTransfer();
-    newFiles.forEach(file => dt.items.add(file));
+    newFiles.forEach(f => dt.items.add(f));
     inputs.images.files = dt.files;
-    handleImages();
+    renderImagePreviews();
   }
 
-  function handleImages() {
+  function renderImagePreviews() {
     imagePreview.innerHTML = '';
     uploadError.classList.remove('visible');
     uploadError.textContent = '';
 
     const count = newFiles.length;
     imageCountNum.textContent = count;
-    imageCountNum.className = 'count-num' + (count > 0 ? ' has-images' : '');
+    imageCountNum.className   = 'count-num' + (count > 0 ? ' has-images' : '');
 
-    // Hide existing images section if new files are added, to avoid confusion
-    if (count > 0 && currentImagesSection) {
-      currentImagesSection.style.opacity = '0.4';
-      currentImagesSection.style.pointerEvents = 'none';
-    } else if (currentImagesSection) {
-      currentImagesSection.style.opacity = '1';
-      currentImagesSection.style.pointerEvents = 'auto';
+    if (currentImagesSection) {
+      currentImagesSection.style.opacity        = count > 0 ? '0.4' : '1';
+      currentImagesSection.style.pointerEvents  = count > 0 ? 'none' : 'auto';
     }
 
-    if (count > MAX_IMAGES) {
-      uploadError.textContent = `Maximum ${MAX_IMAGES} images allowed. You have ${count}.`;
-      uploadError.classList.add('visible');
-    }
-
-    // Validate each file
-    for (const file of newFiles) {
-      if (!['image/jpeg', 'image/png'].includes(file.type)) {
+    newFiles.forEach((file, idx) => {
+      if (!['image/jpeg','image/png'].includes(file.type)) {
         uploadError.textContent = `"${file.name}" is not a valid format. Use JPG or PNG.`;
         uploadError.classList.add('visible');
-        continue;
+        return;
       }
       if (file.size > 5 * 1024 * 1024) {
         uploadError.textContent = `"${file.name}" exceeds the 5MB limit.`;
         uploadError.classList.add('visible');
-        continue;
+        return;
       }
-    }
-
-    // Render thumbnails from newFiles
-    newFiles.forEach((file, idx) => {
       const wrap = document.createElement('div');
-      wrap.className = 'ap-thumb is-new'; // New class for green border
+      wrap.className = 'ap-thumb is-new';
       const img = document.createElement('img');
       img.src = URL.createObjectURL(file);
       const badge = document.createElement('div');
       badge.className = 'ap-thumb-badge';
       badge.textContent = idx === 0 ? 'Cover' : `#${idx + 1}`;
-      badge.style.backgroundColor = '#28a745'; // Green badge for new
       const removeBtn = document.createElement('button');
-      removeBtn.type = 'button';
-      removeBtn.className = 'ap-thumb-remove';
+      removeBtn.type = 'button'; removeBtn.className = 'ap-thumb-remove';
       removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-      removeBtn.addEventListener('click', () => {
-        newFiles = newFiles.filter((_, i) => i !== idx);
-        updateImageInput();
-        updatePreview(); // Update preview to revert to existing if list is empty
-      });
-      wrap.appendChild(img);
-      wrap.appendChild(badge);
-      wrap.appendChild(removeBtn);
+      removeBtn.addEventListener('click', () => { newFiles = newFiles.filter((_,i) => i !== idx); syncImageInput(); updatePreview(); updateSteps(); });
+      wrap.append(img, badge, removeBtn);
       imagePreview.appendChild(wrap);
     });
 
-    updatePreview();
+    updatePreview(); updateSteps();
   }
 
-  // ---- Real-time comprehensive preview ----
+  // ── REAL-TIME PREVIEW ─────────────────────────────────────────────────
   function updatePreview() {
-    // Title & Type
     el('previewTitle').textContent = inputs.name.value || 'Property Name';
+
     const typeBadge = el('previewTypeBadge');
-    if (inputs.type.value) {
-      typeBadge.textContent = inputs.type.value;
-      typeBadge.classList.add('visible');
-    } else {
-      typeBadge.classList.remove('visible');
-    }
+    if (inputs.type.value) { typeBadge.textContent = inputs.type.value; typeBadge.classList.add('visible'); }
+    else typeBadge.classList.remove('visible');
 
-    // Description
-    el('previewDesc').textContent = inputs.description.value || 'Property description will appear here as you type...';
+    el('previewDesc').textContent = inputs.description.value || 'Description will appear here...';
 
-    // Location
     const shortLoc = [inputs.city.value, inputs.country.value].filter(Boolean).join(', ');
     el('previewLocation').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${shortLoc || 'City, Country'}`;
 
-    // Pricing
     el('previewPrice').textContent = inputs.rent.value ? `KES ${Number(inputs.rent.value).toLocaleString()}/mo` : 'KES 0/mo';
     el('previewDeposit').innerHTML = `<i class="fas fa-lock"></i> Deposit: ${inputs.deposit.value ? 'KES ' + Number(inputs.deposit.value).toLocaleString() : '--'}`;
-
-    if (inputs.leaseTerm.value) {
-      el('previewLease').innerHTML = `<i class="fas fa-file-contract"></i> Lease: ${inputs.leaseTerm.value}`;
-    } else {
-      el('previewLease').innerHTML = `<i class="fas fa-file-contract"></i> Lease: --`;
-    }
+    el('previewLease').innerHTML   = `<i class="fas fa-file-contract"></i> Lease: ${inputs.leaseTerm.value || '--'}`;
 
     if (inputs.availabilityDate.value) {
       const d = new Date(inputs.availabilityDate.value + 'T00:00:00');
-      el('previewAvail').innerHTML = `<i class="fas fa-calendar"></i> Available: ${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+      el('previewAvail').innerHTML = `<i class="fas fa-calendar"></i> Available: ${d.toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'})}`;
     } else {
       el('previewAvail').innerHTML = `<i class="fas fa-calendar"></i> Available: --`;
     }
 
-    // Specs
-    el('previewBeds').textContent = inputs.bedrooms.value ? `${inputs.bedrooms.value} Bed${inputs.bedrooms.value > 1 ? 's' : ''}` : '0 Beds';
+    el('previewBeds').textContent  = inputs.bedrooms.value  ? `${inputs.bedrooms.value} Bed${inputs.bedrooms.value > 1 ? 's' : ''}`  : '0 Beds';
     el('previewBaths').textContent = inputs.bathrooms.value ? `${inputs.bathrooms.value} Bath${inputs.bathrooms.value > 1 ? 's' : ''}` : '0 Baths';
-    el('previewSqft').textContent = inputs.squareFootage.value ? `${Number(inputs.squareFootage.value).toLocaleString()} sq ft` : '-- sq ft';
+    el('previewSqft').textContent  = inputs.squareFootage.value ? `${Number(inputs.squareFootage.value).toLocaleString()} sq ft` : '-- sq ft';
 
-    // Preview gallery logic
+    // Gallery — show new uploads if any, otherwise existing
     const gallery = el('previewGallery');
-    gallery.querySelectorAll('img').forEach(img => img.remove());
-    const existingCountBadge = gallery.querySelector('.ap-preview-gallery-count');
-    if (existingCountBadge) existingCountBadge.remove();
+    Array.from(gallery.children).forEach(c => { if (!c.classList.contains('ap-preview-gallery-badge')) c.remove(); });
 
-    // If user has selected NEW files, show ONLY those (backend replacement logic)
-    // If NO new files, show EXISTING images
-    let displaySources = [];
-    let displayCount = 0;
+    const sources = newFiles.length > 0
+      ? newFiles.map(f => URL.createObjectURL(f))
+      : existingImageUrls;
 
-    if (newFiles.length > 0) {
-      // Show new uploads
-      newFiles.forEach(file => displaySources.push({ type: 'file', src: URL.createObjectURL(file) }));
-      displayCount = newFiles.length;
-    } else {
-      // Show existing images
-      existingImageUrls.forEach(url => displaySources.push({ type: 'url', src: url }));
-      displayCount = existingImageUrls.length;
-    }
-
-    if (displayCount > 0) {
+    if (sources.length > 0) {
       gallery.classList.add('has-images');
-      const showCount = Math.min(displayCount, 4);
-      for (let i = 0; i < showCount; i++) {
-        const img = document.createElement('img');
-        img.className = 'ap-pv-gallery-img';
-        img.src = displaySources[i].src;
-        gallery.appendChild(img);
-      }
-      if (displayCount > 1) {
-        const countBadge = document.createElement('span');
-        countBadge.className = 'ap-preview-gallery-count';
-        countBadge.textContent = `+${displayCount - 1} more`;
-        gallery.appendChild(countBadge);
-      }
+      const grid = document.createElement('div');
+      grid.className = 'ap-pv-grid';
+      sources.forEach((src, idx) => {
+        const cell = document.createElement('div'); cell.className = 'ap-pv-grid-cell';
+        const img  = document.createElement('img'); img.className = 'ap-pv-gallery-img'; img.src = src;
+        cell.appendChild(img);
+        if (idx > 0) { const num = document.createElement('span'); num.className = 'ap-pv-cell-num'; num.textContent = `#${idx + 1}`; cell.appendChild(num); }
+        grid.appendChild(cell);
+      });
+      gallery.appendChild(grid);
+      const footer = document.createElement('div');
+      footer.className = 'ap-pv-gallery-footer';
+      footer.innerHTML = `<strong>${sources.length}</strong> image${sources.length !== 1 ? 's' : ''}`;
+      gallery.appendChild(footer);
     } else {
       gallery.classList.remove('has-images');
     }
 
-    // Features tags
+    // Features
     const tags = [];
     const furnished = Array.from(inputs.furnished).find(f => f.checked);
     if (furnished && furnished.value !== 'Unfurnished') tags.push(furnished.value);
     if (inputs.parking.value !== 'None') tags.push(inputs.parking.value);
     Array.from(inputs.utilities).filter(u => u.checked).forEach(u => tags.push(u.value));
     Array.from(inputs.amenities).filter(a => a.checked).forEach(a => tags.push(a.value));
-
-    const featuresEl = el('previewFeatures');
-    if (tags.length > 0) {
-      featuresEl.innerHTML = tags.map(t => `<span class="ap-preview-tag">${t}</span>`).join('');
-    } else {
-      featuresEl.innerHTML = '<span class="ap-pv-empty">No features selected</span>';
-    }
+    el('previewFeatures').innerHTML = tags.length > 0 ? tags.map(t => `<span class="ap-preview-tag">${t}</span>`).join('') : '<span class="ap-pv-empty">No features selected</span>';
 
     // Policies
-    const petsVal = Array.from(inputs.pets).find(p => p.checked);
-    el('previewPets').textContent = `Pets: ${petsVal ? petsVal.value : 'No'}`;
+    const petsVal  = Array.from(inputs.pets).find(p => p.checked);
     const smokeVal = Array.from(inputs.smoking).find(s => s.checked);
-    el('previewSmoking').textContent = `Smoking: ${smokeVal ? smokeVal.value : 'Non-Smoking'}`;
     const accessVals = Array.from(inputs.accessibility).filter(a => a.checked).map(a => a.value);
-    el('previewAccess').textContent = `Accessibility: ${accessVals.length > 0 ? accessVals.join(', ') : 'None'}`;
+    el('previewPets').textContent    = `Pets: ${petsVal  ? petsVal.value  : 'No'}`;
+    el('previewSmoking').textContent = `Smoking: ${smokeVal ? smokeVal.value : 'Non-Smoking'}`;
+    el('previewAccess').textContent  = `Accessibility: ${accessVals.length > 0 ? accessVals.join(', ') : 'None'}`;
   }
 
-  // ---- Steps bar click-to-scroll ----
+  // ── STEP CLICK-TO-SCROLL ──────────────────────────────────────────────
   document.querySelectorAll('.ap-step').forEach(step => {
-    step.addEventListener('click', (e) => {
+    step.addEventListener('click', e => {
       e.preventDefault();
-      const targetId = step.getAttribute('data-step-target');
-      const target = document.getElementById(targetId);
-      if (target) {
-        const stepsBar = el('stepsBar');
-        const stepsBarHeight = stepsBar ? stepsBar.offsetHeight : 0;
-        const navHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--navbar-height')) || 70;
-        const offset = navHeight + stepsBarHeight + 12;
-        const top = target.getBoundingClientRect().top + window.scrollY - offset;
-        window.scrollTo({ top, behavior: 'smooth' });
-      }
+      const target = document.getElementById(step.getAttribute('data-step-target'));
+      if (!target) return;
+      const stepsBarH = (el('stepsBar') || {offsetHeight: 0}).offsetHeight;
+      const navH      = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--navbar-height')) || 70;
+      window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - navH - stepsBarH - 12, behavior: 'smooth' });
     });
   });
 
-  // Listen on all text/select inputs for preview
+  // ── LISTEN ON ALL INPUTS ──────────────────────────────────────────────
   [inputs.name, inputs.type, inputs.description, inputs.addressLine1, inputs.addressLine2,
    inputs.city, inputs.stateProvince, inputs.postalCode, inputs.country, inputs.rent,
    inputs.deposit, inputs.leaseTerm, inputs.availabilityDate, inputs.bedrooms, inputs.bathrooms,
    inputs.squareFootage, inputs.parking, inputs.petRestrictions
-  ].forEach(inp => {
-    if (!inp) return;
-    inp.addEventListener('input', updatePreview);
-    inp.addEventListener('change', updatePreview);
-  });
+  ].forEach(inp => { if (!inp) return; inp.addEventListener('input', () => { updatePreview(); updateSteps(); }); inp.addEventListener('change', () => { updatePreview(); updateSteps(); }); });
 
-  // ---- Set min date to today ----
-  const today = new Date().toISOString().split('T')[0];
-  inputs.availabilityDate.setAttribute('min', today);
+  // ── MIN DATE ──────────────────────────────────────────────────────────
+  inputs.availabilityDate.setAttribute('min', new Date().toISOString().split('T')[0]);
 
-  // ---- Form submission ----
+  // ── FORM SUBMIT ───────────────────────────────────────────────────────
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-
-    const requiredFields = form.querySelectorAll('[required]');
     let valid = true;
-    requiredFields.forEach(f => {
-      if (!f.value || (f.tagName === 'SELECT' && f.value === '')) {
-        f.classList.add('is-invalid');
-        valid = false;
-      } else {
-        f.classList.remove('is-invalid');
-      }
+    form.querySelectorAll('[required]').forEach(f => {
+      if (!f.value || (f.tagName === 'SELECT' && f.value === '')) { f.classList.add('is-invalid'); valid = false; }
+      else f.classList.remove('is-invalid');
     });
-
-    if (inputs.description.value.length > 500) {
-      inputs.description.classList.add('is-invalid');
-      valid = false;
-    }
-
+    if (inputs.description.value.length > 500) { inputs.description.classList.add('is-invalid'); valid = false; }
     if (!valid) {
       showFeedback('Please fill in all required fields correctly.', 'danger');
-      const firstInvalid = form.querySelector('.is-invalid');
-      if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const first = form.querySelector('.is-invalid');
+      if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
-    submitButton.disabled = true;
-    submitBtnText.textContent = 'Updating...';
-    submitSpinner.style.display = 'block';
-    showFeedback('Uploading images and updating property...', 'info');
+    submitButton.disabled        = true;
+    submitBtnText.textContent    = 'Updating...';
+    submitSpinner.style.display  = 'block';
+    showFeedback('Saving changes...', 'info');
 
     const formData = new FormData(form);
-
-    // Remove the default images entry and re-add from newFiles
     formData.delete('images');
-    newFiles.forEach(file => formData.append('images', file));
-
-    // Note: We do NOT send existing images because the backend logic:
-    // if images and images[0].filename != "": ... house.image_urls = ",".join(uploaded_urls)
-    // implies a full replacement if the key is present.
-    // If newFiles is empty, we don't append 'images' key, backend skips replacement, keeps old ones.
-
-    const csrfToken = form.querySelector('input[name="csrf_token"]').value;
+    newFiles.forEach(f => formData.append('images', f));
 
     try {
-      const response = await fetch(form.action, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': csrfToken },
-        body: formData,
-        credentials: 'include'
-      });
+      const res    = await fetch(form.action, { method: 'POST', headers: { 'X-CSRFToken': form.querySelector('input[name="csrf_token"]').value }, body: formData, credentials: 'include' });
+      let result   = {};
+      try { result = await res.json(); } catch { result = { message: 'Server returned non-JSON response.' }; }
 
-      let result = {};
-        try {
-        result = await response.json();
-        } catch (e) {
-        result = { message: "Server returned non-JSON response." };
-        }
-
-      if (response.ok) {
+      if (res.ok) {
         showFeedback(result.message || 'Property updated successfully!', 'success');
         setTimeout(() => { window.location.href = "{{ url_for('landlord.properties') }}"; }, 1500);
       } else {
         showFeedback(result.message || 'Error updating property. Please try again.', 'danger');
-        submitButton.disabled = false;
-        submitBtnText.textContent = 'Update Property';
-        submitSpinner.style.display = 'none';
+        submitButton.disabled        = false;
+        submitBtnText.textContent    = 'Update Property';
+        submitSpinner.style.display  = 'none';
       }
-    } catch (error) {
+    } catch {
       showFeedback('Network error. Please check your connection and try again.', 'danger');
-      submitButton.disabled = false;
-      submitBtnText.textContent = 'Update Property';
-      submitSpinner.style.display = 'none';
+      submitButton.disabled        = false;
+      submitBtnText.textContent    = 'Update Property';
+      submitSpinner.style.display  = 'none';
     }
   });
 
-  // ---- Feedback helper ----
   function showFeedback(msg, type) {
     const iconMap = { success: 'check-circle', danger: 'exclamation-circle', info: 'spinner fa-spin' };
     feedback.className = `ap-feedback alert-${type} visible`;
     feedback.innerHTML = `<i class="fas fa-${iconMap[type] || 'info-circle'}"></i><span>${msg}</span>`;
   }
 
-  // Initial state
+  // ── INIT ──────────────────────────────────────────────────────────────
   updatePreview();
+  updateSteps();
+
+  // ── FEATURED MODAL ────────────────────────────────────────────────────
+  const featOverlay = document.getElementById('featModalOverlay');
+  const btnOpen     = document.getElementById('btnOpenFeatured');
+
+  if (featOverlay && btnOpen) {
+    btnOpen.addEventListener('click', () => {
+      featOverlay.classList.add('open');
+      goFeatStep(1);
+      document.body.style.overflow = 'hidden';
+    });
+
+    featOverlay.addEventListener('click', e => { if (e.target === featOverlay) closeFeatModal(); });
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeFeatModal();
+      closeDeleteModal();
+    }
+  });
 });
 
-// --- Modal Logic ---
-function openDeleteModal() {
-  document.getElementById('deleteModal').classList.add('active');
-}
-
-function closeDeleteModal() {
-  document.getElementById('deleteModal').classList.remove('active');
-}
+// ── MODAL HELPERS (global) ─────────────────────────────────────────────
+function openDeleteModal()  { document.getElementById('deleteModal').classList.add('active'); }
+function closeDeleteModal() { document.getElementById('deleteModal').classList.remove('active'); }
 
 document.getElementById('deleteModal').addEventListener('click', function(e) {
   if (e.target === this) closeDeleteModal();
 });
+
+function closeFeatModal() {
+  const overlay = document.getElementById('featModalOverlay');
+  if (overlay) { overlay.classList.remove('open'); document.body.style.overflow = ''; }
+}
+
+function goFeatStep(step) {
+  document.querySelectorAll('.feat-step').forEach(s => s.classList.remove('active'));
+  document.getElementById(`featStep${step}`)?.classList.add('active');
+}
+
+// ── FEATURED PAYMENT — redirect to feature_house route ────────────────
+// The house already exists so we redirect directly to /landlord/feature/<id>
+// which creates the PaymentLink with the admin-set price and goes to payments.pay
+function proceedToFeatPayment() {
+  const btn     = document.getElementById('btnFeatProceed');
+  const spinner = document.getElementById('featPaySpinner');
+  const errEl   = document.getElementById('featPayError');
+
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  spinner.style.display = 'inline-block';
+
+  // Direct redirect — no AJAX needed because the house_id is already known
+  window.location.href = '{{ url_for("landlord.feature_house", house_id=house.id) }}';
+}
 </script>
 {% endblock %}

@@ -729,6 +729,10 @@ def reports():
 @landlord_bp.route("/properties/<int:property_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_property(property_id):
+    
+    featured_price = float(SystemSetting.get("featured_price", 10))
+    return render_template("landlord/edit_property.html", house=House, featured_price=featured_price)
+
     if current_user.role != "landlord":
         flash("Access denied.", "danger")
         return redirect(url_for("main.index"))
