@@ -48,6 +48,20 @@ auth_bp = Blueprint("auth", __name__)
 PASSWORD_RESET_SALT = "homehub-password-reset"
 
 
+def _admin_session_snapshot(user=None):
+    """Minimal session state for diagnosing admin access flow."""
+    return {
+        'user_id': getattr(user, 'id', None),
+        'is_authenticated': bool(getattr(user, 'is_authenticated', False)),
+        'role': getattr(user, 'role', None),
+        'admin_entry_granted': bool(session.get('admin_entry_granted')),
+        'admin_entry_granted_at': session.get('admin_entry_granted_at'),
+        'admin_totp_verified_for': session.get('admin_totp_verified_for'),
+        'admin_session_nonce': session.get('admin_session_nonce'),
+        'admin_last_seen_at': session.get('admin_last_seen_at'),
+    }
+
+
 def _get_password_reset_serializer():
     secret_key = current_app.config.get('SECRET_KEY') or current_app.secret_key
     if not secret_key:
@@ -567,6 +581,10 @@ def admin_2fa_verify():
         totp = pyotp.TOTP(current_user.two_factor_secret)
         if totp.verify(code, valid_window=1):
             mark_admin_totp_verified(current_user)
+            logger.info(
+                "Admin TOTP verified in admin_2fa_verify. session=%s",
+                _admin_session_snapshot(current_user)
+            )
             flash('Admin authenticator verification complete.', 'success')
             return redirect(url_for('admin.dashboard'))
 
@@ -768,9 +786,22 @@ def verify_2fa_login():
                 session['admin_entry_granted_at'] = int(time.time())
                 session.modified = True
 
+                logger.info(
+                    "Admin email OTP verified. post-login session=%s",
+                    _admin_session_snapshot(user)
+                )
+
                 if user.two_factor_enabled and user.two_factor_secret and not has_admin_totp_verified(user):
+                    logger.info(
+                        "Redirecting admin user to authenticator check. session=%s",
+                        _admin_session_snapshot(user)
+                    )
                     return redirect(url_for("auth.admin_2fa_verify"))
 
+                logger.info(
+                    "Redirecting admin user to dashboard directly. session=%s",
+                    _admin_session_snapshot(user)
+                )
                 return redirect(url_for("admin.dashboard"))
             else:
                 return redirect(url_for("main.index"))

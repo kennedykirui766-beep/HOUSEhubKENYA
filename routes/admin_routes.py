@@ -33,6 +33,24 @@ from utils_security import (
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
+
+def _admin_gate_snapshot():
+    """Minimal session snapshot to diagnose admin gate redirects."""
+    return {
+        'endpoint': request.endpoint,
+        'method': request.method,
+        'path': request.path,
+        'user_id': getattr(current_user, 'id', None),
+        'is_authenticated': bool(getattr(current_user, 'is_authenticated', False)),
+        'role': getattr(current_user, 'role', None),
+        'email': getattr(current_user, 'email', None),
+        'admin_entry_granted': bool(session.get('admin_entry_granted')),
+        'admin_entry_granted_at': session.get('admin_entry_granted_at'),
+        'admin_totp_verified_for': session.get('admin_totp_verified_for'),
+        'admin_session_nonce': session.get('admin_session_nonce'),
+        'admin_last_seen_at': session.get('admin_last_seen_at'),
+    }
+
 SIGNUP_ROLE_CHOICES = ('tenant', 'landlord', 'service')
 
 DEFAULT_EMAIL_TEMPLATES = [
@@ -227,17 +245,22 @@ def log_admin_action(action, *, category='admin', target_type=None, target_id=No
 
 @admin_bp.before_request
 def restrict_to_admin():
+    logger.info("Admin gate check started. state=%s", _admin_gate_snapshot())
+
     if not session.get('admin_entry_granted'):
+        logger.warning("Admin gate blocked: admin_entry_granted missing. state=%s", _admin_gate_snapshot())
         flash("Use the private admin access link before opening admin pages.", "warning")
         return redirect(url_for('auth.semantic_admin_entry'))
 
     if not is_admin():
+        logger.warning("Admin gate blocked: not approved admin. state=%s", _admin_gate_snapshot())
         flash("Access denied. Admins only.", "danger")
         return redirect(url_for('auth.login'))
 
     # Enforce admin IP allowlist (if configured).
     client_ip = get_request_ip()
     if not is_admin_ip_allowed(client_ip):
+        logger.warning("Admin gate blocked: IP allowlist denied ip=%s state=%s", client_ip, _admin_gate_snapshot())
         log_admin_action(
             'admin_ip_allowlist_block',
             category='security',
@@ -268,6 +291,12 @@ def restrict_to_admin():
         session['admin_session_nonce'] = current_nonce
         session.modified = True
     elif session_nonce != current_nonce:
+        logger.warning(
+            "Admin gate blocked: session nonce mismatch expected=%s got=%s state=%s",
+            current_nonce,
+            session_nonce,
+            _admin_gate_snapshot()
+        )
         log_admin_action(
             'admin_session_revoked',
             category='security',
@@ -294,6 +323,12 @@ def restrict_to_admin():
     if last_seen is not None:
         try:
             if now_ts - int(last_seen) > timeout_seconds:
+                logger.warning(
+                    "Admin gate blocked: idle timeout idle_seconds=%s timeout_seconds=%s state=%s",
+                    now_ts - int(last_seen),
+                    timeout_seconds,
+                    _admin_gate_snapshot()
+                )
                 log_admin_action(
                     'admin_session_timeout',
                     category='security',
@@ -324,11 +359,15 @@ def restrict_to_admin():
             return redirect(url_for('admin.dashboard'))
 
     if not current_user.two_factor_enabled or not current_user.two_factor_secret:
+        logger.warning("Admin gate reroute: authenticator not configured. state=%s", _admin_gate_snapshot())
         flash("Enable authenticator 2FA before using the admin area.", "warning")
         return redirect(url_for('auth.admin_security_setup'))
 
     if not has_admin_totp_verified(current_user):
+        logger.warning("Admin gate reroute: admin TOTP not verified in session. state=%s", _admin_gate_snapshot())
         return redirect(url_for('auth.admin_2fa_verify'))
+
+    logger.info("Admin gate passed. state=%s", _admin_gate_snapshot())
 
 def get_stats():
     """Return a consistent stats dictionary for all admin pages."""
