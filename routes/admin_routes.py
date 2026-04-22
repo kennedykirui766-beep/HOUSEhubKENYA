@@ -371,6 +371,11 @@ def restrict_to_admin():
 
 def get_stats():
     """Return a consistent stats dictionary for all admin pages."""
+    def _delta_percent(current, previous):
+        if previous == 0:
+            return 0.0 if current == 0 else 100.0
+        return round(((current - previous) / previous) * 100, 1)
+
     # Build last 6-month label window first so chart payload is always present.
     now_utc = datetime.utcnow()
     trend_month_keys = []
@@ -537,6 +542,31 @@ def get_stats():
     except Exception:
         support_30d = 0
 
+    cutoff_prev_30d = cutoff_30d - timedelta(days=30)
+    try:
+        payments_prev_30d = Payment.query.filter(
+            Payment.created_at >= cutoff_prev_30d,
+            Payment.created_at < cutoff_30d,
+        ).count()
+    except Exception:
+        payments_prev_30d = 0
+
+    try:
+        maintenance_prev_30d = MaintenanceRequest.query.filter(
+            MaintenanceRequest.created_at >= cutoff_prev_30d,
+            MaintenanceRequest.created_at < cutoff_30d,
+        ).count()
+    except Exception:
+        maintenance_prev_30d = 0
+
+    try:
+        support_prev_30d = SupportTicket.query.filter(
+            SupportTicket.created_at >= cutoff_prev_30d,
+            SupportTicket.created_at < cutoff_30d,
+        ).count()
+    except Exception:
+        support_prev_30d = 0
+
     # Role distribution for admin insights
     role_counts = {}
     for role_name in ('tenant', 'landlord', 'service', 'admin'):
@@ -559,6 +589,19 @@ def get_stats():
         db.session.execute('SELECT 1')
     except Exception:
         db_ok = False
+
+    uptime_value = SystemSetting.get('platform_uptime_percent', '')
+    api_response_value = SystemSetting.get('platform_api_response_ms', '')
+
+    try:
+        uptime_metric = float(uptime_value) if str(uptime_value).strip() else None
+    except Exception:
+        uptime_metric = None
+
+    try:
+        api_response_metric = int(float(api_response_value)) if str(api_response_value).strip() else None
+    except Exception:
+        api_response_metric = None
 
     return {
         'total_users': total_users,
@@ -584,8 +627,14 @@ def get_stats():
         'revenue_mtd': revenue_mtd,
         'transactions_mtd': transactions_mtd,
         'payments_30d': payments_30d,
+        'payments_prev_30d': payments_prev_30d,
+        'payments_delta_30d': _delta_percent(payments_30d, payments_prev_30d),
         'maintenance_30d': maintenance_30d,
+        'maintenance_prev_30d': maintenance_prev_30d,
+        'maintenance_delta_30d': _delta_percent(maintenance_30d, maintenance_prev_30d),
         'support_30d': support_30d,
+        'support_prev_30d': support_prev_30d,
+        'support_delta_30d': _delta_percent(support_30d, support_prev_30d),
         'role_counts': role_counts,
         'trend_labels': trend_labels,
         'payments_trend': [payments_trend[k] for k in trend_month_keys],
@@ -594,8 +643,8 @@ def get_stats():
         'support_trend': [support_trend[k] for k in trend_month_keys],
         'queue_length': queue_len,
         'db_ok': db_ok,
-        'uptime': 99.5,
-        'api_response': 280,
+        'uptime': uptime_metric,
+        'api_response': api_response_metric,
     }
 
 # --- Dashboard ---
@@ -605,11 +654,59 @@ def dashboard():
     users = User.query.all()
     houses = House.query.all()
     stats = get_stats()
+
+    needs_attention = []
+    if stats.get('support_open', 0) > 0:
+        needs_attention.append({
+            'level': 'warning',
+            'title': 'Open support tickets',
+            'value': stats['support_open'],
+            'hint': 'Customer issues awaiting closure.',
+            'url': url_for('admin.support_tickets', status='open'),
+        })
+
+    if stats.get('maintenance_open', 0) > 0:
+        needs_attention.append({
+            'level': 'warning',
+            'title': 'Open maintenance requests',
+            'value': stats['maintenance_open'],
+            'hint': 'Property operations tasks still active.',
+            'url': url_for('admin.maintenance_queue', status='open'),
+        })
+
+    if stats.get('payment_failures', 0) > 0:
+        needs_attention.append({
+            'level': 'critical',
+            'title': 'Payment failures detected',
+            'value': stats['payment_failures'],
+            'hint': 'Investigate failed transactions and retries.',
+            'url': url_for('admin.operations'),
+        })
+
+    if not stats.get('db_ok', True):
+        needs_attention.append({
+            'level': 'critical',
+            'title': 'Database health check failed',
+            'value': 'Now',
+            'hint': 'Review database connectivity immediately.',
+            'url': url_for('admin.operations'),
+        })
+
+    if stats.get('queue_length', 0) >= 50:
+        needs_attention.append({
+            'level': 'warning',
+            'title': 'Notification queue backlog',
+            'value': stats['queue_length'],
+            'hint': 'Background jobs are piling up.',
+            'url': url_for('admin.operations'),
+        })
+
     return render_template(
         'admin.html',
         users=users,
         houses=houses,
         stats=stats,
+        needs_attention=needs_attention,
         approved_admin_email=get_allowed_admin_email(),
         admin_totp_verified=has_admin_totp_verified(current_user),
     )
