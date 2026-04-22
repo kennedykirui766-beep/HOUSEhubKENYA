@@ -1332,7 +1332,7 @@ def feature_house(house_id):
     token = str(uuid.uuid4())
 
     # 🔥 GET ADMIN CONTROLLED PRICE
-    price = float(SystemSetting.get("featured_price", 500))
+    price = float(SystemSetting.get("featured_price", 10))
 
 
     link = PaymentLink(
