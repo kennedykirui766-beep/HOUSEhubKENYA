@@ -332,7 +332,7 @@
   .btn-delete-prop {
     background: rgba(220,53,69,0.08);
     border: 1.5px solid rgba(220,53,69,0.3);
-    color: #dc3545; padding: 0.65rem 1.25rem;
+    color: #dc3544; padding: 0.65rem 1.25rem;
     border-radius: var(--radius-md); font-weight: 600; font-size: 0.9rem;
     transition: var(--transition); text-decoration: none;
     display: inline-flex; align-items: center; gap: 0.5rem;
@@ -894,7 +894,7 @@
     <header class="ap-header mb-4" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
       <div>
         <h1>Edit Property Details</h1>
-        <p>Update the information for <strong>{{ house.title }}</strong></p>
+        <p>Update information for <strong>{{ house.title }}</strong></p>
       </div>
       <div class="header-actions">
         <a href="{{ url_for('landlord.properties') }}" class="btn-ap-cancel">
@@ -960,6 +960,9 @@
       <div class="col-lg-8">
         <form id="editPropertyForm" enctype="multipart/form-data" method="POST" action="{{ url_for('landlord.edit_property', property_id=house.id) }}" novalidate>
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          
+          <!-- Hidden Status Input: Updated via JS based on which button is clicked -->
+          <input type="hidden" name="status" id="formStatus" value="{{ house.status if house.status else 'published' }}" />
 
           <!-- SECTION 1: Details -->
           <div class="ap-section" id="section-details">
@@ -1003,7 +1006,7 @@
               <div class="ap-section-icon"><i class="fas fa-map-marker-alt"></i></div>
               <div>
                 <h3 class="ap-section-title">Location</h3>
-                <p class="ap-section-subtitle">Where is the property located?</p>
+                <p class="ap-section-subtitle">Where is property located?</p>
               </div>
               <div class="ap-section-complete-badge"><i class="fas fa-check-circle"></i> Complete</div>
             </div>
@@ -1099,7 +1102,7 @@
               <div class="ap-section-icon"><i class="fas fa-camera"></i></div>
               <div>
                 <h3 class="ap-section-title">Property Images</h3>
-                <p class="ap-section-subtitle">Upload new photos to replace the current gallery</p>
+                <p class="ap-section-subtitle">Upload new photos to replace current gallery</p>
               </div>
               <div class="ap-section-complete-badge"><i class="fas fa-check-circle"></i> Complete</div>
             </div>
@@ -1164,7 +1167,7 @@
               <div class="ap-section-icon"><i class="fas fa-star"></i></div>
               <div>
                 <h3 class="ap-section-title">Features &amp; Amenities</h3>
-                <p class="ap-section-subtitle">Select what's included with the property</p>
+                <p class="ap-section-subtitle">Select what's included with property</p>
               </div>
               <div class="ap-section-complete-badge"><i class="fas fa-check-circle"></i> Complete</div>
             </div>
@@ -1267,7 +1270,7 @@
                       Featured ✓ — this property is currently shown in the homepage featured section
                       {% if house.featured_until %} until {{ house.featured_until.strftime('%d %b %Y') }}{% endif %}.
                     {% else %}
-                      Boost visibility on the homepage &amp; all listings for
+                      Boost visibility on the homepage for
                       <strong style="color:#fbbf24;">KES {{ "{:,.0f}".format(featured_price) }}</strong>.
                       Get 10× more tenant enquiries.
                     {% endif %}
@@ -1285,15 +1288,19 @@
               </div>
             </div>
 
+            <!-- DRAFT / PUBLISH BUTTONS -->
             <div class="ap-actions">
-              <button type="submit" class="btn-ap-submit" id="submitProperty">
-                <i class="fas fa-save"></i>
-                <span id="submitBtnText">Update Property</span>
-                <div class="ap-spinner" id="submitSpinner"></div>
-              </button>
-              <a href="{{ url_for('landlord.properties') }}" class="btn-ap-cancel">
-                <i class="fas fa-times"></i> Cancel
-              </a>
+                <!-- Save as Draft -->
+                <button type="submit" class="btn-ap-cancel" id="btnSaveDraft" data-status="draft">
+                    <i class="fas fa-save"></i> Save as Draft
+                </button>
+
+                <!-- Publish Property -->
+                <button type="submit" class="btn-ap-submit" id="btnPublish" data-status="published">
+                    <i class="fas fa-paper-plane"></i>
+                    <span id="submitBtnText">Publish Property</span>
+                    <div class="ap-spinner" id="submitSpinner"></div>
+                </button>
             </div>
             <div class="ap-feedback" id="editPropertyFeedback"></div>
           </div>
@@ -1307,9 +1314,10 @@
           <h5><i class="fas fa-lightbulb"></i> Editing Tips</h5>
           <ul class="ap-tips-list">
             <li><i class="fas fa-circle"></i>Uploading new images replaces the entire current gallery.</li>
-            <li><i class="fas fa-circle"></i>Ensure the first image is your best cover photo.</li>
+            <li><i class="fas fa-circle"></i>Ensure your first image is the best cover photo.</li>
             <li><i class="fas fa-circle"></i>Keep your amenities list accurate to attract the right tenants.</li>
-            <li><i class="fas fa-circle"></i>Feature your property to get 10× more enquiries.</li>
+            <li><i class="fas fa-circle"></i>Use <strong>Save as Draft</strong> to keep work private while editing.</li>
+            <li><i class="fas fa-circle"></i>Click <strong>Publish Property</strong> to make it visible to tenants.</li>
           </ul>
         </aside>
 
@@ -1514,7 +1522,11 @@
 document.addEventListener('DOMContentLoaded', () => {
   const form          = document.getElementById('editPropertyForm');
   const feedback      = document.getElementById('editPropertyFeedback');
-  const submitButton  = document.getElementById('submitProperty');
+  
+  // New elements for Draft/Publish logic
+  const statusInput   = document.getElementById('formStatus');
+  const btnSaveDraft  = document.getElementById('btnSaveDraft');
+  const btnPublish    = document.getElementById('btnPublish');
   const submitBtnText = document.getElementById('submitBtnText');
   const submitSpinner = document.getElementById('submitSpinner');
 
@@ -1553,15 +1565,27 @@ document.addEventListener('DOMContentLoaded', () => {
     accessibility:    document.querySelectorAll('input[name="accessibility_features"]'),
   };
 
+  // ── DRAFT / PUBLISH CLICK HANDLERS ────────────────────────────────────
+  // Update hidden input before submission
+  if(btnSaveDraft) {
+    btnSaveDraft.addEventListener('click', () => {
+        statusInput.value = 'draft';
+    });
+  }
+  if(btnPublish) {
+    btnPublish.addEventListener('click', () => {
+        statusInput.value = 'published';
+    });
+  }
+
   // ── STEP / SECTION COMPLETION CHECKS ──────────────────────────────────
   function isDetailsComplete()  { return !!(inputs.name.value.trim() && inputs.type.value && inputs.description.value.trim() && inputs.description.value.length <= 500); }
   function isLocationComplete() { return !!(inputs.addressLine1.value.trim() && inputs.city.value.trim() && inputs.stateProvince.value.trim() && inputs.country.value); }
   function isPricingComplete()  { return !!(inputs.rent.value && Number(inputs.rent.value) > 0 && inputs.leaseTerm.value && inputs.availabilityDate.value); }
-  // Images: complete if there are new files OR existing images
   function isImagesComplete()   { return newFiles.length > 0 || existingImageUrls.length > 0; }
   function isSpecsComplete()    { return !!(inputs.bedrooms.value !== '' && Number(inputs.bedrooms.value) >= 0 && inputs.bathrooms.value !== '' && Number(inputs.bathrooms.value) >= 0); }
-  function isFeaturesComplete() { return true; }  // all optional
-  function isPoliciesComplete() { return true; }  // defaults exist
+  function isFeaturesComplete() { return true; }
+  function isPoliciesComplete() { return true; }
 
   // ── UPDATE STEPS + SECTION BORDERS + PROGRESS BAR ──────────────────────
   function updateSteps() {
@@ -1725,7 +1749,6 @@ document.addEventListener('DOMContentLoaded', () => {
     el('previewBaths').textContent = inputs.bathrooms.value ? `${inputs.bathrooms.value} Bath${inputs.bathrooms.value > 1 ? 's' : ''}` : '0 Baths';
     el('previewSqft').textContent  = inputs.squareFootage.value ? `${Number(inputs.squareFootage.value).toLocaleString()} sq ft` : '-- sq ft';
 
-    // Gallery — show new uploads if any, otherwise existing
     const gallery = el('previewGallery');
     Array.from(gallery.children).forEach(c => { if (!c.classList.contains('ap-preview-gallery-badge')) c.remove(); });
 
@@ -1753,7 +1776,6 @@ document.addEventListener('DOMContentLoaded', () => {
       gallery.classList.remove('has-images');
     }
 
-    // Features
     const tags = [];
     const furnished = Array.from(inputs.furnished).find(f => f.checked);
     if (furnished && furnished.value !== 'Unfurnished') tags.push(furnished.value);
@@ -1762,7 +1784,6 @@ document.addEventListener('DOMContentLoaded', () => {
     Array.from(inputs.amenities).filter(a => a.checked).forEach(a => tags.push(a.value));
     el('previewFeatures').innerHTML = tags.length > 0 ? tags.map(t => `<span class="ap-preview-tag">${t}</span>`).join('') : '<span class="ap-pv-empty">No features selected</span>';
 
-    // Policies
     const petsVal  = Array.from(inputs.pets).find(p => p.checked);
     const smokeVal = Array.from(inputs.smoking).find(s => s.checked);
     const accessVals = Array.from(inputs.accessibility).filter(a => a.checked).map(a => a.value);
@@ -1809,9 +1830,25 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    submitButton.disabled        = true;
-    submitBtnText.textContent    = 'Updating...';
-    submitSpinner.style.display  = 'block';
+    // Identify which button was clicked (Draft or Publish)
+    const submitter = event.submitter;
+    
+    // Disable clicked button and show spinner logic
+    if (submitter) {
+        submitter.disabled = true;
+        // If it's the publish button (which has a spinner container)
+        if(submitter === btnPublish) {
+            submitBtnText.textContent = 'Publishing...';
+            submitSpinner.style.display = 'block';
+        } else if (submitter === btnSaveDraft) {
+            // For Draft button, we just change text inline
+            const originalText = submitter.innerHTML;
+            submitter.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving Draft...';
+            // We'll need to restore this on error
+            submitter.dataset.originalText = originalText;
+        }
+    }
+
     showFeedback('Saving changes...', 'info');
 
     const formData = new FormData(form);
@@ -1828,15 +1865,29 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => { window.location.href = "{{ url_for('landlord.properties') }}"; }, 1500);
       } else {
         showFeedback(result.message || 'Error updating property. Please try again.', 'danger');
-        submitButton.disabled        = false;
-        submitBtnText.textContent    = 'Update Property';
-        submitSpinner.style.display  = 'none';
+        // Re-enable button and restore text
+        if (submitter) {
+            submitter.disabled = false;
+            if(submitter === btnPublish) {
+                submitBtnText.textContent = 'Publish Property';
+                submitSpinner.style.display = 'none';
+            } else if (submitter.dataset.originalText) {
+                submitter.innerHTML = submitter.dataset.originalText;
+            }
+        }
       }
     } catch {
       showFeedback('Network error. Please check your connection and try again.', 'danger');
-      submitButton.disabled        = false;
-      submitBtnText.textContent    = 'Update Property';
-      submitSpinner.style.display  = 'none';
+      // Re-enable button
+      if (submitter) {
+            submitter.disabled = false;
+            if(submitter === btnPublish) {
+                submitBtnText.textContent = 'Publish Property';
+                submitSpinner.style.display = 'none';
+            } else if (submitter.dataset.originalText) {
+                submitter.innerHTML = submitter.dataset.originalText;
+            }
+        }
     }
   });
 
@@ -1891,8 +1942,6 @@ function goFeatStep(step) {
 }
 
 // ── FEATURED PAYMENT — redirect to feature_house route ────────────────
-// The house already exists so we redirect directly to /landlord/feature/<id>
-// which creates the PaymentLink with the admin-set price and goes to payments.pay
 function proceedToFeatPayment() {
   const btn     = document.getElementById('btnFeatProceed');
   const spinner = document.getElementById('featPaySpinner');
@@ -1902,7 +1951,6 @@ function proceedToFeatPayment() {
   btn.disabled = true;
   spinner.style.display = 'inline-block';
 
-  // Direct redirect — no AJAX needed because the house_id is already known
   window.location.href = '{{ url_for("landlord.feature_house", house_id=house.id) }}';
 }
 </script>

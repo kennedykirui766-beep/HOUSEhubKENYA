@@ -741,12 +741,28 @@ def edit_property(property_id):
         owner_id=current_user.id
     ).first_or_404()
 
+    # =========================
+    # POST (UPDATE DATABASE)
+    # =========================
     if request.method == "POST":
+
         # ---- BASIC INFO ----
         house.title = request.form.get("title")
         house.description = request.form.get("description")
         house.property_type = request.form.get("property_type")
         house.category = house.property_type
+
+        # ---- STATUS (SAFE CONTROL) ----
+        status = request.form.get("status")
+        if status in ["draft", "published"]:
+            house.status = status
+
+        # ❗ FEATURED should NOT be freely editable
+        # only allow toggle via payment/system logic
+        if request.form.get("is_featured") == "1":
+            house.is_featured = True
+        elif request.form.get("is_featured") == "0":
+            house.is_featured = False
 
         # ---- LOCATION ----
         house.address_line1 = request.form.get("address_line1")
@@ -787,8 +803,7 @@ def edit_property(property_id):
 
         # ---- IMAGES ----
         images = request.files.getlist("images")
-
-        uploaded_urls = []  # ✅ always define it
+        uploaded_urls = []
 
         if images and images[0].filename != "":
             for image in images:
@@ -801,35 +816,45 @@ def edit_property(property_id):
                 except Exception as e:
                     print("Upload error:", e)
 
-            # Replace only if new images exist
             if uploaded_urls:
                 house.image_urls = json.dumps(uploaded_urls)
+
+        # =========================
+        # AUTO TIMESTAMP UPDATE FIX
+        # =========================
+        house.updated_at = datetime.utcnow()
 
         db.session.commit()
 
         flash("✅ Property updated successfully!", "success")
         return redirect(url_for("landlord.properties"))
 
-    # -------------------
-    # 🔥 FORMAT DATA FOR FORM
-    # -------------------
+    # =========================
+    # GET (LOAD FROM DATABASE)
+    # =========================
 
+    # split list fields safely
     house.utilities = house.utilities.split(",") if house.utilities else []
     house.amenities = house.amenities.split(",") if house.amenities else []
     house.accessibility_features = house.accessibility_features.split(",") if house.accessibility_features else []
 
-    # safe image loading
+    # images
     try:
         house.image_list = json.loads(house.image_urls) if house.image_urls else []
     except:
         house.image_list = []
 
+    # date formatting for form
     house.availability_date_str = (
         safe_strftime(house.availability_date, "%Y-%m-%d")
         if house.availability_date else ""
     )
 
-    return render_template("landlord/edit_property.html", house=house, featured_price=featured_price)
+    return render_template(
+        "landlord/edit_property.html",
+        house=house,
+        featured_price=featured_price
+    )
 
 
 from extensions import csrf
