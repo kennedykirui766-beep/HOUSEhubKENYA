@@ -37,6 +37,124 @@
       margin-bottom: 1rem;
     }
 
+    .admin-utility-bar {
+      position: sticky;
+      top: 0.75rem;
+      z-index: 20;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      background: rgba(255, 255, 255, 0.86);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--admin-border);
+      border-radius: 14px;
+      box-shadow: var(--admin-shadow);
+      padding: 0.85rem 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .utility-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .utility-actions button,
+    .utility-actions .utility-pill {
+      border-radius: 999px;
+      border: 1px solid var(--admin-border);
+      background: #fff;
+      color: var(--admin-ink);
+      padding: 0.45rem 0.8rem;
+      font-weight: 650;
+    }
+
+    .utility-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .utility-hint {
+      color: var(--admin-subtle);
+      font-size: 0.88rem;
+    }
+
+    .command-palette-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(16, 24, 40, 0.45);
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 10vh;
+      z-index: 2000;
+    }
+
+    .command-palette-backdrop.open {
+      display: flex;
+    }
+
+    .command-palette {
+      width: min(720px, calc(100vw - 2rem));
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--admin-border);
+      overflow: hidden;
+    }
+
+    .command-palette input {
+      width: 100%;
+      border: none;
+      border-bottom: 1px solid var(--admin-border);
+      padding: 1rem 1.1rem;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .command-palette-results {
+      max-height: 420px;
+      overflow: auto;
+    }
+
+    .command-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.9rem 1.1rem;
+      border-bottom: 1px solid #eef2f7;
+      cursor: pointer;
+    }
+
+    .command-item:hover,
+    .command-item.active {
+      background: #f7fbff;
+    }
+
+    .command-item-title {
+      font-weight: 700;
+      color: var(--admin-ink);
+    }
+
+    .command-item-subtitle {
+      color: var(--admin-subtle);
+      font-size: 0.85rem;
+    }
+
+    .command-item-badge {
+      font-size: 0.75rem;
+      color: var(--admin-primary);
+      background: var(--admin-primary-soft);
+      padding: 0.2rem 0.45rem;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
     .admin-panel {
       background: var(--admin-panel);
       border: 1px solid var(--admin-border);
@@ -222,6 +340,37 @@
       color: var(--admin-danger);
     }
 
+    .admin-density-compact .admin-panel,
+    .admin-density-compact .kpi-card,
+    .admin-density-compact .need-card,
+    .admin-density-compact .obs-card {
+      padding: 0.7rem;
+    }
+
+    .admin-density-compact .kpi-value {
+      font-size: 1.35rem;
+    }
+
+    .admin-density-compact .tab-content,
+    .admin-density-compact .layout-controls,
+    .admin-density-compact .platform-announcement,
+    .admin-density-compact .filters,
+    .admin-density-compact .activity-log,
+    .admin-density-compact .security-alerts,
+    .admin-density-compact .quick-links {
+      margin-top: 0.5rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .admin-density-compact table th,
+    .admin-density-compact table td {
+      padding: 0.55rem 0.7rem;
+    }
+
+    .admin-density-compact .data-table-wrap {
+      max-height: 360px;
+    }
+
     /* Ensure admin pages align with global sidebar on wide screens */
     @media (min-width: 992px) {
       .admin-main {
@@ -241,6 +390,17 @@
   <main class="admin-main">
     <h1 class="admin-title">Admin Dashboard</h1>
     <p class="admin-subtitle">Monitor platform health, resolve issues quickly, and run operations at scale.</p>
+    <div class="admin-utility-bar">
+      <div class="utility-actions">
+        <button type="button" id="open-command-palette" class="utility-pill">
+          <i class="fas fa-magnifying-glass"></i> Command Palette
+        </button>
+        <button type="button" id="toggle-density-btn" class="utility-pill">
+          <i class="fas fa-compress"></i> Comfortable
+        </button>
+      </div>
+      <div class="utility-hint">Jump fast with Ctrl/Cmd + K, or switch density to match the task.</div>
+    </div>
     {% if session.get('is_impersonating') %}
     <div class="mb-3">
       <form action="{{ url_for('admin.stop_impersonate') }}" method="POST" style="display:inline;">
@@ -622,6 +782,14 @@
       <button onclick="closeModal('user-details-modal')">Close</button>
     </div>
   </div>
+
+  <div class="command-palette-backdrop" id="command-palette-backdrop" aria-hidden="true">
+    <div class="command-palette" role="dialog" aria-modal="true" aria-labelledby="command-palette-title">
+      <h2 id="command-palette-title" class="visually-hidden">Admin Command Palette</h2>
+      <input type="text" id="command-palette-input" placeholder="Search admin actions, sections, and pages" aria-label="Search admin actions">
+      <div class="command-palette-results" id="command-palette-results"></div>
+    </div>
+  </div>
 </div>
 
 <style>
@@ -760,6 +928,22 @@
     }
   }
 
+  function applyDensity(density) {
+    document.body.classList.toggle('admin-density-compact', density === 'compact');
+    const toggleBtn = document.getElementById('toggle-density-btn');
+    if (toggleBtn) {
+      toggleBtn.innerHTML = density === 'compact'
+        ? '<i class="fas fa-expand"></i> Compact'
+        : '<i class="fas fa-compress"></i> Comfortable';
+    }
+  }
+
+  function setDensity(density) {
+    const densityKey = 'admin-density-{{ current_user.id }}';
+    localStorage.setItem(densityKey, density);
+    applyDensity(density);
+  }
+
   function applyLayoutProfile(profile) {
     document.querySelectorAll("[data-layout]").forEach(section => {
       const allowed = section.getAttribute("data-layout").split(" ");
@@ -836,6 +1020,50 @@
       });
     }
 
+    const densityKey = 'admin-density-{{ current_user.id }}';
+    const savedDensity = localStorage.getItem(densityKey) || 'comfortable';
+    applyDensity(savedDensity);
+
+    const toggleDensityBtn = document.getElementById('toggle-density-btn');
+    if (toggleDensityBtn) {
+      toggleDensityBtn.addEventListener('click', function () {
+        const nextDensity = document.body.classList.contains('admin-density-compact') ? 'comfortable' : 'compact';
+        setDensity(nextDensity);
+      });
+    }
+
+    const paletteOpenBtn = document.getElementById('open-command-palette');
+    if (paletteOpenBtn) {
+      paletteOpenBtn.addEventListener('click', openCommandPalette);
+    }
+
+    const paletteBackdrop = document.getElementById('command-palette-backdrop');
+    const paletteInput = document.getElementById('command-palette-input');
+    if (paletteInput) {
+      paletteInput.addEventListener('input', function () {
+        renderCommandPalette(paletteInput.value);
+      });
+    }
+
+    if (paletteBackdrop) {
+      paletteBackdrop.addEventListener('click', function (event) {
+        if (event.target === paletteBackdrop) {
+          closeCommandPalette();
+        }
+      });
+    }
+
+    document.addEventListener('keydown', function (event) {
+      const isMetaK = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k';
+      if (isMetaK) {
+        event.preventDefault();
+        openCommandPalette();
+      }
+      if (event.key === 'Escape') {
+        closeCommandPalette();
+      }
+    });
+
     // attach change handlers to checkboxes to update counts
     document.querySelectorAll("input[name='ids']").forEach(cb=>cb.addEventListener('change', updateSelectedCounts));
 
@@ -886,6 +1114,80 @@
 
   function toggleLanguage() {
     document.getElementById("language-form").submit();
+  }
+
+  const adminCommands = [
+    { label: 'Open Users', subtitle: 'Jump to the users table', badge: 'Tab', action: () => showTab('users') },
+    { label: 'Open Properties', subtitle: 'Jump to property management', badge: 'Tab', action: () => showTab('properties') },
+    { label: 'Open Reports', subtitle: 'Jump to reporting', badge: 'Tab', action: () => showTab('reports') },
+    { label: 'Open Transactions', subtitle: 'Jump to transaction summary', badge: 'Tab', action: () => showTab('transactions') },
+    { label: 'Open Maintenance', subtitle: 'Jump to maintenance requests', badge: 'Tab', action: () => showTab('maintenance') },
+    { label: 'Open Support Tickets', subtitle: 'Go to support tickets page', badge: 'Page', action: () => window.location.href = "{{ url_for('admin.support_tickets') }}" },
+    { label: 'Open Operations', subtitle: 'Go to platform operations', badge: 'Page', action: () => window.location.href = "{{ url_for('admin.operations') }}" },
+    { label: 'Open Manage Users', subtitle: 'Go to the user admin page', badge: 'Page', action: () => window.location.href = "{{ url_for('admin.manage_users') }}" },
+    { label: 'Open System Settings', subtitle: 'Go to platform settings', badge: 'Page', action: () => window.location.href = "{{ url_for('admin.system_settings') }}" },
+    { label: 'Open Audit Logs', subtitle: 'Inspect admin audit history', badge: 'Page', action: () => window.location.href = "{{ url_for('admin.audit_logs') }}" },
+    { label: 'Open Reports Page', subtitle: 'View the full reports center', badge: 'Page', action: () => window.location.href = "{{ url_for('admin.view_reports') }}" },
+    { label: 'Set density: compact', subtitle: 'Reduce spacing for dense workflows', badge: 'UI', action: () => setDensity('compact') },
+    { label: 'Set density: comfortable', subtitle: 'Restore roomy spacing', badge: 'UI', action: () => setDensity('comfortable') },
+    { label: 'Focus user search', subtitle: 'Jump to the user filter field', badge: 'Focus', action: () => { showTab('users'); document.querySelector("input[name='user_search']")?.focus(); } },
+  ];
+
+  function openCommandPalette() {
+    const backdrop = document.getElementById('command-palette-backdrop');
+    const input = document.getElementById('command-palette-input');
+    if (!backdrop || !input) return;
+    backdrop.classList.add('open');
+    backdrop.setAttribute('aria-hidden', 'false');
+    input.value = '';
+    renderCommandPalette('');
+    setTimeout(() => input.focus(), 0);
+  }
+
+  function closeCommandPalette() {
+    const backdrop = document.getElementById('command-palette-backdrop');
+    if (!backdrop) return;
+    backdrop.classList.remove('open');
+    backdrop.setAttribute('aria-hidden', 'true');
+  }
+
+  function renderCommandPalette(query) {
+    const results = document.getElementById('command-palette-results');
+    if (!results) return;
+    const normalized = (query || '').trim().toLowerCase();
+    const matches = adminCommands.filter(item => {
+      const haystack = `${item.label} ${item.subtitle} ${item.badge}`.toLowerCase();
+      return !normalized || haystack.includes(normalized);
+    });
+
+    results.innerHTML = matches.map((item, index) => `
+      <div class="command-item" data-command-index="${index}" role="button" tabindex="0">
+        <div>
+          <div class="command-item-title">${item.label}</div>
+          <div class="command-item-subtitle">${item.subtitle}</div>
+        </div>
+        <span class="command-item-badge">${item.badge}</span>
+      </div>
+    `).join('') || '<div class="p-3 text-muted">No matching actions found.</div>';
+
+    results.querySelectorAll('.command-item').forEach((node, index) => {
+      node.addEventListener('click', () => {
+        const match = matches[index];
+        if (match) {
+          closeCommandPalette();
+          match.action();
+        }
+      });
+      node.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          const match = matches[index];
+          if (match) {
+            closeCommandPalette();
+            match.action();
+          }
+        }
+      });
+    });
   }
 
   document.addEventListener("DOMContentLoaded", () => {
