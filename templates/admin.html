@@ -24,12 +24,6 @@
     <h1 style="color: #3D8B40;">Admin Dashboard</h1>
     <p>Manage users, properties, and platform operations.</p>
     {% if session.get('is_impersonating') %}
-  .admin-main {
-    flex: 1;
-    padding: 20px;
-    margin-left: 220px;
-    margin-top: 56px;
-  }
     <div class="mb-3">
       <form action="{{ url_for('admin.stop_impersonate') }}" method="POST" style="display:inline;">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -62,24 +56,22 @@
       {% endfor %}
       {% endif %}
       {% endwith %}
-        return render_template(
-            'admin.html',
-            users=users,
-            houses=houses,
-            stats=stats,
-            approved_admin_email=get_allowed_admin_email(),
-            admin_totp_verified=has_admin_totp_verified(current_user),
-        )
     </section>
 
     <!-- Platform Health Metrics -->
     <section class="health-metrics">
       <h2>Platform Health</h2>
-      <div class="card" style="color: {{ '#4A90E2' if stats.uptime >= 99 else '#B22222' }};">
-        Server Uptime: {{ stats.uptime }}%
+      <div class="card" style="color: {{ '#4A90E2' if stats.get('db_ok') else '#B22222' }};">
+        Database Status: {{ 'Healthy' if stats.get('db_ok') else 'Issue Detected' }}
       </div>
-      <div class="card" style="color: {{ '#4A90E2' if stats.api_response <= 300 else '#B22222' }};">
-        API Response: {{ stats.api_response }}ms
+      <div class="card" style="color: {{ '#4A90E2' if stats.get('queue_length', 0) < 50 else '#B22222' }};">
+        Notification Queue: {{ stats.get('queue_length', 0) }}
+      </div>
+      <div class="card" style="color: {{ '#4A90E2' if (stats.get('uptime') is not none and stats.get('uptime') >= 99) else '#B22222' }};">
+        Server Uptime: {{ ('%.2f'|format(stats.get('uptime'))) if stats.get('uptime') is not none else 'N/A' }}{% if stats.get('uptime') is not none %}%{% endif %}
+      </div>
+      <div class="card" style="color: {{ '#4A90E2' if (stats.get('api_response') is not none and stats.get('api_response') <= 300) else '#B22222' }};">
+        API Response: {{ stats.get('api_response') if stats.get('api_response') is not none else 'N/A' }}{% if stats.get('api_response') is not none %}ms{% endif %}
       </div>
     </section>
 
