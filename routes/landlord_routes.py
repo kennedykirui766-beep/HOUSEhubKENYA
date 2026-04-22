@@ -177,19 +177,54 @@ def properties():
         flash("Access denied.", "danger")
         return redirect(url_for("main.index"))
 
-    properties = House.query.filter_by(owner_id=current_user.id).all()
+    # 🔍 Get filter from query params (?filter=draft etc.)
+    filter_type = request.args.get("filter", "all")
 
-    # ✅ Convert JSON string → list
+    # =========================
+    # BASE QUERY
+    # =========================
+    house_query = House.query.filter_by(owner_id=current_user.id)
+
+    # =========================
+    # APPLY FILTERS
+    # =========================
+    if filter_type == "draft":
+        house_query = house_query.filter(House.status == "draft")
+
+    elif filter_type == "published":
+        house_query = house_query.filter(House.status == "published")
+
+    elif filter_type == "featured":
+        house_query = house_query.filter(House.is_featured == True)
+
+    # "all" → no filter applied
+
+    properties = house_query.order_by(House.created_at.desc()).all()
+
+    # =========================
+    # PROCESS IMAGES
+    # =========================
     for p in properties:
         try:
             p.image_list = json.loads(p.image_urls) if p.image_urls else []
         except Exception:
             p.image_list = []
 
+    # =========================
+    # 📊 STATS (VERY IMPORTANT FOR UI)
+    # =========================
+    stats = {
+        "all": House.query.filter_by(owner_id=current_user.id).count(),
+        "draft": House.query.filter_by(owner_id=current_user.id, status="draft").count(),
+        "published": House.query.filter_by(owner_id=current_user.id, status="published").count(),
+        "featured": House.query.filter_by(owner_id=current_user.id, is_featured=True).count(),
+    }
+
     return render_template(
         "landlord/properties.html",
         properties=properties,
-        stats={}
+        stats=stats,
+        active_filter=filter_type  # 👈 useful for UI highlighting
     )
 
 
