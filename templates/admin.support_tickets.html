@@ -73,6 +73,7 @@
               <a href="{{ url_for('admin.support_ticket_view', ticket_id=t.id) }}" class="btn btn-sm btn-primary">View</a>
               {% if t.status != 'resolved' %}
               <form action="{{ url_for('admin.support_ticket_resolve', ticket_id=t.id) }}" method="post" style="display:inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button class="btn btn-sm btn-success" type="submit">Resolve</button>
               </form>
               {% endif %}
