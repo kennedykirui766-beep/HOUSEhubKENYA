@@ -222,10 +222,10 @@ def properties():
     # Base query with owner
     house_query = House.query.options(joinedload(House.owner))
 
-    # ✅ NEW: Filter only published houses (ADD THIS LINE)
-    house_query = house_query.filter_by(status="published")
-    # OR use this if your model uses boolean:
-    # house_query = house_query.filter_by(is_published=True)
+    # ✅ Filter ONLY published AND featured houses
+    house_query = house_query.filter_by(status="published", is_featured=True)
+    # If your field is named differently, use:
+    # house_query = house_query.filter_by(status="published", featured=True)
 
     # Search
     if query:
@@ -245,7 +245,6 @@ def properties():
     for house in houses:
         images = []
 
-        # ✅ Handle JSON or comma-separated string
         if house.image_urls:
             try:
                 images = json.loads(house.image_urls)
@@ -257,7 +256,6 @@ def properties():
                     if img.strip()
                 ]
 
-        # ✅ Optimize Cloudinary images
         def optimize(url):
             if url and "res.cloudinary.com" in url:
                 return url.replace("/upload/", "/upload/f_auto,q_auto/")
@@ -265,8 +263,9 @@ def properties():
 
         images = [optimize(img) for img in images]
 
-        # ✅ Default fallback image
-        image_url = images[0] if images else url_for('static', filename='images/default-house.jpg')
+        image_url = images[0] if images else url_for(
+            'static', filename='images/default-house.jpg'
+        )
 
         processed_houses.append({
             "id": house.id,
@@ -284,9 +283,8 @@ def properties():
         "tenant/properties.html",
         houses=processed_houses,
         query=query,
-        is_guest=is_guest
     )
-
+    
 @tenant_bp.route('/upload_document', methods=['GET', 'POST'])
 @login_required
 def upload_document():
