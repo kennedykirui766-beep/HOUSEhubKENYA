@@ -84,9 +84,8 @@
 
   /* ========== NOTIFICATION DROPDOWN ========== */
   .notif-dropdown {
-    position: absolute;
-    top: calc(100% + 10px);
-    right: 0;           /* Desktop: opens leftward from bell — nothing clips off-screen */
+    position: fixed;       /* fixed so JS viewport coords work directly */
+    top: 0; left: 0;       /* JS overrides these on every open */
     width: 320px;
     background: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -97,6 +96,8 @@
     display: none;
     flex-direction: column;
     animation: notifDropIn 0.2s ease-out;
+    /* On very small viewports shrink to fit */
+    max-width: calc(100vw - 2rem);
   }
 
   .notif-dropdown.open {
@@ -108,12 +109,12 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* Caret arrow — sits above the bell on desktop (right-aligned) */
+  /* Caret arrow — JS moves it horizontally to sit above the bell */
   .notif-dropdown::before {
     content: '';
     position: absolute;
     top: -7px;
-    right: 12px;        /* Matches right:0 alignment */
+    left: var(--caret-left, 16px);
     width: 13px;
     height: 13px;
     background: var(--card-bg);
@@ -1208,16 +1209,8 @@
       width: 100%;
       justify-content: center;
     }
-    /* Responsive: notification dropdown on small screens */
-    .notif-dropdown {
-      width: calc(100vw - 2rem);
-      right: auto;
-      left: 0;
-    }
-    .notif-dropdown::before {
-      right: auto;
-      left: 12px;
-    }
+    /* Notification dropdown positioning is handled entirely by JS
+       (positionNotifDropdown) so no CSS override needed here. */
   }
 
   @media (max-width: 480px) {
@@ -1750,16 +1743,68 @@
   var notifBell      = document.getElementById('notifBell');
   var notifDropdown  = document.getElementById('notifDropdown');
 
+  function positionNotifDropdown() {
+    var bell       = notifBell.getBoundingClientRect();
+    var dropW      = 320;
+    var margin     = 12;   // px gap from viewport edge
+    var DROPDOWN_H = 10;   // gap between bell bottom and dropdown top
+
+    // --- Vertical: always just below the bell ---
+    var top = bell.bottom + DROPDOWN_H;
+
+    // --- Horizontal: try to right-align to the bell's right edge ---
+    var left = bell.right - dropW;
+
+    // If that would clip the left edge, push right
+    if (left < margin) {
+      left = margin;
+    }
+
+    // If the dropdown is wider than the viewport, stretch it instead
+    var maxW = window.innerWidth - margin * 2;
+    if (dropW > maxW) {
+      dropW = maxW;
+      left  = margin;
+    }
+
+    // If right edge would overflow, pull left
+    if (left + dropW > window.innerWidth - margin) {
+      left = window.innerWidth - margin - dropW;
+    }
+
+    notifDropdown.style.top   = top  + 'px';
+    notifDropdown.style.left  = left + 'px';
+    notifDropdown.style.width = dropW + 'px';
+
+    // --- Move the caret to sit above the centre of the bell ---
+    var bellCentreX = bell.left + bell.width / 2;
+    var caretX      = bellCentreX - left - 6; // 6 = half caret width
+    // Clamp so it stays within the rounded corners
+    caretX = Math.max(10, Math.min(caretX, dropW - 22));
+    // Set as a CSS custom property directly on the element so ::before picks it up
+    notifDropdown.style.setProperty('--caret-left', caretX + 'px');
+  }
+
   function toggleNotifDropdown(e) {
     e.stopPropagation();
     var isOpen = notifDropdown.classList.toggle('open');
     notifBell.setAttribute('aria-expanded', isOpen);
+    if (isOpen) positionNotifDropdown();
   }
 
   function closeNotifDropdown() {
     notifDropdown.classList.remove('open');
     notifBell.setAttribute('aria-expanded', 'false');
   }
+
+  // Reposition on scroll or resize while open
+  window.addEventListener('resize', function() {
+    if (notifDropdown.classList.contains('open')) positionNotifDropdown();
+  });
+
+  window.addEventListener('scroll', function() {
+    if (notifDropdown.classList.contains('open')) positionNotifDropdown();
+  }, { passive: true });
 
   function markAllNotifRead(e) {
     e.stopPropagation(); // don't close via outside-click handler
@@ -1770,7 +1815,7 @@
                        ? document.querySelector('input[name="csrf_token"]').value 
                        : '');
 
-    fetch('/landlord/messages/mark_all_read', {
+    fetch('/landlord/mark_all_read', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken }
     })
