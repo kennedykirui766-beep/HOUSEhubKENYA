@@ -806,11 +806,11 @@ def all_bookings():
                 "name": owner.name if owner else "Unknown",
                 "email": owner.email if owner else None,
                 "image": (
-                    owner.profile_image.replace(
+                    owner.profile_picture.replace(
                         "/upload/",
                         "/upload/w_100,h_100,c_fill,q_auto,f_auto/"
                     )
-                    if owner and owner.profile_image else None
+                    if owner and owner.profile_picture else None
                 )
             }
         })
