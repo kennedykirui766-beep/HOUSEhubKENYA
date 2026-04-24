@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Browse Featured Properties | HOUSEhubKENYA{% endblock %}
+{% block title %}Browse Properties | HOUSEhubKENYA{% endblock %}
 
 {% block styles %}
 <style>
@@ -8,7 +8,7 @@
     
     /* Hero / Search Section */
     .properties-hero {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f2044 100%), 
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(139, 92, 246, 0.8)), 
                     url('https://images.unsplash.com/photo-1560448204-603b3fc33ddc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
         background-size: cover;
         background-position: center;
@@ -19,21 +19,19 @@
         text-align: center;
         position: relative;
         overflow: hidden;
-        border: 1px solid rgba(255, 215, 0, 0.3); /* Gold border for premium feel */
     }
 
     .properties-hero::before {
         content: '';
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
-        background: radial-gradient(circle at top right, rgba(255, 215, 0, 0.15), transparent 40%);
+        background: radial-gradient(circle at top right, rgba(255,255,255,0.1), transparent 40%);
     }
 
     .properties-hero h1 {
         font-weight: 800;
         margin-bottom: 0.5rem;
         position: relative;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.3);
     }
 
     .properties-hero p {
@@ -43,7 +41,6 @@
         margin-left: auto;
         margin-right: auto;
         position: relative;
-        text-shadow: 0 1px 4px rgba(0,0,0,0.3);
     }
 
     /* Search Bar */
@@ -164,7 +161,7 @@
         transform: scale(1.05);
     }
 
-    /* Featured Badge Style */
+    /* Featured Badge Style - Only shown conditionally */
     .featured-badge {
         position: absolute;
         top: 1rem;
@@ -200,7 +197,7 @@
         font-size: 0.72rem;
         font-weight: 600;
         background: rgba(255, 255, 255, 0.9);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .status-success { color: #16a34a; }
@@ -401,13 +398,13 @@
     <!-- Hero Section with Search -->
     <div class="container">
         <div class="properties-hero">
-            <h1>Featured Properties</h1>
-            <p>Discover our hand-picked, premium listings in Kenya's best locations.</p>
+            <h1>Find Your Perfect Home</h1>
+            <p>Discover houses, apartments, and flats in Kenya's best locations.</p>
             
             <form action="{{ url_for('tenant.properties') }}" method="GET" class="search-container">
                 <div class="search-input-group">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" name="query" class="search-input" placeholder="Search featured homes..." value="{{ query }}">
+                    <input type="text" name="query" class="search-input" placeholder="Search by city, location, or property type..." value="{{ query }}">
                 </div>
                 <button type="submit" class="search-btn">Search</button>
             </form>
@@ -417,7 +414,7 @@
     <div class="container main-container">
         <!-- Quick Filters -->
         <div class="filter-tags">
-            <a href="{{ url_for('tenant.properties') }}" class="filter-tag {% if not query %}active{% endif %}">All Featured</a>
+            <a href="{{ url_for('tenant.properties') }}" class="filter-tag {% if not query %}active{% endif %}">All</a>
             <a href="{{ url_for('tenant.properties', query='Apartment') }}" class="filter-tag">Apartments</a>
             <a href="{{ url_for('tenant.properties', query='House') }}" class="filter-tag">Houses</a>
             <a href="{{ url_for('tenant.properties', query='Nairobi') }}" class="filter-tag">Nairobi</a>
@@ -431,7 +428,7 @@
                 {% if query %}
                     Results for "{{ query }}"
                 {% else %}
-                    Featured Homes
+                    All Properties
                 {% endif %}
                 <span style="color: var(--text-secondary); font-weight: 400; font-size: 0.9rem;">({{ houses|length }} found)</span>
             </h5>
@@ -460,10 +457,12 @@
                     <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
                         <article class="property-card">
                             
-                            <!-- Featured Badge -->
-                            <div class="featured-badge">
-                                <i class="fas fa-crown"></i> Featured
-                            </div>
+                            <!-- Featured Badge - CONDITIONAL (Only shows if is_featured is true) -->
+                            {% if house.is_featured %}
+                                <div class="featured-badge">
+                                    <i class="fas fa-crown"></i> Featured
+                                </div>
+                            {% endif %}
 
                             <!-- Favorite Button -->
                             <button class="favorite-btn" onclick="this.classList.toggle('active')">
@@ -539,8 +538,8 @@
             <!-- No Results Found -->
             <div class="empty-state">
                 <i class="far fa-sad-tear"></i>
-                <h3>No featured properties found</h3>
-                <p class="mb-4">We couldn't find any featured properties matching your search criteria.</p>
+                <h3>No properties found</h3>
+                <p class="mb-4">We couldn't find any properties matching your search criteria.</p>
                 <a href="{{ url_for('tenant.properties') }}" class="btn btn-primary-custom">
                     <i class="fas fa-sync-alt me-2"></i>Clear Filters
                 </a>
