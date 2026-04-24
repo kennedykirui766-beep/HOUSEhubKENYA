@@ -560,9 +560,10 @@ def api_generate_payment_link():
         })
 
     except Exception as e:
-        import traceback
-        print("❌ API ERROR:")
-        traceback.print_exc()
+        import logging
+        logging.error(f"SendGrid email failed: {e}")
+
+        email_status = "failed"
 
         return jsonify({
             "success": False,
