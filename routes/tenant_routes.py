@@ -751,10 +751,22 @@ import json
 @login_required
 def all_bookings():
 
-    # ✅ Eager load house + owner (performance boost)
     bookings = Booking.query.options(
         joinedload(Booking.house).joinedload(House.owner)
     ).filter_by(tenant_id=current_user.id).all()
+
+    def safe_images(image_urls):
+        if not image_urls:
+            return []
+
+        try:
+            imgs = json.loads(image_urls)
+            if isinstance(imgs, list):
+                return imgs
+        except Exception:
+            return [i.strip() for i in image_urls.split(",") if i.strip()]
+
+        return []
 
     def optimize(url):
         if url and "res.cloudinary.com" in url:
@@ -764,64 +776,42 @@ def all_bookings():
     bookings_data = []
 
     for b in bookings:
+
+        # 🚨 SAFETY CHECK (this is what was breaking your route)
+        if not b.house:
+            continue
+
         house = b.house
-        owner = house.owner if house else None
+        owner = house.owner
 
-        # ✅ Safe image handling
-        images = []
-        if house and house.image_urls:
-            try:
-                images = json.loads(house.image_urls)
-                if not isinstance(images, list):
-                    images = []
-            except Exception:
-                images = [
-                    img.strip() for img in house.image_urls.split(",")
-                    if img.strip()
-                ]
-
-        images = [optimize(img) for img in images]
-
-        # ✅ Owner image (Cloudinary or fallback)
-        owner_image = None
-        if owner and owner.profile_picture:
-            if "res.cloudinary.com" in owner.profile_picture:
-                owner_image = owner.profile_picture.replace(
-                    "/upload/", "/upload/w_100,h_100,c_fill,q_auto,f_auto/"
-                )
-            else:
-                owner_image = owner.profile_picture
+        images = [optimize(img) for img in safe_images(house.image_urls)]
 
         bookings_data.append({
             "id": b.id,
             "status": b.status,
             "created_at": b.created_at,
 
-            # ✅ Booking info
-            "tenant_id": b.tenant_id,
-            "house_id": b.house_id,
-
-            # ✅ House FULL data
             "house": {
-                "id": house.id if house else None,
-                "title": house.title if house else "N/A",
-                "location": house.location if house else "N/A",
-                "city": house.city if house else None,
-                "price": house.rent_amount if house else 0,
-                "bedrooms": house.bedrooms if house else None,
-                "bathrooms": house.bathrooms if house else None,
-                "property_type": house.property_type if house else None,
-                "available": house.available if house else False,
-                "images": images,
-                "is_featured": house.is_featured if house else False,
+                "id": house.id,
+                "title": house.title,
+                "location": house.location,
+                "price": house.rent_amount,
+                "bedrooms": house.bedrooms,
+                "bathrooms": house.bathrooms,
+                "is_featured": house.is_featured,
+                "images": images
             },
 
-            # ✅ Owner FULL data
             "owner": {
                 "name": owner.name if owner else "Unknown",
                 "email": owner.email if owner else None,
-                "phone": owner.phone if hasattr(owner, "phone") else None,
-                "image": owner_image
+                "image": (
+                    owner.profile_image.replace(
+                        "/upload/",
+                        "/upload/w_100,h_100,c_fill,q_auto,f_auto/"
+                    )
+                    if owner and owner.profile_image else None
+                )
             }
         })
 
@@ -829,7 +819,7 @@ def all_bookings():
         'tenant/tenant_bookings.html',
         bookings=bookings_data
     )
-
+    
 from sqlalchemy import or_
 
 @tenant_bp.route('/messages')
