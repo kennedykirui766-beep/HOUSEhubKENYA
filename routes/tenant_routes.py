@@ -214,18 +214,17 @@ def bookings(house_id):
     db.session.commit()
     return redirect(url_for('tenant.dashboard'))
 
+from datetime import datetime
+
 @tenant_bp.route("/properties", methods=['GET'])
 def properties():
     query = request.args.get('query', '').strip()
     is_guest = not current_user.is_authenticated
 
-    # Base query with owner
     house_query = House.query.options(joinedload(House.owner))
 
-    # ✅ Filter ONLY published AND featured houses
-    house_query = house_query.filter_by(status="published", is_featured=True)
-    # If your field is named differently, use:
-    # house_query = house_query.filter_by(status="published", featured=True)
+    # ✅ ONLY published houses (NO drafts)
+    house_query = house_query.filter(House.status == "published")
 
     # Search
     if query:
@@ -238,7 +237,13 @@ def properties():
             )
         )
 
-    houses = house_query.order_by(House.available.desc()).all()
+    # ✅ Order: Featured first, then available
+    house_query = house_query.order_by(
+        House.is_featured.desc(),   # ⭐ featured first
+        House.available.desc()      # then available
+    )
+
+    houses = house_query.all()
 
     processed_houses = []
 
@@ -276,7 +281,8 @@ def properties():
             "bathrooms": house.bathrooms,
             "image": image_url,
             "available": house.available,
-            "owner": house.owner.name if house.owner else "Unknown"
+            "owner": house.owner.name if house.owner else "Unknown",
+            "is_featured": house.is_featured  # 👈 useful for UI badge
         })
 
     return render_template(
