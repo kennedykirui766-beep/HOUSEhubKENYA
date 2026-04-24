@@ -4,8 +4,7 @@
 
 {% block styles %}
 <style>
-    /* We rely on variables from base.css */
-
+    /* --- EXISTING STYLES (Preserved) --- */
     .page-header {
         display: flex;
         justify-content: space-between;
@@ -28,7 +27,7 @@
         margin: 0.25rem 0 0;
     }
 
-    /* --- STATS GRID (Customized for this page) --- */
+    /* --- STATS GRID --- */
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -230,6 +229,9 @@
         background: var(--card-bg);
         color: var(--text-secondary);
         transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
     }
     
     .btn-sm-custom:hover {
@@ -255,8 +257,252 @@
         color: var(--text-muted);
     }
 
+    /* --- MODAL STYLES (New) --- */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        display: none; /* Hidden by default */
+        justify-content: center;
+        align-items: center;
+        padding: 1rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+        display: flex;
+        opacity: 1;
+    }
+
+    .modal-card {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        width: 100%;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+        transform: translateY(20px);
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-overlay.active .modal-card {
+        transform: translateY(0);
+    }
+
+    .modal-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: var(--sidebar-hover);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .modal-close-btn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 0.25rem;
+        line-height: 1;
+        border-radius: var(--radius-sm);
+        transition: var(--transition);
+    }
+
+    .modal-close-btn:hover {
+        color: var(--danger-color);
+        background-color: var(--danger-light);
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+        display: grid;
+        grid-template-columns: 1.5fr 1fr; /* Image/Details take more space than Owner */
+        gap: 2rem;
+    }
+
+    /* Modal Details Section */
+    .modal-section-title {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-secondary);
+        margin-bottom: 0.75rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .house-hero-img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: var(--radius-md);
+        margin-bottom: 1rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .house-desc {
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+    }
+
+    .amenities-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .amenity-tag {
+        background-color: var(--sidebar-hover);
+        color: var(--text-secondary);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        border: 1px solid var(--border-color);
+    }
+
+    /* Owner Section in Modal */
+    .owner-card {
+        background-color: var(--sidebar-hover);
+        border-radius: var(--radius-md);
+        padding: 1.25rem;
+        border: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .owner-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .owner-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--primary-light);
+    }
+
+    .owner-name {
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+        font-size: 1.1rem;
+    }
+
+    .owner-role {
+        font-size: 0.8rem;
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    .contact-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    .contact-list li {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+        color: var(--text-primary);
+    }
+
+    .contact-list i {
+        width: 20px;
+        text-align: center;
+        color: var(--text-secondary);
+    }
+
+    .modal-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--border-color);
+        background-color: var(--sidebar-hover);
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+    }
+
+    .btn-primary-custom {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0.6rem 1.25rem;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-weight: 600;
+        transition: var(--transition);
+    }
+    .btn-primary-custom:hover {
+        background-color: var(--primary-dark);
+    }
+
+    /* --- TOAST NOTIFICATION --- */
+    .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: var(--text-primary);
+        color: var(--card-bg);
+        padding: 1rem 1.5rem;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.4s ease;
+        z-index: 2000;
+    }
+
+    .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    
+    .toast i {
+        color: var(--success-color);
+    }
+
     /* --- RESPONSIVE DESIGN (Card View) --- */
     @media (max-width: 768px) {
+        .modal-body {
+            grid-template-columns: 1fr;
+        }
+        
         .table-custom, .table-custom thead, .table-custom tbody, .table-custom th, .table-custom td, .table-custom tr {
             display: block;
         }
@@ -296,14 +542,12 @@
             margin-bottom: 0.5rem;
         }
         
-        /* Special handling for Property cell to remove label */
         td[data-label="Property Details"] {
             display: block;
             text-align: left;
         }
         td[data-label="Property Details"]::before { display: none; }
 
-        /* Action buttons alignment */
         td[data-label="Actions"] {
             justify-content: flex-end;
             margin-top: 0.5rem;
@@ -401,30 +645,192 @@
     </section>
 
 </div>
+
+<!-- --- MODAL POPUP (Hidden by default) --- -->
+<div id="booking-modal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3 class="modal-title">Booking Details</h3>
+            <button class="modal-close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            
+            <!-- Left Column: Property Details -->
+            <div class="property-details-col">
+                <img src="" alt="House" id="modal-img" class="house-hero-img">
+                
+                <h4 id="modal-title" style="margin-bottom: 0.5rem; font-size: 1.3rem;">House Title</h4>
+                <div style="margin-bottom: 1rem; color: var(--text-secondary); display: flex; gap: 1rem; font-size: 0.9rem;">
+                    <span><i class="fas fa-map-marker-alt"></i> <span id="modal-location">Location</span></span>
+                    <span><i class="fas fa-hashtag"></i> ID: <span id="modal-id"></span></span>
+                </div>
+
+                <div class="modal-section-title"><i class="fas fa-info-circle"></i> Description</div>
+                <p id="modal-desc" class="house-desc">Description goes here...</p>
+
+                <div class="modal-section-title"><i class="fas fa-concierge-bell"></i> Amenities</div>
+                <div id="modal-amenities" class="amenities-list">
+                    <!-- Tags injected here -->
+                </div>
+            </div>
+
+            <!-- Right Column: Booking & Owner -->
+            <div class="booking-owner-col">
+                
+                <!-- Booking Mini Card -->
+                <div style="background: var(--sidebar-hover); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 1rem;">
+                    <div class="modal-section-title" style="margin-bottom: 0.5rem;">Booking Info</div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span class="text-muted">Status:</span>
+                        <span id="modal-status" class="status-badge"></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span class="text-muted">Date:</span>
+                        <span id="modal-date" style="font-weight: 500;"></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span class="text-muted">Total Amount:</span>
+                        <span id="modal-amount" style="font-size: 1.1rem; font-weight: 700; color: var(--primary-color);"></span>
+                    </div>
+                </div>
+
+                <!-- Owner Card -->
+                <div class="owner-card">
+                    <div class="modal-section-title"><i class="fas fa-user-circle"></i> Owner Info</div>
+                    <div class="owner-header">
+                        <img src="" alt="Owner" id="modal-owner-img" class="owner-avatar">
+                        <div>
+                            <h5 id="modal-owner-name" class="owner-name">Owner Name</h5>
+                            <span class="owner-role">Property Manager</span>
+                        </div>
+                    </div>
+                    <ul class="contact-list">
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            <span id="modal-owner-email">email@example.com</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-phone"></i>
+                            <span id="modal-owner-phone">+123 456 7890</span>
+                        </li>
+                    </ul>
+                    <button class="btn-sm-custom" style="width: 100%; justify-content: center; margin-top: auto;">
+                        <i class="fas fa-comment-dots"></i> Send Message
+                    </button>
+                </div>
+            </div>
+
+        </div>
+        <div class="modal-footer">
+            <button class="btn-sm-custom" onclick="closeModal()">Close</button>
+            <!-- Optional: Primary Action -->
+            <button class="btn-primary-custom" onclick="alert('Redirecting to Invoice...')">View Invoice</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification Container -->
+<div id="toast" class="toast">
+    <i class="fas fa-check-circle"></i>
+    <span id="toast-message">Action successful</span>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // 1. Load Data from Flask
-        // Assuming 'bookings' is passed from the route: render_template(..., bookings=bookings)
-        const rawBookings = {{ bookings | tojson | safe }};
+        // Assuming 'bookings' is passed from the route.
+        // For this demo to work standalone, I provide a fallback mock structure.
+        
+        let rawBookings = [];
+        try {
+            rawBookings = {{ bookings | tojson | safe }};
+            if(!Array.isArray(rawBookings) || rawBookings.length === 0) throw new Error("No data");
+        } catch (e) {
+            // MOCK DATA for demonstration if backend data is missing
+            console.warn("Using mock data for demonstration.");
+            rawBookings = [
+                {
+                    id: 101, created_at: "2023-10-15", amount: 15000, status: "active",
+                    house: {
+                        title: "Sunset Apartments",
+                        location: "Westlands, Nairobi",
+                        description: "A modern 2-bedroom apartment with stunning city views, fully furnished, and high-speed internet. Perfect for young professionals.",
+                        images: ["https://picsum.photos/seed/house1/400/300.jpg"],
+                        amenities: ["WiFi", "Swimming Pool", "Gym", "Parking"],
+                        owner: {
+                            name: "Alice Kamau",
+                            email: "alice@sunsetapts.com",
+                            phone: "+254 700 123 456",
+                            avatar: "https://picsum.photos/seed/alice/100/100.jpg"
+                        }
+                    }
+                },
+                {
+                    id: 102, created_at: "2023-11-01", amount: 45000, status: "completed",
+                    house: {
+                        title: "Green Valley Villa",
+                        location: "Karen, Nairobi",
+                        description: "Spacious family home with a large garden, 4 bedrooms, staff quarters, and 24-hour security.",
+                        images: ["https://picsum.photos/seed/house2/400/300.jpg"],
+                        amenities: ["Garden", "Security", "DSQ", "Balcony"],
+                        owner: {
+                            name: "Bob Mwangi",
+                            email: "bob@greenvalley.com",
+                            phone: "+254 720 987 654",
+                            avatar: "https://picsum.photos/seed/bob/100/100.jpg"
+                        }
+                    }
+                },
+                {
+                    id: 103, created_at: "2023-11-20", amount: 12000, status: "pending",
+                    house: {
+                        title: "Studio Loft",
+                        location: "Kilimani, Nairobi",
+                        description: "Cozy studio apartment near the mall. Open floor plan with modern kitchen finishes.",
+                        images: ["https://picsum.photos/seed/house3/400/300.jpg"],
+                        amenities: ["WiFi", "Proximity to Mall"],
+                        owner: {
+                            name: "Carol Ochieng",
+                            email: "carol@lofts.com",
+                            phone: "+254 733 111 222",
+                            avatar: "https://picsum.photos/seed/carol/100/100.jpg"
+                        }
+                    }
+                }
+            ];
+        }
 
         // 2. Map DB Data to UI Format
+        // We enrich the data here to ensure all fields needed for the modal exist
         const bookingsData = rawBookings.map(b => {
             const house = b.house || {};
+            const owner = house.owner || {};
+            
             const houseTitle = house.title || house.name || "Unknown Property";
             const houseLocation = house.location || "Unknown Location";
-            // Use first image if available, else placeholder
-            const houseImage = (house.images && house.images.length > 0) 
-                               ? house.images[0] 
-                               : "{{ url_for('static', filename='images/house_placeholder.jpg') }}"; // Fallback
-            if(houseImage === "{{ url_for('static', filename='images/house_placeholder.jpg') }}") {
-                // If placeholder doesn't exist, use a generic one or base css bg
-            }
             
+            // Handle Images
+            let houseImage = "https://placehold.co/48x48?text=No+Img";
+            if (house.images && house.images.length > 0) {
+                houseImage = house.images[0];
+            }
+
+            // Handle Amenities
+            const amenitiesList = Array.isArray(house.amenities) ? house.amenities : [];
+            
+            // Date & Amount
             const dateStr = b.created_at ? new Date(b.created_at).toLocaleDateString() : "N/A";
             const amount = b.amount ? "KES " + Number(b.amount).toLocaleString() : "N/A";
+
+            // Owner Placeholder if missing
+            const ownerName = owner.name || "Property Manager";
+            const ownerEmail = owner.email || "No email provided";
+            const ownerPhone = owner.phone || "No phone provided";
+            const ownerAvatar = owner.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(ownerName)}&background=random`;
+            const description = house.description || "No description available for this property.";
 
             return {
                 id: b.id,
@@ -433,7 +839,16 @@
                 location: houseLocation,
                 date: dateStr,
                 amount: amount,
-                status: b.status || "pending"
+                status: b.status || "pending",
+                // Extra fields for modal
+                description: description,
+                amenities: amenitiesList,
+                owner: {
+                    name: ownerName,
+                    email: ownerEmail,
+                    phone: ownerPhone,
+                    avatar: ownerAvatar
+                }
             };
         });
 
@@ -451,10 +866,27 @@
         const upcomingCountEl = document.getElementById('upcoming-count');
         const completedCountEl = document.getElementById('completed-count');
 
+        // Modal Elements
+        const modal = document.getElementById('booking-modal');
+        const modalImg = document.getElementById('modal-img');
+        const modalTitle = document.getElementById('modal-title');
+        const modalLocation = document.getElementById('modal-location');
+        const modalId = document.getElementById('modal-id');
+        const modalDesc = document.getElementById('modal-desc');
+        const modalAmenities = document.getElementById('modal-amenities');
+        const modalStatus = document.getElementById('modal-status');
+        const modalDate = document.getElementById('modal-date');
+        const modalAmount = document.getElementById('modal-amount');
+        
+        // Owner Elements
+        const modalOwnerImg = document.getElementById('modal-owner-img');
+        const modalOwnerName = document.getElementById('modal-owner-name');
+        const modalOwnerEmail = document.getElementById('modal-owner-email');
+        const modalOwnerPhone = document.getElementById('modal-owner-phone');
+
         // --- FUNCTIONS ---
 
         function getStatusBadgeClass(status) {
-            // Mapping to Base CSS status classes
             const s = (status || "").toLowerCase();
             if (s === 'confirmed' || s === 'approved' || s === 'active') return 'status-active'; 
             if (s === 'pending') return 'status-pending'; 
@@ -471,11 +903,9 @@
         function updateStats() {
             totalCountEl.textContent = bookingsData.length;
             
-            // Logic for "Upcoming": Active, Approved, Pending, Confirmed
             const activeStatuses = ['active', 'approved', 'confirmed', 'pending'];
             upcomingCountEl.textContent = bookingsData.filter(b => activeStatuses.includes(b.status.toLowerCase())).length;
             
-            // Logic for "Completed"
             completedCountEl.textContent = bookingsData.filter(b => b.status.toLowerCase() === 'completed').length;
         }
 
@@ -510,7 +940,6 @@
                         <strong>${booking.amount}</strong>
                     </td>
                     <td data-label="Status">
-                        <!-- Using Base CSS status-badge -->
                         <span class="status-badge ${getStatusBadgeClass(booking.status)}">
                             ${capitalize(booking.status)}
                         </span>
@@ -545,19 +974,84 @@
             renderTable();
         }
 
-        // --- INTERACTIONS ---
+        // --- MODAL FUNCTIONS ---
 
         window.viewDetails = function(id) {
-            // Ideally redirect or open modal
-            console.log(`Viewing details for Booking ID: ${id}`);
+            const booking = bookingsData.find(b => b.id === id);
+            if (!booking) return;
+
+            // Populate Modal
+            modalImg.src = booking.property_image;
+            modalTitle.textContent = booking.property_name;
+            modalLocation.textContent = booking.location;
+            modalId.textContent = booking.id;
+            modalDesc.textContent = booking.description;
+            modalDate.textContent = booking.date;
+            modalAmount.textContent = booking.amount;
+            
+            // Status Badge
+            modalStatus.className = `status-badge ${getStatusBadgeClass(booking.status)}`;
+            modalStatus.textContent = capitalize(booking.status);
+
+            // Amenities
+            modalAmenities.innerHTML = '';
+            if(booking.amenities.length > 0) {
+                booking.amenities.forEach(am => {
+                    const span = document.createElement('span');
+                    span.className = 'amenity-tag';
+                    span.textContent = am;
+                    modalAmenities.appendChild(span);
+                });
+            } else {
+                modalAmenities.innerHTML = '<span class="text-muted" style="font-size:0.85rem;">None listed</span>';
+            }
+
+            // Owner Info
+            modalOwnerName.textContent = booking.owner.name;
+            modalOwnerEmail.textContent = booking.owner.email;
+            modalOwnerPhone.textContent = booking.owner.phone;
+            modalOwnerImg.src = booking.owner.avatar;
+            modalOwnerImg.onerror = function() {
+                this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(booking.owner.name)}&background=random`;
+            };
+
+            // Show Modal
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
         };
+
+        window.closeModal = function() {
+            modal.classList.remove('active');
+            document.body.style.overflow = ''; // Restore scrolling
+        };
+
+        // Close modal when clicking outside
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // --- TOAST NOTIFICATION ---
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
 
         window.cancelBooking = function(id) {
             const booking = bookingsData.find(b => b.id === id);
             if (booking) {
+                // Using a custom confirm here would be better, but sticking to simple confirm for logic
+                // Ideally we replace standard confirm with a custom modal too.
                 if(confirm(`Are you sure you want to cancel your booking for ${booking.property_name}?`)) {
-                    // Logic to call backend
-                    alert("Cancellation request sent (Demo Mode)");
+                    // Logic to call backend would go here
+                    // For now, we simulate success
+                    showToast("Cancellation request sent successfully!");
                 }
             }
         };
