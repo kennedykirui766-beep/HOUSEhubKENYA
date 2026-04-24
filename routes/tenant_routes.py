@@ -209,10 +209,54 @@ def save_dashboard_order():
 @tenant_bp.route('/bookings/<int:house_id>')
 @login_required
 def bookings(house_id):
-    booking = Booking(tenant_id=current_user.id, house_id=house_id, status='pending')
-    db.session.add(booking)
-    db.session.commit()
-    return redirect(url_for('tenant.dashboard'))
+
+    # ✅ Get house + owner
+    house = House.query.options(joinedload(House.owner)).get_or_404(house_id)
+
+    # ✅ Get booking for this tenant & house (if exists)
+    booking = Booking.query.filter_by(
+        tenant_id=current_user.id,
+        house_id=house_id
+    ).first()
+
+    # ✅ Process house images (same logic you use)
+    images = []
+    if house.image_urls:
+        try:
+            images = json.loads(house.image_urls)
+            if not isinstance(images, list):
+                images = []
+        except Exception:
+            images = [
+                img.strip() for img in house.image_urls.split(",")
+                if img.strip()
+            ]
+
+    def optimize(url):
+        if url and "res.cloudinary.com" in url:
+            return url.replace("/upload/", "/upload/f_auto,q_auto/")
+        return url
+
+    images = [optimize(img) for img in images]
+
+    # ✅ Owner image (Cloudinary or fallback)
+    owner_image = None
+    if house.owner and house.owner.profile_image:
+        if "res.cloudinary.com" in house.owner.profile_image:
+            owner_image = house.owner.profile_image.replace(
+                "/upload/", "/upload/w_100,h_100,c_fill,q_auto,f_auto/"
+            )
+        else:
+            owner_image = house.owner.profile_image
+
+    return render_template(
+        "tenant/booking_details.html",
+        house=house,
+        booking=booking,
+        images=images,
+        owner=house.owner,
+        owner_image=owner_image
+    )
 
 from datetime import datetime
 
