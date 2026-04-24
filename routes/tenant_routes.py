@@ -17,7 +17,7 @@ from werkzeug.utils import secure_filename
 
 from models.models import (
     Document, Booking, MaintenanceRequest, Message,
-    House, Notification, Payment, User, Event,
+    House, Notification, Payment, PaymentLink, User, Event,
     SupportTicket, SupportMessage
 )
 
@@ -493,16 +493,69 @@ def submit_request():
     return render_template('tenant/submit_request.html', bookings=bookings)
 
 
+from datetime import datetime, timedelta
+from sqlalchemy.orm import joinedload
+
 @tenant_bp.route('/pay_rent', methods=['GET', 'POST'])
 @login_required
 def pay_rent():
 
-    # Only approved bookings
-    bookings = Booking.query.filter_by(
+    # ✅ Step 1: Get approved bookings
+    bookings = Booking.query.options(
+        joinedload(Booking.house)
+    ).filter_by(
         tenant_id=current_user.id,
         status='approved'
     ).all()
 
+    eligible_bookings = []
+    rent_alerts = []
+
+    for b in bookings:
+
+        # ✅ Step 2: Check if deposit is PAID
+        deposit = PaymentLink.query.filter_by(
+            tenant_id=current_user.id,
+            house_id=b.house_id,
+            payment_type="deposit",
+            status="paid"
+        ).first()
+
+        if not deposit:
+            continue  # ❌ skip houses without deposit
+
+        house = b.house
+
+        # ✅ Step 3: Rent due logic
+        today = datetime.utcnow().date()
+
+        # Example: rent due every month on booking day
+        due_day = b.created_at.day if b.created_at else 1
+        due_date = datetime(today.year, today.month, min(due_day, 28)).date()
+
+        # If already passed, next month
+        if today > due_date:
+            next_month = (today.replace(day=1) + timedelta(days=32)).replace(day=1)
+            due_date = next_month.replace(day=min(due_day, 28))
+
+        days_left = (due_date - today).days
+
+        # ✅ Alert if close to due
+        if days_left <= 5:
+            rent_alerts.append({
+                "house": house.title,
+                "days_left": days_left,
+                "due_date": due_date
+            })
+
+        eligible_bookings.append({
+            "booking": b,
+            "house": house,
+            "due_date": due_date,
+            "days_left": days_left
+        })
+
+    # ---------------- POST (PAY RENT) ----------------
     if request.method == 'POST':
 
         house_id = request.form.get('house_id')
@@ -510,10 +563,21 @@ def pay_rent():
 
         house = House.query.get_or_404(house_id)
 
-        # ✅ Get rent from house
+        # ✅ Double check deposit again (security)
+        deposit = PaymentLink.query.filter_by(
+            tenant_id=current_user.id,
+            house_id=house_id,
+            payment_type="deposit",
+            status="paid"
+        ).first()
+
+        if not deposit:
+            flash("You must pay deposit before paying rent.", "danger")
+            return redirect(url_for('tenant.pay_rent'))
+
         amount = house.rent_amount
 
-        # ✅ Prevent duplicate payments
+        # ✅ Prevent duplicate payment
         existing = Payment.query.filter_by(
             tenant_id=current_user.id,
             house_id=house_id,
@@ -536,30 +600,32 @@ def pay_rent():
         db.session.add(payment)
         db.session.commit()
 
-        # Create a payment link (STK push or dev link) and save
+        # ✅ Create payment link
         try:
             from services.mpesa import create_payment_link
-            link, tx = create_payment_link(amount, phone_number=getattr(current_user, 'phone_number', None), account_ref=f"rent-{payment.id}")
+
+            link, tx = create_payment_link(
+                amount,
+                phone_number=current_user.phone_number,
+                account_ref=f"rent-{payment.id}"
+            )
+
             payment.payment_link = link
             payment.transaction_id = tx
             db.session.commit()
 
-            # Send payment email (best-effort)
-            try:
-                from services.email_service import send_payment_email
-                send_payment_email(current_user.email, current_user.name, link, amount)
-            except Exception:
-                import logging
-                logging.exception('Failed to send payment email')
-
         except Exception:
             import logging
-            logging.exception('Failed to create payment link')
+            logging.exception('Payment link failed')
 
-        flash("Rent payment initiated. Check your phone or email for payment link.", "success")
+        flash("Rent payment initiated.", "success")
         return redirect(url_for('tenant.dashboard'))
 
-    return render_template('tenant/pay_rent.html', bookings=bookings)
+    return render_template(
+        'tenant/pay_rent.html',
+        bookings=eligible_bookings,
+        alerts=rent_alerts
+    )
 
 
 

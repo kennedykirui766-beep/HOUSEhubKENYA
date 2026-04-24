@@ -43,6 +43,46 @@
         padding: 2.5rem;
     }
 
+    /* --- ALERT STYLES --- */
+    .alert-box {
+        background-color: #fff7ed; /* Light orange */
+        border: 1px solid #fdba74;
+        color: #9a3412;
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    [data-bs-theme="dark"] .alert-box {
+        background-color: rgba(234, 88, 12, 0.15);
+        color: #fdba74;
+        border-color: #c2410c;
+    }
+
+    .alert-icon {
+        font-size: 1.5rem;
+    }
+
+    .alert-content h5 {
+        margin: 0 0 0.25rem 0;
+        font-weight: 700;
+        font-size: 1rem;
+    }
+    
+    .alert-list {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0 0;
+        font-size: 0.9rem;
+    }
+    
+    .alert-list li {
+        margin-bottom: 0.25rem;
+    }
+
     /* Form Controls */
     .form-label {
         font-weight: 600;
@@ -164,6 +204,25 @@
                 <form method="POST" id="rentForm">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
+                    <!-- ALERTS SECTION -->
+                    {% if alerts %}
+                    <div class="alert-box">
+                        <div class="alert-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div class="alert-content">
+                            <h5>Rent Due Soon!</h5>
+                            <p style="margin:0; font-size: 0.9rem;">The following properties have rent due in 5 days or less:</p>
+                            <ul class="alert-list">
+                                {% for alert in alerts %}
+                                <li>
+                                    <strong>{{ alert.house }}</strong> - 
+                                    <span style="color: #c2410c; font-weight: 600;">{{ alert.days_left }} days</span> left (Due: {{ alert.due_date.strftime('%b %d, %Y') }})
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    {% endif %}
+
                     <div class="row">
                         <!-- Left Column: Selection -->
                         <div class="col-lg-7">
@@ -173,13 +232,25 @@
                                 <label for="houseSelect" class="form-label">Select Property / Booking</label>
                                 <select name="house_id" id="houseSelect" class="form-select" required onchange="updateRentAmount()">
                                     <option value="" disabled selected>-- Choose your property --</option>
-                                    {% for booking in bookings %}
-                                        <option value="{{ booking.house.id }}" data-rent="{{ booking.house.rent_amount }}" data-name="{{ booking.house.name }}">
-                                            {{ booking.house.name }}
+                                    {% for item in bookings %}
+                                        <!-- 
+                                           The route passes 'bookings' where each item is a dict:
+                                           { "booking": obj, "house": obj, "due_date": obj, "days_left": int }
+                                        -->
+                                        <option value="{{ item.house.id }}" 
+                                                data-rent="{{ item.house.rent_amount }}" 
+                                                data-name="{{ item.house.title }}"
+                                                data-due="{{ item.due_date.strftime('%b %d, %Y') }}">
+                                            {{ item.house.title }} 
+                                            {% if item.days_left <= 5 %}
+                                                <span style="color:var(--danger-color)">(Due: {{ item.due_date.strftime('%b %d') }})</span>
+                                            {% else %}
+                                                <span style="color:var(--text-muted)">(Due: {{ item.due_date.strftime('%b %d') }})</span>
+                                            {% endif %}
                                         </option>
                                     {% endfor %}
                                 </select>
-                                <small class="text-muted" style="font-size: 0.85rem;">Only approved bookings are listed.</small>
+                                <small class="text-muted" style="font-size: 0.85rem;">Only properties with paid deposits are listed.</small>
                             </div>
 
                             <!-- Month Selection -->
@@ -211,12 +282,15 @@
                                 <div id="propertyNameDisplay" style="margin-top:0.5rem; font-size:0.9rem; color: var(--text-secondary); height: 1.2em;">
                                     <!-- Property name appears here -->
                                 </div>
+                                <div id="dueDateDisplay" style="margin-top:0.25rem; font-size:0.8rem; color: var(--text-muted);">
+                                    <!-- Due date appears here -->
+                                </div>
                             </div>
                             
                             <div class="info-alert">
                                 <i class="fas fa-info-circle mt-1"></i>
                                 <div>
-                                    <strong>Note:</strong> Payments will be processed with a status of "Pending" until verified.
+                                    <strong>Note:</strong> Payments will be processed with a status of "Pending" until verified by the system.
                                 </div>
                             </div>
                         </div>
@@ -241,7 +315,7 @@
             <div class="empty-state">
                 <i class="fas fa-home"></i>
                 <h3 class="h4 mb-3">No Active Properties</h3>
-                <p class="text-muted">You do not have any approved bookings to pay rent for.</p>
+                <p class="text-muted">You do not have any approved bookings with paid deposits to pay rent for.</p>
                 <a href="{{ url_for('tenant.dashboard') }}" class="btn btn-outline-custom mt-3">
                     Return to Dashboard
                 </a>
@@ -271,6 +345,7 @@
         const select = document.getElementById('houseSelect');
         const display = document.getElementById('displayAmount');
         const propNameDisplay = document.getElementById('propertyNameDisplay');
+        const dueDateDisplay = document.getElementById('dueDateDisplay');
         
         // Get the selected option
         const selectedOption = select.options[select.selectedIndex];
@@ -278,6 +353,7 @@
         if (selectedOption.value) {
             const rent = selectedOption.getAttribute('data-rent');
             const name = selectedOption.getAttribute('data-name');
+            const dueDate = selectedOption.getAttribute('data-due');
             
             // Format currency (add commas)
             const formattedRent = Number(rent).toLocaleString('en-US', {
@@ -287,9 +363,11 @@
 
             display.textContent = formattedRent;
             propNameDisplay.textContent = name;
+            dueDateDisplay.textContent = `Next Due Date: ${dueDate}`;
         } else {
             display.textContent = "0.00";
             propNameDisplay.textContent = "";
+            dueDateDisplay.textContent = "";
         }
     }
 </script>
