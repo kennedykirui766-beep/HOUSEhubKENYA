@@ -784,13 +784,13 @@ def all_bookings():
 
         # ✅ Owner image (Cloudinary or fallback)
         owner_image = None
-        if owner and owner.profile_image:
-            if "res.cloudinary.com" in owner.profile_image:
-                owner_image = owner.profile_image.replace(
+        if owner and owner.profile_picture:
+            if "res.cloudinary.com" in owner.profile_picture:
+                owner_image = owner.profile_picture.replace(
                     "/upload/", "/upload/w_100,h_100,c_fill,q_auto,f_auto/"
                 )
             else:
-                owner_image = owner.profile_image
+                owner_image = owner.profile_picture
 
         bookings_data.append({
             "id": b.id,
