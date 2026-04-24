@@ -209,54 +209,10 @@ def save_dashboard_order():
 @tenant_bp.route('/bookings/<int:house_id>')
 @login_required
 def bookings(house_id):
-
-    # ✅ Get house + owner
-    house = House.query.options(joinedload(House.owner)).get_or_404(house_id)
-
-    # ✅ Get booking for this tenant & house (if exists)
-    booking = Booking.query.filter_by(
-        tenant_id=current_user.id,
-        house_id=house_id
-    ).first()
-
-    # ✅ Process house images (same logic you use)
-    images = []
-    if house.image_urls:
-        try:
-            images = json.loads(house.image_urls)
-            if not isinstance(images, list):
-                images = []
-        except Exception:
-            images = [
-                img.strip() for img in house.image_urls.split(",")
-                if img.strip()
-            ]
-
-    def optimize(url):
-        if url and "res.cloudinary.com" in url:
-            return url.replace("/upload/", "/upload/f_auto,q_auto/")
-        return url
-
-    images = [optimize(img) for img in images]
-
-    # ✅ Owner image (Cloudinary or fallback)
-    owner_image = None
-    if house.owner and house.owner.profile_image:
-        if "res.cloudinary.com" in house.owner.profile_image:
-            owner_image = house.owner.profile_image.replace(
-                "/upload/", "/upload/w_100,h_100,c_fill,q_auto,f_auto/"
-            )
-        else:
-            owner_image = house.owner.profile_image
-
-    return render_template(
-        "tenant/booking_details.html",
-        house=house,
-        booking=booking,
-        images=images,
-        owner=house.owner,
-        owner_image=owner_image
-    )
+    booking = Booking(tenant_id=current_user.id, house_id=house_id, status='pending')
+    db.session.add(booking)
+    db.session.commit()
+    return redirect(url_for('tenant.dashboard'))
 
 from datetime import datetime
 
@@ -788,31 +744,91 @@ def book_house(house_id):
 
 
 # View all bookings
+from sqlalchemy.orm import joinedload
+import json
+
 @tenant_bp.route('/all_bookings')
 @login_required
 def all_bookings():
-    bookings = Booking.query.filter_by(tenant_id=current_user.id).all()
 
-    bookings_data = [
-        {
+    # ✅ Eager load house + owner (performance boost)
+    bookings = Booking.query.options(
+        joinedload(Booking.house).joinedload(House.owner)
+    ).filter_by(tenant_id=current_user.id).all()
+
+    def optimize(url):
+        if url and "res.cloudinary.com" in url:
+            return url.replace("/upload/", "/upload/f_auto,q_auto/")
+        return url
+
+    bookings_data = []
+
+    for b in bookings:
+        house = b.house
+        owner = house.owner if house else None
+
+        # ✅ Safe image handling
+        images = []
+        if house and house.image_urls:
+            try:
+                images = json.loads(house.image_urls)
+                if not isinstance(images, list):
+                    images = []
+            except Exception:
+                images = [
+                    img.strip() for img in house.image_urls.split(",")
+                    if img.strip()
+                ]
+
+        images = [optimize(img) for img in images]
+
+        # ✅ Owner image (Cloudinary or fallback)
+        owner_image = None
+        if owner and owner.profile_image:
+            if "res.cloudinary.com" in owner.profile_image:
+                owner_image = owner.profile_image.replace(
+                    "/upload/", "/upload/w_100,h_100,c_fill,q_auto,f_auto/"
+                )
+            else:
+                owner_image = owner.profile_image
+
+        bookings_data.append({
             "id": b.id,
             "status": b.status,
             "created_at": b.created_at,
-            "amount": b.house.rent_amount,
+
+            # ✅ Booking info
+            "tenant_id": b.tenant_id,
+            "house_id": b.house_id,
+
+            # ✅ House FULL data
             "house": {
-                "name": b.house.title,
-                "location": b.house.location,
-                "images": json.loads(b.house.image_urls)  # if exists
+                "id": house.id if house else None,
+                "title": house.title if house else "N/A",
+                "location": house.location if house else "N/A",
+                "city": house.city if house else None,
+                "price": house.rent_amount if house else 0,
+                "bedrooms": house.bedrooms if house else None,
+                "bathrooms": house.bathrooms if house else None,
+                "property_type": house.property_type if house else None,
+                "available": house.available if house else False,
+                "images": images,
+                "is_featured": house.is_featured if house else False,
+            },
+
+            # ✅ Owner FULL data
+            "owner": {
+                "name": owner.name if owner else "Unknown",
+                "email": owner.email if owner else None,
+                "phone": owner.phone if hasattr(owner, "phone") else None,
+                "image": owner_image
             }
-        }
-        for b in bookings
-    ]
+        })
 
     return render_template(
         'tenant/tenant_bookings.html',
         bookings=bookings_data
     )
-
 
 from sqlalchemy import or_
 
