@@ -282,7 +282,8 @@ def properties():
             "image": image_url,
             "available": house.available,
             "owner": house.owner.name if house.owner else "Unknown",
-            "is_featured": house.is_featured  # 👈 useful for UI badge
+            "is_featured": house.is_featured,  # 👈 useful for UI badge
+            "owner_image": house.owner.profile_image if house.owner and house.owner.profile_image else None
         })
 
     return render_template(

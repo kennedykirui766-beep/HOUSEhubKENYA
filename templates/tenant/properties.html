@@ -511,7 +511,10 @@
                             <!-- Footer -->
                             <div class="card-footer-custom">
                                 <div class="owner-info">
-                                    <img src="https://ui-avatars.com/api/?name={{ house.owner }}&background=random" alt="Owner" class="owner-avatar">
+                                    <img 
+                                        src="{{ house.owner_image if house.owner_image else 'https://ui-avatars.com/api/?name=' ~ house.owner ~ '&background=random' }}" 
+                                        alt="Owner" 
+                                        class="owner-avatar">
                                     <span class="owner-name">{{ house.owner }}</span>
                                 </div>
                                 <a href="{{ url_for('house.view_property', property_id=house.id) }}" class="view-btn">
