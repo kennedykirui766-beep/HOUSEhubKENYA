@@ -1,17 +1,19 @@
 from datetime import datetime
 import os
-from mailjet_rest import Client
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+
 
 def send_payment_email(to_email, tenant_name, payment_url, amount):
     """
-    Sends a detailed, styled HTML email for a payment request.
+    Sends a detailed, styled HTML email for a payment request using SendGrid.
     """
-    
+
     # Branding details
     brand_name = "HouseHub Kenya"
-    brand_color = "#0056b3"  # A professional deep blue
-    
-    html_content = f"""
+    brand_color = "#0056b3"
+
+    html_content = f""" 
     <!DOCTYPE html>
     <html>
     <head>
@@ -116,60 +118,38 @@ def send_payment_email(to_email, tenant_name, payment_url, amount):
         </table>
     </body>
     </html>
-    """
+    """  # 👈 paste your full HTML here unchanged
 
-    # Initialize the message payload for Mailjet v3.1
-    sender_email = os.environ.get("SENDER_EMAIL", "noreply@homehub.app")
+
+    sender_email = os.environ.get("SENDGRID_FROM_EMAIL", "noreply@homehub.app")
     sender_name = os.environ.get("SENDER_NAME", "HouseHub Kenya")
 
-    data = {
-        "Messages": [
-            {
-                "From": {"Email": sender_email, "Name": sender_name},
-                "To": [{"Email": to_email, "Name": tenant_name}],
-                "Subject": "Action Required: Deposit Payment Request",
-                "HTMLPart": html_content,
-                "TextPart": f"Please complete payment of KES {amount}: {payment_url}",
-            }
-        ]
-    }
-
     try:
-        # Initialize Mailjet SDK client
-        mailjet = Client(auth=(os.environ.get("MAILJET_API_KEY"), os.environ.get("MAILJET_API_SECRET")), version="v3.1")
+        message = Mail(
+            from_email=(sender_email, sender_name),
+            to_emails=to_email,
+            subject="Action Required: Deposit Payment Request",
+            html_content=html_content,
+            plain_text_content=f"Please complete payment of KES {amount}: {payment_url}",
+        )
 
-        # Send message
-        result = mailjet.send.create(data=data)
+        sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
+        response = sg.send(message)
 
-        # Logging success
-        status = getattr(result, "status_code", None)
+        status = response.status_code
 
-        if status in [200, 201]:
-            print("✅ EMAIL SENT SUCCESSFULLY")
+        if status in [200, 202]:
+            print("✅ SENDGRID EMAIL SENT SUCCESSFULLY")
         else:
-            print("❌ EMAIL FAILED")
+            print("❌ SENDGRID EMAIL FAILED")
             print("📊 Status Code:", status)
-            print("📩 Response:", result.json())
-            raise Exception(f"Mailjet error: {status}")
+            print("📩 Body:", response.body)
+            raise Exception(f"SendGrid error: {status}")
 
-        return result
+        return response
 
     except Exception as e:
-        # Detailed Error Logging
-        import traceback, json
-        print("❌ MAILJET ERROR OCCURRED:")
+        import traceback
+        print("❌ SENDGRID ERROR OCCURRED:")
         traceback.print_exc()
-
-        # Try to show response body if available
-        try:
-            body = getattr(e, 'response', None) or getattr(e, 'body', None)
-            if body:
-                try:
-                    parsed = json.loads(body)
-                    print("❌ MAILJET API DETAILS:", parsed)
-                except Exception:
-                    print("❌ MAILJET RESPONSE BODY:", body)
-        except Exception:
-            pass
-
         raise
