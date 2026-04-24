@@ -185,7 +185,7 @@
         border-bottom: none;
     }
 
-    .table-custom tbody tr:hover {
+    .table-custom tbody tr:hover td {
         background-color: var(--sidebar-hover);
     }
 
@@ -218,8 +218,7 @@
         font-size: 0.95rem;
         font-weight: 600;
         color: var(--text-primary);
-        margin: 0 0 0.2rem 0;
-        line-height: 1.2;
+        margin-bottom: 0.2rem;
     }
 
     .property-info span {
@@ -276,7 +275,7 @@
         background-color: rgba(0,0,0,0.5);
         backdrop-filter: blur(4px);
         -webkit-backdrop-filter: blur(4px);
-        z-index: 1050;
+        z-index: 9999; /* Ensures it sits on top */
         display: flex;
         align-items: center;
         justify-content: center;
@@ -379,7 +378,8 @@
         object-fit: cover;
         border-radius: var(--radius-md);
         margin-bottom: 1.5rem;
-        background-color: var(--body-bg);
+        background-color: var(--body-bg); /* Fallback bg */
+        border: 1px solid var(--border-color); /* Border so if image is missing, you see a box */
     }
 
     .modal-detail-row {
@@ -462,6 +462,7 @@
         font-weight: 600;
         text-decoration: none;
         transition: var(--transition);
+        font-family: inherit;
     }
 
     .btn-msg-owner:hover {
@@ -498,6 +499,7 @@
             content: attr(data-label);
             font-weight: 600;
             color: var(--text-secondary);
+            font-size: 0.85rem;
             margin-right: 1rem;
             flex-shrink: 0;
         }
@@ -628,7 +630,9 @@
             <!-- Left Side: Property Info -->
             <div class="modal-left">
                 <!-- Property Image -->
-                <img src="" alt="Property" class="property-hero-img" id="bm-property-image">
+                <!-- Added onerror handler to load fallback if url fails -->
+                <img src="" alt="Property" class="property-hero-img" id="bm-property-image" 
+                     onerror="this.src='https://via.placeholder.com/800x600?text=No+Image+Found&bg=eee&text=777'">
                 
                 <div class="modal-detail-row label-only">
                     <div class="modal-label">Property</div>
@@ -667,7 +671,8 @@
 
             <!-- Right Side: Owner Profile -->
             <div class="modal-right">
-                <img src="" alt="Owner" class="owner-avatar-lg" id="bm-owner-image">
+                <img src="" alt="Owner" class="owner-avatar-lg" id="bm-owner-image"
+                     onerror="this.src='https://ui-avatars.com/api/?name=User+&background=random'">
                 <div class="owner-name-lg" id="bm-owner-name">Owner Name</div>
                 <div class="owner-role-badge"><i class="fas fa-check-circle"></i> Landlord</div>
                 
@@ -689,6 +694,55 @@
         // Assuming 'bookings' is passed from the route: render_template(..., bookings=bookings)
         const rawBookings = {{ bookings | tojson | safe }};
 
+        // Helper: Robust Image URL Extraction
+        // Handles: JSON string, Array, Single URL, CSV
+        function getImageUrl(house) {
+            if (!house) return 'https://via.placeholder.com/800x600?text=No+House+Data';
+            
+            // Try common keys: image_urls, images, image
+            let potentialUrl = house.image_urls || house.images || house.image;
+            
+            if (!potentialUrl) return 'https://via.placeholder.com/800x600?text=No+Image+Found';
+            
+            // If it's already an array (less common from SQL)
+            if (Array.isArray(potentialUrl)) return potentialUrl[0] || '...';
+            
+            // If it's a string
+            if (typeof potentialUrl === 'string') {
+                potentialUrl = potentialUrl.trim();
+                if (!potentialUrl) return '...';
+                
+                // 1. Check for JSON string "[url1, url2]"
+                if (potentialUrl.startsWith('[')) {
+                    try {
+                        const parsed = JSON.parse(potentialUrl);
+                        if (Array.isArray(parsed)) return parsed[0] || '...';
+                    } catch (e) {
+                        console.warn("JSON Parse Error for image", e);
+                    }
+                }
+                // 2. Check for CSV "url1, url2"
+                else if (potentialUrl.includes(',')) {
+                    return potentialUrl.split(',')[0].trim();
+                }
+                // 3. Assume it's a direct URL
+                else {
+                    return potentialUrl;
+                }
+            }
+            
+            return '...';
+        }
+
+        // Helper: Cloudinary Optimization
+        function optimizeUrl(url) {
+            if(!url) return url;
+            if(url.includes('res.cloudinary.com')) {
+                return url.replace("/upload/", "/upload/f_auto,q_auto/");
+            }
+            return url;
+        }
+
         // 2. Map DB Data to UI Format
         const bookingsData = rawBookings.map(b => {
             const house = b.house || {};
@@ -697,12 +751,9 @@
             const houseTitle = house.title || house.name || "Unknown Property";
             const houseLocation = house.location || "Unknown Location";
             
-            // Use first image if available, else placeholder
-            // Note: Adjust 'house.images' based on your actual JSON key (e.g. image_urls)
-            const houseImages = house.images || house.image_urls || [];
-            const houseImage = (Array.isArray(houseImages) && houseImages.length > 0) 
-                               ? houseImages[0] 
-                               : "https://via.placeholder.com/150?text=No+Img";
+            // Get image using robust helper
+            const rawImage = getImageUrl(house);
+            const houseImage = optimizeUrl(rawImage);
 
             const dateStr = b.created_at ? new Date(b.created_at).toLocaleDateString() : "N/A";
             const amount = b.amount ? "KES " + Number(b.amount).toLocaleString() : "N/A";
@@ -711,7 +762,7 @@
                 id: b.id,
                 property_name: houseTitle,
                 property_location: houseLocation,
-                property_description: house.description || "",
+                property_description: house.description || "No description provided.",
                 property_image: houseImage,
                 date: dateStr,
                 amount: amount,
@@ -739,9 +790,10 @@
         // --- FUNCTIONS ---
 
         function getStatusBadgeClass(status) {
+            // Mapping to Base CSS status classes
             const s = (status || "").toLowerCase();
             if (s === 'confirmed' || s === 'approved' || s === 'active') return 'icon-primary'; 
-            if (s === 'pending') return 'text-warning';
+            if (s === 'pending') return 'text-warning'; 
             if (s === 'cancelled' || s === 'rejected') return 'text-danger'; 
             if (s === 'completed') return 'icon-success'; 
             return '';
@@ -759,15 +811,6 @@
         function capitalize(str) {
             if(!str) return "";
             return str.charAt(0).toUpperCase() + str.slice(1);
-        }
-
-        // Cloudinary Optimization Helper
-        function optimizeCloudinaryUrl(url) {
-            if(!url) return url;
-            if(url.includes('res.cloudinary.com')) {
-                return url.replace("/upload/", "/upload/f_auto,q_auto/");
-            }
-            return url;
         }
 
         function updateStats() {
@@ -869,18 +912,18 @@
             document.getElementById('bm-booking-id').textContent = "#" + booking.id;
             
             // Handle Description
-            const desc = house.description || "No description provided for this property.";
+            const desc = booking.property_description || "No description provided for this property.";
             document.getElementById('bm-description').textContent = desc.length > 200 ? desc.substring(0, 200) + "..." : desc;
 
-            // Handle Property Image (Cloudinary Optimize)
-            const propImg = optimizeCloudinaryUrl(booking.property_image);
+            // Handle Property Image (Set Src)
+            const propImg = booking.property_image; // This is already optimized in map function
             document.getElementById('bm-property-image').src = propImg;
 
             // Populate Owner Details
             document.getElementById('bm-owner-name').textContent = owner.name || "Unknown Owner";
             
             // Handle Owner Image
-            const ownerImg = (owner.profile_pic || owner.image) ? optimizeCloudinaryUrl(owner.profile_pic || owner.image) 
+            const ownerImg = (owner.profile_pic || owner.image) ? optimizeUrl(owner.profile_pic || owner.image) 
                            : "https://ui-avatars.com/api/?name=" + (owner.name || "O") + "&background=random";
             document.getElementById('bm-owner-image').src = ownerImg;
 
