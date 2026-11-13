@@ -1386,6 +1386,7 @@ def get_messages(other_user_id):
 @login_required
 def send_message():
     from datetime import datetime
+    from sqlalchemy import func
 
     data = request.get_json()
 
@@ -1396,26 +1397,60 @@ def send_message():
         return {"success": False, "error": "Missing data"}, 400
 
     try:
+        now_utc = datetime.utcnow()
+
+        # =========================
+        # REPLY = READ.
+        # Replying to someone implicitly means you've read everything they
+        # sent you. Mark all of their unread messages to me as read so the
+        # sender's blue ticks update on their next poll (no need for them
+        # to wait for the next chat-open poll cycle).
+        # =========================
+        Message.query.filter(
+            Message.sender_id == receiver_id,
+            Message.receiver_id == current_user.id,
+            Message.is_read == False
+        ).update({
+            "is_read": True,
+            "read_at": now_utc,
+            "delivered_at": func.coalesce(Message.delivered_at, now_utc),
+        }, synchronize_session=False)
+
+        # =========================
+        # Create the outgoing message
+        # =========================
         message = Message(
             sender_id=current_user.id,
             receiver_id=receiver_id,
             content=content,
-            timestamp=datetime.utcnow(),
-            is_read=False   # 👈 important
+            timestamp=now_utc,
+            is_read=False,
+            delivered_at=None,
+            read_at=None,
         )
 
         db.session.add(message)
         db.session.commit()
 
+        # Look up the receiver once for the "other_user" payload the JS expects
+        receiver = User.query.get(receiver_id)
+
         return {
             "success": True,
             "message": {
-                "id": message.id,
-                "sender_id": message.sender_id,
-                "receiver_id": message.receiver_id,
-                "content": message.content,
-                "timestamp": message.timestamp.isoformat(),  # 👈 critical
-                "is_read": message.is_read
+                "id":           message.id,
+                "sender_id":    message.sender_id,
+                "receiver_id":  message.receiver_id,
+                "content":      message.content,
+                "timestamp":    message.timestamp.isoformat(),
+                "is_read":      message.is_read,
+                "delivered_at": None,
+                "read_at":      None,
+                "other_user": {
+                    "id":     receiver.id if receiver else None,
+                    "name":   receiver.name if receiver else "",
+                    "avatar": getattr(receiver, 'profile_picture', None) if receiver else None,
+                },
             }
         }
 
@@ -1423,6 +1458,8 @@ def send_message():
         db.session.rollback()
         print("Error:", e)
         return {"success": False, "error": str(e)}, 500
+
+    
 
 @landlord_bp.route("/delete_image/<image_name>", methods=["POST"])
 @login_required
