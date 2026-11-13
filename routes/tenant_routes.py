@@ -7,9 +7,10 @@ import os
 
 from flask import Blueprint, current_app, flash, jsonify, render_template, request, redirect, url_for, make_response
 from flask_login import login_required, current_user, logout_user
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 from sqlalchemy.orm import joinedload
 from utils_presence import touch_presence, is_user_online, presence_payload
+
 
 import pyotp
 import qrcode as qr_code
@@ -947,6 +948,8 @@ def messages():
         flash("Unable to load messages.", "danger")
         return redirect(url_for("tenant.dashboard"))
     
+from sqlalchemy import or_, func  # Make sure this is at the top of the file!
+
 @tenant_bp.route("/poll_messages")
 @login_required
 def poll_messages():
@@ -954,17 +957,60 @@ def poll_messages():
         return jsonify({"error": "Access denied"}), 403
 
     # =========================
-    # 1. UNREAD COUNT (cheap)
+    # 0. PRESENCE: touch current user
+    # =========================
+    # If you have the touch_presence helper imported, keep it here:
+    # touch_presence(current_user)
+
+    # =========================
+    # 1. UNREAD COUNT
     # =========================
     unread_count = Message.query.filter(
         Message.receiver_id == current_user.id,
         Message.is_read == False
     ).count()
 
+    now_utc = datetime.utcnow()
+
     # =========================
-    # 2. FETCH ONLY NEW MESSAGES
+    # 2. DELIVERY RECEIPTS
+    #    Mark as delivered any message from the landlord that Esther's
+    #    device just fetched.
     # =========================
-    since_param = request.args.get("since")  # ISO timestamp
+    Message.query.filter(
+        Message.receiver_id == current_user.id,
+        Message.delivered_at.is_(None)
+    ).update(
+        {"delivered_at": now_utc},
+        synchronize_session=False,
+    )
+
+    # =========================
+    # 3. READ RECEIPTS
+    #    If Esther has the chat with the landlord open (?peer_id=...),
+    #    mark all unread messages from that landlord as read.
+    # =========================
+    active_peer_id = request.args.get("peer_id", type=int)
+    if active_peer_id and active_peer_id != current_user.id:
+        Message.query.filter(
+            Message.sender_id == active_peer_id,
+            Message.receiver_id == current_user.id,
+            Message.is_read == False
+        ).update(
+            {
+                "is_read": True,
+                "read_at": now_utc,
+                "delivered_at": func.coalesce(Message.delivered_at, now_utc),
+            },
+            synchronize_session=False,
+        )
+
+    # =========================
+    # 4. FETCH NEW MESSAGES
+    #    Include messages whose receipts changed since the last poll
+    #    so the sender sees ticks flip blue.
+    # =========================
+    since_param = request.args.get("since")
 
     msgs_query = Message.query.filter(
         (Message.receiver_id == current_user.id) |
@@ -974,44 +1020,54 @@ def poll_messages():
     if since_param:
         try:
             since_dt = datetime.fromisoformat(since_param)
-            msgs_query = msgs_query.filter(Message.timestamp > since_dt)
+            msgs_query = msgs_query.filter(
+                or_(
+                    Message.timestamp    > since_dt,
+                    Message.delivered_at > since_dt,
+                    Message.read_at      > since_dt,
+                )
+            )
         except ValueError:
-            pass  # fallback if invalid timestamp
+            pass
 
-    msgs_query = msgs_query.order_by(Message.timestamp.asc()).limit(50).all()
+    msgs_query = msgs_query.order_by(Message.timestamp.asc()).limit(100).all()
 
     # =========================
-    # 3. FORMAT RESPONSE
+    # 5. FORMAT RESPONSE
+    #    Include delivered_at and read_at so the frontend can render
+    #    the correct tick style.
     # =========================
     messages_data = []
     for m in msgs_query:
-        if m.sender_id == current_user.id:
-            other_id = m.receiver_id
-            other_name = m.receiver.name
-            other_avatar = getattr(m.receiver, 'profile_picture', None)
-        else:
-            other_id = m.sender_id
-            other_name = m.sender.name
-            other_avatar = getattr(m.sender, 'profile_picture', None)
+        other = m.receiver if m.sender_id == current_user.id else m.sender
+        other_id     = other.id if other else None
+        other_name   = other.name if other else "Unknown User"
+        other_avatar = getattr(other, 'profile_picture', None) if other else None
 
         messages_data.append({
-            "id": m.id,
-            "sender_id": m.sender_id,
-            "receiver_id": m.receiver_id,
-            "content": m.content,
-            "timestamp": serialize_timestamp(m.timestamp),
-            "is_read": m.is_read,
+            "id":           m.id,
+            "sender_id":    m.sender_id,
+            "receiver_id":  m.receiver_id,
+            "content":      m.content,
+            "timestamp":    serialize_timestamp(m.timestamp),
+            "is_read":      m.is_read,
+            "delivered_at": m.delivered_at.isoformat() if m.delivered_at else None,
+            "read_at":      m.read_at.isoformat() if m.read_at else None,
             "other_user": {
-                "id": other_id,
-                "name": other_name,
+                "id":     other_id,
+                "name":   other_name,
                 "avatar": other_avatar
             }
         })
 
+    db.session.commit()
+
     return jsonify({
         "unread_count": unread_count,
-        "messages": messages_data
-    })    
+        "messages":     messages_data
+    })
+
+
 
 @tenant_bp.route('/compose_message', methods=['GET', 'POST'])
 @login_required

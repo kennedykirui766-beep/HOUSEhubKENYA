@@ -6,11 +6,10 @@
 <style>
   /* --- 1. THEME VARIABLES --- */
   :root {
-    /* Light Mode Defaults (WhatsApp Style) */
     --chat-bg-app: #efeae2;
     --chat-bg-sidebar: #ffffff;
     --chat-bg-header: #f0f2f5;
-    --chat-bubble-out: #d9fdd3; /* Greenish */
+    --chat-bubble-out: #d9fdd3;
     --chat-bubble-in: #ffffff;
     --chat-text-primary: #111b21;
     --chat-text-secondary: #667781;
@@ -19,13 +18,12 @@
     --chat-tick-grey: #8696a0;
   }
 
-  /* Dark Mode Overrides (HouseHub Theme) */
   [data-bs-theme="dark"] {
-    --chat-bg-app: var(--body-bg); /* Dark Grey */
-    --chat-bg-sidebar: var(--sidebar-bg); /* Slightly lighter grey */
+    --chat-bg-app: var(--body-bg);
+    --chat-bg-sidebar: var(--sidebar-bg);
     --chat-bg-header: var(--sidebar-hover);
-    --chat-bubble-out: var(--primary-color); /* Indigo for consistency */
-    --chat-bubble-in: #334155; /* Dark Grey for received */
+    --chat-bubble-out: var(--primary-color);
+    --chat-bubble-in: #334155;
     --chat-text-primary: var(--text-primary);
     --chat-text-secondary: var(--text-secondary);
     --chat-border: var(--border-color);
@@ -70,10 +68,7 @@
     flex-shrink: 0;
   }
 
-  .sidebar-title {
-    font-weight: 600;
-    color: var(--text-primary);
-  }
+  .sidebar-title { font-weight: 600; color: var(--text-primary); }
 
   .search-box {
     padding: 8px 12px;
@@ -81,10 +76,7 @@
     background: var(--chat-bg-sidebar);
     display: none;
   }
-  
-  [data-bs-theme="dark"] .search-box {
-      background: var(--sidebar-bg);
-  }
+  [data-bs-theme="dark"] .search-box { background: var(--sidebar-bg); }
 
   .search-wrapper {
     background-color: var(--sidebar-hover);
@@ -95,210 +87,84 @@
     height: 35px;
   }
 
-  .search-icon {
-    color: var(--text-secondary);
-    margin-right: 10px;
-    font-size: 0.9rem;
-  }
+  .search-icon { color: var(--text-secondary); margin-right: 10px; font-size: 0.9rem; }
 
   .search-input {
-    width: 100%;
-    border: none;
-    background: transparent;
-    font-size: 0.9rem;
-    outline: none;
-    color: var(--text-primary);
+    width: 100%; border: none; background: transparent;
+    font-size: 0.9rem; outline: none; color: var(--text-primary);
   }
 
-  .chat-list {
-    flex: 1;
-    overflow-y: auto;
-  }
+  .chat-list { flex: 1; overflow-y: auto; }
 
   .chat-item {
-    display: flex;
-    align-items: center;
-    padding: 12px 15px;
-    cursor: pointer;
-    border-bottom: 1px solid var(--chat-border);
+    display: flex; align-items: center; padding: 12px 15px;
+    cursor: pointer; border-bottom: 1px solid var(--chat-border);
     transition: background 0.2s;
   }
 
   .chat-item:hover { background-color: var(--sidebar-hover); }
-  
-  .chat-item.active { 
-      background-color: var(--sidebar-hover); 
-      border-left: 4px solid var(--primary-color);
-  }
+  .chat-item.active { background-color: var(--sidebar-hover); border-left: 4px solid var(--primary-color); }
 
   .avatar {
-    width: 49px;
-    height: 49px;
-    border-radius: 50%;
-    background-color: var(--sidebar-hover);
-    margin-right: 15px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-primary);
-    font-weight: bold;
-    overflow: hidden;
+    width: 49px; height: 49px; border-radius: 50%;
+    background-color: var(--sidebar-hover); margin-right: 15px;
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    color: var(--text-primary); font-weight: bold; overflow: hidden;
     border: 1px solid var(--border-color);
   }
-  
   .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-  .chat-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-width: 0;
-  }
-
-  .info-top {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 3px;
-  }
-
-  .chat-name {
-    font-weight: 500;
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .chat-time {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-  }
-
-  .info-bottom {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-  }
-
-  .last-msg {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  .chat-info { flex: 1; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+  .info-top { display: flex; justify-content: space-between; margin-bottom: 3px; }
+  .chat-name { font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chat-time { font-size: 0.75rem; color: var(--text-secondary); }
+  .info-bottom { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary); }
+  .last-msg { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   /* --- 4. RIGHT CHAT AREA --- */
   .chat-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+    flex: 1; display: flex; flex-direction: column;
     background-color: var(--chat-bg-app);
-    /* SVG Background Pattern - Doodle style in light, subtle in dark */
     background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.08' fill-rule='evenodd'/%3E%3C/svg%3E");
-    background-size: 300px; /* Smaller pattern repeat */
-    position: relative;
+    background-size: 300px; position: relative;
   }
 
-  [data-bs-theme="dark"] .chat-main {
-      background-image: none; /* Remove busy pattern in dark mode */
-  }
+  [data-bs-theme="dark"] .chat-main { background-image: none; }
 
   .chat-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    text-align: center;
-    border-bottom: 6px solid var(--primary-color);
-    background: var(--sidebar-bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 100%; text-align: center; border-bottom: 6px solid var(--primary-color); background: var(--sidebar-bg);
   }
 
   .chat-view-header {
-    height: 60px;
-    padding: 0 16px;
-    background-color: var(--chat-bg-header);
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid var(--chat-border);
-    flex-shrink: 0;
+    height: 60px; padding: 0 16px; background-color: var(--chat-bg-header);
+    display: flex; align-items: center; border-bottom: 1px solid var(--chat-border); flex-shrink: 0;
   }
 
-  .back-btn {
-    display: none;
-    border: none;
-    background: none;
-    color: var(--text-secondary);
-    font-size: 1.2rem;
-    margin-right: 10px;
-    cursor: pointer;
-  }
+  .back-btn { display: none; border: none; background: none; color: var(--text-secondary); font-size: 1.2rem; margin-right: 10px; cursor: pointer; }
 
-  .header-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    margin-right: 10px;
-    background-color: var(--sidebar-hover);
-  }
+  .header-avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; background-color: var(--sidebar-hover); }
 
-  .messages-scroll-area {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px 5%;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
+  .messages-scroll-area { flex: 1; overflow-y: auto; padding: 20px 5%; display: flex; flex-direction: column; gap: 8px; }
 
-  .msg-row {
-    display: flex;
-    margin-bottom: 4px;
-    width: 100%;
-  }
-
+  .msg-row { display: flex; margin-bottom: 4px; width: 100%; }
   .msg-row.sent { justify-content: flex-end; }
   .msg-row.received { justify-content: flex-start; }
 
   .bubble {
-    max-width: 65%;
-    padding: 8px 10px;
-    border-radius: 8px;
-    position: relative;
-    font-size: 0.95rem;
-    line-height: 1.4;
-    box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
-    word-wrap: break-word;
+    max-width: 65%; padding: 8px 10px; border-radius: 8px;
+    position: relative; font-size: 0.95rem; line-height: 1.4;
+    box-shadow: 0 1px 0.5px rgba(0,0,0,0.13); word-wrap: break-word;
   }
 
-  .bubble.sent {
-    background-color: var(--chat-bubble-out);
-    border-top-right-radius: 0;
-    color: white; /* White text on Green/Indigo bubble */
-  }
+  .bubble.sent { background-color: var(--chat-bubble-out); border-top-right-radius: 0; color: white; }
+  .bubble.received { background-color: var(--chat-bubble-in); border-top-left-radius: 0; color: var(--text-primary); }
 
-  .bubble.received {
-    background-color: var(--chat-bubble-in);
-    border-top-left-radius: 0;
-    color: var(--text-primary); /* Text depends on bubble color */
-  }
-
-  /* Adjust text color for received bubble in light/dark */
   [data-bs-theme="light"] .bubble.received { color: #111b21; }
   [data-bs-theme="dark"] .bubble.received { color: #f1f5f9; }
 
-  .meta {
-    float: right;
-    margin-left: 10px;
-    margin-top: 4px;
-    display: flex;
-    align-items: center;
-    gap: 3px;
-  }
-
-  .time { font-size: 0.7rem; color: rgba(255,255,255,0.8); } /* Always white-ish on bubbles */
+  .meta { float: right; margin-left: 10px; margin-top: 4px; display: flex; align-items: center; gap: 3px; }
+  .time { font-size: 0.7rem; color: rgba(255,255,255,0.8); }
   
   .tick { font-size: 0.75rem; }
   .tick-blue { color: var(--chat-tick-blue); }
@@ -307,159 +173,83 @@
   /* --- 5. INPUT AREA --- */
   .chat-input-footer {
     background-color: var(--chat-bg-header);
-    padding: 10px 16px;
-    display: flex;
-    align-items: center;
-    z-index: 50;
-    flex-shrink: 0;
+    padding: 10px 16px; display: flex; align-items: center;
+    z-index: 50; flex-shrink: 0; position: relative;
   }
 
   .footer-icon {
-    color: var(--text-secondary);
-    font-size: 1.5rem;
-    margin-right: 15px;
-    cursor: pointer;
-    transition: color 0.2s;
+    color: var(--text-secondary); font-size: 1.5rem;
+    margin-right: 15px; cursor: pointer; transition: color 0.2s;
+    background: none; border: none; padding: 0;
   }
-  
   .footer-icon:hover { color: var(--primary-color); }
 
-  .input-wrapper {
-    flex: 1;
-    background-color: var(--card-bg);
-    border-radius: 8px;
-    padding: 9px 12px;
-    display: flex;
-    align-items: center;
-    border: 1px solid var(--border-color);
-  }
-
-  .chat-text-input {
-    width: 100%;
-    border: none;
-    outline: none;
-    font-size: 0.95rem;
-    background: transparent;
-    color: var(--text-primary);
-  }
-
-  .send-btn {
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    font-size: 1.5rem;
-    margin-left: 10px;
-    cursor: pointer;
-  }
+  .input-wrapper { flex: 1; background-color: var(--card-bg); border-radius: 8px; padding: 9px 12px; display: flex; align-items: center; border: 1px solid var(--border-color); }
+  .chat-text-input { width: 100%; border: none; outline: none; font-size: 0.95rem; background: transparent; color: var(--text-primary); }
+  
+  .send-btn { background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; margin-left: 10px; cursor: pointer; }
   .send-btn:hover { color: var(--primary-color); }
 
+  /* --- Emoji picker --- */
+  .emoji-picker {
+    position: absolute; bottom: 70px; left: 16px;
+    background: #fff; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+    padding: 10px; display: none; grid-template-columns: repeat(8, 1fr); gap: 4px;
+    width: 320px; z-index: 200;
+  }
+  .emoji-picker.open { display: grid; }
+  .emoji-picker button {
+    background: none; border: none; font-size: 1.4rem; cursor: pointer;
+    padding: 4px; border-radius: 4px; transition: background 0.12s;
+  }
+  .emoji-picker button:hover { background: #f0f2f5; }
+
+  /* --- Attachment menu --- */
+  .attach-menu {
+    position: absolute; bottom: 70px; left: 60px;
+    background: #fff; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+    padding: 8px; display: none; flex-direction: column; gap: 4px;
+    z-index: 200; min-width: 180px;
+  }
+  .attach-menu.open { display: flex; }
+  .attach-menu button {
+    display: flex; align-items: center; gap: 10px;
+    background: none; border: none; padding: 10px 12px; border-radius: 6px;
+    cursor: pointer; font-size: 0.9rem; color: #111b21; text-align: left;
+  }
+  .attach-menu button:hover { background: #f0f2f5; }
+  .attach-menu button i { color: var(--primary-color); width: 20px; text-align: center; }
+
   /* --- 6. MODAL --- */
-  .modal-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-    z-index: 2000;
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.3s ease;
-  }
+  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
   .modal-overlay.active { opacity: 1; pointer-events: auto; }
-  
-  .modal-box {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    width: 90%;
-    max-width: 400px;
-    overflow: hidden;
-    box-shadow: var(--shadow-xl);
-  }
-  
+  .modal-box { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; width: 90%; max-width: 400px; overflow: hidden; box-shadow: var(--shadow-xl); }
   .modal-header { padding: 1rem; border-bottom: 1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; }
   .modal-body { padding: 1.5rem; color: var(--text-secondary); }
   .modal-footer { padding: 1rem; display:flex; justify-content:flex-end; gap:10px; background: var(--sidebar-hover); }
-  
-  .btn-modal {
-    padding: 8px 16px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    font-weight: 500;
-  }
+  .btn-modal { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; }
   .btn-cancel { background: transparent; color: var(--text-secondary); }
   .btn-confirm { background: var(--danger-color); color: white; }
 
   /* --- 7. RESPONSIVE / MOBILE --- */
   @media (max-width: 768px) {
     body.mobile-chat-open { overflow: hidden; }
-
-    .chat-app-wrapper {
-      top: var(--navbar-height);
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: auto;
-      border-radius: 0;
-      position: fixed;
-      z-index: 1030;
-      border: none; /* Full screen */
-    }
-
-    .chat-sidebar {
-      width: 100%;
-      max-width: none;
-      position: absolute;
-      top: 0; left: 0;
-      height: 100%;
-      z-index: 5;
-    }
-
-    .chat-main {
-      width: 100%;
-      position: absolute;
-      top: 0; left: 0;
-      height: 100%;
-      z-index: 10;
-      transform: translateX(100%);
-      transition: transform 0.3s ease-in-out;
-      background-color: var(--body-bg); /* Solid background on mobile */
-      background-image: none;
-    }
-
+    .chat-app-wrapper { top: var(--navbar-height); bottom: 0; left: 0; right: 0; height: auto; border-radius: 0; position: fixed; z-index: 1030; border: none; }
+    .chat-sidebar { width: 100%; max-width: none; position: absolute; top: 0; left: 0; height: 100%; z-index: 5; }
+    .chat-main { width: 100%; position: absolute; top: 0; left: 0; height: 100%; z-index: 10; transform: translateX(100%); transition: transform 0.3s ease-in-out; background-color: var(--body-bg); background-image: none; }
     .chat-placeholder { display: none; }
-
-    body.chat-active .chat-main {
-      transform: translateX(0);
-    }
-
+    body.chat-active .chat-main { transform: translateX(0); }
     .back-btn { display: block; }
-
-    .chat-input-footer {
-      z-index: 100;
-      padding: 10px 10px;
-    }
+    .chat-input-footer { z-index: 100; padding: 10px 10px; }
+    .emoji-picker { width: calc(100vw - 32px); left: 16px; grid-template-columns: repeat(8, 1fr); }
+    .attach-menu { left: 50px; }
   }
 
-  /* Hide Global Floating Chat on this page */
-  .dash-chat,
-  .dash-chat-toggle,
-  .ap-access-badge,
-  [class*="chat-support"],
-  [class*="fab-"],
-  [class*="float-btn"],
-  [class*="live-chat"],
-  [class*="support-btn"],
-  [class*="crisp"],
-  [class*="intercom"] {
-    display: none !important;
-  }
+  .dash-chat, .dash-chat-toggle, .ap-access-badge, [class*="chat-support"], [class*="fab-"], [class*="float-btn"], [class*="live-chat"], [class*="support-btn"], [class*="crisp"], [class*="intercom"] { display: none !important; }
 
-  /* Scrollbar Styling */
   ::-webkit-scrollbar { width: 6px !important; }
   ::-webkit-scrollbar-track { background: transparent !important; }
   ::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.2); border-radius: 3px; }
-  
   [data-bs-theme="dark"] ::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,0.2); }
 </style>
 {% endblock %}
@@ -535,8 +325,22 @@
 
       <!-- INPUT AREA -->
       <footer class="chat-input-footer">
-        <i class="far fa-smile footer-icon"></i>
-        <i class="fas fa-plus footer-icon" style="font-size: 1.2rem;"></i>
+        <!-- Emoji button + picker -->
+        <button type="button" class="footer-icon" id="emojiBtn" title="Emoji">
+          <i class="far fa-smile"></i>
+        </button>
+        <div class="emoji-picker" id="emojiPicker"></div>
+
+        <!-- Attachment button + menu -->
+        <button type="button" class="footer-icon" id="attachBtn" title="Attach">
+          <i class="fas fa-plus"></i>
+        </button>
+        <div class="attach-menu" id="attachMenu">
+          <button type="button" data-type="image"><i class="fas fa-image"></i> Photo</button>
+          <button type="button" data-type="document"><i class="fas fa-file-alt"></i> Document</button>
+          <button type="button" data-type="location"><i class="fas fa-map-marker-alt"></i> Location</button>
+        </div>
+
         <div class="input-wrapper">
           <input type="text" class="chat-text-input" id="msgInput" placeholder="Type a message" autocomplete="off">
         </div>
@@ -579,8 +383,6 @@
       currentUserId: window.currentUser,
       conversations: {},
       activeChatId: null,
-
-      // --- Smart polling state ---
       lastKnownUnreadCount: null,
       lastMessageTimestamp: null,
       pollInterval: null,
@@ -606,7 +408,11 @@
       sendBtn: document.getElementById('sendBtn'),
       backBtn: document.getElementById('backBtn'),
       deleteModal: document.getElementById('deleteModal'),
-      body: document.body
+      body: document.body,
+      emojiBtn: document.getElementById('emojiBtn'),
+      emojiPicker: document.getElementById('emojiPicker'),
+      attachBtn: document.getElementById('attachBtn'),
+      attachMenu: document.getElementById('attachMenu'),
     };
 
     // =====================================================================
@@ -631,11 +437,15 @@
         }
 
         if (typeof msg.delivered_at === 'undefined') msg.delivered_at = null;
-        if (typeof msg.is_read     === 'undefined') msg.is_read      = false;
+        if (typeof msg.read_at      === 'undefined') msg.read_at      = null;
+        if (typeof msg.is_read      === 'undefined') msg.is_read      = false;
 
-        // Avoid duplicate messages when merging poll results
-        const alreadyExists = state.conversations[otherId].messages.some(m => m.id === msg.id);
-        if (!alreadyExists) {
+        const existing = state.conversations[otherId].messages.find(m => m.id === msg.id);
+        if (existing) {
+          if (msg.is_read)      existing.is_read = true;
+          if (msg.read_at)      existing.read_at = msg.read_at;
+          if (msg.delivered_at) existing.delivered_at = msg.delivered_at;
+        } else {
           state.conversations[otherId].messages.push(msg);
         }
 
@@ -643,12 +453,13 @@
           state.conversations[otherId].lastMsgTime = msg.timestamp;
         }
 
-        if (
-          !state.lastMessageTimestamp ||
-          new Date(msg.timestamp) > new Date(state.lastMessageTimestamp)
-        ) {
-          state.lastMessageTimestamp = msg.timestamp;
-        }
+        const candidates = [msg.timestamp, msg.delivered_at, msg.read_at].filter(Boolean);
+        candidates.forEach(ts => {
+          if (!state.lastMessageTimestamp ||
+              new Date(ts) > new Date(state.lastMessageTimestamp)) {
+            state.lastMessageTimestamp = ts;
+          }
+        });
       });
     }
 
@@ -656,9 +467,11 @@
     // TICK LOGIC
     // =====================================================================
     function getTickHtml(msg) {
-      if (!msg.delivered_at) return '<i class="fas fa-check tick tick-grey"></i>';
-      if (!msg.is_read)      return '<i class="fas fa-check-double tick tick-grey"></i>';
-      return '<i class="fas fa-check-double tick tick-blue"></i>';
+      if (!msg) return '';
+      if (msg._pending) return '<i class="far fa-clock tick tick-grey"></i>';
+      if (msg.is_read || msg.read_at) return '<i class="fas fa-check-double tick tick-blue"></i>';
+      if (msg.delivered_at) return '<i class="fas fa-check-double tick tick-grey"></i>';
+      return '<i class="fas fa-check tick tick-grey"></i>';
     }
 
     // =====================================================================
@@ -723,7 +536,6 @@
 
       renderMessages(convo.messages);
 
-      // Mark as read when opening chat
       fetch('/tenant/mark_read/' + id, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken() }
@@ -738,13 +550,10 @@
       })
       .catch(e => console.error('Mark read error:', e));
 
-      // Switch to fast polling now that a chat is open
       restartPolling(state.POLL_ACTIVE_MS);
+      poll();
     }
 
-    // =====================================================================
-    // RENDER MESSAGES
-    // =====================================================================
     function renderMessages(messages) {
       els.messagesArea.innerHTML = '';
       let lastDate = null;
@@ -774,9 +583,13 @@
       const timeStr  = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       const tickHtml = isMe ? getTickHtml(msg) : '';
 
+      const safeContent = String(msg.content)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/\n/g, '<br>');
+
       row.innerHTML = `
         <div class="bubble">
-          ${msg.content}
+          ${safeContent}
           <div class="meta">
             <span class="time">${timeStr}</span>
             ${tickHtml}
@@ -800,13 +613,15 @@
         content: text,
         timestamp: new Date().toISOString(),
         delivered_at: null,
+        read_at: null,
         is_read: false,
+        _pending: true,
         sender:   { name: 'Me',       profile_image: null },
         receiver: { name: 'Landlord', profile_image: null }
       };
 
       state.conversations[state.activeChatId].messages.push(tempMsg);
-      renderBubble(tempMsg);
+      renderMessages(state.conversations[state.activeChatId].messages);
       els.input.value = '';
       els.messagesArea.scrollTop = els.messagesArea.scrollHeight;
       renderList();
@@ -826,12 +641,13 @@
           if (convo.messages[tempMsgIndex].id === tempMsg.id) {
             convo.messages[tempMsgIndex] = realMsg;
 
-            if (
-              !state.lastMessageTimestamp ||
-              new Date(realMsg.timestamp) > new Date(state.lastMessageTimestamp)
-            ) {
-              state.lastMessageTimestamp = realMsg.timestamp;
-            }
+            const candidates = [realMsg.timestamp, realMsg.delivered_at, realMsg.read_at].filter(Boolean);
+            candidates.forEach(ts => {
+              if (!state.lastMessageTimestamp ||
+                  new Date(ts) > new Date(state.lastMessageTimestamp)) {
+                state.lastMessageTimestamp = ts;
+              }
+            });
 
             renderMessages(convo.messages);
             renderList();
@@ -850,10 +666,12 @@
     // SMART POLLING
     // =====================================================================
     function poll() {
+      const params = new URLSearchParams();
+      if (state.lastMessageTimestamp) params.set('since', state.lastMessageTimestamp);
+      if (state.activeChatId) params.set('peer_id', state.activeChatId);
+
       let url = '/tenant/poll_messages';
-      if (state.lastMessageTimestamp) {
-        url += '?since=' + encodeURIComponent(state.lastMessageTimestamp);
-      }
+      if ([...params].length) url += '?' + params.toString();
 
       fetch(url, {
         method: 'GET',
@@ -871,22 +689,21 @@
 
         state.lastKnownUnreadCount = newUnreadCount;
 
-        if (!chatIsOpen && !unreadChanged) return;
-
         if (data.messages && data.messages.length > 0) {
           processData(data.messages);
+        }
 
-          if (chatIsOpen) {
-            const convo = state.conversations[state.activeChatId];
-            if (convo) {
-              const wasAtBottom = isScrolledToBottom(els.messagesArea);
-              renderMessages(convo.messages);
-              if (wasAtBottom) {
-                els.messagesArea.scrollTop = els.messagesArea.scrollHeight;
-              }
+        if (chatIsOpen) {
+          const convo = state.conversations[state.activeChatId];
+          if (convo) {
+            const wasAtBottom = isScrolledToBottom(els.messagesArea);
+            renderMessages(convo.messages);
+            if (wasAtBottom) {
+              els.messagesArea.scrollTop = els.messagesArea.scrollHeight;
             }
           }
-
+          renderList();
+        } else if (unreadChanged || (data.messages && data.messages.length > 0)) {
           renderList();
         }
       })
@@ -903,6 +720,105 @@
       if (state.pollInterval) clearInterval(state.pollInterval);
       state.pollInterval = setInterval(poll, intervalMs);
     }
+
+    // =====================================================================
+    // EMOJI PICKER & ATTACHMENTS
+    // =====================================================================
+    const EMOJIS = [
+      '😀','😃','😄','😁','😆','😅','😂','🤣',
+      '😊','😇','🙂','🙃','😉','😌','😍','🥰',
+      '😘','😗','😙','😚','😋','😛','😝','😜',
+      '🤪','🤨','🧐','🤓','😎','🤩','🥳','😏',
+      '😒','😞','😔','😟','😕','🙁','☹️','😣',
+      '😖','😫','😩','🥺','😢','😭','😤','😠',
+      '😡','🤬','🤯','😳','🥵','🥶','😱','😨',
+      '😰','😥','😓','🤗','🤔','🤭','🤫','🤥',
+      '😶','😐','😑','😬','🙄','😯','😦','😧',
+      '😮','😲','🥱','😴','🤤','😪','😵','🤐',
+      '🥴','🤢','🤮','🤧','😷','🤒','🤕','👍',
+      '👎','👌','✌️','🤞','🤟','🤘','🤙','👈',
+      '👉','👆','👇','☝️','✋','🤚','🖐','🖖',
+      '👋','🤝','🙏','💪','❤️','🧡','💛','💚',
+      '💙','💜','🖤','🤍','💔','❣️','💕','💞',
+      '💓','💗','💖','💘','💝','🎉','🎊','🎁'
+    ];
+
+    function buildEmojiPicker() {
+      els.emojiPicker.innerHTML = '';
+      EMOJIS.forEach(emoji => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = emoji;
+        btn.addEventListener('click', () => {
+          const start = els.input.selectionStart ?? els.input.value.length;
+          const end = els.input.selectionEnd ?? els.input.value.length;
+          const before = els.input.value.substring(0, start);
+          const after = els.input.value.substring(end);
+          els.input.value = before + emoji + after;
+          const newPos = start + emoji.length;
+          els.input.setSelectionRange(newPos, newPos);
+          els.input.focus();
+        });
+        els.emojiPicker.appendChild(btn);
+      });
+    }
+
+    els.emojiBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      els.attachMenu.classList.remove('open');
+      els.emojiPicker.classList.toggle('open');
+    });
+
+    els.attachBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      els.emojiPicker.classList.remove('open');
+      els.attachMenu.classList.toggle('open');
+    });
+
+    els.attachMenu.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const type = btn.dataset.type;
+        els.attachMenu.classList.remove('open');
+
+        if (type === 'image' || type === 'document') {
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.accept = type === 'image' ? 'image/*' : '*/*';
+          fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+            els.input.value = `📎 ${file.name}`;
+            els.input.focus();
+          });
+          fileInput.click();
+        } else if (type === 'location') {
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              pos => {
+                els.input.value = `📍 https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                els.input.focus();
+              },
+              () => {
+                els.input.value = '📍 (Location unavailable)';
+                els.input.focus();
+              }
+            );
+          } else {
+            els.input.value = '📍 (Geolocation not supported)';
+            els.input.focus();
+          }
+        }
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!els.emojiPicker.contains(e.target) && e.target !== els.emojiBtn) {
+        els.emojiPicker.classList.remove('open');
+      }
+      if (!els.attachMenu.contains(e.target) && e.target !== els.attachBtn) {
+        els.attachMenu.classList.remove('open');
+      }
+    });
 
     // =====================================================================
     // HELPERS
@@ -1008,6 +924,7 @@
     // =====================================================================
     // INIT
     // =====================================================================
+    buildEmojiPicker();
     processData(window.rawMessages);  
     renderList();
     restartPolling(state.POLL_IDLE_MS); 
