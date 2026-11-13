@@ -253,6 +253,65 @@
       align-items: flex-start;
     }
   }
+
+  /* =================================================================
+     PRINT STYLES (FOR PDF GENERATION)
+     ================================================================= */
+  @media print {
+    /* 1. Force exact color printing */
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    /* 2. Hide sidebars, navbars, and buttons */
+    nav, .navbar, .sidebar, .dash-chat, .btn, button, footer, .no-print {
+      display: none !important;
+    }
+
+    /* 3. Reset backgrounds and margins */
+    body, html, .reports-page {
+      background-color: #ffffff !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      height: auto !important;
+    }
+
+    .container-fluid {
+      padding: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    /* 4. Clean up the header for the PDF */
+    .reports-header {
+      padding: 0 0 1rem 0 !important;
+      margin-bottom: 1.5rem !important;
+      border-bottom: 2px solid #e5e7eb !important;
+    }
+
+    /* 5. Prevent page breaks inside cards */
+    .kpi-card, .section-card, .stat-item, tr {
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+
+    /* 6. Adjust grid layouts for print */
+    .kpi-grid {
+      grid-template-columns: repeat(4, 1fr) !important;
+      gap: 1rem !important;
+    }
+
+    .reports-section-grid {
+      grid-template-columns: 1fr 1fr !important; /* Make columns even for PDF */
+      gap: 1rem !important;
+    }
+
+    .section-card {
+      box-shadow: none !important; /* Flat look for print */
+      border: 1px solid #e5e7eb !important;
+    }
+  }
 </style>
 {% endblock %}
 
@@ -266,9 +325,9 @@
         <h2>Financial & Performance Report</h2>
         <p>Overview of your revenue, occupancy, and booking activities.</p>
       </div>
-      <div>
+      <div class="no-print">
         <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">
-          <i class="fas fa-print me-2"></i> Print Report
+          <i class="fas fa-file-pdf me-2"></i> Save as PDF
         </button>
       </div>
     </div>
@@ -424,7 +483,7 @@
 
     </div>
 
-    <!-- Detailed Summary Table (Mockup for structure) -->
+    <!-- Detailed Summary Table -->
     <div class="section-card mt-4">
         <div class="section-header">
             <h3 class="section-title">Summary Overview</h3>
