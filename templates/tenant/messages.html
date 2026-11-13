@@ -166,7 +166,14 @@
   .meta { float: right; margin-left: 10px; margin-top: 4px; display: flex; align-items: center; gap: 3px; }
   .time { font-size: 0.7rem; color: rgba(255,255,255,0.8); }
   
-  .tick { font-size: 0.75rem; }
+  /* FIX: Prevent tick overlap */
+  .tick { 
+    font-size: 0.85rem; 
+    letter-spacing: -3px; 
+    padding-right: 3px;
+    vertical-align: middle;
+  }
+  
   .tick-blue { color: var(--chat-tick-blue); }
   .tick-grey { color: var(--chat-tick-grey); }
 
@@ -440,6 +447,7 @@
         if (typeof msg.read_at      === 'undefined') msg.read_at      = null;
         if (typeof msg.is_read      === 'undefined') msg.is_read      = false;
 
+        // MERGE receipt updates into existing messages
         const existing = state.conversations[otherId].messages.find(m => m.id === msg.id);
         if (existing) {
           if (msg.is_read)      existing.is_read = true;
@@ -453,6 +461,7 @@
           state.conversations[otherId].lastMsgTime = msg.timestamp;
         }
 
+        // Advance watermark with the newest of timestamp / delivered_at / read_at
         const candidates = [msg.timestamp, msg.delivered_at, msg.read_at].filter(Boolean);
         candidates.forEach(ts => {
           if (!state.lastMessageTimestamp ||
@@ -551,6 +560,8 @@
       .catch(e => console.error('Mark read error:', e));
 
       restartPolling(state.POLL_ACTIVE_MS);
+      
+      // IMMEDIATE POLL to trigger read receipts
       poll();
     }
 
@@ -666,6 +677,7 @@
     // SMART POLLING
     // =====================================================================
     function poll() {
+      // CRITICAL FIX: Send peer_id so the backend marks messages as read!
       const params = new URLSearchParams();
       if (state.lastMessageTimestamp) params.set('since', state.lastMessageTimestamp);
       if (state.activeChatId) params.set('peer_id', state.activeChatId);
@@ -693,6 +705,7 @@
           processData(data.messages);
         }
 
+        // Always re-render if chat is open so ticks flip properly
         if (chatIsOpen) {
           const convo = state.conversations[state.activeChatId];
           if (convo) {
