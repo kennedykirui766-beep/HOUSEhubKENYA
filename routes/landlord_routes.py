@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from models.models import FeaturedPayment, Message, PaymentLink, SystemSetting, User, House, Booking, Payment, MaintenanceRequest
 import cloudinary.uploader
 import json
+from utils_presence import touch_presence, is_user_online, presence_payload
 
 # Import email sender lazily inside handlers to avoid import-time failures
 
@@ -1077,6 +1078,14 @@ def poll_messages():
         return jsonify({"error": "Access denied"}), 403
 
     # =========================
+    # 0. PRESENCE: touch current user
+    #    Any poll = "I'm still here". Cheap write, keeps them online
+    #    while the chat page is open. Flips to offline ~2 min after
+    #    the tab is closed (polling stops → last_seen_at stops updating).
+    # =========================
+    touch_presence(current_user)
+
+    # =========================
     # 1. UNREAD COUNT (cheap)
     # =========================
     unread_count = Message.query.filter(
@@ -1105,18 +1114,22 @@ def poll_messages():
     msgs_query = msgs_query.order_by(Message.timestamp.asc()).limit(50).all()
 
     # =========================
-    # 3. FORMAT
+    # 3. FORMAT + collect peer IDs
     # =========================
     messages_data = []
+    peer_ids = set()
+
     for m in msgs_query:
         if m.sender_id == current_user.id:
-            other_id   = m.receiver_id
-            other_name = m.receiver.name
-            other_avatar = getattr(m.receiver, 'profile_picture', None)
+            other = m.receiver
         else:
-            other_id   = m.sender_id
-            other_name = m.sender.name
-            other_avatar = getattr(m.sender, 'profile_picture', None)
+            other = m.sender
+
+        other_id     = other.id
+        other_name   = other.name
+        other_avatar = getattr(other, 'profile_picture', None)
+
+        peer_ids.add(other_id)
 
         messages_data.append({
             "id":          m.id,
@@ -1132,10 +1145,35 @@ def poll_messages():
             }
         })
 
+    # =========================
+    # 4. PRESENCE MAP for peers
+    #    On the active chat we also want to report the peer's state
+    #    even if they haven't messaged during this poll window.
+    #    That covers the case "I open a chat, they're online but
+    #    haven't sent anything new".
+    # =========================
+    active_peer_id = request.args.get("peer_id", type=int)
+    if active_peer_id and active_peer_id != current_user.id:
+        peer_ids.add(active_peer_id)
+
+    presence = {}
+    if peer_ids:
+        peers = User.query.filter(User.id.in_(peer_ids)).all()
+        for p in peers:
+            presence[str(p.id)] = {
+                "online":    is_user_online(p),
+                "last_seen": p.last_seen_at.isoformat() if p.last_seen_at else None,
+            }
+
+    # Commit presence write together with anything else pending
+    db.session.commit()
+
     return jsonify({
         "unread_count": unread_count,
-        "messages":     messages_data
-    })    
+        "messages":     messages_data,
+        "presence":     presence,
+    })
+
     
 @csrf.exempt
 @landlord_bp.route("/messages/mark_all_read", methods=["POST"])

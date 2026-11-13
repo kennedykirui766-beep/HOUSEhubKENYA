@@ -120,8 +120,22 @@
     color: white;
     font-weight: bold;
     overflow: hidden;
+    position: relative;
   }
   .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* Presence dot on avatar */
+  .presence-dot {
+    position: absolute;
+    bottom: 1px;
+    right: 1px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    background: #9aa5ac;
+  }
+  .presence-dot.online { background: #25d366; }
 
   .chat-info {
     flex: 1;
@@ -209,6 +223,8 @@
     height: 40px;
     border-radius: 50%;
     margin-right: 10px;
+    position: relative;
+    flex-shrink: 0;
   }
 
   .messages-scroll-area {
@@ -218,6 +234,20 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
+  }
+
+  /* --- Date Separator (WhatsApp style) --- */
+  .date-separator {
+    align-self: center;
+    background: #ffffff;
+    color: #54656f;
+    font-size: 0.75rem;
+    padding: 5px 12px;
+    border-radius: 7px;
+    box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
+    margin: 10px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
   }
 
   .msg-row {
@@ -273,6 +303,7 @@
     align-items: center;
     z-index: 50;
     flex-shrink: 0;
+    position: relative;
   }
 
   .footer-icon {
@@ -280,7 +311,12 @@
     font-size: 1.5rem;
     margin-right: 15px;
     cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    transition: color 0.15s;
   }
+  .footer-icon:hover { color: var(--wa-primary); }
 
   .input-wrapper {
     flex: 1;
@@ -309,13 +345,70 @@
   }
   .send-btn:hover { color: var(--wa-primary); }
 
+  /* --- Emoji picker --- */
+  .emoji-picker {
+    position: absolute;
+    bottom: 70px;
+    left: 16px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+    padding: 10px;
+    display: none;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+    width: 320px;
+    z-index: 200;
+  }
+  .emoji-picker.open { display: grid; }
+  .emoji-picker button {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background 0.12s;
+  }
+  .emoji-picker button:hover { background: #f0f2f5; }
+
+  /* --- Attachment menu --- */
+  .attach-menu {
+    position: absolute;
+    bottom: 70px;
+    left: 60px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+    padding: 8px;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 200;
+    min-width: 180px;
+  }
+  .attach-menu.open { display: flex; }
+  .attach-menu button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: none;
+    border: none;
+    padding: 10px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--wa-text-primary);
+    text-align: left;
+  }
+  .attach-menu button:hover { background: #f0f2f5; }
+  .attach-menu button i { color: var(--wa-primary); width: 20px; text-align: center; }
+
   /* --- 6. RESPONSIVE / MOBILE FIX --- */
   @media (max-width: 768px) {
     body.mobile-chat-open { overflow: hidden; }
 
-    .chat-support-btn {
-      display: none !important;
-    }
+    .chat-support-btn { display: none !important; }
 
     .chat-app-wrapper {
       top: var(--navbar-height);
@@ -349,21 +442,18 @@
 
     .chat-placeholder { display: none; }
 
-    body.chat-active .chat-main {
-      transform: translateX(0);
-    }
+    body.chat-active .chat-main { transform: translateX(0); }
 
     .back-btn { display: block; }
 
-    .chat-input-footer {
-      z-index: 100;
-      padding: 10px 10px;
-    }
+    .chat-input-footer { z-index: 100; padding: 10px 10px; }
+
+    .emoji-picker { width: calc(100vw - 32px); left: 16px; grid-template-columns: repeat(8, 1fr); }
+    .attach-menu { left: 50px; }
   }
 
   ::-webkit-scrollbar { width: 6px !important; }
   ::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.2); border-radius: 3px; }
-
 </style>
 {% endblock %}
 
@@ -420,13 +510,8 @@
         <div class="header-avatar" id="headerAvatar"></div>
         <div style="flex: 1;">
           <div style="font-weight: 600; color: var(--wa-text-primary);" id="headerName">Name</div>
-          <div style="font-size: 0.75rem; color: var(--wa-text-secondary);" id="headerStatus">online</div>
+          <div style="font-size: 0.75rem; color: var(--wa-text-secondary);" id="headerStatus">offline</div>
         </div>
-
-        <!-- Sim Button -->
-        <button id="simBtn" style="margin-left:auto; border:none; background:none; font-size:0.8rem; color:var(--wa-text-secondary); cursor:pointer;">
-          Sim Online
-        </button>
 
         <div style="color: #54656f; margin-left: 15px; display: flex; gap: 20px;">
           <i class="fas fa-search"></i>
@@ -440,8 +525,22 @@
 
       <!-- INPUT AREA -->
       <footer class="chat-input-footer">
-        <i class="far fa-smile footer-icon"></i>
-        <i class="fas fa-plus footer-icon" style="font-size: 1.2rem;"></i>
+        <!-- Emoji button + picker -->
+        <button type="button" class="footer-icon" id="emojiBtn" title="Emoji">
+          <i class="far fa-smile"></i>
+        </button>
+        <div class="emoji-picker" id="emojiPicker"></div>
+
+        <!-- Attachment button + menu -->
+        <button type="button" class="footer-icon" id="attachBtn" title="Attach">
+          <i class="fas fa-plus"></i>
+        </button>
+        <div class="attach-menu" id="attachMenu">
+          <button type="button" data-type="image"><i class="fas fa-image"></i> Photo</button>
+          <button type="button" data-type="document"><i class="fas fa-file-alt"></i> Document</button>
+          <button type="button" data-type="location"><i class="fas fa-map-marker-alt"></i> Location</button>
+        </div>
+
         <div class="input-wrapper">
           <input type="text" class="chat-text-input" id="msgInput" placeholder="Type a message" autocomplete="off">
         </div>
@@ -469,15 +568,13 @@
       activeChatId: null,
       isRecipientOnline: false,
 
-      // --- Smart polling state ---
-      // Tracks total unread count from the last poll so we can detect changes
+      // Presence map: { userId: true/false }
+      presence: {},
+
+      // Smart polling state
       lastKnownUnreadCount: null,
-      // Watermark: ISO timestamp of the newest message we have locally.
-      // Sent as ?since= so the server only returns messages newer than this.
       lastMessageTimestamp: null,
-      // Interval handle so we can clear it if needed
       pollInterval: null,
-      // How often to poll (ms). Active chat = 4s, idle = 15s
       POLL_ACTIVE_MS: 4000,
       POLL_IDLE_MS: 15000,
     };
@@ -499,9 +596,39 @@
       input: document.getElementById('msgInput'),
       sendBtn: document.getElementById('sendBtn'),
       backBtn: document.getElementById('backBtn'),
-      simBtn: document.getElementById('simBtn'),
-      body: document.body
+      body: document.body,
+      emojiBtn: document.getElementById('emojiBtn'),
+      emojiPicker: document.getElementById('emojiPicker'),
+      attachBtn: document.getElementById('attachBtn'),
+      attachMenu: document.getElementById('attachMenu'),
     };
+
+    // =====================================================================
+    // DATE HELPERS
+    // =====================================================================
+    function isSameDay(d1, d2) {
+      return d1.getFullYear() === d2.getFullYear() &&
+             d1.getMonth() === d2.getMonth() &&
+             d1.getDate() === d2.getDate();
+    }
+
+    function formatDateSeparator(isoStr) {
+      const d = new Date(isoStr);
+      const now = new Date();
+      const yesterday = new Date();
+      yesterday.setDate(now.getDate() - 1);
+
+      if (isSameDay(d, now)) return 'Today';
+      if (isSameDay(d, yesterday)) return 'Yesterday';
+
+      // Within the last 7 days → weekday name
+      const diffDays = Math.floor((now - d) / (1000 * 60 * 60 * 24));
+      if (diffDays >= 0 && diffDays < 7) {
+        return d.toLocaleDateString(undefined, { weekday: 'long' });
+      }
+      // Older → date string
+      return d.toLocaleDateString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
 
     // =====================================================================
     // PROCESS INITIAL DATA
@@ -524,7 +651,6 @@
 
         if (typeof msg.is_read === 'undefined') msg.is_read = false;
 
-        // Avoid duplicate messages (can happen when merging poll results)
         const alreadyExists = state.conversations[otherId].messages.some(m => m.id === msg.id);
         if (!alreadyExists) {
           state.conversations[otherId].messages.push(msg);
@@ -534,8 +660,6 @@
           state.conversations[otherId].lastMsgTime = msg.timestamp;
         }
 
-        // Keep the global timestamp watermark up to date so poll() sends
-        // the correct ?since= value and never re-fetches old messages.
         if (
           !state.lastMessageTimestamp ||
           new Date(msg.timestamp) > new Date(state.lastMessageTimestamp)
@@ -576,13 +700,28 @@
         const initials = convo.name ? convo.name.charAt(0).toUpperCase() : '?';
         const avatarHtml = convo.avatar ? `<img src="${convo.avatar}">` : `<span>${initials}</span>`;
 
-        const timeStr = new Date(lastMsg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        // Presence dot
+        const online = !!state.presence[convo.id];
+        const presenceHtml = `<span class="presence-dot ${online ? 'online' : ''}"></span>`;
 
-        const isOnline = (state.activeChatId === convo.id) ? state.isRecipientOnline : false;
-        const tickHtml = (lastMsg.sender_id === state.currentUserId) ? getTickHtml(lastMsg, isOnline) : '';
+        // Last message time → human-friendly
+        const lastMsgDate = new Date(lastMsg.timestamp);
+        const now = new Date();
+        let timeStr;
+        if (isSameDay(lastMsgDate, now)) {
+          timeStr = lastMsgDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        } else if (isSameDay(lastMsgDate, new Date(now.getTime() - 86400000))) {
+          timeStr = 'Yesterday';
+        } else {
+          timeStr = lastMsgDate.toLocaleDateString(undefined, { day: '2-digit', month: '2-digit' });
+        }
+
+        const tickHtml = (lastMsg.sender_id === state.currentUserId)
+          ? getTickHtml(lastMsg, online)
+          : '';
 
         div.innerHTML = `
-          <div class="avatar">${avatarHtml}</div>
+          <div class="avatar">${avatarHtml}${presenceHtml}</div>
           <div class="chat-info">
             <div class="info-top">
               <span class="chat-name" title="${convo.name}">${convo.name}</span>
@@ -604,7 +743,6 @@
     function loadChat(id) {
       state.activeChatId = id;
       const convo = state.conversations[id];
-      state.isRecipientOnline = false;
       updateStatusUI();
 
       renderList();
@@ -620,14 +758,28 @@
         : `<div style="width:100%; height:100%; background:#00a884; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white;">${initials}</div>`;
 
       renderMessages(convo.messages);
-
-      // Switch to fast polling now that the user opened a chat
       restartPolling(state.POLL_ACTIVE_MS);
     }
 
     function renderMessages(messages) {
       els.messagesArea.innerHTML = '';
-      messages.forEach(msg => renderBubble(msg));
+
+      let lastDay = null;
+      messages.forEach(msg => {
+        const msgDate = new Date(msg.timestamp);
+
+        // Insert date separator when the day changes
+        if (!lastDay || !isSameDay(lastDay, msgDate)) {
+          const sep = document.createElement('div');
+          sep.className = 'date-separator';
+          sep.textContent = formatDateSeparator(msg.timestamp);
+          els.messagesArea.appendChild(sep);
+          lastDay = msgDate;
+        }
+
+        renderBubble(msg);
+      });
+
       els.messagesArea.scrollTop = els.messagesArea.scrollHeight;
     }
 
@@ -640,9 +792,12 @@
       let tickHtml = '';
       if (isMe) tickHtml = getTickHtml(msg, state.isRecipientOnline);
 
+      // Escape content to prevent HTML injection
+      const safeContent = escapeHtml(msg.content);
+
       row.innerHTML = `
         <div class="bubble">
-          ${msg.content}
+          ${safeContent}
           <div class="meta">
             <span class="time">${timeStr}</span>
             ${tickHtml}
@@ -650,6 +805,16 @@
         </div>
       `;
       els.messagesArea.appendChild(row);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/\n/g, '<br>');
     }
 
     // =====================================================================
@@ -670,7 +835,7 @@
       };
 
       state.conversations[state.activeChatId].messages.push(tempMsg);
-      renderBubble(tempMsg);
+      renderMessages(state.conversations[state.activeChatId].messages);
       els.input.value = '';
       els.messagesArea.scrollTop = els.messagesArea.scrollHeight;
       renderList();
@@ -688,7 +853,6 @@
           const tempMsgIndex = convo.messages.length - 1;
           if (convo.messages[tempMsgIndex].id === tempMsg.id) {
             convo.messages[tempMsgIndex] = realMsg;
-            // Advance the watermark so the next poll won't re-fetch this message
             if (
               !state.lastMessageTimestamp ||
               new Date(realMsg.timestamp) > new Date(state.lastMessageTimestamp)
@@ -706,20 +870,20 @@
     }
 
     // =====================================================================
-    // STATUS UI
+    // STATUS UI (uses real presence from server)
     // =====================================================================
     function updateStatusUI() {
-      if (state.isRecipientOnline) {
+      const online = state.activeChatId ? !!state.presence[state.activeChatId] : false;
+      state.isRecipientOnline = online;
+
+      if (online) {
         els.headerStatus.textContent = "online";
         els.headerStatus.style.color = "var(--wa-primary)";
-        els.simBtn.textContent = "Go Offline";
-        els.simBtn.style.color = "var(--wa-primary)";
       } else {
         els.headerStatus.textContent = "offline";
         els.headerStatus.style.color = "var(--wa-text-secondary)";
-        els.simBtn.textContent = "Go Online";
-        els.simBtn.style.color = "var(--wa-text-secondary)";
       }
+
       if (state.activeChatId) {
         renderMessages(state.conversations[state.activeChatId].messages);
         renderList();
@@ -731,22 +895,9 @@
     }
 
     // =====================================================================
-    // SMART POLLING
-    //
-    // Two conditions trigger an actual message fetch:
-    //   1. User has a chat open (activeChatId is set)
-    //   2. The server-reported total unread count changed since last poll
-    //
-    // The poll endpoint is /landlord/poll_messages and should return:
-    //   { unread_count: <int>, messages: [...] }
-    //
-    // When neither condition is true we still call the lightweight poll
-    // endpoint but skip the heavier message merge / re-render work.
+    // SMART POLLING (now also updates presence)
     // =====================================================================
     function poll() {
-      // Build URL — append ?since= so the server only returns messages
-      // newer than the newest one we already have locally. This avoids
-      // re-fetching the entire history on every tick.
       let url = '/landlord/poll_messages';
       if (state.lastMessageTimestamp) {
         url += '?since=' + encodeURIComponent(state.lastMessageTimestamp);
@@ -761,28 +912,32 @@
         return res.json();
       })
       .then(data => {
+        // --- Presence update ---
+        if (data.presence && typeof data.presence === 'object') {
+          const changed = Object.keys(data.presence).some(
+            uid => state.presence[uid] !== data.presence[uid]
+          );
+          state.presence = data.presence;
+          if (changed) {
+            updateStatusUI();
+            renderList();
+          }
+        }
+
         const newUnreadCount = data.unread_count ?? 0;
         const chatIsOpen     = state.activeChatId !== null;
         const unreadChanged  = state.lastKnownUnreadCount !== null &&
                                newUnreadCount !== state.lastKnownUnreadCount;
 
-        // Update our snapshot of unread count regardless
         state.lastKnownUnreadCount = newUnreadCount;
 
-        // --- Only process messages if one of the two conditions is met ---
         if (!chatIsOpen && !unreadChanged) {
-          // Nothing to do — skip expensive merge & re-render
           return;
         }
 
-        // Merge new messages into local state.
-        // processData() also advances state.lastMessageTimestamp automatically,
-        // so the next poll will use the updated ?since= watermark.
         if (data.messages && data.messages.length > 0) {
           processData(data.messages);
 
-          // If a chat is open, append only the new bubbles that arrived
-          // (avoid a full re-render to prevent scroll-jump for the user).
           if (chatIsOpen) {
             const convo = state.conversations[state.activeChatId];
             if (convo) {
@@ -794,29 +949,130 @@
             }
           }
 
-          // Always refresh the sidebar list so last-message previews stay current
           renderList();
         }
       })
       .catch(err => {
-        // Silently swallow network errors so polling keeps running
         console.warn('[Poll]', err.message);
       });
     }
 
-    // Helper: returns true if the scroll area is near the bottom (within 60px)
     function isScrolledToBottom(el) {
       return el.scrollHeight - el.scrollTop - el.clientHeight < 60;
     }
 
-    // Start (or restart) the polling interval at a given interval in ms.
-    // Clears any existing interval first to avoid duplicates.
     function restartPolling(intervalMs) {
       if (state.pollInterval) {
         clearInterval(state.pollInterval);
       }
       state.pollInterval = setInterval(poll, intervalMs);
     }
+
+    // =====================================================================
+    // EMOJI PICKER
+    // =====================================================================
+    const EMOJIS = [
+      '😀','😃','😄','😁','😆','😅','😂','🤣',
+      '😊','😇','🙂','🙃','😉','😌','😍','🥰',
+      '😘','😗','😙','😚','😋','😛','😝','😜',
+      '🤪','🤨','🧐','🤓','😎','🤩','🥳','😏',
+      '😒','😞','😔','😟','😕','🙁','☹️','😣',
+      '😖','😫','😩','🥺','😢','😭','😤','😠',
+      '😡','🤬','🤯','😳','🥵','🥶','😱','😨',
+      '😰','😥','😓','🤗','🤔','🤭','🤫','🤥',
+      '😶','😐','😑','😬','🙄','😯','😦','😧',
+      '😮','😲','🥱','😴','🤤','😪','😵','🤐',
+      '🥴','🤢','🤮','🤧','😷','🤒','🤕','👍',
+      '👎','👌','✌️','🤞','🤟','🤘','🤙','👈',
+      '👉','👆','👇','☝️','✋','🤚','🖐','🖖',
+      '👋','🤝','🙏','💪','❤️','🧡','💛','💚',
+      '💙','💜','🖤','🤍','💔','❣️','💕','💞',
+      '💓','💗','💖','💘','💝','🎉','🎊','🎁'
+    ];
+
+    function buildEmojiPicker() {
+      els.emojiPicker.innerHTML = '';
+      EMOJIS.forEach(emoji => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = emoji;
+        btn.addEventListener('click', () => {
+          // Insert at cursor position in input
+          const start = els.input.selectionStart ?? els.input.value.length;
+          const end = els.input.selectionEnd ?? els.input.value.length;
+          const before = els.input.value.substring(0, start);
+          const after = els.input.value.substring(end);
+          els.input.value = before + emoji + after;
+          const newPos = start + emoji.length;
+          els.input.setSelectionRange(newPos, newPos);
+          els.input.focus();
+        });
+        els.emojiPicker.appendChild(btn);
+      });
+    }
+
+    els.emojiBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      els.attachMenu.classList.remove('open');
+      els.emojiPicker.classList.toggle('open');
+    });
+
+    // =====================================================================
+    // ATTACHMENT MENU
+    // =====================================================================
+    els.attachBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      els.emojiPicker.classList.remove('open');
+      els.attachMenu.classList.toggle('open');
+    });
+
+    els.attachMenu.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const type = btn.dataset.type;
+        els.attachMenu.classList.remove('open');
+
+        if (type === 'image' || type === 'document') {
+          // Open a file picker
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.accept = type === 'image' ? 'image/*' : '*/*';
+          fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+            // Send filename as a message (placeholder until upload endpoint exists)
+            els.input.value = `📎 ${file.name}`;
+            els.input.focus();
+          });
+          fileInput.click();
+        } else if (type === 'location') {
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              pos => {
+                els.input.value = `📍 https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                els.input.focus();
+              },
+              () => {
+                els.input.value = '📍 (Location unavailable)';
+                els.input.focus();
+              }
+            );
+          } else {
+            els.input.value = '📍 (Geolocation not supported)';
+            els.input.focus();
+          }
+        }
+      });
+    });
+
+    // Close pickers when clicking elsewhere
+    document.addEventListener('click', (e) => {
+      if (!els.emojiPicker.contains(e.target) && e.target !== els.emojiBtn) {
+        els.emojiPicker.classList.remove('open');
+      }
+      if (!els.attachMenu.contains(e.target) && e.target !== els.attachBtn) {
+        els.attachMenu.classList.remove('open');
+      }
+    });
 
     // =====================================================================
     // EVENTS
@@ -829,7 +1085,6 @@
       els.body.classList.remove('mobile-chat-open');
       state.activeChatId = null;
 
-      // Back to idle polling speed
       restartPolling(state.POLL_IDLE_MS);
 
       setTimeout(() => {
@@ -848,12 +1103,6 @@
       });
     });
 
-    els.simBtn.addEventListener('click', () => {
-      state.isRecipientOnline = !state.isRecipientOnline;
-      updateStatusUI();
-    });
-
-    // Pause polling when the browser tab is hidden; resume when visible again
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         if (state.pollInterval) {
@@ -861,10 +1110,8 @@
           state.pollInterval = null;
         }
       } else {
-        // Resume at the right speed for current context
         const intervalMs = state.activeChatId ? state.POLL_ACTIVE_MS : state.POLL_IDLE_MS;
         restartPolling(intervalMs);
-        // Do an immediate poll so the user gets fresh data right away
         poll();
       }
     });
@@ -872,13 +1119,10 @@
     // =====================================================================
     // INIT
     // =====================================================================
+    buildEmojiPicker();
     processData(window.rawMessages);
     renderList();
-
-    // Kick off idle polling — switches to fast polling inside loadChat()
     restartPolling(state.POLL_IDLE_MS);
-
-    // Seed the initial unread count with a first poll right away
     poll();
   });
 </script>

@@ -9,6 +9,7 @@ from flask import Blueprint, current_app, flash, jsonify, render_template, reque
 from flask_login import login_required, current_user, logout_user
 from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
+from utils_presence import touch_presence, is_user_online, presence_payload
 
 import pyotp
 import qrcode as qr_code
