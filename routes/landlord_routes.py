@@ -1094,8 +1094,54 @@ def poll_messages():
     ).count()
 
     # =========================
-    # 2. ONLY FETCH NEW MESSAGES
-    #    Use ?since= to avoid re-sending everything
+    # 2. DELIVERY RECEIPTS
+    #    Any message addressed to me that I haven't acked yet is now
+    #    "delivered" — my device just fetched it. Stamp delivered_at.
+    #    (is_read stays False until I actually open that chat.)
+    # =========================
+    now_utc = datetime.utcnow()
+    Message.query.filter(
+        Message.receiver_id == current_user.id,
+        Message.delivered_at.is_(None)
+    ).update(
+        {"delivered_at": now_utc},
+        synchronize_session=False,
+    )
+
+    # =========================
+    # 3. READ RECEIPTS
+    #    If the client tells us which chat is open (?peer_id=X), any
+    #    incoming messages from that peer that are still unread get
+    #    marked read right now — that's what turns the sender's ticks
+    #    blue on their next poll.
+    # =========================
+    active_peer_id = request.args.get("peer_id", type=int)
+    if active_peer_id and active_peer_id != current_user.id:
+        Message.query.filter(
+            Message.sender_id == active_peer_id,
+            Message.receiver_id == current_user.id,
+            Message.is_read == False
+        ).update(
+            {
+                "is_read": True,
+                "read_at": now_utc,
+                # Also fill delivered_at if it was somehow still NULL
+                "delivered_at": func.coalesce(Message.delivered_at, now_utc),
+            },
+            synchronize_session=False,
+        )
+
+    # =========================
+    # 4. ONLY FETCH NEW MESSAGES
+    #    Use ?since= to avoid re-sending everything.
+    #
+    #    We also include messages whose receipts changed since the last
+    #    poll, so the sender sees ticks flip from grey → blue even when
+    #    no new text was sent. The watermark is the newest of:
+    #       - last message.timestamp
+    #       - last delivered_at
+    #       - last read_at
+    #    The client sends this as ?since= on the next tick.
     # =========================
     since_param = request.args.get("since")  # ISO timestamp string
 
@@ -1107,14 +1153,20 @@ def poll_messages():
     if since_param:
         try:
             since_dt = datetime.fromisoformat(since_param)
-            msgs_query = msgs_query.filter(Message.timestamp > since_dt)
+            msgs_query = msgs_query.filter(
+                or_(
+                    Message.timestamp    > since_dt,
+                    Message.delivered_at > since_dt,
+                    Message.read_at      > since_dt,
+                )
+            )
         except ValueError:
             pass  # bad timestamp — return all recent messages as fallback
 
-    msgs_query = msgs_query.order_by(Message.timestamp.asc()).limit(50).all()
+    msgs_query = msgs_query.order_by(Message.timestamp.asc()).limit(100).all()
 
     # =========================
-    # 3. FORMAT + collect peer IDs
+    # 5. FORMAT + collect peer IDs
     # =========================
     messages_data = []
     peer_ids = set()
@@ -1132,12 +1184,15 @@ def poll_messages():
         peer_ids.add(other_id)
 
         messages_data.append({
-            "id":          m.id,
-            "sender_id":   m.sender_id,
-            "receiver_id": m.receiver_id,
-            "content":     m.content,
-            "timestamp":   serialize_timestamp(m.timestamp),
-            "is_read":     m.is_read,
+            "id":           m.id,
+            "sender_id":    m.sender_id,
+            "receiver_id":  m.receiver_id,
+            "content":      m.content,
+            "timestamp":    serialize_timestamp(m.timestamp),
+            "is_read":      m.is_read,
+            # New receipt fields — used by the frontend to pick tick style
+            "delivered_at": m.delivered_at.isoformat() if m.delivered_at else None,
+            "read_at":      m.read_at.isoformat() if m.read_at else None,
             "other_user": {
                 "id":     other_id,
                 "name":   other_name,
@@ -1146,13 +1201,12 @@ def poll_messages():
         })
 
     # =========================
-    # 4. PRESENCE MAP for peers
+    # 6. PRESENCE MAP for peers
     #    On the active chat we also want to report the peer's state
     #    even if they haven't messaged during this poll window.
     #    That covers the case "I open a chat, they're online but
     #    haven't sent anything new".
     # =========================
-    active_peer_id = request.args.get("peer_id", type=int)
     if active_peer_id and active_peer_id != current_user.id:
         peer_ids.add(active_peer_id)
 
@@ -1165,7 +1219,7 @@ def poll_messages():
                 "last_seen": p.last_seen_at.isoformat() if p.last_seen_at else None,
             }
 
-    # Commit presence write together with anything else pending
+    # Commit presence write + receipt updates together
     db.session.commit()
 
     return jsonify({

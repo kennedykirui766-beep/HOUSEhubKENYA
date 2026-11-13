@@ -568,7 +568,7 @@
       activeChatId: null,
       isRecipientOnline: false,
 
-      // Presence map: { userId: true/false }
+      // Presence map: { userId: { online: bool, last_seen: ISO|null } }
       presence: {},
 
       // Smart polling state
@@ -621,17 +621,25 @@
       if (isSameDay(d, now)) return 'Today';
       if (isSameDay(d, yesterday)) return 'Yesterday';
 
-      // Within the last 7 days → weekday name
       const diffDays = Math.floor((now - d) / (1000 * 60 * 60 * 24));
       if (diffDays >= 0 && diffDays < 7) {
         return d.toLocaleDateString(undefined, { weekday: 'long' });
       }
-      // Older → date string
       return d.toLocaleDateString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 
+    function formatRelativeTime(isoStr) {
+      if (!isoStr) return '';
+      const d = new Date(isoStr);
+      const diffSec = Math.floor((Date.now() - d.getTime()) / 1000);
+      if (diffSec < 60) return 'just now';
+      if (diffSec < 3600) return Math.floor(diffSec / 60) + 'm ago';
+      if (diffSec < 86400) return Math.floor(diffSec / 3600) + 'h ago';
+      return d.toLocaleDateString();
+    }
+
     // =====================================================================
-    // PROCESS INITIAL DATA
+    // PROCESS DATA (merge receipts into existing messages)
     // =====================================================================
     function processData(messages) {
       messages.forEach(msg => {
@@ -651,8 +659,14 @@
 
         if (typeof msg.is_read === 'undefined') msg.is_read = false;
 
-        const alreadyExists = state.conversations[otherId].messages.some(m => m.id === msg.id);
-        if (!alreadyExists) {
+        // Merge into existing message if we already have it (receipt updates!)
+        const existing = state.conversations[otherId].messages.find(m => m.id === msg.id);
+        if (existing) {
+          if (msg.is_read)      existing.is_read = true;
+          if (msg.read_at)      existing.read_at = msg.read_at;
+          if (msg.delivered_at) existing.delivered_at = msg.delivered_at;
+          if (msg.is_read && !existing.is_read) existing.is_read = true;
+        } else {
           state.conversations[otherId].messages.push(msg);
         }
 
@@ -660,21 +674,35 @@
           state.conversations[otherId].lastMsgTime = msg.timestamp;
         }
 
-        if (
-          !state.lastMessageTimestamp ||
-          new Date(msg.timestamp) > new Date(state.lastMessageTimestamp)
-        ) {
-          state.lastMessageTimestamp = msg.timestamp;
-        }
+        // Advance watermark with the newest of timestamp / delivered_at / read_at
+        const candidates = [msg.timestamp, msg.delivered_at, msg.read_at].filter(Boolean);
+        candidates.forEach(ts => {
+          if (!state.lastMessageTimestamp ||
+              new Date(ts) > new Date(state.lastMessageTimestamp)) {
+            state.lastMessageTimestamp = ts;
+          }
+        });
       });
     }
 
     // =====================================================================
     // TICK LOGIC
+    //   - read_at/is_read → double blue
+    //   - delivered_at    → double grey
+    //   - otherwise       → single grey
+    //   - _pending (temp) → clock
     // =====================================================================
-    function getTickHtml(msg, isOnline) {
-      if (msg.is_read) return '<i class="fas fa-check-double tick tick-blue"></i>';
-      if (isOnline)    return '<i class="fas fa-check-double tick tick-grey"></i>';
+    function getTickHtml(msg) {
+      if (!msg) return '';
+      if (msg._pending) {
+        return '<i class="far fa-clock tick tick-grey"></i>';
+      }
+      if (msg.is_read || msg.read_at) {
+        return '<i class="fas fa-check-double tick tick-blue"></i>';
+      }
+      if (msg.delivered_at) {
+        return '<i class="fas fa-check-double tick tick-grey"></i>';
+      }
       return '<i class="fas fa-check tick tick-grey"></i>';
     }
 
@@ -701,10 +729,11 @@
         const avatarHtml = convo.avatar ? `<img src="${convo.avatar}">` : `<span>${initials}</span>`;
 
         // Presence dot
-        const online = !!state.presence[convo.id];
+        const p = state.presence[convo.id];
+        const online = !!(p && p.online);
         const presenceHtml = `<span class="presence-dot ${online ? 'online' : ''}"></span>`;
 
-        // Last message time → human-friendly
+        // Last message time
         const lastMsgDate = new Date(lastMsg.timestamp);
         const now = new Date();
         let timeStr;
@@ -717,7 +746,7 @@
         }
 
         const tickHtml = (lastMsg.sender_id === state.currentUserId)
-          ? getTickHtml(lastMsg, online)
+          ? getTickHtml(lastMsg)
           : '';
 
         div.innerHTML = `
@@ -759,6 +788,9 @@
 
       renderMessages(convo.messages);
       restartPolling(state.POLL_ACTIVE_MS);
+
+      // Immediately poll with peer_id so the server marks messages read
+      poll();
     }
 
     function renderMessages(messages) {
@@ -768,7 +800,6 @@
       messages.forEach(msg => {
         const msgDate = new Date(msg.timestamp);
 
-        // Insert date separator when the day changes
         if (!lastDay || !isSameDay(lastDay, msgDate)) {
           const sep = document.createElement('div');
           sep.className = 'date-separator';
@@ -790,9 +821,8 @@
 
       const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       let tickHtml = '';
-      if (isMe) tickHtml = getTickHtml(msg, state.isRecipientOnline);
+      if (isMe) tickHtml = getTickHtml(msg);
 
-      // Escape content to prevent HTML injection
       const safeContent = escapeHtml(msg.content);
 
       row.innerHTML = `
@@ -804,6 +834,22 @@
           </div>
         </div>
       `;
+
+      // Long-press / right-click on a sent bubble to see read time
+      if (isMe) {
+        const bubble = row.querySelector('.bubble');
+        bubble.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          let info = 'Sent';
+          if (msg.read_at) {
+            info = 'Read at ' + new Date(msg.read_at).toLocaleString();
+          } else if (msg.delivered_at) {
+            info = 'Delivered at ' + new Date(msg.delivered_at).toLocaleString();
+          }
+          alert(info);
+        });
+      }
+
       els.messagesArea.appendChild(row);
     }
 
@@ -831,6 +877,7 @@
         content: text,
         timestamp: new Date().toISOString(),
         is_read: false,
+        _pending: true,
         other_user: state.conversations[state.activeChatId]
       };
 
@@ -853,12 +900,15 @@
           const tempMsgIndex = convo.messages.length - 1;
           if (convo.messages[tempMsgIndex].id === tempMsg.id) {
             convo.messages[tempMsgIndex] = realMsg;
-            if (
-              !state.lastMessageTimestamp ||
-              new Date(realMsg.timestamp) > new Date(state.lastMessageTimestamp)
-            ) {
-              state.lastMessageTimestamp = realMsg.timestamp;
-            }
+
+            const candidates = [realMsg.timestamp, realMsg.delivered_at, realMsg.read_at].filter(Boolean);
+            candidates.forEach(ts => {
+              if (!state.lastMessageTimestamp ||
+                  new Date(ts) > new Date(state.lastMessageTimestamp)) {
+                state.lastMessageTimestamp = ts;
+              }
+            });
+
             renderMessages(convo.messages);
             renderList();
           }
@@ -873,12 +923,16 @@
     // STATUS UI (uses real presence from server)
     // =====================================================================
     function updateStatusUI() {
-      const online = state.activeChatId ? !!state.presence[state.activeChatId] : false;
+      const p = state.activeChatId ? state.presence[state.activeChatId] : null;
+      const online = !!(p && p.online);
       state.isRecipientOnline = online;
 
       if (online) {
         els.headerStatus.textContent = "online";
         els.headerStatus.style.color = "var(--wa-primary)";
+      } else if (p && p.last_seen) {
+        els.headerStatus.textContent = "last seen " + formatRelativeTime(p.last_seen);
+        els.headerStatus.style.color = "var(--wa-text-secondary)";
       } else {
         els.headerStatus.textContent = "offline";
         els.headerStatus.style.color = "var(--wa-text-secondary)";
@@ -895,13 +949,15 @@
     }
 
     // =====================================================================
-    // SMART POLLING (now also updates presence)
+    // SMART POLLING
     // =====================================================================
     function poll() {
+      const params = new URLSearchParams();
+      if (state.lastMessageTimestamp) params.set('since', state.lastMessageTimestamp);
+      if (state.activeChatId) params.set('peer_id', state.activeChatId);
+
       let url = '/landlord/poll_messages';
-      if (state.lastMessageTimestamp) {
-        url += '?since=' + encodeURIComponent(state.lastMessageTimestamp);
-      }
+      if ([...params].length) url += '?' + params.toString();
 
       fetch(url, {
         method: 'GET',
@@ -914,14 +970,9 @@
       .then(data => {
         // --- Presence update ---
         if (data.presence && typeof data.presence === 'object') {
-          const changed = Object.keys(data.presence).some(
-            uid => state.presence[uid] !== data.presence[uid]
-          );
           state.presence = data.presence;
-          if (changed) {
-            updateStatusUI();
-            renderList();
-          }
+          updateStatusUI();
+          renderList();
         }
 
         const newUnreadCount = data.unread_count ?? 0;
@@ -931,24 +982,24 @@
 
         state.lastKnownUnreadCount = newUnreadCount;
 
-        if (!chatIsOpen && !unreadChanged) {
-          return;
-        }
-
+        // Merge any incoming messages (including receipt-only updates)
         if (data.messages && data.messages.length > 0) {
           processData(data.messages);
+        }
 
-          if (chatIsOpen) {
-            const convo = state.conversations[state.activeChatId];
-            if (convo) {
-              const wasAtBottom = isScrolledToBottom(els.messagesArea);
-              renderMessages(convo.messages);
-              if (wasAtBottom) {
-                els.messagesArea.scrollTop = els.messagesArea.scrollHeight;
-              }
+        // While a chat is open, ALWAYS re-render so tick changes appear
+        // even when no new message text arrives.
+        if (chatIsOpen) {
+          const convo = state.conversations[state.activeChatId];
+          if (convo) {
+            const wasAtBottom = isScrolledToBottom(els.messagesArea);
+            renderMessages(convo.messages);
+            if (wasAtBottom) {
+              els.messagesArea.scrollTop = els.messagesArea.scrollHeight;
             }
           }
-
+          renderList();
+        } else if (unreadChanged || (data.messages && data.messages.length > 0)) {
           renderList();
         }
       })
@@ -997,7 +1048,6 @@
         btn.type = 'button';
         btn.textContent = emoji;
         btn.addEventListener('click', () => {
-          // Insert at cursor position in input
           const start = els.input.selectionStart ?? els.input.value.length;
           const end = els.input.selectionEnd ?? els.input.value.length;
           const before = els.input.value.substring(0, start);
@@ -1032,14 +1082,12 @@
         els.attachMenu.classList.remove('open');
 
         if (type === 'image' || type === 'document') {
-          // Open a file picker
           const fileInput = document.createElement('input');
           fileInput.type = 'file';
           fileInput.accept = type === 'image' ? 'image/*' : '*/*';
           fileInput.addEventListener('change', () => {
             const file = fileInput.files[0];
             if (!file) return;
-            // Send filename as a message (placeholder until upload endpoint exists)
             els.input.value = `📎 ${file.name}`;
             els.input.focus();
           });
@@ -1064,7 +1112,6 @@
       });
     });
 
-    // Close pickers when clicking elsewhere
     document.addEventListener('click', (e) => {
       if (!els.emojiPicker.contains(e.target) && e.target !== els.emojiBtn) {
         els.emojiPicker.classList.remove('open');
