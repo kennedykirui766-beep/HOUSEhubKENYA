@@ -157,7 +157,8 @@
 
   .back-btn { display: none; border: none; background: none; color: var(--text-secondary); font-size: 1.2rem; margin-right: 10px; cursor: pointer; }
 
-  .header-avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; background-color: var(--sidebar-hover); }
+  .header-avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; background-color: var(--sidebar-hover); overflow: hidden; }
+  .header-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
   .messages-scroll-area { flex: 1; overflow-y: auto; padding: 20px 5%; display: flex; flex-direction: column; gap: 8px; }
 
@@ -171,7 +172,6 @@
     box-shadow: 0 1px 0.5px rgba(0,0,0,0.13); word-wrap: break-word;
   }
 
-  /* FIX: Make sent bubbles light green with dark text so it's visible */
   .bubble.sent { 
     background-color: var(--chat-bubble-out); 
     border-top-right-radius: 0; 
@@ -186,15 +186,13 @@
 
   [data-bs-theme="light"] .bubble.received { color: #111b21; }
   [data-bs-theme="dark"] .bubble.received { color: #f1f5f9; }
-  [data-bs-theme="dark"] .bubble.sent { color: white; } /* White text in dark mode */
+  [data-bs-theme="dark"] .bubble.sent { color: white; }
 
   .meta { float: right; margin-left: 10px; margin-top: 4px; display: flex; align-items: center; gap: 3px; }
   
-  /* FIX: Time color so it's visible inside the green bubble */
   .time { font-size: 0.7rem; color: rgba(0,0,0,0.45); }
   [data-bs-theme="dark"] .time { color: rgba(255,255,255,0.8); }
   
-  /* FIX: Prevent tick overlap and make them clearly visible */
   .tick { 
     font-size: 0.85rem; 
     letter-spacing: -3px; 
@@ -497,7 +495,7 @@
           state.conversations[otherId] = {
             id: otherId,
             name: otherInfo.name || 'Landlord',
-            avatar: otherInfo.profile_image,
+            avatar: otherInfo.profile_image, // <--- USING LANDLORD'S PROFILE PICTURE
             messages: [],
             lastMsgTime: msg.timestamp
           };
