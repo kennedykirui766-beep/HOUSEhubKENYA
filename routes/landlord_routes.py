@@ -12,6 +12,7 @@ from models.models import FeaturedPayment, Message, PaymentLink, SystemSetting, 
 import cloudinary.uploader
 import json
 from utils_presence import touch_presence, is_user_online, presence_payload
+from sqlalchemy import or_, func
 
 # Import email sender lazily inside handlers to avoid import-time failures
 
