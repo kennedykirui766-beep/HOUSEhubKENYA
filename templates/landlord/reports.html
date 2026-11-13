@@ -256,20 +256,21 @@
 
   /* =================================================================
      PRINT STYLES (FOR PDF GENERATION)
+     This makes the page look like a clean document instead of a webpage
      ================================================================= */
   @media print {
-    /* 1. Force exact color printing */
+    /* 1. Force exact color printing so the charts and badges keep their colors */
     * {
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
     }
 
-    /* 2. Hide sidebars, navbars, and buttons */
+    /* 2. Hide navigation, sidebars, footers, and buttons */
     nav, .navbar, .sidebar, .dash-chat, .btn, button, footer, .no-print {
       display: none !important;
     }
 
-    /* 3. Reset backgrounds and margins */
+    /* 3. Reset the body and background for the printed document */
     body, html, .reports-page {
       background-color: #ffffff !important;
       margin: 0 !important;
@@ -277,26 +278,27 @@
       height: auto !important;
     }
 
+    /* 4. Make the container use the full width of the paper */
     .container-fluid {
       padding: 0 !important;
       width: 100% !important;
       max-width: 100% !important;
     }
 
-    /* 4. Clean up the header for the PDF */
+    /* 5. Clean up the header for the PDF */
     .reports-header {
       padding: 0 0 1rem 0 !important;
       margin-bottom: 1.5rem !important;
       border-bottom: 2px solid #e5e7eb !important;
     }
 
-    /* 5. Prevent page breaks inside cards */
+    /* 6. Prevent cards from being cut in half across pages */
     .kpi-card, .section-card, .stat-item, tr {
       page-break-inside: avoid !important;
       break-inside: avoid !important;
     }
 
-    /* 6. Adjust grid layouts for print */
+    /* 7. Adjust grid layouts for print to fit on A4 paper */
     .kpi-grid {
       grid-template-columns: repeat(4, 1fr) !important;
       gap: 1rem !important;
@@ -307,8 +309,9 @@
       gap: 1rem !important;
     }
 
+    /* 8. Flatten shadows for a cleaner document look */
     .section-card {
-      box-shadow: none !important; /* Flat look for print */
+      box-shadow: none !important;
       border: 1px solid #e5e7eb !important;
     }
   }
@@ -483,7 +486,7 @@
 
     </div>
 
-    <!-- Detailed Summary Table -->
+    <!-- Detailed Summary Table (Mockup for structure) -->
     <div class="section-card mt-4">
         <div class="section-header">
             <h3 class="section-title">Summary Overview</h3>
