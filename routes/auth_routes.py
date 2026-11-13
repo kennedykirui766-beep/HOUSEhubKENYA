@@ -163,18 +163,25 @@ def login():
                     flash("Use the approved admin email for this environment.", "danger")
                     return render_template("login.html")
 
-            # Always verify the user's account email before granting access.
-            code_obj = create_verification_code(user, method='email')
-            if send_2fa_email(user.email, user.name, code_obj.code, method='login'):
-                session['pending_2fa_user_id'] = user.id
-                session['2fa_method'] = 'email'
-                session['remember_me'] = remember_me
-                session['otp_resend_allowed_at'] = int(time.time()) + 30
-                flash("We sent a login code to your account email. Enter it to continue.", "info")
-                return redirect(url_for('auth.verify_2fa_login'))
+            # ============================================================
+            # TEMPORARILY DISABLED: Email 2FA on login
+            # Re-enable by uncommenting the block below.
+            # ============================================================
+            # # Always verify the user's account email before granting access.
+            # code_obj = create_verification_code(user, method='email')
+            # if send_2fa_email(user.email, user.name, code_obj.code, method='login'):
+            #     session['pending_2fa_user_id'] = user.id
+            #     session['2fa_method'] = 'email'
+            #     session['remember_me'] = remember_me
+            #     session['otp_resend_allowed_at'] = int(time.time()) + 30
+            #     flash("We sent a login code to your account email. Enter it to continue.", "info")
+            #     return redirect(url_for('auth.verify_2fa_login'))
+            #
+            # flash("Failed to send the login code. Please try again.", "danger")
+            # return render_template("login.html")
 
-            flash("Failed to send the login code. Please try again.", "danger")
-            return render_template("login.html")
+            # Log the user in directly (2FA bypassed for now).
+            login_user(user, remember=remember_me)
 
             # Redirect based on role
             if user.role == "tenant":
@@ -186,7 +193,7 @@ def login():
             elif user.role == "admin":
                 return redirect(url_for("admin.dashboard"))
             else:
-                return redirect(url_for("portal"))
+                return redirect(url_for("main.index"))
 
         except Exception as e:
             db.session.rollback()
@@ -196,10 +203,12 @@ def login():
 
     return render_template("login.html", admin_entry_required=admin_entry_required)
 
+
 @auth_bp.route('/semantic/admin')
 def semantic_admin_entry():
     """Private admin entrypoint page."""
     return render_template('semantic_admin_entry.html')
+
 
 @auth_bp.route('/semantic/admin/continue', methods=['POST'])
 def semantic_admin_continue():
@@ -599,6 +608,7 @@ def admin_2fa_verify():
         resend_wait_seconds=0,
         post_url=url_for('auth.admin_2fa_verify'),
     )
+
 
 # ------------------- UPDATE PROFILE -------------------
 @auth_bp.route("/update_profile", methods=["POST"])
