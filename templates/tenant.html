@@ -1,757 +1,749 @@
 {% extends "base.html" %}
 
-{% block title %}Tenant Dashboard{% endblock %}
+{% block title %}Dashboard · HOUSEhubKENYA{% endblock %}
 
 {% block styles %}
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
 <style>
-  /* ========== DASHBOARD PAGE STYLES ========== */
-  
-  /* Dashboard Header */
-  .dash-header {
-    margin-bottom: 2rem;
-  }
-  
-  .dash-welcome {
-    color: var(--text-primary);
-    font-weight: 700;
-    font-size: 1.75rem;
-    margin-bottom: 0.25rem;
-  }
-  
-  .dash-subtitle {
-    color: var(--text-secondary);
+  /* Scoped to the tenant dashboard. Everything is prefixed td- so it can't
+     collide with the shared styles in base.html. Colours come from base.html
+     variables, so dark mode keeps working. */
+
+  .td-wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    font-variant-numeric: tabular-nums;
   }
 
-  /* Stats Grid */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-  }
-
-  .stat-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
+  /* ---------- Page header ---------- */
+  .td-head {
     display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-    border-left: 4px solid transparent;
-  }
-
-  .stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
-  }
-
-  .stat-card.primary { border-left-color: var(--primary-color); }
-  .stat-card.warning { border-left-color: var(--warning-color); }
-  .stat-card.info { border-left-color: var(--info-color); }
-
-  .stat-icon-box {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    flex-shrink: 0;
-  }
-
-  .stat-card.primary .stat-icon-box { background: var(--primary-light); color: var(--primary-color); }
-  .stat-card.warning .stat-icon-box { background: rgba(255, 193, 7, 0.1); color: var(--warning-color); }
-  .stat-card.info .stat-icon-box { background: rgba(33, 150, 243, 0.1); color: var(--info-color); }
-
-  .stat-info h4 {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-    margin-bottom: 0.25rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .stat-value {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
-  }
-
-  .stat-link {
-    font-size: 0.9rem;
-    color: var(--primary-color);
-    font-weight: 600;
-    text-decoration: none;
-    margin-top: 0.25rem;
-    display: inline-block;
-  }
-  
-  .stat-link:hover { text-decoration: underline; }
-
-  /* Content Cards */
-  .dash-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    height: 100%;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-    margin-bottom: 1.5rem;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .dash-card:hover {
-    box-shadow: var(--shadow-md);
-  }
-
-  .dash-card-header {
-    display: flex;
+    align-items: flex-end;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.25rem;
-    padding-bottom: 1rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.75rem;
     border-bottom: 1px solid var(--border-color);
   }
-
-  .dash-card-title {
-    font-size: 1.1rem;
-    font-weight: 700;
+  .td-eyebrow {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+    margin-bottom: 0.2rem;
+  }
+  .td-title {
+    font-size: 1.6rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
     color: var(--text-primary);
     margin: 0;
   }
+  .td-head-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
-  .dash-card-link {
+  /* ---------- Buttons ---------- */
+  .td-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 0.95rem;
     font-size: 0.85rem;
-    color: var(--primary-color);
+    font-weight: 550;
+    line-height: 1.2;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-primary);
     text-decoration: none;
+    cursor: pointer;
+    transition: border-color .15s, background-color .15s, color .15s;
+  }
+  .td-btn:hover { border-color: var(--text-muted); color: var(--text-primary); }
+  .td-btn-solid {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #fff;
+  }
+  .td-btn-solid:hover { background: var(--primary-hover); border-color: var(--primary-hover); color: #fff; }
+  .td-btn-quiet { color: #b4372f; }
+  [data-bs-theme="dark"] .td-btn-quiet { color: #f08a82; }
+  .td-btn-block { width: 100%; justify-content: center; }
+
+  /* ---------- Hero: balance + property ---------- */
+  .td-hero {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    background: var(--card-bg);
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+  }
+  .td-hero-main { padding: 1.75rem 1.9rem; }
+  .td-hero-side {
+    padding: 1.75rem 1.9rem;
+    border-left: 1px solid var(--border-color);
+    background: var(--body-bg);
+  }
+  .td-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+  .td-balance {
+    font-size: 2.9rem;
+    font-weight: 650;
+    letter-spacing: -0.035em;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+  .td-balance sup {
+    font-size: 1.1rem;
     font-weight: 500;
+    color: var(--text-muted);
+    top: -1.1em;
+    margin-right: 0.15rem;
   }
-  
-  .dash-card-link:hover { text-decoration: underline; }
-
-  .dash-card-body {
-    flex-grow: 1;
+  .td-balance small { font-size: 1.2rem; color: var(--text-muted); font-weight: 500; }
+  .td-due {
+    margin: 0.85rem 0 1.4rem;
     color: var(--text-secondary);
-    font-size: 0.95rem;
+    font-size: 0.92rem;
   }
+  .td-due strong { color: var(--text-primary); font-weight: 600; }
 
-  /* Lists inside cards */
-  .item-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .item-list > li {
-    padding: 0.75rem 0;
-    border-bottom: 1px dashed var(--border-color);
+  .td-facts { margin: 0; }
+  .td-facts > div {
     display: flex;
     justify-content: space-between;
+    gap: 1rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;
+  }
+  .td-facts > div:last-child { border-bottom: none; }
+  .td-facts dt { font-weight: 450; color: var(--text-secondary); }
+  .td-facts dd { margin: 0; font-weight: 550; color: var(--text-primary); text-align: right; }
+
+  .td-lease { margin-top: 1rem; }
+  .td-lease-bar {
+    height: 5px;
+    border-radius: 99px;
+    background: var(--border-color);
+    overflow: hidden;
+  }
+  .td-lease-bar span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--primary-color);
+    border-radius: 99px;
+    transition: width .8s ease;
+  }
+  .td-lease-note { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.4rem; }
+
+  .td-empty-note { color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1rem; }
+
+  /* ---------- Quick numbers strip ---------- */
+  .td-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    background: var(--card-bg);
+    margin-bottom: 1.75rem;
+  }
+  .td-strip-item {
+    padding: 1rem 1.25rem;
+    border-right: 1px solid var(--border-color);
+    text-decoration: none;
+    color: inherit;
+    transition: background-color .15s;
+  }
+  .td-strip-item:first-child { border-radius: 14px 0 0 14px; }
+  .td-strip-item:last-child { border-right: none; border-radius: 0 14px 14px 0; }
+  .td-strip-item:hover { background: var(--body-bg); color: inherit; }
+  .td-strip-num { font-size: 1.35rem; font-weight: 650; letter-spacing: -0.02em; color: var(--text-primary); }
+  .td-strip-txt { font-size: 0.8rem; color: var(--text-secondary); }
+
+  /* ---------- Layout ---------- */
+  .td-cols {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+  .td-stack { display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; }
+
+  /* ---------- Panels ---------- */
+  .td-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    min-width: 0;
+  }
+  .td-card-head {
+    display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .td-card-title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 620;
+    color: var(--text-primary);
+  }
+  .td-link {
+    font-size: 0.8rem;
+    font-weight: 550;
+    color: var(--primary-color);
+    text-decoration: none;
+  }
+  .td-link:hover { text-decoration: underline; color: var(--primary-hover); }
+  .td-card-body { padding: 1.1rem 1.25rem; }
+  .td-card-body.flush { padding: 0; }
+  .td-muted { color: var(--text-muted); font-size: 0.88rem; margin: 0; }
+
+  .td-select {
+    font-size: 0.8rem;
+    padding: 0.3rem 1.8rem 0.3rem 0.6rem;
+    border: 1px solid var(--border-color);
+    border-radius: 7px;
+    background-color: var(--card-bg);
+    color: var(--text-primary);
   }
 
-  .item-list > li:last-child { border-bottom: none; }
+  /* ---------- Ledger tables ---------- */
+  .td-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .td-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  .td-table th {
+    text-align: left;
+    padding: 0.7rem 1.25rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+  }
+  .td-table td {
+    padding: 0.8rem 1.25rem;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+  }
+  .td-table tbody tr:last-child td { border-bottom: none; }
+  .td-table tbody tr:hover td { background: var(--body-bg); }
+  .td-table .num { font-weight: 600; color: var(--text-primary); text-align: right; }
+  .td-table th.num { text-align: right; }
+  .td-table .end { text-align: right; white-space: nowrap; }
 
-  /* Badges */
-  .badge-custom {
-    padding: 0.25rem 0.6rem;
-    border-radius: 20px;
+  /* ---------- Status ---------- */
+  .td-pill {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 6px;
     font-size: 0.75rem;
     font-weight: 600;
   }
-  .badge-success { background: rgba(40, 167, 69, 0.1); color: #28a745; }
-  .badge-warning { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
-  .badge-danger { background: rgba(220, 53, 69, 0.1); color: #dc3545; }
+  .td-pill.ok   { background: var(--success-light); color: #0d7a57; }
+  .td-pill.wait { background: var(--warning-light); color: #9a5d00; }
+  .td-pill.bad  { background: var(--danger-light);  color: #b4372f; }
+  [data-bs-theme="dark"] .td-pill.ok   { color: #5be0b0; }
+  [data-bs-theme="dark"] .td-pill.wait { color: #f4c25b; }
+  [data-bs-theme="dark"] .td-pill.bad  { color: #f08a82; }
 
-  /* Buttons */
-  .btn-sm-custom {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.85rem;
-    border-radius: var(--radius-md);
-  }
-
-  /* Tables */
-  .table-responsive-custom {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .table-custom {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-  }
-
-  .table-custom th, .table-custom td {
-    padding: 0.75rem 1rem;
-    text-align: left;
+  /* ---------- Plain lists ---------- */
+  .td-list { list-style: none; margin: 0; padding: 0; }
+  .td-list li {
+    padding: 0.7rem 0;
     border-bottom: 1px solid var(--border-color);
   }
-  
-  .table-custom th {
-    background-color: var(--body-bg);
-    font-weight: 600;
-    color: var(--text-primary);
-    font-size: 0.85rem;
-    text-transform: uppercase;
+  .td-list li:first-child { padding-top: 0; }
+  .td-list li:last-child { border-bottom: none; padding-bottom: 0; }
+  .td-row { display: flex; justify-content: space-between; gap: 0.75rem; align-items: baseline; }
+  .td-row b { font-weight: 600; color: var(--text-primary); font-size: 0.88rem; }
+  .td-row time, .td-row .when { font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; }
+  .td-snippet {
+    font-size: 0.83rem;
+    color: var(--text-secondary);
+    margin-top: 0.1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
-  .table-custom tr:last-child td { border-bottom: none; }
-  
-  .action-link {
+  /* ---------- Landlord ---------- */
+  .td-person { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.9rem; }
+  .td-initial {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    background: var(--primary-light);
     color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.9rem;
+    font-weight: 650;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
   }
-  .action-link:hover { text-decoration: underline; }
+  .td-person b { display: block; font-size: 0.95rem; color: var(--text-primary); }
+  .td-person span { font-size: 0.8rem; color: var(--text-muted); }
+  .td-contact { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.9rem; }
+  .td-contact div { padding: 0.2rem 0; word-break: break-all; }
+  .td-contact i { width: 1.3rem; color: var(--text-muted); }
 
-  /* Upload Form */
-  .upload-form .form-control {
+  /* ---------- Upload ---------- */
+  .td-file {
+    width: 100%;
+    font-size: 0.85rem;
     padding: 0.5rem;
-    font-size: 0.9rem;
+    border: 1px dashed var(--border-color);
+    border-radius: 8px;
+    background: var(--body-bg);
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
   }
 
-  /* Responsive */
-  @media (max-width: 768px) {
-    .stats-grid {
-      grid-template-columns: 1fr;
-    }
-    .dash-card-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.5rem;
-    }
+  /* ---------- Calendar / chart ---------- */
+  .td-event { display: flex; gap: 0.75rem; padding: 0.55rem 0; border-top: 1px solid var(--border-color); }
+  .td-event:first-child { border-top: none; }
+  .td-event b { display: block; font-size: 0.86rem; color: var(--text-primary); font-weight: 600; }
+  .td-event span { font-size: 0.78rem; color: var(--text-muted); }
+  .fc { font-size: 0.82rem; }
+  .fc .fc-button-primary { background: var(--card-bg); border-color: var(--border-color); color: var(--text-primary); box-shadow: none !important; }
+  .fc .fc-button-primary:hover { background: var(--body-bg); }
+  .fc .fc-button-primary:not(:disabled).fc-button-active,
+  .fc .fc-button-primary:not(:disabled):active { background: var(--primary-color); border-color: var(--primary-color); }
+  .fc .fc-toolbar-title { font-size: 1rem; font-weight: 600; }
+  .fc-theme-standard td, .fc-theme-standard th, .fc-theme-standard .fc-scrollgrid { border-color: var(--border-color); }
+  .fc .fc-daygrid-day-number, .fc .fc-col-header-cell-cushion { color: var(--text-secondary); text-decoration: none; }
+  .fc .fc-day-today { background: var(--primary-light) !important; }
+
+  .td-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-top: 1.25rem; }
+  .sortable-ghost { opacity: .4; }
+  #sortable-dashboard-grid .td-card-head { cursor: grab; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 991.98px) {
+    .td-cols, .td-grid-2 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 767.98px) {
+    .td-hero { grid-template-columns: 1fr; }
+    .td-hero-side { border-left: none; border-top: 1px solid var(--border-color); }
+    .td-hero-main, .td-hero-side { padding: 1.4rem 1.25rem; }
+    .td-balance { font-size: 2.4rem; }
+    .td-strip { grid-template-columns: 1fr 1fr; }
+    .td-strip-item { border-bottom: 1px solid var(--border-color); }
+    .td-strip-item:nth-child(2n) { border-right: none; }
+    .td-strip-item:nth-last-child(-n+2) { border-bottom: none; }
+    .td-strip-item:first-child { border-radius: 14px 0 0 0; }
+    .td-strip-item:last-child { border-radius: 0 0 14px 0; }
+    .td-title { font-size: 1.35rem; }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  
-  <!-- Flash Messages -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <div class="row mb-4">
-        <div class="col-12">
-          {% for category, message in messages %}
-          <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} d-flex align-items-center" role="alert">
-            <i class="fas fa-{{ 'exclamation-circle' if category == 'error' else 'check-circle' }} me-2 fs-5"></i>
-            <div>{{ message }}</div>
-            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+{% set first_name = current_user.name.split()[0] if current_user.name else 'there' %}
+<div class="td-wrap">
+
+  <!-- Header -->
+  <header class="td-head">
+    <div>
+      <div class="td-eyebrow" id="todayLabel">Tenant dashboard</div>
+      <h1 class="td-title"><span id="greeting">Welcome back</span>, {{ first_name }}</h1>
+    </div>
+    <div class="td-head-actions">
+      <a href="{{ url_for('tenant.submit_request') }}" class="td-btn"><i class="fas fa-wrench"></i> Report an issue</a>
+      <a href="{{ url_for('tenant.pay_rent') }}" class="td-btn td-btn-solid"><i class="fas fa-credit-card"></i> Pay rent</a>
+    </div>
+  </header>
+
+  <!-- Hero: balance + home -->
+  <section class="td-hero">
+    <div class="td-hero-main">
+      <div class="td-label">Outstanding balance</div>
+      {% set bal = '%.2f'|format(balance) if balance else '0.00' %}
+      <div class="td-balance"><sup>$</sup>{{ bal.split('.')[0] }}<small>.{{ bal.split('.')[1] }}</small></div>
+      <p class="td-due">
+        {% if next_payment %}
+          Next payment of <strong>${{ next_payment.amount }}</strong> is due
+          <strong>{{ next_payment.due_date.strftime('%d %b %Y') }}</strong>.
+        {% else %}
+          Nothing is due right now.
+        {% endif %}
+      </p>
+      <a href="{{ url_for('tenant.pay_rent') }}" class="td-btn td-btn-solid">
+        {% if next_payment %}Pay ${{ next_payment.amount }}{% else %}View payment history{% endif %}
+      </a>
+    </div>
+
+    <div class="td-hero-side">
+      <div class="td-label">Your home</div>
+      {% if property and active_booking %}
+      <dl class="td-facts">
+        <div><dt>Address</dt><dd>{{ property.address_line1 }}</dd></div>
+        <div><dt>Monthly rent</dt><dd>${{ property.rent_amount }}</dd></div>
+        <div><dt>Lease ends</dt><dd>{{ active_booking.lease_end_date.strftime('%d %b %Y') if active_booking.lease_end_date else 'N/A' }}</dd></div>
+      </dl>
+      {% if active_booking.lease_start_date and active_booking.lease_end_date %}
+      <div class="td-lease" id="leaseProgress"
+           data-start="{{ active_booking.lease_start_date.isoformat() }}"
+           data-end="{{ active_booking.lease_end_date.isoformat() }}">
+        <div class="td-lease-bar"><span></span></div>
+        <div class="td-lease-note"></div>
+      </div>
+      {% endif %}
+      <div style="margin-top:1rem;">
+        <a href="{{ url_for('tenant.lease', id=property.id) }}" class="td-link">View lease &rarr;</a>
+      </div>
+      {% else %}
+      <p class="td-empty-note">You don't have an active home yet.</p>
+      <a href="{{ url_for('tenant.properties') }}" class="td-btn">Browse properties</a>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- Quick numbers -->
+  <section class="td-strip">
+    <a class="td-strip-item" href="{{ url_for('tenant.all_bookings') }}">
+      <div class="td-strip-num">{{ active_bookings_count }}</div>
+      <div class="td-strip-txt">Active bookings</div>
+    </a>
+    <a class="td-strip-item" href="{{ url_for('tenant.submit_request') }}">
+      <div class="td-strip-num">{{ open_requests_count }}</div>
+      <div class="td-strip-txt">Open requests</div>
+    </a>
+    <a class="td-strip-item" href="{{ url_for('tenant.messages') }}">
+      <div class="td-strip-num">{{ recent_messages|length }}</div>
+      <div class="td-strip-txt">Recent messages</div>
+    </a>
+    <a class="td-strip-item" href="{{ url_for('tenant.twofa_setup') }}">
+      <div class="td-strip-num">{{ 'On' if current_user.two_factor_enabled else 'Off' }}</div>
+      <div class="td-strip-txt">Two-factor sign-in</div>
+    </a>
+  </section>
+
+  <!-- Main columns -->
+  <div class="td-cols">
+
+    <!-- Left: ledgers -->
+    <div class="td-stack">
+
+      <section class="td-card">
+        <div class="td-card-head">
+          <h2 class="td-card-title">Payments</h2>
+          <select id="payment-filter" onchange="filterPayments(this.value)" class="td-select" aria-label="Filter payments">
+            <option value="all">All</option>
+            <option value="paid">Paid</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+        <div class="td-card-body flush">
+          <div class="td-scroll">
+            <table class="td-table">
+              <thead>
+                <tr><th>Date</th><th>Status</th><th class="num">Amount</th><th></th></tr>
+              </thead>
+              <tbody id="payment-table">
+                {% for payment in payments %}
+                <tr class="payment-row" data-status="{{ payment.status }}">
+                  <td>{{ payment.date.strftime('%d %b %Y') }}</td>
+                  <td><span class="td-pill {{ 'ok' if payment.status == 'paid' else 'wait' }}">{{ payment.status|title }}</span></td>
+                  <td class="num">${{ payment.amount }}</td>
+                  <td class="end"><a href="{{ url_for('tenant.view_receipt', id=payment.id) }}" class="td-link">Receipt</a></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" class="td-muted" style="padding:1.25rem;">No payments recorded yet.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="td-card">
+        <div class="td-card-head">
+          <h2 class="td-card-title">Maintenance</h2>
+          <a href="{{ url_for('tenant.submit_request') }}" class="td-link">New request</a>
+        </div>
+        <div class="td-card-body flush">
+          <div class="td-scroll">
+            <table class="td-table">
+              <thead>
+                <tr><th>Issue</th><th>Status</th><th>Submitted</th><th></th></tr>
+              </thead>
+              <tbody>
+                {% for request in maintenance_requests %}
+                <tr>
+                  <td style="color:var(--text-primary);">{{ request.issue }}</td>
+                  <td>
+                    <span class="td-pill {{ 'ok' if request.status == 'completed' else 'wait' if request.status == 'in-progress' else 'bad' }}">
+                      {{ request.status|replace('-', ' ')|title }}
+                    </span>
+                  </td>
+                  <td>{{ request.date_submitted.strftime('%d %b %Y') }}</td>
+                  <td class="end"><a href="{{ url_for('tenant.view_request', id=request.id) }}" class="td-link">View</a></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" class="td-muted" style="padding:1.25rem;">Nothing reported. Good news.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="td-card">
+        <div class="td-card-head">
+          <h2 class="td-card-title">Bookings</h2>
+          {% if bookings %}
+          <a href="{{ url_for('tenant.all_bookings', house_id=bookings[0].house_id) }}" class="td-link">View all</a>
+          {% endif %}
+        </div>
+        <div class="td-card-body">
+          {% if bookings %}
+          <ul class="td-list">
+            {% for booking in bookings %}
+            <li>
+              <div class="td-row">
+                <b>House #{{ booking.house_id }}</b>
+                <span class="td-pill {{ 'ok' if booking.status == 'active' else 'wait' if booking.status == 'pending' else 'bad' }}">{{ booking.status|title }}</span>
+              </div>
+              <div class="td-snippet" style="-webkit-line-clamp:1;">
+                {{ booking.lease_start_date.strftime('%d %b') if booking.lease_start_date }}
+                {% if booking.lease_start_date and booking.lease_end_date %}&ndash;{% endif %}
+                {{ booking.lease_end_date.strftime('%d %b %Y') if booking.lease_end_date }}
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+          {% if bookings[0] %}
+          <form action="{{ url_for('tenant.move_out', booking_id=bookings[0].id) }}" method="POST"
+                style="margin-top:1rem;"
+                onsubmit="return confirm('Submit a move-out request for this booking?');">
+            <button type="submit" class="td-btn td-btn-quiet"><i class="fas fa-right-from-bracket"></i> Request move-out</button>
+          </form>
+          {% endif %}
+          {% else %}
+          <p class="td-muted" style="margin-bottom:0.9rem;">No bookings yet.</p>
+          <a href="{{ url_for('tenant.properties') }}" class="td-btn">Book a property</a>
+          {% endif %}
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Right: people & updates -->
+    <aside class="td-stack">
+
+      <section class="td-card">
+        <div class="td-card-head"><h2 class="td-card-title">Your landlord</h2></div>
+        <div class="td-card-body">
+          {% if landlord %}
+          <div class="td-person">
+            <div class="td-initial">{{ landlord.name[:1]|upper }}</div>
+            <div><b>{{ landlord.name }}</b><span>Landlord</span></div>
+          </div>
+          <div class="td-contact">
+            <div><i class="fas fa-envelope"></i>{{ landlord.email }}</div>
+            {% if landlord.phone %}<div><i class="fas fa-phone"></i>{{ landlord.phone }}</div>{% endif %}
+          </div>
+          <a href="{{ url_for('tenant.chat', landlord_id=landlord.id) }}" class="td-btn td-btn-block">Send a message</a>
+          {% else %}
+          <p class="td-muted">No landlord assigned yet.</p>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="td-card">
+        <div class="td-card-head">
+          <h2 class="td-card-title">Messages</h2>
+          <a href="{{ url_for('tenant.messages') }}" class="td-link">Open inbox</a>
+        </div>
+        <div class="td-card-body">
+          {% if recent_messages %}
+          <ul class="td-list">
+            {% for msg in recent_messages %}
+            <li>
+              <div class="td-row">
+                <b>{{ msg.sender_name }}</b>
+                <span class="when">{% if msg.date %}{{ msg.date.strftime('%d %b') }}{% endif %}</span>
+              </div>
+              <div class="td-snippet">{{ msg.snippet }}</div>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p class="td-muted">No messages.</p>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="td-card">
+        <div class="td-card-head">
+          <h2 class="td-card-title">Notifications</h2>
+          <a href="{{ url_for('tenant.view_notifications') }}" class="td-link">View all</a>
+        </div>
+        <div class="td-card-body">
+          {% if notifications %}
+          <ul class="td-list">
+            {% for notification in notifications[:3] %}
+            <li>
+              <div class="td-row">
+                <span class="td-snippet" style="margin:0; color:var(--text-primary);">{{ notification.message }}</span>
+                <span class="when">{{ notification.date.strftime('%d %b') if notification.date else '' }}</span>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p class="td-muted">You're all caught up.</p>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="td-card">
+        <div class="td-card-head">
+          <h2 class="td-card-title">Announcements</h2>
+          <a href="{{ url_for('tenant.announcements') }}" class="td-link">View all</a>
+        </div>
+        <div class="td-card-body">
+          {% if announcements %}
+          <ul class="td-list">
+            {% for announcement in announcements[:2] %}
+            <li>
+              <div class="td-row">
+                <span class="td-snippet" style="margin:0; color:var(--text-primary);">{{ announcement.message }}</span>
+                <span class="when">{{ announcement.date.strftime('%d %b') if announcement.date else '' }}</span>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p class="td-muted">No announcements.</p>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="td-card">
+        <div class="td-card-head">
+          <h2 class="td-card-title">Documents</h2>
+          <a href="{{ url_for('tenant.documents') }}" class="td-link">My documents</a>
+        </div>
+        <div class="td-card-body">
+          <form action="{{ url_for('tenant.upload_document') }}" method="POST" enctype="multipart/form-data">
+            <input type="file" name="document" class="td-file" required>
+            <button type="submit" class="td-btn td-btn-block"><i class="fas fa-arrow-up-from-bracket"></i> Upload</button>
+          </form>
+        </div>
+      </section>
+
+    </aside>
+  </div>
+
+  <!-- Calendar & chart (drag the headers to reorder) -->
+  <div class="td-grid-2" id="sortable-dashboard-grid">
+    <section class="td-card" data-id="dash-cal">
+      <div class="td-card-head"><h2 class="td-card-title">Upcoming events</h2></div>
+      <div class="td-card-body">
+        <div id="calendar" style="min-height:300px;"></div>
+        {% if events %}
+        <div style="margin-top:1rem;">
+          {% for event in events[:3] %}
+          <div class="td-event">
+            <div>
+              <b>{{ event.title }}</b>
+              <span>{{ event.date.strftime('%d %b %Y, %I:%M %p') }}</span>
+            </div>
           </div>
           {% endfor %}
         </div>
+        {% else %}
+        <p class="td-muted" style="margin-top:1rem;">No upcoming events.</p>
+        {% endif %}
       </div>
-    {% endif %}
-  {% endwith %}
+    </section>
 
-  <!-- Dashboard Header -->
-  <div class="dash-header">
-    <h1 class="dash-welcome">Welcome back, {{ current_user.name }}!</h1>
-    <p class="dash-subtitle">Here is what's happening with your rentals.</p>
+    <section class="td-card" data-id="dash-chart">
+      <div class="td-card-head"><h2 class="td-card-title">Payment trend</h2></div>
+      <div class="td-card-body">
+        <div style="position:relative; height:300px;">
+          <canvas id="paymentChart"></canvas>
+        </div>
+      </div>
+    </section>
   </div>
-
-  <!-- Stats Grid -->
-  <div class="stats-grid">
-    <!-- Next Payment -->
-    <div class="stat-card primary">
-      <div class="stat-icon-box">
-        <i class="fas fa-money-bill-wave"></i>
-      </div>
-      <div class="stat-info">
-        <h4>Next Payment Due</h4>
-        <div class="stat-value">
-          {% if next_payment %} {{ next_payment.due_date.strftime('%b %d') }} {% else %} N/A {% endif %}
-        </div>
-        <a href="{{ url_for('tenant.pay_rent') }}" class="stat-link">
-          {% if next_payment %} Pay ${{ next_payment.amount }} {% else %} View History {% endif %}
-        </a>
-      </div>
-    </div>
-
-    <!-- Balance -->
-    <div class="stat-card primary">
-      <div class="stat-icon-box">
-        <i class="fas fa-wallet"></i>
-      </div>
-      <div class="stat-info">
-        <h4>Outstanding Balance</h4>
-        <div class="stat-value">
-          ${{ '%.2f'|format(balance) if balance else '0.00' }}
-        </div>
-        <a href="{{ url_for('tenant.pay_rent') }}" class="stat-link">Pay Now</a>
-      </div>
-    </div>
-
-    <!-- Recent Messages (previews) -->
-    <div class="stat-card info">
-      <div class="stat-icon-box">
-        <i class="fas fa-envelope"></i>
-      </div>
-      <div class="stat-info">
-        <h4>Recent Messages</h4>
-        <div class="stat-value" style="font-size:0.95rem; font-weight:600;">{{ recent_messages|length }}</div>
-        <div style="margin-top:0.5rem;">
-          {% if recent_messages %}
-          <ul class="item-list" style="max-height:120px; overflow:auto;">
-            {% for msg in recent_messages %}
-            <li style="display:block;">
-              <div style="display:flex; justify-content:space-between; gap:0.5rem; align-items:flex-start;">
-                <div style="flex:1; min-width:0;">
-                  <strong class="d-block small text-dark">{{ msg.sender_name }}</strong>
-                  <small class="text-muted small text-truncate" style="display:block;">{{ msg.snippet }}</small>
-                </div>
-                <small class="text-muted" style="white-space:nowrap; margin-left:0.5rem;">{% if msg.date %}{{ msg.date.strftime('%b %d') }}{% endif %}</small>
-              </div>
-            </li>
-            {% endfor %}
-          </ul>
-          {% else %}
-          <p class="text-muted small">No messages</p>
-          {% endif %}
-        </div>
-        <a href="{{ url_for('tenant.messages') }}" class="stat-link">View All Messages</a>
-      </div>
-    </div>
-
-    <!-- Active Bookings -->
-    <div class="stat-card warning">
-      <div class="stat-icon-box">
-        <i class="fas fa-calendar-check"></i>
-      </div>
-      <div class="stat-info">
-        <h4>Active Bookings</h4>
-        <div class="stat-value">{{ active_bookings_count }}</div>
-        <a href="{{ url_for('tenant.all_bookings') }}" class="stat-link">Manage Bookings</a>
-      </div>
-    </div>
-
-    <!-- Open Requests -->
-    <div class="stat-card warning">
-      <div class="stat-icon-box">
-        <i class="fas fa-tools"></i>
-      </div>
-      <div class="stat-info">
-        <h4>Open Requests</h4>
-        <div class="stat-value">{{ open_requests_count }}</div>
-        <a href="{{ url_for('tenant.submit_request') }}" class="stat-link">Submit Request</a>
-      </div>
-    </div>
-
-    <!-- 2FA Status -->
-    <div class="stat-card info">
-      <div class="stat-icon-box">
-        <i class="fas fa-shield-alt"></i>
-      </div>
-      <div class="stat-info">
-        <h4>2FA Status</h4>
-        <div class="stat-value">{{ 'Enabled' if current_user.two_factor_enabled else 'Disabled' }}</div>
-        <a href="{{ url_for('tenant.twofa_setup') }}" class="stat-link">
-          {{ 'Manage' if current_user.two_factor_enabled else 'Enable' }} 2FA
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Content Grid -->
-  <div class="row g-4 mb-4">
-    
-    <!-- Property Details -->
-    <div class="col-lg-4 col-md-6">
-      <div class="dash-card">
-        <div class="dash-card-header">
-          <h3 class="dash-card-title">Property Details</h3>
-          {% if property %}
-          <a href="{{ url_for('tenant.lease', id=property.id) }}" class="dash-card-link">View Lease</a>
-          {% endif %}
-        </div>
-        <div class="dash-card-body">
-          {% if property and active_booking %}
-          <ul class="item-list">
-            <li>
-              <span class="text-muted small"><i class="fas fa-map-marker-alt me-2"></i>Address:</span>
-              <br><strong class="text-primary">{{ property.address_line1 }}</strong>
-            </li>
-            <li>
-              <span class="text-muted small"><i class="fas fa-dollar-sign me-2"></i>Rent:</span>
-              <span class="fw-bold">${{ property.rent_amount }}/mo</span>
-            </li>
-            <li>
-              <span class="text-muted small"><i class="fas fa-calendar-alt me-2"></i>Lease Ends:</span>
-              <span>{{ active_booking.lease_end_date.strftime('%b %d, %Y') if active_booking.lease_end_date else 'N/A' }}</span>
-            </li>
-          </ul>
-
-          <div class="mt-3">
-            {% if landlord %}
-            <a href="{{ url_for('tenant.chat', landlord_id=landlord.id) }}" class="btn btn-primary btn-sm-custom w-100">
-              <i class="fas fa-envelope me-2"></i> Contact Landlord
-            </a>
-            {% else %}
-            <button class="btn btn-secondary btn-sm-custom w-100" disabled>No Landlord</button>
-            {% endif %}
-          </div>
-
-          {% else %}
-          <p class="text-center">No active property assigned.</p>
-          <a href="{{ url_for('tenant.properties') }}" class="btn btn-outline-primary btn-sm-custom w-100 mt-2">Browse Properties</a>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-
-    <!-- My Bookings -->
-    <div class="col-lg-4 col-md-6">
-      <div class="dash-card">
-        <div class="dash-card-header">
-          <h3 class="dash-card-title">My Bookings</h3>
-          {% if property %}
-          <a href="{{ url_for('tenant.all_bookings', house_id=booking.house_id) }}" class="dash-card-link">View All</a>
-          {% endif %}
-        </div>
-        <div class="dash-card-body">
-          {% if bookings %}
-          <ul class="item-list">
-            {% for booking in bookings %}
-            <li>
-              <div>
-                <strong class="d-block text-dark">ID: {{ booking.house_id }}</strong>
-                <small class="text-muted d-block">
-                  {{ booking.lease_start_date.strftime('%b %d') if booking.lease_start_date }} - 
-                  {{ booking.lease_end_date.strftime('%b %d, %Y') if booking.lease_end_date }}
-                </small>
-              </div>
-              <span class="badge-custom badge-{{ 'success' if booking.status == 'active' else 'warning' if booking.status == 'pending' else 'danger' }}">
-                {{ booking.status|title }}
-              </span>
-            </li>
-            {% endfor %}
-          </ul>
-          
-          {% if bookings and bookings[0] %}
-          <div class="mt-3 text-center">
-            <form action="{{ url_for('tenant.move_out', booking_id=bookings[0].id) }}" method="POST">
-              <button type="submit" class="btn btn-danger btn-sm-custom">
-                <i class="fas fa-sign-out-alt me-1"></i> Move-Out
-              </button>
-            </form>
-          </div>
-          {% endif %}
-
-          {% else %}
-          <p class="text-center text-muted">No bookings found.</p>
-          <a href="{{ url_for('tenant.properties') }}" class="btn btn-primary btn-sm-custom w-100 mt-2">Book a Property</a>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-
-    <!-- Notifications -->
-    <div class="col-lg-4 col-md-6">
-      <div class="dash-card">
-        <div class="dash-card-header">
-          <h3 class="dash-card-title">Notifications</h3>
-          <a href="{{ url_for('tenant.view_notifications') }}" class="dash-card-link">View All</a>
-        </div>
-        <div class="dash-card-body">
-          {% if notifications %}
-          <ul class="item-list">
-            {% for notification in notifications[:3] %}
-            <li>
-              <div>{{ notification.message }}</div>
-              <small class="text-muted">{{ notification.date.strftime('%b %d') if notification.date else '' }}</small>
-            </li>
-            {% endfor %}
-          </ul>
-          {% if notifications|length > 3 %}
-          <div class="mt-3 text-center">
-            <a href="{{ url_for('tenant.view_notifications') }}" class="btn btn-outline-secondary btn-sm-custom w-100">View All</a>
-          </div>
-          {% endif %}
-          {% else %}
-          <p class="text-center text-muted">No new notifications.</p>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-
-    <!-- Landlord Contact -->
-    <div class="col-lg-4 col-md-6">
-      <div class="dash-card">
-        <div class="dash-card-header">
-          <h3 class="dash-card-title">Landlord Contact</h3>
-        </div>
-        <div class="dash-card-body">
-          {% if landlord %}
-          <div class="text-center mb-3">
-             <i class="fas fa-user-circle fa-3x text-primary mb-2"></i>
-             <h5 class="mb-1">{{ landlord.name }}</h5>
-          </div>
-          <ul class="item-list">
-            <li class="d-flex justify-content-between">
-              <span><i class="fas fa-envelope me-2 text-muted"></i>Email</span>
-              <small>{{ landlord.email }}</small>
-            </li>
-            {% if landlord.phone %}
-            <li class="d-flex justify-content-between">
-              <span><i class="fas fa-phone me-2 text-muted"></i>Phone</span>
-              <small>{{ landlord.phone }}</small>
-            </li>
-            {% endif %}
-          </ul>
-          <a href="{{ url_for('tenant.chat', landlord_id=landlord.id) }}" class="btn btn-primary btn-sm-custom w-100 mt-2">
-            <i class="fas fa-envelope me-2"></i> Send Message
-          </a>
-          {% else %}
-          <p class="text-center text-muted">No landlord assigned.</p>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-
-    <!-- Upload Documents -->
-    <div class="col-lg-4 col-md-6">
-      <div class="dash-card">
-        <div class="dash-card-header">
-          <h3 class="dash-card-title">Upload Documents</h3>
-          <a href="{{ url_for('tenant.documents') }}" class="dash-card-link">My Docs</a>
-        </div>
-        <div class="dash-card-body">
-          <form action="{{ url_for('tenant.upload_document') }}" method="POST" enctype="multipart/form-data" class="upload-form">
-            <div class="mb-3">
-              <input type="file" name="document" class="form-control" required />
-            </div>
-            <button type="submit" class="btn btn-primary btn-sm-custom w-100">
-              <i class="fas fa-upload me-2"></i> Submit
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Announcements -->
-    <div class="col-lg-4 col-md-6">
-      <div class="dash-card">
-        <div class="dash-card-header">
-          <h3 class="dash-card-title">Announcements</h3>
-          <a href="{{ url_for('tenant.announcements') }}" class="dash-card-link">View All</a>
-        </div>
-        <div class="dash-card-body">
-           {% if announcements %}
-          <ul class="item-list">
-            {% for announcement in announcements[:2] %}
-            <li>
-              <div>{{ announcement.message }}</div>
-              <small class="text-muted">{{ announcement.date.strftime('%b %d') if announcement.date else '' }}</small>
-            </li>
-            {% endfor %}
-          </ul>
-          {% else %}
-          <p class="text-center text-muted">No announcements.</p>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-
-  </div> <!-- End Grid -->
-
-  <!-- Payment History Table -->
-  <div class="dash-card">
-    <div class="dash-card-header">
-      <h3 class="dash-card-title">Payment History</h3>
-      <select id="payment-filter" onchange="filterPayments(this.value)" class="form-select form-select-sm w-auto" style="width: auto;">
-        <option value="all">All Payments</option>
-        <option value="paid">Paid</option>
-        <option value="pending">Pending</option>
-      </select>
-    </div>
-    <div class="dash-card-body p-0">
-      <div class="table-responsive-custom">
-        <table class="table-custom">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Amount</th>
-              <th>Status</th>
-              <th class="text-end">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="payment-table">
-            {% for payment in payments %}
-            <tr class="payment-row" data-status="{{ payment.status }}">
-              <td>{{ payment.date.strftime('%b %d, %Y') }}</td>
-              <td class="fw-bold">${{ payment.amount }}</td>
-              <td>
-                <span class="badge-custom badge-{{ 'success' if payment.status == 'paid' else 'warning' }}">
-                  {{ payment.status|title }}
-                </span>
-              </td>
-              <td class="text-end">
-                <a href="{{ url_for('tenant.view_receipt', id=payment.id) }}" class="action-link">
-                  <i class="fas fa-receipt me-1"></i> Receipt
-                </a>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- Maintenance Requests -->
-  <div class="dash-card">
-    <div class="dash-card-header">
-      <h3 class="dash-card-title">Maintenance Requests</h3>
-      <a href="{{ url_for('tenant.submit_request') }}" class="btn btn-primary btn-sm-custom">New Request</a>
-    </div>
-    <div class="dash-card-body p-0">
-      <div class="table-responsive-custom">
-        <table class="table-custom">
-          <thead>
-            <tr>
-              <th>Issue</th>
-              <th>Status</th>
-              <th>Date</th>
-              <th class="text-end">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for request in maintenance_requests %}
-            <tr>
-              <td>{{ request.issue }}</td>
-              <td>
-                <span class="badge-custom badge-{{ 'success' if request.status == 'completed' else 'warning' if request.status == 'in-progress' else 'danger' }}">
-                  {{ request.status|replace('-', ' ')|title }}
-                </span>
-              </td>
-              <td>{{ request.date_submitted.strftime('%b %d, %Y') }}</td>
-              <td class="text-end">
-                <a href="{{ url_for('tenant.view_request', id=request.id) }}" class="action-link">
-                  <i class="fas fa-eye me-1"></i> View
-                </a>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- Calendar & Charts Grid -->
-  <div class="row g-4 mt-1" id="sortable-dashboard-grid">
-    <!-- Calendar -->
-    <div class="col-lg-6">
-      <div class="dash-card" data-id="dash-cal">
-        <div class="dash-card-header">
-          <h3 class="dash-card-title">Upcoming Events</h3>
-        </div>
-        <div class="dash-card-body">
-          <div id="calendar" style="min-height: 300px;"></div>
-          {% if events %}
-          <div class="mt-3">
-            {% for event in events[:3] %}
-            <div class="d-flex align-items-center mb-2 p-2 bg-light rounded">
-              <i class="fas fa-calendar-day text-primary me-2"></i>
-              <div>
-                <div class="fw-bold small">{{ event.title }}</div>
-                <div class="text-muted small">{{ event.date.strftime('%b %d, %Y - %I:%M %p') }}</div>
-              </div>
-            </div>
-            {% endfor %}
-          </div>
-          {% else %}
-          <p class="text-center text-muted mt-3">No upcoming events.</p>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-
-    <!-- Payment Trends Chart -->
-    <div class="col-lg-6">
-      <div class="dash-card" data-id="dash-chart">
-        <div class="dash-card-header">
-          <h3 class="dash-card-title">Payment Trends</h3>
-        </div>
-        <div class="dash-card-body">
-          <div style="position: relative; height: 300px;">
-            <canvas id="paymentChart"></canvas>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <footer class="text-center mt-5 mb-3 text-muted small">
-    <a href="/terms" class="text-decoration-none me-3">Terms of Service</a>
-    <a href="/privacy" class="text-decoration-none">Privacy Policy</a>
-  </footer>
 
 </div>
 {% endblock %}
 
 {% block scripts %}
-<!-- Load Required Libraries -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    
-    // --- Alert Close ---
-    const alertCloseButtons = document.querySelectorAll('.btn-close');
-    alertCloseButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        this.closest('.alert').style.display = 'none';
-      });
+  // Payment filter (global so the inline onchange can reach it)
+  function filterPayments(status) {
+    document.querySelectorAll('.payment-row').forEach(function (row) {
+      row.style.display = (status === 'all' || row.dataset.status.toLowerCase() === status) ? '' : 'none';
     });
+  }
 
-    // --- Payment Filter ---
-    window.filterPayments = function(status) {
-      const rows = document.querySelectorAll('.payment-row');
-      rows.forEach(row => {
-        if (status === 'all' || row.dataset.status.toLowerCase() === status) {
-          row.style.display = '';
-        } else {
-          row.style.display = 'none';
-        }
-      });
+  document.addEventListener('DOMContentLoaded', function () {
+
+    // --- Greeting + date ---
+    var now = new Date();
+    var h = now.getHours();
+    var greet = h < 12 ? 'Good morning' : (h < 17 ? 'Good afternoon' : 'Good evening');
+    var g = document.getElementById('greeting');
+    if (g) g.textContent = greet;
+    var t = document.getElementById('todayLabel');
+    if (t) t.textContent = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+
+    // --- Lease progress ---
+    var lease = document.getElementById('leaseProgress');
+    if (lease) {
+      var start = new Date(lease.dataset.start);
+      var end = new Date(lease.dataset.end);
+      var total = end - start;
+      if (total > 0) {
+        var pct = Math.max(0, Math.min(100, ((now - start) / total) * 100));
+        var daysLeft = Math.ceil((end - now) / 86400000);
+        lease.querySelector('span').style.width = pct.toFixed(0) + '%';
+        lease.querySelector('.td-lease-note').textContent =
+          daysLeft > 0 ? daysLeft + ' days left on your lease' : 'Lease period has ended';
+      }
     }
 
-    // --- FullCalendar ---
-    const calendarEl = document.getElementById('calendar');
-    if (calendarEl) {
-      const calendar = new FullCalendar.Calendar(calendarEl, {
+    // Theme colour pulled from the page so the chart follows the app's accent
+    var css = getComputedStyle(document.documentElement);
+    var accent = css.getPropertyValue('--primary-color').trim() || '#6366f1';
+    var gridColor = css.getPropertyValue('--border-color').trim() || '#e5e7eb';
+    var muted = css.getPropertyValue('--text-muted').trim() || '#9ca3af';
+
+    // --- Calendar ---
+    var calendarEl = document.getElementById('calendar');
+    if (calendarEl && window.FullCalendar) {
+      new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         height: 300,
-        headerToolbar: {
-          left: 'prev,next today',
-          center: 'title',
-          right: ''
-        },
+        headerToolbar: { left: 'prev,next', center: 'title', right: 'today' },
         events: {{ events | tojson if events else '[]' }},
-        eventTimeFormat: {
-          hour: 'numeric',
-          minute: '2-digit',
-          meridiem: 'short'
-        }
-      });
-      calendar.render();
+        eventTimeFormat: { hour: 'numeric', minute: '2-digit', meridiem: 'short' }
+      }).render();
     }
 
-    // --- Chart.js ---
-    const ctx = document.getElementById('paymentChart');
-    if (ctx) {
+    // --- Chart ---
+    var ctx = document.getElementById('paymentChart');
+    if (ctx && window.Chart) {
       new Chart(ctx, {
         type: 'bar',
         data: {
@@ -759,92 +751,61 @@
           datasets: [{
             label: 'Payments ($)',
             data: {{ payment_data | tojson if payment_data else '[]' }},
-            backgroundColor: 'rgba(67, 97, 238, 0.6)', // Using Blue theme
-            borderColor: 'rgba(67, 97, 238, 1)',
-            borderWidth: 1,
-            borderRadius: 4
+            backgroundColor: accent,
+            borderRadius: 4,
+            maxBarThickness: 28
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            y: {
-              beginAtZero: true,
-              grid: { color: 'rgba(0,0,0,0.05)' }
-            },
-            x: {
-              grid: { display: false }
-            }
+            y: { beginAtZero: true, grid: { color: gridColor }, border: { display: false }, ticks: { color: muted } },
+            x: { grid: { display: false }, ticks: { color: muted } }
           },
           plugins: {
             legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  return 'Amount: $' + context.raw;
-                }
-              }
-            }
+            tooltip: { callbacks: { label: function (c) { return '$' + c.raw; } } }
           }
         }
       });
     }
 
-    // --- SortableJS Dashboard Customization ---
-    const sortableGrid = document.getElementById('sortable-dashboard-grid');
-    const savedDashboardOrder = {{ dashboard_order | tojson if dashboard_order else '[]' }};
-    
-    // Get CSRF Token from meta tag (assuming base.html provides it)
-    const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
-    const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
-    const saveDashboardOrderUrl = '/tenant/save_dashboard_order';
+    // --- Sortable calendar/chart cards ---
+    var grid = document.getElementById('sortable-dashboard-grid');
+    var savedOrder = {{ dashboard_order | tojson if dashboard_order else '[]' }};
+    var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    var csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
 
-    if (sortableGrid && typeof Sortable !== 'undefined') {
-      // Assign IDs to cards if missing
-      const cards = Array.from(sortableGrid.children);
-      cards.forEach((card, index) => {
-        if (!card.dataset.id) {
-          card.dataset.id = `tenant-card-${index + 1}`;
-        }
+    if (grid && typeof Sortable !== 'undefined') {
+      var cards = Array.from(grid.children);
+      cards.forEach(function (card, i) {
+        if (!card.dataset.id) card.dataset.id = 'tenant-card-' + (i + 1);
       });
 
-      // Restore Order
-      if (Array.isArray(savedDashboardOrder) && savedDashboardOrder.length > 0) {
-        const cardMap = new Map(Array.from(cards).map(c => [c.dataset.id, c]));
-        // Clear grid
-        while (sortableGrid.firstChild) {
-          sortableGrid.removeChild(sortableGrid.firstChild);
-        }
-        // Re-append in saved order
-        savedDashboardOrder.forEach(cardId => {
-          const card = cardMap.get(cardId);
-          if (card) sortableGrid.appendChild(card);
+      if (Array.isArray(savedOrder) && savedOrder.length) {
+        var map = new Map(cards.map(function (c) { return [c.dataset.id, c]; }));
+        savedOrder.forEach(function (id) {
+          var c = map.get(id);
+          if (c) grid.appendChild(c);
         });
       }
 
-      // Enable Sortable
-      new Sortable(sortableGrid, {
-        handle: '.dash-card-header', // Drag by the header
+      new Sortable(grid, {
+        handle: '.td-card-head',
         animation: 150,
-        ghostClass: 'bg-light',
-        onEnd: async function() {
-          const newOrder = Array.from(sortableGrid.children).map(c => c.dataset.id);
+        onEnd: async function () {
+          var order = Array.from(grid.children).map(function (c) { return c.dataset.id; });
           try {
-            const response = await fetch(saveDashboardOrderUrl, {
+            var res = await fetch('/tenant/save_dashboard_order', {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-              },
-              body: JSON.stringify({ order: newOrder }),
+              headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+              body: JSON.stringify({ order: order }),
               credentials: 'include'
             });
-            if (!response.ok) {
-              console.error('Failed to save dashboard order');
-            }
-          } catch (error) {
-            console.error('Error saving dashboard order:', error);
+            if (!res.ok) console.error('Failed to save dashboard order');
+          } catch (err) {
+            console.error('Error saving dashboard order:', err);
           }
         }
       });
