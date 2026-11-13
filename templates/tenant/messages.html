@@ -481,24 +481,27 @@
     }
 
     // =====================================================================
-    // PROCESS DATA
+    // PROCESS DATA (FIXED: Reads msg.other_user for the avatar)
     // =====================================================================
     function processData(messages) {
       messages.forEach(msg => {
         const isMe = msg.sender_id === state.currentUserId;
         const otherId = isMe ? msg.receiver_id : msg.sender_id;
-        const otherInfo = isMe
-          ? (msg.receiver || { name: 'Landlord', profile_image: null })
-          : (msg.sender   || { name: 'Landlord', profile_image: null });
+        
+        // ✅ FIX: API sends 'other_user' containing the name & avatar
+        const otherInfo = msg.other_user || { name: 'Landlord', avatar: null };
 
         if (!state.conversations[otherId]) {
           state.conversations[otherId] = {
             id: otherId,
             name: otherInfo.name || 'Landlord',
-            avatar: otherInfo.profile_image, // <--- USING LANDLORD'S PROFILE PICTURE
+            avatar: otherInfo.avatar,
             messages: [],
             lastMsgTime: msg.timestamp
           };
+        } else if (otherInfo.avatar && !state.conversations[otherId].avatar) {
+          // Update avatar if we didn't have it before
+          state.conversations[otherId].avatar = otherInfo.avatar;
         }
 
         if (typeof msg.delivered_at === 'undefined') msg.delivered_at = null;
@@ -559,7 +562,12 @@
         div.onclick = () => loadChat(convo.id);
 
         const initials  = convo.name ? convo.name.charAt(0).toUpperCase() : '?';
-        const avatarHtml = convo.avatar ? `<img src="${convo.avatar}">` : `<span>${initials}</span>`;
+        
+        // ✅ FIX: Safely render image, fallback to initials if broken
+        const avatarHtml = convo.avatar 
+          ? `<img src="${convo.avatar}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"> <span style="display:none">${initials}</span>` 
+          : `<span>${initials}</span>`;
+
         const timeStr   = formatTimeStr(lastMsg.timestamp);
         const tickHtml  = (lastMsg.sender_id === state.currentUserId) ? getTickHtml(lastMsg) : '';
 
@@ -601,8 +609,11 @@
 
       els.headerName.textContent = convo.name;
       const initials = convo.name.substring(0, 2).toUpperCase();
+      
+      // ✅ FIX: Safely render header image, fallback to initials
       els.headerAvatar.innerHTML = convo.avatar
-        ? `<img src="${convo.avatar}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`
+        ? `<img src="${convo.avatar}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"> 
+           <div style="display:none; width:100%; height:100%; background:var(--primary-color); border-radius:50%; align-items:center; justify-content:center; color:white;">${initials}</div>`
         : `<div style="width:100%; height:100%; background:var(--primary-color); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white;">${initials}</div>`;
 
       renderMessages(convo.messages);
@@ -687,8 +698,7 @@
         read_at: null,
         is_read: false,
         _pending: true,
-        sender:   { name: 'Me',       profile_image: null },
-        receiver: { name: 'Landlord', profile_image: null }
+        other_user: state.conversations[state.activeChatId] // Preserve avatar info
       };
 
       state.conversations[state.activeChatId].messages.push(tempMsg);
