@@ -9,7 +9,7 @@
     --chat-bg-app: #efeae2;
     --chat-bg-sidebar: #ffffff;
     --chat-bg-header: #f0f2f5;
-    --chat-bubble-out: #d9fdd3;
+    --chat-bubble-out: #d9fdd3; /* The light green for sent messages */
     --chat-bubble-in: #ffffff;
     --chat-text-primary: #111b21;
     --chat-text-secondary: #667781;
@@ -157,16 +157,30 @@
     box-shadow: 0 1px 0.5px rgba(0,0,0,0.13); word-wrap: break-word;
   }
 
-  .bubble.sent { background-color: var(--chat-bubble-out); border-top-right-radius: 0; color: white; }
-  .bubble.received { background-color: var(--chat-bubble-in); border-top-left-radius: 0; color: var(--text-primary); }
+  /* FIX: Make sent bubbles light green with dark text so it's visible */
+  .bubble.sent { 
+    background-color: var(--chat-bubble-out); 
+    border-top-right-radius: 0; 
+    color: #111b21; /* Dark text */
+  }
+  
+  .bubble.received { 
+    background-color: var(--chat-bubble-in); 
+    border-top-left-radius: 0; 
+    color: var(--text-primary); 
+  }
 
   [data-bs-theme="light"] .bubble.received { color: #111b21; }
   [data-bs-theme="dark"] .bubble.received { color: #f1f5f9; }
+  [data-bs-theme="dark"] .bubble.sent { color: white; } /* White text in dark mode */
 
   .meta { float: right; margin-left: 10px; margin-top: 4px; display: flex; align-items: center; gap: 3px; }
-  .time { font-size: 0.7rem; color: rgba(255,255,255,0.8); }
   
-  /* FIX: Prevent tick overlap */
+  /* FIX: Time color so it's visible inside the green bubble */
+  .time { font-size: 0.7rem; color: rgba(0,0,0,0.45); }
+  [data-bs-theme="dark"] .time { color: rgba(255,255,255,0.8); }
+  
+  /* FIX: Prevent tick overlap and make them clearly visible */
   .tick { 
     font-size: 0.85rem; 
     letter-spacing: -3px; 
