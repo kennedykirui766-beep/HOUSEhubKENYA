@@ -988,6 +988,9 @@ def messages():
     
 
 
+from sqlalchemy import or_, func
+from utils_presence import touch_presence, is_user_online  # Ensure these are imported!
+
 @tenant_bp.route("/poll_messages")
 @login_required
 def poll_messages():
@@ -996,9 +999,9 @@ def poll_messages():
 
     # =========================
     # 0. PRESENCE: touch current user
+    #    Uncomment this so the tenant is marked as online!
     # =========================
-    # If you have the touch_presence helper imported, keep it here:
-    # touch_presence(current_user)
+    touch_presence(current_user)
 
     # =========================
     # 1. UNREAD COUNT
@@ -1012,8 +1015,6 @@ def poll_messages():
 
     # =========================
     # 2. DELIVERY RECEIPTS
-    #    Mark as delivered any message from the landlord that Esther's
-    #    device just fetched.
     # =========================
     Message.query.filter(
         Message.receiver_id == current_user.id,
@@ -1025,8 +1026,6 @@ def poll_messages():
 
     # =========================
     # 3. READ RECEIPTS
-    #    If Esther has the chat with the landlord open (?peer_id=...),
-    #    mark all unread messages from that landlord as read.
     # =========================
     active_peer_id = request.args.get("peer_id", type=int)
     if active_peer_id and active_peer_id != current_user.id:
@@ -1045,8 +1044,6 @@ def poll_messages():
 
     # =========================
     # 4. FETCH NEW MESSAGES
-    #    Include messages whose receipts changed since the last poll
-    #    so the sender sees ticks flip blue.
     # =========================
     since_param = request.args.get("since")
 
@@ -1072,15 +1069,18 @@ def poll_messages():
 
     # =========================
     # 5. FORMAT RESPONSE
-    #    Include delivered_at and read_at so the frontend can render
-    #    the correct tick style.
     # =========================
     messages_data = []
+    peer_ids = set()
+
     for m in msgs_query:
         other = m.receiver if m.sender_id == current_user.id else m.sender
         other_id     = other.id if other else None
         other_name   = other.name if other else "Unknown User"
         other_avatar = getattr(other, 'profile_picture', None) if other else None
+
+        if other_id:
+            peer_ids.add(other_id)
 
         messages_data.append({
             "id":           m.id,
@@ -1098,13 +1098,29 @@ def poll_messages():
             }
         })
 
+    # =========================
+    # 6. PRESENCE MAP
+    #    (Add the active peer so we know their status even if they haven't messaged)
+    # =========================
+    if active_peer_id and active_peer_id != current_user.id:
+        peer_ids.add(active_peer_id)
+
+    presence = {}
+    if peer_ids:
+        peers = User.query.filter(User.id.in_(peer_ids)).all()
+        for p in peers:
+            presence[str(p.id)] = {
+                "online":    is_user_online(p),
+                "last_seen": p.last_seen_at.isoformat() if p.last_seen_at else None,
+            }
+
     db.session.commit()
 
     return jsonify({
         "unread_count": unread_count,
-        "messages":     messages_data
+        "messages":     messages_data,
+        "presence":     presence,  
     })
-
 
 
 @tenant_bp.route('/compose_message', methods=['GET', 'POST'])

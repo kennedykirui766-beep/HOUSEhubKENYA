@@ -291,7 +291,6 @@
 
   .time { font-size: 0.7rem; color: rgba(0,0,0,0.45); }
   
-  /* FIX: Increased tick font size and added letter-spacing so they don't overlap */
   .tick { 
     font-size: 0.85rem; 
     letter-spacing: -3px; 
@@ -607,7 +606,7 @@
     };
 
     // =====================================================================
-    // DATE HELPERS
+    // DATE HELPERS & FORMATTERS (FIXED TIMEZONE)
     // =====================================================================
     function isSameDay(d1, d2) {
       return d1.getFullYear() === d2.getFullYear() &&
@@ -615,8 +614,21 @@
              d1.getDate() === d2.getDate();
     }
 
-    function formatDateSeparator(isoStr) {
-      const d = new Date(isoStr);
+    function parseUTC(isoString) {
+      if (!isoString) return new Date();
+      // Force the browser to treat missing timezone as UTC
+      const safeStr = (isoString.endsWith('Z') || isoString.includes('+')) 
+                      ? isoString 
+                      : isoString + 'Z';
+      return new Date(safeStr);
+    }
+
+    function formatTimeStr(isoString) {
+      return parseUTC(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function formatDateSeparator(isoString) {
+      const d = parseUTC(isoString);
       const now = new Date();
       const yesterday = new Date();
       yesterday.setDate(now.getDate() - 1);
@@ -631,9 +643,9 @@
       return d.toLocaleDateString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 
-    function formatRelativeTime(isoStr) {
-      if (!isoStr) return '';
-      const d = new Date(isoStr);
+    function formatRelativeTime(isoString) {
+      if (!isoString) return '';
+      const d = parseUTC(isoString);
       const diffSec = Math.floor((Date.now() - d.getTime()) / 1000);
       if (diffSec < 60) return 'just now';
       if (diffSec < 3600) return Math.floor(diffSec / 60) + 'm ago';
@@ -671,14 +683,14 @@
           state.conversations[otherId].messages.push(msg);
         }
 
-        if (new Date(msg.timestamp) > new Date(state.conversations[otherId].lastMsgTime)) {
+        if (parseUTC(msg.timestamp) > parseUTC(state.conversations[otherId].lastMsgTime)) {
           state.conversations[otherId].lastMsgTime = msg.timestamp;
         }
 
         const candidates = [msg.timestamp, msg.delivered_at, msg.read_at].filter(Boolean);
         candidates.forEach(ts => {
           if (!state.lastMessageTimestamp ||
-              new Date(ts) > new Date(state.lastMessageTimestamp)) {
+              parseUTC(ts) > parseUTC(state.lastMessageTimestamp)) {
             state.lastMessageTimestamp = ts;
           }
         });
@@ -708,7 +720,7 @@
     function renderList() {
       els.list.innerHTML = '';
       const sorted = Object.values(state.conversations)
-        .sort((a, b) => new Date(b.lastMsgTime) - new Date(a.lastMsgTime));
+        .sort((a, b) => parseUTC(b.lastMsgTime) - parseUTC(a.lastMsgTime));
 
       if (sorted.length === 0) {
         els.list.innerHTML = '<div style="padding:20px; text-align:center; color:#667781;">No messages.</div>';
@@ -728,11 +740,12 @@
         const online = !!(p && p.online);
         const presenceHtml = `<span class="presence-dot ${online ? 'online' : ''}"></span>`;
 
-        const lastMsgDate = new Date(lastMsg.timestamp);
+        const lastMsgDate = parseUTC(lastMsg.timestamp);
         const now = new Date();
         let timeStr;
+        
         if (isSameDay(lastMsgDate, now)) {
-          timeStr = lastMsgDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          timeStr = formatTimeStr(lastMsg.timestamp);
         } else if (isSameDay(lastMsgDate, new Date(now.getTime() - 86400000))) {
           timeStr = 'Yesterday';
         } else {
@@ -781,7 +794,7 @@
       renderMessages(convo.messages);
       restartPolling(state.POLL_ACTIVE_MS);
 
-      // IMMEDIATE POLL to trigger read receipts for Esther!
+      // IMMEDIATE POLL to trigger read receipts
       poll();
     }
 
@@ -790,7 +803,7 @@
 
       let lastDay = null;
       messages.forEach(msg => {
-        const msgDate = new Date(msg.timestamp);
+        const msgDate = parseUTC(msg.timestamp);
 
         if (!lastDay || !isSameDay(lastDay, msgDate)) {
           const sep = document.createElement('div');
@@ -811,7 +824,7 @@
       const row = document.createElement('div');
       row.className = `msg-row ${isMe ? 'sent' : 'received'}`;
 
-      const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const timeStr = formatTimeStr(msg.timestamp);
       let tickHtml = '';
       if (isMe) tickHtml = getTickHtml(msg);
 
@@ -880,7 +893,7 @@
             const candidates = [realMsg.timestamp, realMsg.delivered_at, realMsg.read_at].filter(Boolean);
             candidates.forEach(ts => {
               if (!state.lastMessageTimestamp ||
-                  new Date(ts) > new Date(state.lastMessageTimestamp)) {
+                  parseUTC(ts) > parseUTC(state.lastMessageTimestamp)) {
                 state.lastMessageTimestamp = ts;
               }
             });

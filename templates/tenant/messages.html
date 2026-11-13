@@ -111,8 +111,22 @@
     flex-shrink: 0; display: flex; align-items: center; justify-content: center;
     color: var(--text-primary); font-weight: bold; overflow: hidden;
     border: 1px solid var(--border-color);
+    position: relative;
   }
   .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* Presence dot on avatar */
+  .presence-dot {
+    position: absolute;
+    bottom: 1px;
+    right: 1px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    background: #9aa5ac;
+  }
+  .presence-dot.online { background: #25d366; }
 
   .chat-info { flex: 1; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
   .info-top { display: flex; justify-content: space-between; margin-bottom: 3px; }
@@ -404,6 +418,7 @@
       currentUserId: window.currentUser,
       conversations: {},
       activeChatId: null,
+      presence: {},
       lastKnownUnreadCount: null,
       lastMessageTimestamp: null,
       pollInterval: null,
@@ -437,6 +452,37 @@
     };
 
     // =====================================================================
+    // DATE HELPERS & FORMATTERS (FIXED TIMEZONE)
+    // =====================================================================
+    function parseUTC(isoString) {
+      if (!isoString) return new Date();
+      const safeStr = (isoString.endsWith('Z') || isoString.includes('+')) 
+                      ? isoString 
+                      : isoString + 'Z';
+      return new Date(safeStr);
+    }
+
+    function formatTimeStr(isoString) {
+      return parseUTC(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function isSameDay(d1, d2) {
+      return d1.getFullYear() === d2.getFullYear() &&
+             d1.getMonth() === d2.getMonth() &&
+             d1.getDate() === d2.getDate();
+    }
+
+    function formatRelativeTime(isoString) {
+      if (!isoString) return '';
+      const d = parseUTC(isoString);
+      const diffSec = Math.floor((Date.now() - d.getTime()) / 1000);
+      if (diffSec < 60) return 'just now';
+      if (diffSec < 3600) return Math.floor(diffSec / 60) + 'm ago';
+      if (diffSec < 86400) return Math.floor(diffSec / 3600) + 'h ago';
+      return d.toLocaleDateString();
+    }
+
+    // =====================================================================
     // PROCESS DATA
     // =====================================================================
     function processData(messages) {
@@ -461,7 +507,6 @@
         if (typeof msg.read_at      === 'undefined') msg.read_at      = null;
         if (typeof msg.is_read      === 'undefined') msg.is_read      = false;
 
-        // MERGE receipt updates into existing messages
         const existing = state.conversations[otherId].messages.find(m => m.id === msg.id);
         if (existing) {
           if (msg.is_read)      existing.is_read = true;
@@ -471,15 +516,14 @@
           state.conversations[otherId].messages.push(msg);
         }
 
-        if (new Date(msg.timestamp) > new Date(state.conversations[otherId].lastMsgTime)) {
+        if (parseUTC(msg.timestamp) > parseUTC(state.conversations[otherId].lastMsgTime)) {
           state.conversations[otherId].lastMsgTime = msg.timestamp;
         }
 
-        // Advance watermark with the newest of timestamp / delivered_at / read_at
         const candidates = [msg.timestamp, msg.delivered_at, msg.read_at].filter(Boolean);
         candidates.forEach(ts => {
           if (!state.lastMessageTimestamp ||
-              new Date(ts) > new Date(state.lastMessageTimestamp)) {
+              parseUTC(ts) > parseUTC(state.lastMessageTimestamp)) {
             state.lastMessageTimestamp = ts;
           }
         });
@@ -503,7 +547,7 @@
     function renderList() {
       els.list.innerHTML = '';
       const sorted = Object.values(state.conversations)
-        .sort((a, b) => new Date(b.lastMsgTime) - new Date(a.lastMsgTime));
+        .sort((a, b) => parseUTC(b.lastMsgTime) - parseUTC(a.lastMsgTime));
 
       if (sorted.length === 0) {
         els.list.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-secondary);">No messages.</div>';
@@ -518,11 +562,15 @@
 
         const initials  = convo.name ? convo.name.charAt(0).toUpperCase() : '?';
         const avatarHtml = convo.avatar ? `<img src="${convo.avatar}">` : `<span>${initials}</span>`;
-        const timeStr   = new Date(lastMsg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const timeStr   = formatTimeStr(lastMsg.timestamp);
         const tickHtml  = (lastMsg.sender_id === state.currentUserId) ? getTickHtml(lastMsg) : '';
 
+        const p = state.presence[convo.id];
+        const online = !!(p && p.online);
+        const presenceHtml = `<span class="presence-dot ${online ? 'online' : ''}"></span>`;
+
         div.innerHTML = `
-          <div class="avatar">${avatarHtml}</div>
+          <div class="avatar">${avatarHtml}${presenceHtml}</div>
           <div class="chat-info">
             <div class="info-top">
               <span class="chat-name" title="${convo.name}">${convo.name}</span>
@@ -544,6 +592,8 @@
     function loadChat(id) {
       state.activeChatId = id;
       const convo = state.conversations[id];
+
+      updateStatusUI();
 
       renderList();
       els.placeholder.style.display = 'none';
@@ -574,8 +624,6 @@
       .catch(e => console.error('Mark read error:', e));
 
       restartPolling(state.POLL_ACTIVE_MS);
-      
-      // IMMEDIATE POLL to trigger read receipts
       poll();
     }
 
@@ -583,10 +631,10 @@
       els.messagesArea.innerHTML = '';
       let lastDate = null;
 
-      const sorted = [...messages].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      const sorted = [...messages].sort((a, b) => parseUTC(a.timestamp) - parseUTC(b.timestamp));
 
       sorted.forEach(msg => {
-        const msgDate = new Date(msg.timestamp).toLocaleDateString();
+        const msgDate = parseUTC(msg.timestamp).toLocaleDateString();
         if (msgDate !== lastDate) {
           const divider = document.createElement('div');
           divider.style.cssText = 'text-align:center; margin:10px 0; color:var(--text-primary); background:var(--card-bg); padding:5px 12px; border-radius:8px; align-self:center; font-size:0.8rem; box-shadow:var(--shadow-sm); border: 1px solid var(--border-color);';
@@ -605,7 +653,7 @@
       const row  = document.createElement('div');
       row.className = `msg-row ${isMe ? 'sent' : 'received'}`;
 
-      const timeStr  = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const timeStr  = formatTimeStr(msg.timestamp);
       const tickHtml = isMe ? getTickHtml(msg) : '';
 
       const safeContent = String(msg.content)
@@ -669,7 +717,7 @@
             const candidates = [realMsg.timestamp, realMsg.delivered_at, realMsg.read_at].filter(Boolean);
             candidates.forEach(ts => {
               if (!state.lastMessageTimestamp ||
-                  new Date(ts) > new Date(state.lastMessageTimestamp)) {
+                  parseUTC(ts) > parseUTC(state.lastMessageTimestamp)) {
                 state.lastMessageTimestamp = ts;
               }
             });
@@ -688,10 +736,32 @@
     }
 
     // =====================================================================
+    // STATUS UI
+    // =====================================================================
+    function updateStatusUI() {
+      const p = state.activeChatId ? state.presence[state.activeChatId] : null;
+      const online = !!(p && p.online);
+
+      if (online) {
+        els.headerStatus.textContent = "online";
+        els.headerStatus.style.color = "var(--primary-color)";
+      } else if (p && p.last_seen) {
+        els.headerStatus.textContent = "last seen " + formatRelativeTime(p.last_seen);
+        els.headerStatus.style.color = "var(--text-secondary)";
+      } else {
+        els.headerStatus.textContent = "offline";
+        els.headerStatus.style.color = "var(--text-secondary)";
+      }
+
+      if (state.activeChatId) {
+        renderList();
+      }
+    }
+
+    // =====================================================================
     // SMART POLLING
     // =====================================================================
     function poll() {
-      // CRITICAL FIX: Send peer_id so the backend marks messages as read!
       const params = new URLSearchParams();
       if (state.lastMessageTimestamp) params.set('since', state.lastMessageTimestamp);
       if (state.activeChatId) params.set('peer_id', state.activeChatId);
@@ -708,6 +778,11 @@
         return res.json();
       })
       .then(data => {
+        if (data.presence && typeof data.presence === 'object') {
+          state.presence = data.presence;
+          updateStatusUI();
+        }
+
         const newUnreadCount = data.unread_count ?? 0;
         const chatIsOpen     = state.activeChatId !== null;
         const unreadChanged  = state.lastKnownUnreadCount !== null &&
@@ -719,7 +794,6 @@
           processData(data.messages);
         }
 
-        // Always re-render if chat is open so ticks flip properly
         if (chatIsOpen) {
           const convo = state.conversations[state.activeChatId];
           if (convo) {
