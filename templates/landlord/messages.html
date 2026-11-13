@@ -796,7 +796,7 @@
       const initials = convo.name.substring(0, 2).toUpperCase();
       els.headerAvatar.innerHTML = convo.avatar
         ? `<img src="${convo.avatar}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`
-        : `<div style="width:100%; height:100%; background:#00a884; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white;">${initials}</div>`;
+        : `<div style="width:100%; height:100%; background:#00a884; border-radius:50%; display:flex; align-items: center; justify-content: center; color:white;">${initials}</div>`;
 
       renderMessages(convo.messages);
       restartPolling(state.POLL_ACTIVE_MS);
