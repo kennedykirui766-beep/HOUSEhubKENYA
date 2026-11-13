@@ -645,8 +645,15 @@
 
     function formatRelativeTime(isoString) {
       if (!isoString) return '';
-      const d = parseUTC(isoString);
+      
+      // ✅ FIX: Force the browser to treat missing timezone as UTC
+      const safeStr = (isoString.endsWith('Z') || isoString.includes('+')) 
+                      ? isoString 
+                      : isoString + 'Z';
+      const d = new Date(safeStr);
+
       const diffSec = Math.floor((Date.now() - d.getTime()) / 1000);
+      
       if (diffSec < 60) return 'just now';
       if (diffSec < 3600) return Math.floor(diffSec / 60) + 'm ago';
       if (diffSec < 86400) return Math.floor(diffSec / 3600) + 'h ago';
