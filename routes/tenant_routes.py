@@ -888,7 +888,7 @@ def all_bookings():
         bookings=bookings_data
     )
     
-from sqlalchemy import or_
+
 
 @tenant_bp.route('/messages')
 @login_required
@@ -897,8 +897,30 @@ def messages():
         flash("Access restricted to tenants.", "danger")
         return redirect(url_for("auth.login"))
 
+    # ✅ get selected landlord
+    selected_user_id = request.args.get("landlord_id", type=int)
+
     try:
-        msgs = Message.query.options(
+        # =========================
+        # ✅ MARK AS READ & DELIVERED
+        # =========================
+        if selected_user_id:
+            now_utc = datetime.utcnow()
+            Message.query.filter(
+                Message.sender_id == selected_user_id,
+                Message.receiver_id == current_user.id,
+                Message.is_read == False
+            ).update({
+                "is_read": True,
+                "read_at": now_utc,
+                "delivered_at": func.coalesce(Message.delivered_at, now_utc)
+            }, synchronize_session=False)
+            db.session.commit()
+
+        # =========================
+        # FETCH MESSAGES
+        # =========================
+        msgs_query = Message.query.options(
             joinedload(Message.sender),
             joinedload(Message.receiver)
         ).filter(
@@ -906,29 +928,44 @@ def messages():
                 Message.sender_id == current_user.id,
                 Message.receiver_id == current_user.id
             )
-        ).order_by(Message.timestamp.asc()).all()
+        )
+
+        # If a specific landlord chat is selected, filter it
+        if selected_user_id:
+            msgs_query = msgs_query.filter(
+                or_(
+                    (Message.sender_id == current_user.id) & (Message.receiver_id == selected_user_id),
+                    (Message.sender_id == selected_user_id) & (Message.receiver_id == current_user.id)
+                )
+            )
+
+        msgs = msgs_query.order_by(Message.timestamp.asc()).all()
 
         messages_data = []
 
         for m in msgs:
-            # 👇 Determine the OTHER user (same logic as landlord)
+            # 👇 Determine the OTHER user
             if m.sender_id == current_user.id:
                 other = m.receiver
             else:
                 other = m.sender
 
             messages_data.append({
-                "id": m.id,
-                "sender_id": m.sender_id,
-                "receiver_id": m.receiver_id,
-                "content": m.content,
-                "timestamp": serialize_timestamp(m.timestamp),
+                "id":           m.id,
+                "sender_id":    m.sender_id,
+                "receiver_id":  m.receiver_id,
+                "content":      m.content,
+                "timestamp":    serialize_timestamp(m.timestamp),
+                
+                # ✅ CRITICAL: Ensure these three fields are here so ticks persist on refresh
+                "is_read":      m.is_read,
+                "delivered_at": m.delivered_at.isoformat() if m.delivered_at else None,
+                "read_at":      m.read_at.isoformat() if m.read_at else None,
 
-                # ✅ IMPORTANT (your JS depends on this)
                 "other_user": {
-                    "id": other.id,
-                    "name": other.name,
-                    "avatar": getattr(other, "profile_picture", None)
+                    "id":     other.id if other else None,
+                    "name":   other.name if other else "Landlord",
+                    "avatar": getattr(other, "profile_picture", None) if other else None
                 }
             })
 
@@ -939,7 +976,8 @@ def messages():
                 "id": current_user.id,
                 "name": current_user.name,
                 "role": current_user.role
-            }
+            },
+            selected_user_id=selected_user_id
         )
 
     except Exception as e:
@@ -948,7 +986,7 @@ def messages():
         flash("Unable to load messages.", "danger")
         return redirect(url_for("tenant.dashboard"))
     
-from sqlalchemy import or_, func  # Make sure this is at the top of the file!
+
 
 @tenant_bp.route("/poll_messages")
 @login_required

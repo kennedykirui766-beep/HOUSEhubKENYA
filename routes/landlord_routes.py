@@ -987,19 +987,24 @@ def messages():
         flash("Access denied.", "danger")
         return redirect(url_for("main.index"))
 
-    # ✅ NEW: get selected tenant
+    # ✅ get selected tenant
     selected_user_id = request.args.get("tenant_id", type=int)
 
     # =========================
-    # ✅ NEW: MARK AS READ
+    # ✅ MARK AS READ & DELIVERED
     # =========================
     if selected_user_id:
         try:
+            now_utc = datetime.utcnow()
             Message.query.filter(
                 Message.sender_id == selected_user_id,
                 Message.receiver_id == current_user.id,
                 Message.is_read == False
-            ).update({"is_read": True})
+            ).update({
+                "is_read": True,
+                "read_at": now_utc,
+                "delivered_at": func.coalesce(Message.delivered_at, now_utc)
+            }, synchronize_session=False)
 
             db.session.commit()
         except Exception as e:
@@ -1038,23 +1043,27 @@ def messages():
     messages_data = []
     for m in msgs_query:
         if m.sender_id == current_user.id:
-            other_id = m.receiver_id
-            other_name = m.receiver.name
-            other_avatar = getattr(m.receiver, 'profile_picture', None)
+            other = m.receiver
         else:
-            other_id = m.sender_id
-            other_name = m.sender.name
-            other_avatar = getattr(m.sender, 'profile_picture', None)
+            other = m.sender
+
+        other_id     = other.id if other else None
+        other_name   = other.name if other else "Unknown"
+        other_avatar = getattr(other, 'profile_picture', None) if other else None
 
         messages_data.append({
-            "id": m.id,
-            "sender_id": m.sender_id,
-            "receiver_id": m.receiver_id,
-            "content": m.content,
-            "timestamp": serialize_timestamp(m.timestamp),
+            "id":           m.id,
+            "sender_id":    m.sender_id,
+            "receiver_id":  m.receiver_id,
+            "content":      m.content,
+            "timestamp":    serialize_timestamp(m.timestamp),
+            "is_read":      m.is_read,
+            # CRITICAL: Include these so ticks stay blue on refresh
+            "delivered_at": m.delivered_at.isoformat() if m.delivered_at else None,
+            "read_at":      m.read_at.isoformat() if m.read_at else None,
             "other_user": {
-                "id": other_id,
-                "name": other_name,
+                "id":     other_id,
+                "name":   other_name,
                 "avatar": other_avatar
             }
         })
