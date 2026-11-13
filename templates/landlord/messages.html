@@ -290,7 +290,14 @@
   }
 
   .time { font-size: 0.7rem; color: rgba(0,0,0,0.45); }
-  .tick { font-size: 0.75rem; }
+  
+  /* FIX: Increased tick font size and added letter-spacing so they don't overlap */
+  .tick { 
+    font-size: 0.85rem; 
+    letter-spacing: -3px; 
+    padding-right: 3px;
+    vertical-align: middle;
+  }
 
   .tick-blue { color: #53bdeb; }
   .tick-grey { color: #8696a0; }
@@ -567,11 +574,7 @@
       conversations: {},
       activeChatId: null,
       isRecipientOnline: false,
-
-      // Presence map: { userId: { online: bool, last_seen: ISO|null } }
       presence: {},
-
-      // Smart polling state
       lastKnownUnreadCount: null,
       lastMessageTimestamp: null,
       pollInterval: null,
@@ -639,7 +642,7 @@
     }
 
     // =====================================================================
-    // PROCESS DATA (merge receipts into existing messages)
+    // PROCESS DATA (Merge receipts)
     // =====================================================================
     function processData(messages) {
       messages.forEach(msg => {
@@ -659,13 +662,11 @@
 
         if (typeof msg.is_read === 'undefined') msg.is_read = false;
 
-        // Merge into existing message if we already have it (receipt updates!)
         const existing = state.conversations[otherId].messages.find(m => m.id === msg.id);
         if (existing) {
           if (msg.is_read)      existing.is_read = true;
           if (msg.read_at)      existing.read_at = msg.read_at;
           if (msg.delivered_at) existing.delivered_at = msg.delivered_at;
-          if (msg.is_read && !existing.is_read) existing.is_read = true;
         } else {
           state.conversations[otherId].messages.push(msg);
         }
@@ -674,7 +675,6 @@
           state.conversations[otherId].lastMsgTime = msg.timestamp;
         }
 
-        // Advance watermark with the newest of timestamp / delivered_at / read_at
         const candidates = [msg.timestamp, msg.delivered_at, msg.read_at].filter(Boolean);
         candidates.forEach(ts => {
           if (!state.lastMessageTimestamp ||
@@ -687,10 +687,6 @@
 
     // =====================================================================
     // TICK LOGIC
-    //   - read_at/is_read → double blue
-    //   - delivered_at    → double grey
-    //   - otherwise       → single grey
-    //   - _pending (temp) → clock
     // =====================================================================
     function getTickHtml(msg) {
       if (!msg) return '';
@@ -728,12 +724,10 @@
         const initials = convo.name ? convo.name.charAt(0).toUpperCase() : '?';
         const avatarHtml = convo.avatar ? `<img src="${convo.avatar}">` : `<span>${initials}</span>`;
 
-        // Presence dot
         const p = state.presence[convo.id];
         const online = !!(p && p.online);
         const presenceHtml = `<span class="presence-dot ${online ? 'online' : ''}"></span>`;
 
-        // Last message time
         const lastMsgDate = new Date(lastMsg.timestamp);
         const now = new Date();
         let timeStr;
@@ -745,9 +739,7 @@
           timeStr = lastMsgDate.toLocaleDateString(undefined, { day: '2-digit', month: '2-digit' });
         }
 
-        const tickHtml = (lastMsg.sender_id === state.currentUserId)
-          ? getTickHtml(lastMsg)
-          : '';
+        const tickHtml = (lastMsg.sender_id === state.currentUserId) ? getTickHtml(lastMsg) : '';
 
         div.innerHTML = `
           <div class="avatar">${avatarHtml}${presenceHtml}</div>
@@ -789,7 +781,7 @@
       renderMessages(convo.messages);
       restartPolling(state.POLL_ACTIVE_MS);
 
-      // Immediately poll with peer_id so the server marks messages read
+      // IMMEDIATE POLL to trigger read receipts for Esther!
       poll();
     }
 
@@ -834,22 +826,6 @@
           </div>
         </div>
       `;
-
-      // Long-press / right-click on a sent bubble to see read time
-      if (isMe) {
-        const bubble = row.querySelector('.bubble');
-        bubble.addEventListener('contextmenu', (e) => {
-          e.preventDefault();
-          let info = 'Sent';
-          if (msg.read_at) {
-            info = 'Read at ' + new Date(msg.read_at).toLocaleString();
-          } else if (msg.delivered_at) {
-            info = 'Delivered at ' + new Date(msg.delivered_at).toLocaleString();
-          }
-          alert(info);
-        });
-      }
-
       els.messagesArea.appendChild(row);
     }
 
@@ -920,7 +896,7 @@
     }
 
     // =====================================================================
-    // STATUS UI (uses real presence from server)
+    // STATUS UI
     // =====================================================================
     function updateStatusUI() {
       const p = state.activeChatId ? state.presence[state.activeChatId] : null;
@@ -968,7 +944,6 @@
         return res.json();
       })
       .then(data => {
-        // --- Presence update ---
         if (data.presence && typeof data.presence === 'object') {
           state.presence = data.presence;
           updateStatusUI();
@@ -982,13 +957,10 @@
 
         state.lastKnownUnreadCount = newUnreadCount;
 
-        // Merge any incoming messages (including receipt-only updates)
         if (data.messages && data.messages.length > 0) {
           processData(data.messages);
         }
 
-        // While a chat is open, ALWAYS re-render so tick changes appear
-        // even when no new message text arrives.
         if (chatIsOpen) {
           const convo = state.conversations[state.activeChatId];
           if (convo) {
@@ -1020,7 +992,7 @@
     }
 
     // =====================================================================
-    // EMOJI PICKER
+    // EMOJI PICKER & ATTACHMENTS
     // =====================================================================
     const EMOJIS = [
       '😀','😃','😄','😁','😆','😅','😂','🤣',
@@ -1067,9 +1039,6 @@
       els.emojiPicker.classList.toggle('open');
     });
 
-    // =====================================================================
-    // ATTACHMENT MENU
-    // =====================================================================
     els.attachBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       els.emojiPicker.classList.remove('open');
