@@ -358,14 +358,17 @@ def restrict_to_admin():
             flash(f"Too many admin actions. Please wait {retry_after}s and try again.", 'warning')
             return redirect(url_for('admin.dashboard'))
 
-    if not current_user.two_factor_enabled or not current_user.two_factor_secret:
-        logger.warning("Admin gate reroute: authenticator not configured. state=%s", _admin_gate_snapshot())
-        flash("Enable authenticator 2FA before using the admin area.", "warning")
-        return redirect(url_for('auth.admin_security_setup'))
-
-    if not has_admin_totp_verified(current_user):
-        logger.warning("Admin gate reroute: admin TOTP not verified in session. state=%s", _admin_gate_snapshot())
-        return redirect(url_for('auth.admin_2fa_verify'))
+    # =====================================================================
+    # 2FA CHECKS COMMENTED OUT
+    # =====================================================================
+    # if not current_user.two_factor_enabled or not current_user.two_factor_secret:
+    #     logger.warning("Admin gate reroute: authenticator not configured. state=%s", _admin_gate_snapshot())
+    #     flash("Enable authenticator 2FA before using the admin area.", "warning")
+    #     return redirect(url_for('auth.admin_security_setup'))
+    # 
+    # if not has_admin_totp_verified(current_user):
+    #     logger.warning("Admin gate reroute: admin TOTP not verified in session. state=%s", _admin_gate_snapshot())
+    #     return redirect(url_for('auth.admin_2fa_verify'))
 
     logger.info("Admin gate passed. state=%s", _admin_gate_snapshot())
 
@@ -2340,4 +2343,3 @@ def download_audit_log():
     # Placeholder: later we can stream a CSV/Excel/JSON file
     flash("Audit log downloaded successfully (placeholder).", "success")
     return redirect(url_for('admin.dashboard'))
-
