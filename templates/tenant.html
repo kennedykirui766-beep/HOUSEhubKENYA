@@ -370,17 +370,17 @@
     <div class="td-hero-main">
       <div class="td-label">Outstanding balance</div>
       {% set bal = '%.2f'|format(balance) if balance else '0.00' %}
-      <div class="td-balance"><sup>$</sup>{{ bal.split('.')[0] }}<small>.{{ bal.split('.')[1] }}</small></div>
+      <div class="td-balance"><sup>KES</sup> {{ bal.split('.')[0] }}<small>.{{ bal.split('.')[1] }}</small></div>
       <p class="td-due">
         {% if next_payment %}
-          Next payment of <strong>${{ next_payment.amount }}</strong> is due
+          Next payment of <strong>KES {{ next_payment.amount }}</strong> is due
           <strong>{{ next_payment.due_date.strftime('%d %b %Y') }}</strong>.
         {% else %}
           Nothing is due right now.
         {% endif %}
       </p>
       <a href="{{ url_for('tenant.pay_rent') }}" class="td-btn td-btn-solid">
-        {% if next_payment %}Pay ${{ next_payment.amount }}{% else %}View payment history{% endif %}
+        {% if next_payment %}Pay KES {{ next_payment.amount }}{% else %}View payment history{% endif %}
       </a>
     </div>
 
@@ -389,7 +389,7 @@
       {% if property and active_booking %}
       <dl class="td-facts">
         <div><dt>Address</dt><dd>{{ property.address_line1 }}</dd></div>
-        <div><dt>Monthly rent</dt><dd>${{ property.rent_amount }}</dd></div>
+        <div><dt>Monthly rent</dt><dd>KES {{ property.rent_amount }}</dd></div>
         <div><dt>Lease ends</dt><dd>{{ active_booking.lease_end_date.strftime('%d %b %Y') if active_booking.lease_end_date else 'N/A' }}</dd></div>
       </dl>
       {% if active_booking.lease_start_date and active_booking.lease_end_date %}
@@ -456,7 +456,7 @@
                 <tr class="payment-row" data-status="{{ payment.status }}">
                   <td>{{ payment.date.strftime('%d %b %Y') }}</td>
                   <td><span class="td-pill {{ 'ok' if payment.status == 'paid' else 'wait' }}">{{ payment.status|title }}</span></td>
-                  <td class="num">${{ payment.amount }}</td>
+                  <td class="num">KES {{ payment.amount }}</td>
                   <td class="end"><a href="{{ url_for('tenant.view_receipt', id=payment.id) }}" class="td-link">Receipt</a></td>
                 </tr>
                 {% else %}
@@ -749,7 +749,7 @@
         data: {
           labels: {{ payment_labels | tojson if payment_labels else '[]' }},
           datasets: [{
-            label: 'Payments ($)',
+            label: 'Payments (KES)',
             data: {{ payment_data | tojson if payment_data else '[]' }},
             backgroundColor: accent,
             borderRadius: 4,
@@ -765,7 +765,7 @@
           },
           plugins: {
             legend: { display: false },
-            tooltip: { callbacks: { label: function (c) { return '$' + c.raw; } } }
+            tooltip: { callbacks: { label: function (c) { return 'KES ' + c.raw; } } }
           }
         }
       });
