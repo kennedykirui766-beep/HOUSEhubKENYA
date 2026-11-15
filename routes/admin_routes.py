@@ -1947,78 +1947,66 @@ def bulk_action():
 
     return redirect(url_for('admin.dashboard'))
 
-# --- Single User Actions ---
+from datetime import datetime
+from flask import request, flash, redirect, url_for
+from flask_login import current_user, login_required
+from extensions import db
+from models import User
+# delete_user_and_dependents imported where it already is
+
 @admin_bp.route('/user_action/<int:user_id>', methods=['POST'])
 @login_required
 def user_action(user_id):
+    if not is_approved_admin(current_user):
+        flash('Access denied.', 'danger')
+        return redirect(url_for('admin.operations'))
+
     action = request.form.get("action")
     user = User.query.get_or_404(user_id)
 
     if action == "delete":
-        # Prevent self-delete
         if current_user.id == user.id:
             flash("You cannot delete your own account.", "danger")
             return redirect(url_for('admin.operations'))
 
-        success, error = delete_user_and_dependents(user)
-        if success:
-            logger.info(f"Admin {current_user.id} hard-deleted user {user.id}")
-            log_admin_action(
-                'user_action_delete',
-                target_type='user',
-                target_id=user.id,
-                details={'action': 'delete'}
-            )
-            flash(f"User {getattr(user, 'name', user.id)} deleted.", "success")
-        else:
-            log_admin_action(
-                'user_action_delete',
-                target_type='user',
-                target_id=user.id,
-                status='failed',
-                details={'action': 'delete', 'error': error}
-            )
-            flash(f"Could not delete user: {error}", "danger")
+        # Option A: soft delete (recommended for your schema)
+        user.deleted_at = datetime.utcnow()
+        user.is_active = False
+        db.session.commit()
+        logger.info(f"Admin {current_user.id} soft-deleted user {user.id}")
+        log_admin_action(
+            'user_action_delete', target_type='user', target_id=user.id,
+            details={'action': 'delete', 'mode': 'soft'}
+        )
+        flash(f"User {user.name or user.id} deleted.", "success")
 
     elif action == "deactivate":
         user.is_active = False
         db.session.commit()
-        log_admin_action(
-            'user_action_deactivate',
-            target_type='user',
-            target_id=user.id,
-            details={'action': 'deactivate'}
-        )
-        flash(f"User {getattr(user, 'name', user.id)} deactivated.", "warning")
+        log_admin_action('user_action_deactivate', target_type='user',
+                         target_id=user.id, details={'action': 'deactivate'})
+        flash(f"User {user.name or user.id} suspended.", "warning")
 
     elif action == "activate":
         user.is_active = True
         db.session.commit()
-        log_admin_action(
-            'user_action_activate',
-            target_type='user',
-            target_id=user.id,
-            details={'action': 'activate'}
-        )
-        flash(f"User {getattr(user, 'name', user.id)} activated.", "success")
+        log_admin_action('user_action_activate', target_type='user',
+                         target_id=user.id, details={'action': 'activate'})
+        flash(f"User {user.name or user.id} activated.", "success")
 
     elif action == "reset_password":
         if not getattr(user, 'email', None):
-            flash("This user does not have an email address for a reset link.", "danger")
+            flash("This user has no email address for a reset link.", "danger")
             return redirect(url_for('admin.operations'))
-
         if user.role != 'admin':
-            flash("Password reset links are currently restricted to admin accounts.", "warning")
+            flash("Password reset links are restricted to admin accounts.", "warning")
             return redirect(url_for('admin.operations'))
 
         from routes.auth_routes import _queue_password_reset
-
         _queue_password_reset(user)
         log_admin_action(
-            'user_reset_password_link',
-            category='security',
-            target_type='user',
-            target_id=user.id,
+            'user_reset_password_link', category='security',
+            target_type='user', target_id=user.id,
             details={'email': user.email, 'role': user.role}
         )
         flash(f"Password reset link queued for {user.email}.", "success")
