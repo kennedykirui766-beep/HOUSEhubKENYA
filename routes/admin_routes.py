@@ -10,13 +10,13 @@ from models.models import User, House, SystemUpdateSubscriber, SystemSetting
 from models.models import EmailTemplate, EmailTemplateVersion, EmailTemplateSendLog
 from models.models import SupportTicket, SupportMessage, MaintenanceRequest, Payment, MaintenanceComment
 from models.models import AuditLog
-from extensions import db, csrf, request, flash, redirect, url_for
+from extensions import db, csrf
 from flask import make_response
 import csv
 import io
 from datetime import datetime, timedelta
 from utils_delete import delete_user_and_dependents
-
+from flask import request, flash, redirect, url_for
 
 
 logger = logging.getLogger(__name__)
