@@ -1,199 +1,428 @@
 <!-- homehub/templates/platform_settings.html -->
 {% extends "base.html" %}
 
-{% block title %}Platform Settings - HomeHub{% endblock %}
+{% block title %}Platform settings · HomeHub{% endblock %}
 
 {% block styles %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <style>
-        .settings-container {
-            max-width: 600px;
-            margin: 20px auto;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #2E6B2F; /* Darker Acacia Green */
-        }
-        input[type="number"], select {
-            width: 100%;
-            padding: 8px;
-            border: 2px solid #3D8B40; /* Acacia Green */
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        input[type="checkbox"] {
-            margin-right: 10px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #3D8B40; /* Acacia Green */
-            color: #F5E8C7; /* Savanna Beige */
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #2E6B2F; /* Darker Acacia Green */
-        }
-        .flash {
-            margin-bottom: 15px;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .flash.success { background-color: #d4edda; color: #155724; }
-        .flash.error { background-color: #f8d7da; color: #721c24; }
-        @media (max-width: 600px) {
-            .settings-container { padding: 10px; }
-        }
-    </style>
+<style>
+  /* Platform settings. Prefixed st- so nothing leaks into base.html. */
+
+  .st-wrap { max-width: 980px; margin: 0 auto; }
+
+  /* ---------- Header ---------- */
+  .st-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding-bottom: 1.1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .st-eyebrow { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.15rem; }
+  .st-eyebrow a { color: inherit; text-decoration: none; }
+  .st-eyebrow a:hover { color: var(--primary-color); }
+  .st-title { margin: 0; font-size: 1.55rem; font-weight: 650; letter-spacing: -0.02em; color: var(--text-primary); }
+  .st-tools { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+  .st-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.95rem;
+    font-size: 0.84rem;
+    font-weight: 550;
+    line-height: 1.2;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color .15s, background-color .15s;
+  }
+  .st-btn:hover { border-color: var(--text-muted); color: var(--text-primary); }
+  .st-btn-primary { background: var(--primary-color); border-color: var(--primary-color); color: #fff; }
+  .st-btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); color: #fff; }
+
+  /* ---------- Layout: section nav + content ---------- */
+  .st-layout { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 2rem; align-items: start; }
+  .st-nav { position: sticky; top: calc(var(--navbar-height) + 1.25rem); display: flex; flex-direction: column; gap: 0.15rem; }
+  .st-nav a {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.86rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 7px;
+    border-left: 2px solid transparent;
+  }
+  .st-nav a:hover { color: var(--text-primary); background: var(--body-bg); }
+  .st-nav a.active { color: var(--primary-color); border-left-color: var(--primary-color); background: var(--primary-light); }
+
+  /* ---------- Sections ---------- */
+  .st-section { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 1.25rem; scroll-margin-top: calc(var(--navbar-height) + 1rem); }
+  .st-section-head { padding: 1rem 1.3rem; border-bottom: 1px solid var(--border-color); }
+  .st-section-title { margin: 0; font-size: 0.98rem; font-weight: 640; color: var(--text-primary); }
+  .st-section-desc { margin: 0.15rem 0 0; font-size: 0.82rem; color: var(--text-muted); }
+
+  .st-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem 1.3rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .st-row:last-child { border-bottom: none; }
+  .st-row.stack { align-items: flex-start; }
+  .st-text { min-width: 0; flex: 1; }
+  .st-text label, .st-text .st-label { display: block; font-size: 0.9rem; font-weight: 580; color: var(--text-primary); margin: 0; cursor: pointer; }
+  .st-text small { display: block; margin-top: 0.15rem; font-size: 0.8rem; line-height: 1.45; color: var(--text-muted); }
+  .st-control { flex: 0 0 auto; }
+
+  .st-input {
+    width: 100%;
+    font-size: 0.88rem;
+    padding: 0.5rem 0.7rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    min-width: 0;
+  }
+  .st-input:focus { outline: 2px solid var(--primary-light); border-color: var(--primary-color); }
+  .st-control .st-input { width: 220px; }
+  .st-control .st-input.narrow { width: 110px; text-align: right; }
+  .st-control .st-input.wide { width: 300px; }
+
+  /* Toggle switch (still a real checkbox, so the form posts exactly as before) */
+  .st-switch { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; cursor: pointer; }
+  .st-switch input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; z-index: 1; }
+  .st-track { position: absolute; inset: 0; background: var(--border-color); border-radius: 99px; transition: background-color .18s; }
+  .st-track::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 16px; height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 2px rgba(0,0,0,.25);
+    transition: transform .18s;
+  }
+  .st-switch input:checked + .st-track { background: var(--primary-color); }
+  .st-switch input:checked + .st-track::after { transform: translateX(18px); }
+  .st-switch input:focus-visible + .st-track { outline: 2px solid var(--primary-light); outline-offset: 2px; }
+
+  /* Maintenance fields are dimmed (not disabled) while the switch is off,
+     so their values are still submitted. */
+  .st-dim { opacity: 0.55; transition: opacity .15s; }
+  .st-dim:focus-within { opacity: 1; }
+
+  /* Read-only status lines */
+  .st-status { font-size: 0.86rem; color: var(--text-primary); text-align: right; max-width: 360px; word-break: break-word; }
+  .st-status.none { color: var(--text-muted); }
+
+  /* ---------- Save bar ---------- */
+  .st-save {
+    position: sticky;
+    bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 1.1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    z-index: 5;
+  }
+  .st-save-note { font-size: 0.84rem; color: var(--text-muted); }
+  .st-save-note.dirty { color: var(--text-primary); }
+  .st-save-note.dirty::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--warning-color); margin-right: 0.5rem; vertical-align: 1px; }
+  .st-save-note.error { color: #b4372f; }
+  [data-bs-theme="dark"] .st-save-note.error { color: #f08a82; }
+
+  @media (max-width: 767.98px) {
+    .st-layout { grid-template-columns: 1fr; gap: 1rem; }
+    .st-nav { position: static; flex-direction: row; overflow-x: auto; gap: 0.3rem; }
+    .st-nav a { white-space: nowrap; border-left: none; border-bottom: 2px solid transparent; border-radius: 6px 6px 0 0; }
+    .st-nav a.active { border-bottom-color: var(--primary-color); }
+    .st-row { flex-direction: column; align-items: stretch; gap: 0.7rem; }
+    .st-row.toggle { flex-direction: row; align-items: center; }
+    .st-control .st-input, .st-control .st-input.narrow, .st-control .st-input.wide { width: 100%; text-align: left; }
+    .st-status { text-align: left; max-width: none; }
+    .st-title { font-size: 1.3rem; }
+  }
+</style>
 {% endblock %}
 
 {% block content %}
-    <div class="settings-container">
-        <h1>Platform Settings</h1>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash {{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        <form method="POST" action="">
-            <div class="form-group">
-                <label for="max_listings">Maximum Listings:</label>
-                <input type="number" id="max_listings" name="max_listings" value="{{ settings.max_listings if settings is defined else 10 }}" min="1" required>
-            </div>
-            <div class="form-group">
-                <label for="default_status">Default House Status:</label>
-                <select id="default_status" name="default_status">
-                    <option value="active" {% if settings is defined and settings.default_status == 'active' %}selected{% endif %}>Active</option>
-                    <option value="inactive" {% if settings is defined and settings.default_status == 'inactive' %}selected{% endif %}>Inactive</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" name="notification_enabled" {% if settings is defined and settings.notification_enabled %}checked{% endif %}>
-                    Enable Notifications
-                </label>
-            </div>
+{# Tiny helper so the many on/off flags stay one line each #}
+{% macro toggle(name, title, hint, checked, id=None) -%}
+<div class="st-row toggle">
+  <div class="st-text">
+    <label for="{{ id or name }}">{{ title }}</label>
+    {% if hint %}<small>{{ hint }}</small>{% endif %}
+  </div>
+  <div class="st-control">
+    <span class="st-switch">
+      <input type="checkbox" name="{{ name }}" id="{{ id or name }}" {% if checked %}checked{% endif %}>
+      <span class="st-track"></span>
+    </span>
+  </div>
+</div>
+{%- endmacro %}
 
-            <hr>
-            <h4>Maintenance Mode</h4>
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" name="maintenance_mode" id="maintenance_mode" {% if settings is defined and settings.maintenance_mode %}checked{% endif %}>
-                    Enable Maintenance Mode
-                </label>
-            </div>
-            <div class="form-group">
-                <label for="maintenance_start">Start (local):</label>
-                <input type="datetime-local" id="maintenance_start" name="maintenance_start" value="{{ settings.maintenance_start if settings is defined else '' }}">
-            </div>
-            <div class="form-group">
-                <label for="maintenance_end">End (local):</label>
-                <input type="datetime-local" id="maintenance_end" name="maintenance_end" value="{{ settings.maintenance_end if settings is defined else '' }}">
-            </div>
+{% set s = settings if settings is defined and settings else {} %}
+{% set maint_start = s.maintenance_start.strftime('%Y-%m-%dT%H:%M') if s.maintenance_start and s.maintenance_start.strftime is defined else (s.maintenance_start or '') %}
+{% set maint_end = s.maintenance_end.strftime('%Y-%m-%dT%H:%M') if s.maintenance_end and s.maintenance_end.strftime is defined else (s.maintenance_end or '') %}
 
-            <hr>
-            <h4>Feature Flags</h4>
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" name="feature_signup_enabled" {% if settings is defined and settings.feature_signup_enabled %}checked{% endif %}>
-                    Enable New Signups
-                </label>
-            </div>
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" name="feature_live_chat_enabled" {% if settings is defined and settings.feature_live_chat_enabled %}checked{% endif %}>
-                    Enable Live Chat Widget
-                </label>
-            </div>
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" name="feature_support_escalation_enabled" {% if settings is defined and settings.feature_support_escalation_enabled %}checked{% endif %}>
-                    Enable Live Chat Support Escalation
-                </label>
-            </div>
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" name="feature_dark_mode_enabled" {% if settings is defined and settings.feature_dark_mode_enabled %}checked{% endif %}>
-                    Allow Dark Mode Toggle
-                </label>
-                <small>When disabled, the interface stays in light mode and the user theme toggle is hidden.</small>
-            </div>
-            <div class="form-group">
-                <label for="signup_allowed_roles">Allowed Signup Roles (comma-separated):</label>
-                <input type="text" id="signup_allowed_roles" name="signup_allowed_roles" value="{{ settings.signup_allowed_roles if settings is defined else 'tenant,landlord,service' }}" placeholder="tenant,landlord,service">
-            </div>
+<div class="st-wrap">
 
-            <hr>
-            <h4>Report Scheduling Jobs</h4>
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" name="report_schedule_enabled" {% if settings is defined and settings.report_schedule_enabled %}checked{% endif %}>
-                    Enable Scheduled Report Jobs
-                </label>
-            </div>
-            <div class="form-group">
-                <label for="report_schedule_interval_minutes">Run Interval (minutes):</label>
-                <input type="number" id="report_schedule_interval_minutes" name="report_schedule_interval_minutes" min="15" value="{{ settings.report_schedule_interval_minutes if settings is defined else 1440 }}">
-            </div>
-            <div class="form-group">
-                <label for="report_schedule_datasets">Datasets (comma-separated):</label>
-                <input type="text" id="report_schedule_datasets" name="report_schedule_datasets" value="{{ settings.report_schedule_datasets if settings is defined else 'summary,finance,occupancy,maintenance' }}" placeholder="summary,finance,occupancy,maintenance">
-                <small>Allowed values: summary, finance, occupancy, maintenance</small>
-            </div>
-            <div class="form-group">
-                <label for="report_schedule_format">Output Format:</label>
-                <select id="report_schedule_format" name="report_schedule_format">
-                    <option value="csv" {% if settings is defined and settings.report_schedule_format == 'csv' %}selected{% endif %}>CSV only</option>
-                    <option value="xlsx" {% if settings is defined and settings.report_schedule_format == 'xlsx' %}selected{% endif %}>Excel (XLSX) only</option>
-                    <option value="both" {% if settings is defined and settings.report_schedule_format == 'both' %}selected{% endif %}>Both CSV and XLSX</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Last Run (UTC):</label>
-                <input type="text" value="{{ settings.report_schedule_last_run_at if settings is defined else '' }}" readonly>
-            </div>
-            <div class="form-group">
-                <label>Last Result:</label>
-                <input type="text" value="{{ settings.report_schedule_last_result if settings is defined else '' }}" readonly>
-            </div>
-            <button type="submit">Save Changes</button>
-        </form>
-        <form method="POST" action="{{ url_for('admin.run_report_schedule_now') }}" style="margin-top: 10px;">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit">Run Scheduled Report Job Now</button>
-        </form>
-        <p style="text-align: center; margin-top: 16px;">
-            <a href="{{ url_for('admin.email_templates') }}">Manage Email Templates</a>
-        </p>
-        <p style="text-align: center;">
-            <a href="{{ url_for('admin.manage_users') }}">Back to Manage Users</a> |
-            <a href="{{ url_for('index') }}">Home</a>
-        </p>
+  <header class="st-head">
+    <div>
+      <div class="st-eyebrow"><a href="{{ url_for('admin.dashboard') }}">Admin</a> / Configuration</div>
+      <h1 class="st-title">Platform settings</h1>
     </div>
+    <div class="st-tools">
+      <a href="{{ url_for('admin.email_templates') }}" class="st-btn"><i class="fas fa-envelope"></i> Email templates</a>
+      <a href="{{ url_for('admin.manage_users') }}" class="st-btn"><i class="fas fa-users"></i> Manage users</a>
+    </div>
+  </header>
+
+  <div class="st-layout">
+
+    <nav class="st-nav" id="stNav" aria-label="Settings sections">
+      <a href="#general">General</a>
+      <a href="#maintenance">Maintenance mode</a>
+      <a href="#features">Feature flags</a>
+      <a href="#reports">Scheduled reports</a>
+    </nav>
+
+    <div>
+      <form method="POST" action="" id="settings-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <!-- General -->
+        <section class="st-section" id="general">
+          <div class="st-section-head">
+            <h2 class="st-section-title">General</h2>
+            <p class="st-section-desc">Defaults applied across the platform.</p>
+          </div>
+          <div class="st-row">
+            <div class="st-text">
+              <label for="max_listings">Maximum listings</label>
+              <small>How many properties a landlord can list.</small>
+            </div>
+            <div class="st-control">
+              <input type="number" id="max_listings" name="max_listings" class="st-input narrow"
+                     value="{{ s.max_listings if s.max_listings is defined and s.max_listings is not none else 10 }}" min="1" required>
+            </div>
+          </div>
+          <div class="st-row">
+            <div class="st-text">
+              <label for="default_status">Default house status</label>
+              <small>Status given to a house when it is first created.</small>
+            </div>
+            <div class="st-control">
+              <select id="default_status" name="default_status" class="st-input">
+                <option value="active" {% if s.default_status == 'active' %}selected{% endif %}>Active</option>
+                <option value="inactive" {% if s.default_status == 'inactive' %}selected{% endif %}>Inactive</option>
+              </select>
+            </div>
+          </div>
+          {{ toggle('notification_enabled', 'Notifications', 'Send in-app and email notifications to users.', s.notification_enabled) }}
+        </section>
+
+        <!-- Maintenance -->
+        <section class="st-section" id="maintenance">
+          <div class="st-section-head">
+            <h2 class="st-section-title">Maintenance mode</h2>
+            <p class="st-section-desc">Take the platform offline for planned work.</p>
+          </div>
+          {{ toggle('maintenance_mode', 'Enable maintenance mode', 'Visitors will see a maintenance notice while this is on.', s.maintenance_mode, 'maintenance_mode') }}
+          <div class="st-row {{ '' if s.maintenance_mode else 'st-dim' }}" id="maintenance-window-start">
+            <div class="st-text">
+              <label for="maintenance_start">Starts</label>
+              <small>Local time. Leave empty to start immediately.</small>
+            </div>
+            <div class="st-control">
+              <input type="datetime-local" id="maintenance_start" name="maintenance_start" class="st-input" value="{{ maint_start }}">
+            </div>
+          </div>
+          <div class="st-row {{ '' if s.maintenance_mode else 'st-dim' }}" id="maintenance-window-end">
+            <div class="st-text">
+              <label for="maintenance_end">Ends</label>
+              <small>Local time. Leave empty to stay on until switched off.</small>
+            </div>
+            <div class="st-control">
+              <input type="datetime-local" id="maintenance_end" name="maintenance_end" class="st-input" value="{{ maint_end }}">
+            </div>
+          </div>
+        </section>
+
+        <!-- Features -->
+        <section class="st-section" id="features">
+          <div class="st-section-head">
+            <h2 class="st-section-title">Feature flags</h2>
+            <p class="st-section-desc">Switch parts of the product on or off.</p>
+          </div>
+          {{ toggle('feature_signup_enabled', 'New signups', 'Allow new people to create accounts.', s.feature_signup_enabled) }}
+          <div class="st-row stack">
+            <div class="st-text">
+              <label for="signup_allowed_roles">Allowed signup roles</label>
+              <small>Comma-separated, for example <code>tenant,landlord,service</code>.</small>
+            </div>
+            <div class="st-control">
+              <input type="text" id="signup_allowed_roles" name="signup_allowed_roles" class="st-input wide"
+                     value="{{ s.signup_allowed_roles if s.signup_allowed_roles is defined and s.signup_allowed_roles is not none else 'tenant,landlord,service' }}"
+                     placeholder="tenant,landlord,service">
+            </div>
+          </div>
+          {{ toggle('feature_live_chat_enabled', 'Live chat widget', 'Show the support chat bubble to tenants and landlords.', s.feature_live_chat_enabled) }}
+          {{ toggle('feature_support_escalation_enabled', 'Live chat support escalation', 'Let users turn a chat into a support ticket with /support.', s.feature_support_escalation_enabled) }}
+          {{ toggle('feature_dark_mode_enabled', 'Dark mode toggle', 'When off, the interface stays in light mode and the theme toggle is hidden.', s.feature_dark_mode_enabled) }}
+        </section>
+
+        <!-- Reports -->
+        <section class="st-section" id="reports">
+          <div class="st-section-head">
+            <h2 class="st-section-title">Scheduled reports</h2>
+            <p class="st-section-desc">Generate report files automatically.</p>
+          </div>
+          {{ toggle('report_schedule_enabled', 'Scheduled report jobs', 'Run the report job on the interval below.', s.report_schedule_enabled) }}
+          <div class="st-row">
+            <div class="st-text">
+              <label for="report_schedule_interval_minutes">Run interval</label>
+              <small>In minutes, minimum 15. 1440 is once a day.</small>
+            </div>
+            <div class="st-control">
+              <input type="number" id="report_schedule_interval_minutes" name="report_schedule_interval_minutes" class="st-input narrow" min="15"
+                     value="{{ s.report_schedule_interval_minutes if s.report_schedule_interval_minutes is defined and s.report_schedule_interval_minutes is not none else 1440 }}">
+            </div>
+          </div>
+          <div class="st-row stack">
+            <div class="st-text">
+              <label for="report_schedule_datasets">Datasets</label>
+              <small>Comma-separated. Allowed: summary, finance, occupancy, maintenance.</small>
+            </div>
+            <div class="st-control">
+              <input type="text" id="report_schedule_datasets" name="report_schedule_datasets" class="st-input wide"
+                     value="{{ s.report_schedule_datasets if s.report_schedule_datasets is defined and s.report_schedule_datasets is not none else 'summary,finance,occupancy,maintenance' }}"
+                     placeholder="summary,finance,occupancy,maintenance">
+            </div>
+          </div>
+          <div class="st-row">
+            <div class="st-text">
+              <label for="report_schedule_format">Output format</label>
+            </div>
+            <div class="st-control">
+              <select id="report_schedule_format" name="report_schedule_format" class="st-input">
+                <option value="csv" {% if s.report_schedule_format == 'csv' %}selected{% endif %}>CSV only</option>
+                <option value="xlsx" {% if s.report_schedule_format == 'xlsx' %}selected{% endif %}>Excel (XLSX) only</option>
+                <option value="both" {% if s.report_schedule_format == 'both' %}selected{% endif %}>CSV and XLSX</option>
+              </select>
+            </div>
+          </div>
+          <div class="st-row">
+            <div class="st-text"><span class="st-label">Last run</span><small>UTC</small></div>
+            <div class="st-status {{ '' if s.report_schedule_last_run_at else 'none' }}">{{ s.report_schedule_last_run_at or 'Never run' }}</div>
+          </div>
+          <div class="st-row">
+            <div class="st-text"><span class="st-label">Last result</span></div>
+            <div class="st-status {{ '' if s.report_schedule_last_result else 'none' }}">{{ s.report_schedule_last_result or 'No result yet' }}</div>
+          </div>
+          <div class="st-row">
+            <div class="st-text">
+              <span class="st-label">Run now</span>
+              <small>Starts the job immediately. Save any changes above first.</small>
+            </div>
+            <div class="st-control">
+              <button type="submit" form="run-report-form" class="st-btn"><i class="fas fa-play"></i> Run job now</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Save bar -->
+        <div class="st-save">
+          <span class="st-save-note" id="saveNote">No unsaved changes</span>
+          <button type="submit" class="st-btn st-btn-primary">Save changes</button>
+        </div>
+      </form>
+
+      <!-- Lives outside the settings form because HTML forms cannot nest -->
+      <form method="POST" action="{{ url_for('admin.run_report_schedule_now') }}" id="run-report-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      </form>
+    </div>
+
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
-    <script>
-        // Optional: Add JavaScript for form validation or dynamic updates
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const maxListings = document.getElementById('max_listings').value;
-            if (maxListings <= 0) {
-                e.preventDefault();
-                alert('Maximum listings must be greater than 0.');
-            }
+<script>
+  (function () {
+    var form = document.getElementById('settings-form');
+    var note = document.getElementById('saveNote');
+    if (!form) return;
+
+    // Unsaved-changes hint
+    var dirty = false;
+    function markDirty() {
+      if (dirty) return;
+      dirty = true;
+      note.textContent = 'You have unsaved changes';
+      note.className = 'st-save-note dirty';
+    }
+    form.addEventListener('input', markDirty);
+    form.addEventListener('change', markDirty);
+    form.addEventListener('submit', function () { dirty = false; });
+    window.addEventListener('beforeunload', function (e) {
+      if (dirty) { e.preventDefault(); e.returnValue = ''; }
+    });
+
+    // Dim the maintenance window while maintenance mode is off
+    var mm = document.getElementById('maintenance_mode');
+    var rows = [document.getElementById('maintenance-window-start'), document.getElementById('maintenance-window-end')];
+    function syncMaintenance() {
+      rows.forEach(function (r) { if (r) r.classList.toggle('st-dim', !mm.checked); });
+    }
+    if (mm) { mm.addEventListener('change', syncMaintenance); syncMaintenance(); }
+
+    // Validation (replaces the old alert)
+    form.addEventListener('submit', function (e) {
+      var problem = '';
+      var max = parseInt(document.getElementById('max_listings').value, 10);
+      if (!(max > 0)) problem = 'Maximum listings must be greater than 0.';
+      var start = document.getElementById('maintenance_start').value;
+      var end = document.getElementById('maintenance_end').value;
+      if (!problem && start && end && end <= start) problem = 'Maintenance end must be after the start.';
+      if (problem) {
+        e.preventDefault();
+        dirty = true;
+        note.textContent = problem;
+        note.className = 'st-save-note error';
+      }
+    });
+
+    // Highlight the section currently in view
+    var links = Array.from(document.querySelectorAll('#stNav a'));
+    var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); });
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) {
+            links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + en.target.id); });
+          }
         });
-    </script>
+      }, { rootMargin: '-20% 0px -65% 0px' });
+      sections.forEach(function (sec) { if (sec) io.observe(sec); });
+    }
+    if (links[0]) links[0].classList.add('active');
+  })();
+</script>
 {% endblock %}

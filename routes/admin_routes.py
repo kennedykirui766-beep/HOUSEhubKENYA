@@ -1958,7 +1958,7 @@ def user_action(user_id):
         # Prevent self-delete
         if current_user.id == user.id:
             flash("You cannot delete your own account.", "danger")
-            return redirect(url_for('admin.manage_users'))
+            return redirect(url_for('admin.operations'))
 
         success, error = delete_user_and_dependents(user)
         if success:
@@ -2005,11 +2005,11 @@ def user_action(user_id):
     elif action == "reset_password":
         if not getattr(user, 'email', None):
             flash("This user does not have an email address for a reset link.", "danger")
-            return redirect(url_for('admin.manage_users'))
+            return redirect(url_for('admin.operations'))
 
         if user.role != 'admin':
             flash("Password reset links are currently restricted to admin accounts.", "warning")
-            return redirect(url_for('admin.manage_users'))
+            return redirect(url_for('admin.operations'))
 
         from routes.auth_routes import _queue_password_reset
 
@@ -2026,7 +2026,7 @@ def user_action(user_id):
     else:
         flash("Invalid user action.", "danger")
 
-    return redirect(url_for('admin.manage_users'))
+    return redirect(url_for('admin.operations'))
 
 
 # --- Impersonation (read-only) ---

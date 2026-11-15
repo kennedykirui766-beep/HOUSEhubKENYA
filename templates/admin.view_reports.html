@@ -1,91 +1,305 @@
 {% extends 'base.html' %}
-{% block title %}Reports{% endblock %}
+{% block title %}Reports · Admin{% endblock %}
+
+{% block styles %}
+<style>
+  /* Reports page. Prefixed rp- so nothing leaks into base.html. */
+
+  .rp-wrap { max-width: 1180px; margin: 0 auto; font-variant-numeric: tabular-nums; }
+
+  /* ---------- Header ---------- */
+  .rp-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding-bottom: 1.1rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .rp-eyebrow { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.15rem; }
+  .rp-eyebrow a { color: inherit; text-decoration: none; }
+  .rp-eyebrow a:hover { color: var(--primary-color); }
+  .rp-title { margin: 0; font-size: 1.55rem; font-weight: 650; letter-spacing: -0.02em; color: var(--text-primary); }
+
+  .rp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.85rem;
+    font-size: 0.83rem;
+    font-weight: 550;
+    line-height: 1.2;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color .15s, background-color .15s;
+  }
+  .rp-btn:hover { border-color: var(--text-muted); color: var(--text-primary); }
+
+  /* ---------- KPI strip ---------- */
+  .rp-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--card-bg);
+    margin-bottom: 1.25rem;
+  }
+  .rp-kpi { padding: 1.1rem 1.25rem; border-right: 1px solid var(--border-color); }
+  .rp-kpi:last-child { border-right: none; }
+  .rp-kpi-label { font-size: 0.74rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+  .rp-kpi-value { font-size: 1.75rem; font-weight: 650; letter-spacing: -0.025em; color: var(--text-primary); margin-top: 0.3rem; line-height: 1.1; }
+  .rp-kpi-value small { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); margin-right: 0.2rem; letter-spacing: 0; }
+  .rp-kpi-note { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+  /* ---------- Cards ---------- */
+  .rp-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; min-width: 0; }
+  .rp-card-head { padding: 0.85rem 1.2rem; border-bottom: 1px solid var(--border-color); }
+  .rp-card-title { margin: 0; font-size: 0.93rem; font-weight: 620; color: var(--text-primary); }
+  .rp-card-body { padding: 0.4rem 1.2rem 0.9rem; }
+  .rp-card-body.chart { padding: 1rem 1.2rem; }
+
+  .rp-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-bottom: 1.25rem; }
+  .rp-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; margin-bottom: 1.25rem; }
+
+  /* Label / value rows */
+  .rp-rows { margin: 0; }
+  .rp-rows > div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.88rem; }
+  .rp-rows > div:last-child { border-bottom: none; }
+  .rp-rows dt { font-weight: 450; color: var(--text-secondary); }
+  .rp-rows dd { margin: 0; font-weight: 600; color: var(--text-primary); text-align: right; }
+  .rp-rows dd.warn { color: #b4372f; }
+  [data-bs-theme="dark"] .rp-rows dd.warn { color: #f08a82; }
+  .rp-sub { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); padding: 0.9rem 0 0.2rem; border-top: 1px solid var(--border-color); margin-top: 0.3rem; }
+
+  /* Occupancy bar */
+  .rp-occ { padding: 0.8rem 0 0.4rem; }
+  .rp-occ-bar { height: 8px; border-radius: 99px; background: var(--border-color); overflow: hidden; }
+  .rp-occ-bar span { display: block; height: 100%; background: var(--primary-color); border-radius: 99px; }
+  .rp-occ-note { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--text-muted); margin-top: 0.4rem; }
+
+  /* ---------- Section label ---------- */
+  .rp-section { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); margin: 1.75rem 0 0.75rem; }
+
+  /* ---------- Export table ---------- */
+  .rp-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  .rp-table td { padding: 0.75rem 1.2rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); }
+  .rp-table tr:last-child td { border-bottom: none; }
+  .rp-table td:first-child { color: var(--text-primary); font-weight: 550; }
+  .rp-table td:first-child small { display: block; font-weight: 400; color: var(--text-muted); font-size: 0.78rem; }
+  .rp-table td.get { text-align: right; white-space: nowrap; }
+  .rp-table td.get a { margin-left: 0.4rem; }
+  .rp-btn.sm { padding: 0.28rem 0.65rem; font-size: 0.78rem; border-radius: 6px; }
+
+  @media (max-width: 991.98px) {
+    .rp-grid-3 { grid-template-columns: 1fr 1fr; }
+    .rp-kpis { grid-template-columns: 1fr 1fr; }
+    .rp-kpi:nth-child(2) { border-right: none; }
+    .rp-kpi:nth-child(-n+2) { border-bottom: 1px solid var(--border-color); }
+  }
+  @media (max-width: 767.98px) {
+    .rp-grid-3, .rp-grid-2 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 575.98px) {
+    .rp-kpis { grid-template-columns: 1fr; }
+    .rp-kpi { border-right: none; border-bottom: 1px solid var(--border-color); }
+    .rp-kpi:last-child { border-bottom: none; }
+    .rp-title { font-size: 1.3rem; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-  <h2>Reports</h2>
-  <p>Quick summary:</p>
-  <ul>
-    <li>Total users: {{ stats.total_users if stats and stats.total_users is defined else 'N/A' }}</li>
-    <li>Total properties: {{ stats.total_properties if stats and stats.total_properties is defined else 'N/A' }}</li>
-    <li>Total transactions: {{ stats.total_transactions if stats and stats.total_transactions is defined else 'N/A' }}</li>
-  </ul>
+{% set s = stats or {} %}
+{% set rc = s.role_counts|default({}) %}
+{% set occ = [[(s.occupancy_rate|default(0))|float, 0]|max, 100]|min %}
 
-  <h4 class="mt-4">Occupancy</h4>
-  <ul>
-    <li>Occupied properties: {{ stats.occupied_properties if stats and stats.occupied_properties is defined else 0 }}</li>
-    <li>Vacant properties: {{ stats.vacant_properties if stats and stats.vacant_properties is defined else 0 }}</li>
-    <li>Occupancy rate: {{ stats.occupancy_rate if stats and stats.occupancy_rate is defined else 0 }}%</li>
-  </ul>
+<div class="rp-wrap">
 
-  <h4 class="mt-4">Finance</h4>
-  <ul>
-    <li>Paid amount total: KES {{ stats.paid_amount_total if stats and stats.paid_amount_total is defined else 0 }}</li>
-    <li>Revenue (month-to-date): KES {{ stats.revenue_mtd if stats and stats.revenue_mtd is defined else 0 }}</li>
-    <li>Transactions (month-to-date): {{ stats.transactions_mtd if stats and stats.transactions_mtd is defined else 0 }}</li>
-    <li>Payments success rate: {{ stats.payment_success_rate if stats and stats.payment_success_rate is defined else 0 }}%</li>
-    <li>Pending payments: {{ stats.payments_pending_count if stats and stats.payments_pending_count is defined else 0 }}</li>
-    <li>Payment failures: {{ stats.payment_failures if stats and stats.payment_failures is defined else 0 }}</li>
-  </ul>
-
-  <h4 class="mt-4">Maintenance</h4>
-  <ul>
-    <li>Total requests: {{ stats.maintenance_total if stats and stats.maintenance_total is defined else 0 }}</li>
-    <li>Open requests: {{ stats.maintenance_open if stats and stats.maintenance_open is defined else 0 }}</li>
-    <li>Pending: {{ stats.maintenance_pending if stats and stats.maintenance_pending is defined else 0 }}</li>
-    <li>In progress: {{ stats.maintenance_in_progress if stats and stats.maintenance_in_progress is defined else 0 }}</li>
-    <li>Resolved: {{ stats.maintenance_resolved if stats and stats.maintenance_resolved is defined else 0 }}</li>
-  </ul>
-
-  <h4 class="mt-4">Support</h4>
-  <ul>
-    <li>Total tickets: {{ stats.support_total if stats and stats.support_total is defined else 0 }}</li>
-    <li>Open tickets: {{ stats.support_open if stats and stats.support_open is defined else 0 }}</li>
-    <li>Escalated tickets: {{ stats.support_escalated if stats and stats.support_escalated is defined else 0 }}</li>
-    <li>Resolved tickets: {{ stats.support_resolved if stats and stats.support_resolved is defined else 0 }}</li>
-  </ul>
-
-  <h4 class="mt-4">Last 30 Days</h4>
-  <ul>
-    <li>Payments recorded: {{ stats.payments_30d if stats and stats.payments_30d is defined else 0 }}</li>
-    <li>Maintenance requests filed: {{ stats.maintenance_30d if stats and stats.maintenance_30d is defined else 0 }}</li>
-    <li>Support tickets opened: {{ stats.support_30d if stats and stats.support_30d is defined else 0 }}</li>
-  </ul>
-
-  <h4 class="mt-4">User Role Distribution</h4>
-  <ul>
-    <li>Tenants: {{ stats.role_counts.tenant if stats and stats.role_counts is defined and stats.role_counts.tenant is defined else 0 }}</li>
-    <li>Landlords: {{ stats.role_counts.landlord if stats and stats.role_counts is defined and stats.role_counts.landlord is defined else 0 }}</li>
-    <li>Service providers: {{ stats.role_counts.service if stats and stats.role_counts is defined and stats.role_counts.service is defined else 0 }}</li>
-    <li>Admins: {{ stats.role_counts.admin if stats and stats.role_counts is defined and stats.role_counts.admin is defined else 0 }}</li>
-  </ul>
-
-  <h4 class="mt-4">Trend Charts (Last 6 Months)</h4>
-  <div class="row">
-    <div class="col-md-6 mb-4">
-      <canvas id="paymentsTrendChart" height="220"></canvas>
+  <header class="rp-head">
+    <div>
+      <div class="rp-eyebrow"><a href="{{ url_for('admin.dashboard') }}">Admin</a> / Insights</div>
+      <h1 class="rp-title">Reports</h1>
     </div>
-    <div class="col-md-6 mb-4">
-      <canvas id="revenueTrendChart" height="220"></canvas>
+    <a href="{{ url_for('admin.dashboard') }}" class="rp-btn"><i class="fas fa-arrow-left"></i> Back to dashboard</a>
+  </header>
+
+  <!-- Headline numbers -->
+  <section class="rp-kpis">
+    <div class="rp-kpi">
+      <div class="rp-kpi-label">Revenue · this month</div>
+      <div class="rp-kpi-value"><small>KES</small>{{ '{:,.2f}'.format((s.revenue_mtd|default(0))|float) }}</div>
+      <div class="rp-kpi-note">{{ s.transactions_mtd|default(0) }} transactions so far</div>
     </div>
-    <div class="col-md-6 mb-4">
-      <canvas id="maintenanceSupportTrendChart" height="220"></canvas>
+    <div class="rp-kpi">
+      <div class="rp-kpi-label">Occupancy</div>
+      <div class="rp-kpi-value">{{ s.occupancy_rate|default(0) }}%</div>
+      <div class="rp-kpi-note">{{ s.occupied_properties|default(0) }} of {{ (s.occupied_properties|default(0)) + (s.vacant_properties|default(0)) }} properties let</div>
     </div>
-    <div class="col-md-6 mb-4">
-      <canvas id="occupancyRoleChart" height="220"></canvas>
+    <div class="rp-kpi">
+      <div class="rp-kpi-label">Payment success</div>
+      <div class="rp-kpi-value">{{ s.payment_success_rate|default(0) }}%</div>
+      <div class="rp-kpi-note">{{ s.payments_pending_count|default(0) }} pending · {{ s.payment_failures|default(0) }} failed</div>
     </div>
+    <div class="rp-kpi">
+      <div class="rp-kpi-label">Open work</div>
+      <div class="rp-kpi-value">{{ (s.maintenance_open|default(0)) + (s.support_open|default(0)) }}</div>
+      <div class="rp-kpi-note">{{ s.maintenance_open|default(0) }} maintenance · {{ s.support_open|default(0) }} support</div>
+    </div>
+  </section>
+
+  <!-- Trend charts -->
+  <div class="rp-section">Last 6 months</div>
+  <div class="rp-grid-2">
+    <section class="rp-card">
+      <div class="rp-card-head"><h2 class="rp-card-title">Payments</h2></div>
+      <div class="rp-card-body chart"><div style="position:relative; height:230px;"><canvas id="paymentsTrendChart"></canvas></div></div>
+    </section>
+    <section class="rp-card">
+      <div class="rp-card-head"><h2 class="rp-card-title">Revenue (KES)</h2></div>
+      <div class="rp-card-body chart"><div style="position:relative; height:230px;"><canvas id="revenueTrendChart"></canvas></div></div>
+    </section>
+    <section class="rp-card">
+      <div class="rp-card-head"><h2 class="rp-card-title">Maintenance and support</h2></div>
+      <div class="rp-card-body chart"><div style="position:relative; height:230px;"><canvas id="maintenanceSupportTrendChart"></canvas></div></div>
+    </section>
+    <section class="rp-card">
+      <div class="rp-card-head"><h2 class="rp-card-title">Users by role</h2></div>
+      <div class="rp-card-body chart"><div style="position:relative; height:230px;"><canvas id="occupancyRoleChart"></canvas></div></div>
+    </section>
   </div>
 
-  <div class="mt-4">
-    <a href="{{ url_for('admin.export_reports', dataset='summary', format='csv') }}" class="btn btn-primary">Export Summary CSV</a>
-    <a href="{{ url_for('admin.export_reports', dataset='summary', format='xlsx') }}" class="btn btn-outline-success">Export Summary XLSX</a>
-    <a href="{{ url_for('admin.export_reports', dataset='finance', format='csv') }}" class="btn btn-outline-primary">Export Finance CSV</a>
-    <a href="{{ url_for('admin.export_reports', dataset='finance', format='xlsx') }}" class="btn btn-outline-success">Export Finance XLSX</a>
-    <a href="{{ url_for('admin.export_reports', dataset='occupancy', format='csv') }}" class="btn btn-outline-primary">Export Occupancy CSV</a>
-    <a href="{{ url_for('admin.export_reports', dataset='occupancy', format='xlsx') }}" class="btn btn-outline-success">Export Occupancy XLSX</a>
-    <a href="{{ url_for('admin.export_reports', dataset='maintenance', format='csv') }}" class="btn btn-outline-primary">Export Maintenance CSV</a>
-    <a href="{{ url_for('admin.export_reports', dataset='maintenance', format='xlsx') }}" class="btn btn-outline-success">Export Maintenance XLSX</a>
-    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+  <!-- Breakdown -->
+  <div class="rp-section">Breakdown</div>
+  <div class="rp-grid-3">
+
+    <section class="rp-card">
+      <div class="rp-card-head"><h2 class="rp-card-title">Platform</h2></div>
+      <div class="rp-card-body">
+        <dl class="rp-rows">
+          <div><dt>Users</dt><dd>{{ s.total_users|default('N/A') }}</dd></div>
+          <div><dt>Properties</dt><dd>{{ s.total_properties|default('N/A') }}</dd></div>
+          <div><dt>Transactions</dt><dd>{{ s.total_transactions|default('N/A') }}</dd></div>
+        </dl>
+        <div class="rp-sub">By role</div>
+        <dl class="rp-rows">
+          <div><dt>Tenants</dt><dd>{{ rc.tenant|default(0) }}</dd></div>
+          <div><dt>Landlords</dt><dd>{{ rc.landlord|default(0) }}</dd></div>
+          <div><dt>Service providers</dt><dd>{{ rc.service|default(0) }}</dd></div>
+          <div><dt>Admins</dt><dd>{{ rc.admin|default(0) }}</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="rp-card">
+      <div class="rp-card-head"><h2 class="rp-card-title">Occupancy</h2></div>
+      <div class="rp-card-body">
+        <div class="rp-occ">
+          <div class="rp-occ-bar"><span style="width: {{ occ }}%;"></span></div>
+          <div class="rp-occ-note"><span>{{ s.occupancy_rate|default(0) }}% occupied</span><span>{{ s.vacant_properties|default(0) }} vacant</span></div>
+        </div>
+        <dl class="rp-rows">
+          <div><dt>Occupied</dt><dd>{{ s.occupied_properties|default(0) }}</dd></div>
+          <div><dt>Vacant</dt><dd>{{ s.vacant_properties|default(0) }}</dd></div>
+          <div><dt>Occupancy rate</dt><dd>{{ s.occupancy_rate|default(0) }}%</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="rp-card">
+      <div class="rp-card-head"><h2 class="rp-card-title">Finance</h2></div>
+      <div class="rp-card-body">
+        <dl class="rp-rows">
+          <div><dt>Total paid</dt><dd>KES {{ '{:,.2f}'.format((s.paid_amount_total|default(0))|float) }}</dd></div>
+          <div><dt>Revenue, month to date</dt><dd>KES {{ '{:,.2f}'.format((s.revenue_mtd|default(0))|float) }}</dd></div>
+          <div><dt>Transactions, month to date</dt><dd>{{ s.transactions_mtd|default(0) }}</dd></div>
+          <div><dt>Success rate</dt><dd>{{ s.payment_success_rate|default(0) }}%</dd></div>
+          <div><dt>Pending payments</dt><dd>{{ s.payments_pending_count|default(0) }}</dd></div>
+          <div><dt>Failed payments</dt><dd class="{{ 'warn' if (s.payment_failures|default(0)) > 0 }}">{{ s.payment_failures|default(0) }}</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="rp-card">
+      <div class="rp-card-head"><h2 class="rp-card-title">Maintenance</h2></div>
+      <div class="rp-card-body">
+        <dl class="rp-rows">
+          <div><dt>Total requests</dt><dd>{{ s.maintenance_total|default(0) }}</dd></div>
+          <div><dt>Open</dt><dd>{{ s.maintenance_open|default(0) }}</dd></div>
+          <div><dt>Pending</dt><dd>{{ s.maintenance_pending|default(0) }}</dd></div>
+          <div><dt>In progress</dt><dd>{{ s.maintenance_in_progress|default(0) }}</dd></div>
+          <div><dt>Resolved</dt><dd>{{ s.maintenance_resolved|default(0) }}</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="rp-card">
+      <div class="rp-card-head"><h2 class="rp-card-title">Support</h2></div>
+      <div class="rp-card-body">
+        <dl class="rp-rows">
+          <div><dt>Total tickets</dt><dd>{{ s.support_total|default(0) }}</dd></div>
+          <div><dt>Open</dt><dd>{{ s.support_open|default(0) }}</dd></div>
+          <div><dt>Escalated</dt><dd class="{{ 'warn' if (s.support_escalated|default(0)) > 0 }}">{{ s.support_escalated|default(0) }}</dd></div>
+          <div><dt>Resolved</dt><dd>{{ s.support_resolved|default(0) }}</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="rp-card">
+      <div class="rp-card-head"><h2 class="rp-card-title">Last 30 days</h2></div>
+      <div class="rp-card-body">
+        <dl class="rp-rows">
+          <div><dt>Payments recorded</dt><dd>{{ s.payments_30d|default(0) }}</dd></div>
+          <div><dt>Maintenance filed</dt><dd>{{ s.maintenance_30d|default(0) }}</dd></div>
+          <div><dt>Support tickets opened</dt><dd>{{ s.support_30d|default(0) }}</dd></div>
+        </dl>
+      </div>
+    </section>
+
   </div>
+
+  <!-- Exports -->
+  <div class="rp-section">Exports</div>
+  <section class="rp-card" style="margin-bottom:1.25rem;">
+    <table class="rp-table">
+      <tbody>
+        <tr>
+          <td>Summary<small>Platform totals and headline figures</small></td>
+          <td class="get">
+            <a class="rp-btn sm" href="{{ url_for('admin.export_reports', dataset='summary', format='csv') }}"><i class="fas fa-file-csv"></i> CSV</a>
+            <a class="rp-btn sm" href="{{ url_for('admin.export_reports', dataset='summary', format='xlsx') }}"><i class="fas fa-file-excel"></i> XLSX</a>
+          </td>
+        </tr>
+        <tr>
+          <td>Finance<small>Payments, revenue and success rates</small></td>
+          <td class="get">
+            <a class="rp-btn sm" href="{{ url_for('admin.export_reports', dataset='finance', format='csv') }}"><i class="fas fa-file-csv"></i> CSV</a>
+            <a class="rp-btn sm" href="{{ url_for('admin.export_reports', dataset='finance', format='xlsx') }}"><i class="fas fa-file-excel"></i> XLSX</a>
+          </td>
+        </tr>
+        <tr>
+          <td>Occupancy<small>Occupied and vacant properties</small></td>
+          <td class="get">
+            <a class="rp-btn sm" href="{{ url_for('admin.export_reports', dataset='occupancy', format='csv') }}"><i class="fas fa-file-csv"></i> CSV</a>
+            <a class="rp-btn sm" href="{{ url_for('admin.export_reports', dataset='occupancy', format='xlsx') }}"><i class="fas fa-file-excel"></i> XLSX</a>
+          </td>
+        </tr>
+        <tr>
+          <td>Maintenance<small>Requests by status</small></td>
+          <td class="get">
+            <a class="rp-btn sm" href="{{ url_for('admin.export_reports', dataset='maintenance', format='csv') }}"><i class="fas fa-file-csv"></i> CSV</a>
+            <a class="rp-btn sm" href="{{ url_for('admin.export_reports', dataset='maintenance', format='xlsx') }}"><i class="fas fa-file-excel"></i> XLSX</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
 </div>
 {% endblock %}
 
@@ -99,30 +313,41 @@
   const maintenanceTrend = {{ (stats.maintenance_trend if stats and stats.maintenance_trend is defined else []) | tojson }};
   const supportTrend = {{ (stats.support_trend if stats and stats.support_trend is defined else []) | tojson }};
 
-  const occupiedProperties = {{ stats.occupied_properties if stats and stats.occupied_properties is defined else 0 }};
-  const vacantProperties = {{ stats.vacant_properties if stats and stats.vacant_properties is defined else 0 }};
   const roleTenant = {{ stats.role_counts.tenant if stats and stats.role_counts is defined and stats.role_counts.tenant is defined else 0 }};
   const roleLandlord = {{ stats.role_counts.landlord if stats and stats.role_counts is defined and stats.role_counts.landlord is defined else 0 }};
   const roleService = {{ stats.role_counts.service if stats and stats.role_counts is defined and stats.role_counts.service is defined else 0 }};
   const roleAdmin = {{ stats.role_counts.admin if stats and stats.role_counts is defined and stats.role_counts.admin is defined else 0 }};
+
+  // Pull colours from the page so the charts follow light/dark theme
+  const css = getComputedStyle(document.documentElement);
+  const accent = css.getPropertyValue('--primary-color').trim() || '#6366f1';
+  const gridColor = css.getPropertyValue('--border-color').trim() || '#e5e7eb';
+  const muted = css.getPropertyValue('--text-muted').trim() || '#9ca3af';
+  const cardBg = css.getPropertyValue('--card-bg').trim() || '#ffffff';
+
+  const baseScales = {
+    y: { beginAtZero: true, grid: { color: gridColor }, border: { display: false }, ticks: { color: muted, precision: 0 } },
+    x: { grid: { display: false }, ticks: { color: muted } }
+  };
+  const legend = { display: true, position: 'bottom', labels: { color: muted, boxWidth: 10, boxHeight: 10, usePointStyle: true } };
 
   new Chart(document.getElementById('paymentsTrendChart'), {
     type: 'line',
     data: {
       labels: trendLabels,
       datasets: [{
-        label: 'Payments Count',
+        label: 'Payments',
         data: paymentsTrend,
-        borderColor: '#2563eb',
-        backgroundColor: 'rgba(37, 99, 235, 0.15)',
+        borderColor: accent,
+        backgroundColor: accent + '1a',
+        borderWidth: 2,
+        pointRadius: 3,
+        pointBackgroundColor: accent,
         tension: 0.3,
         fill: true
       }]
     },
-    options: {
-      responsive: true,
-      plugins: { title: { display: true, text: 'Payments Trend' } }
-    }
+    options: { responsive: true, maintainAspectRatio: false, scales: baseScales, plugins: { legend: { display: false } } }
   });
 
   new Chart(document.getElementById('revenueTrendChart'), {
@@ -132,14 +357,19 @@
       datasets: [{
         label: 'Revenue (KES)',
         data: revenueTrend,
-        borderColor: '#16a34a',
-        backgroundColor: 'rgba(22, 163, 74, 0.25)',
-        borderWidth: 1
+        backgroundColor: '#10b981',
+        borderRadius: 4,
+        maxBarThickness: 32
       }]
     },
     options: {
       responsive: true,
-      plugins: { title: { display: true, text: 'Revenue Trend' } }
+      maintainAspectRatio: false,
+      scales: baseScales,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: function (c) { return 'KES ' + Number(c.raw).toLocaleString(); } } }
+      }
     }
   });
 
@@ -148,43 +378,25 @@
     data: {
       labels: trendLabels,
       datasets: [
-        {
-          label: 'Maintenance Requests',
-          data: maintenanceTrend,
-          borderColor: '#f59e0b',
-          backgroundColor: 'rgba(245, 158, 11, 0.15)',
-          tension: 0.3,
-          fill: true
-        },
-        {
-          label: 'Support Tickets',
-          data: supportTrend,
-          borderColor: '#dc2626',
-          backgroundColor: 'rgba(220, 38, 38, 0.15)',
-          tension: 0.3,
-          fill: true
-        }
+        { label: 'Maintenance', data: maintenanceTrend, borderColor: '#f59e0b', backgroundColor: '#f59e0b', borderWidth: 2, pointRadius: 3, tension: 0.3 },
+        { label: 'Support', data: supportTrend, borderColor: '#ef4444', backgroundColor: '#ef4444', borderWidth: 2, pointRadius: 3, tension: 0.3 }
       ]
     },
-    options: {
-      responsive: true,
-      plugins: { title: { display: true, text: 'Maintenance vs Support Trend' } }
-    }
+    options: { responsive: true, maintainAspectRatio: false, scales: baseScales, plugins: { legend: legend } }
   });
 
   new Chart(document.getElementById('occupancyRoleChart'), {
     type: 'doughnut',
     data: {
-      labels: ['Occupied', 'Vacant', 'Tenants', 'Landlords', 'Service', 'Admins'],
+      labels: ['Tenants', 'Landlords', 'Service providers', 'Admins'],
       datasets: [{
-        data: [occupiedProperties, vacantProperties, roleTenant, roleLandlord, roleService, roleAdmin],
-        backgroundColor: ['#0ea5e9', '#94a3b8', '#8b5cf6', '#22c55e', '#f97316', '#ef4444']
+        data: [roleTenant, roleLandlord, roleService, roleAdmin],
+        backgroundColor: [accent, '#10b981', '#f59e0b', '#94a3b8'],
+        borderColor: cardBg,
+        borderWidth: 3
       }]
     },
-    options: {
-      responsive: true,
-      plugins: { title: { display: true, text: 'Occupancy + Role Distribution' } }
-    }
+    options: { responsive: true, maintainAspectRatio: false, cutout: '64%', plugins: { legend: legend } }
   });
 </script>
 {% endblock %}
