@@ -10,12 +10,14 @@ from models.models import User, House, SystemUpdateSubscriber, SystemSetting
 from models.models import EmailTemplate, EmailTemplateVersion, EmailTemplateSendLog
 from models.models import SupportTicket, SupportMessage, MaintenanceRequest, Payment, MaintenanceComment
 from models.models import AuditLog
-from extensions import db, csrf
+from extensions import db, csrf, request, flash, redirect, url_for
 from flask import make_response
 import csv
 import io
 from datetime import datetime, timedelta
 from utils_delete import delete_user_and_dependents
+
+
 
 logger = logging.getLogger(__name__)
 from utils_email_2fa import send_system_update_email
@@ -720,12 +722,7 @@ def system_settings():
     # Redirect to the main platform settings handler which builds the settings context
     return redirect(url_for('admin.platform_settings'))
 
-@admin_bp.route('/manage_users')
-@login_required
-def manage_users():
-    users = User.query.all()
-    stats = get_stats()
-    return render_template('admin.html', users=users, stats=stats)
+
 
 @admin_bp.route('/delete_user/<int:user_id>', methods=['POST'])
 @login_required
@@ -1947,11 +1944,7 @@ def bulk_action():
 
     return redirect(url_for('admin.dashboard'))
 
-from datetime import datetime
-from flask import request, flash, redirect, url_for
-from flask_login import current_user, login_required
-from extensions import db
-from models import User
+
 # delete_user_and_dependents imported where it already is
 
 @admin_bp.route('/user_action/<int:user_id>', methods=['POST'])
