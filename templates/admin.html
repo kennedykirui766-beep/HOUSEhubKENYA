@@ -722,7 +722,7 @@
   <!-- Quick links -->
   <section class="ad-panel quick-links">
     <div class="ad-panel-body ad-links">
-      <a href="{{ url_for('admin.manage_users') }}" class="ad-btn">Manage users</a>
+      <a href="{{ url_for('admin.operations') }}" class="ad-btn">Manage users</a>
       <a href="{{ url_for('admin.export_reports') }}" class="ad-btn">Reports</a>
       <a href="{{ url_for('admin.email_templates') }}" class="ad-btn">Email templates</a>
       <form action="{{ url_for('admin.export_financial') }}" method="GET" style="display:inline-block; margin:0;">
@@ -900,7 +900,7 @@
     { label: 'Open maintenance', subtitle: 'Jump to maintenance requests', badge: 'Tab', action: function () { showTab('maintenance'); } },
     { label: 'Support tickets', subtitle: 'Go to the support tickets page', badge: 'Page', action: function () { window.location.href = "{{ url_for('admin.support_tickets') }}"; } },
     { label: 'Operations', subtitle: 'Go to platform operations', badge: 'Page', action: function () { window.location.href = "{{ url_for('admin.operations') }}"; } },
-    { label: 'Manage users', subtitle: 'Go to the user admin page', badge: 'Page', action: function () { window.location.href = "{{ url_for('admin.manage_users') }}"; } },
+    { label: 'Manage users', subtitle: 'Go to the user admin page', badge: 'Page', action: function () { window.location.href = "{{ url_for('admin.operations') }}"; } },
     { label: 'System settings', subtitle: 'Go to platform settings', badge: 'Page', action: function () { window.location.href = "{{ url_for('admin.system_settings') }}"; } },
     { label: 'Audit logs', subtitle: 'Inspect admin audit history', badge: 'Page', action: function () { window.location.href = "{{ url_for('admin.audit_logs') }}"; } },
     { label: 'Reports page', subtitle: 'Open the full reports centre', badge: 'Page', action: function () { window.location.href = "{{ url_for('admin.view_reports') }}"; } },
