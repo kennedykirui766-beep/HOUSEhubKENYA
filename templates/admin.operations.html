@@ -294,12 +294,12 @@
       <div class="mu-foot-btns">
         <span style="align-self:center; margin-right:0.5rem;">Page {{ pagination.page }} of {{ pagination.pages }}</span>
         {% if pagination.has_prev %}
-        <a class="mu-btn" href="{{ url_for('admin.manage_users', page=pagination.prev_num) }}"><i class="fas fa-chevron-left"></i> Previous</a>
+        <a class="mu-btn" href="{{ url_for('admin.operations', page=pagination.prev_num) }}"><i class="fas fa-chevron-left"></i> Previous</a>
         {% else %}
         <span class="mu-btn disabled"><i class="fas fa-chevron-left"></i> Previous</span>
         {% endif %}
         {% if pagination.has_next %}
-        <a class="mu-btn" href="{{ url_for('admin.manage_users', page=pagination.next_num) }}">Next <i class="fas fa-chevron-right"></i></a>
+        <a class="mu-btn" href="{{ url_for('admin.operations', page=pagination.next_num) }}">Next <i class="fas fa-chevron-right"></i></a>
         {% else %}
         <span class="mu-btn disabled">Next <i class="fas fa-chevron-right"></i></span>
         {% endif %}

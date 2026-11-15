@@ -1062,11 +1062,21 @@ def support_ticket_resolve(ticket_id):
     return redirect(url_for('admin.support_tickets'))
 
 
+
 # --- Operations Dashboard (High-impact single view)
 @admin_bp.route('/operations')
 @login_required
 def operations():
+    if not is_approved_admin(current_user):
+        flash('Access denied.', 'danger')
+        return redirect(url_for('admin.dashboard'))
+
     stats = get_stats()
+
+    # 1. FETCH USERS (Add this!)
+    page = request.args.get('page', 1, type=int)
+    pagination = User.query.order_by(User.id.desc()).paginate(page=page, per_page=50, error_out=False)
+    users = pagination.items
 
     # quick lists for the dashboard
     try:
@@ -1084,8 +1094,16 @@ def operations():
     except Exception:
         recent_payment_issues = []
 
-    return render_template('admin.operations.html', stats=stats, open_maintenance=open_maintenance, unresolved_support=unresolved_support, recent_payment_issues=recent_payment_issues)
-
+    # 2. PASS users AND pagination TO THE TEMPLATE
+    return render_template(
+        'admin.operations.html', 
+        stats=stats, 
+        users=users,             
+        pagination=pagination,   
+        open_maintenance=open_maintenance, 
+        unresolved_support=unresolved_support, 
+        recent_payment_issues=recent_payment_issues
+    )
 
 @admin_bp.route('/maintenance_queue')
 @login_required
