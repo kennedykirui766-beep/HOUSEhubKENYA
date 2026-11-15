@@ -1,56 +1,502 @@
-{% extends 'admin.html' %}
+{% extends 'base.html' %}
+{% block title %}Manage users · Admin{% endblock %}
+
+{% block styles %}
+<style>
+  /* Manage users. Prefixed mu- so nothing leaks into base.html. */
+
+  .mu-wrap { max-width: 1240px; margin: 0 auto; }
+
+  /* ---------- Header ---------- */
+  .mu-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding-bottom: 1.1rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .mu-eyebrow { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.15rem; }
+  .mu-eyebrow a { color: inherit; text-decoration: none; }
+  .mu-eyebrow a:hover { color: var(--primary-color); }
+  .mu-title { margin: 0; font-size: 1.55rem; font-weight: 650; letter-spacing: -0.02em; color: var(--text-primary); }
+  .mu-tools { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+  /* ---------- Buttons & fields ---------- */
+  .mu-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.85rem;
+    font-size: 0.83rem;
+    font-weight: 550;
+    line-height: 1.2;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color .15s, background-color .15s;
+  }
+  .mu-btn:hover { border-color: var(--text-muted); color: var(--text-primary); }
+  .mu-btn-primary { background: var(--primary-color); border-color: var(--primary-color); color: #fff; }
+  .mu-btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); color: #fff; }
+  .mu-btn.disabled { opacity: .45; pointer-events: none; }
+
+  .mu-field {
+    font-size: 0.85rem;
+    padding: 0.45rem 0.7rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    min-width: 0;
+  }
+  .mu-field:focus { outline: 2px solid var(--primary-light); border-color: var(--primary-color); }
+  textarea.mu-field { width: 100%; resize: vertical; }
+
+  .mu-act { background: none; border: none; padding: 0.2rem 0.4rem; font-size: 0.78rem; font-weight: 550; color: var(--text-secondary); border-radius: 5px; cursor: pointer; }
+  .mu-act:hover { background: var(--body-bg); color: var(--primary-color); }
+  .mu-act.danger { color: #b4372f; }
+  .mu-act.danger:hover { background: var(--danger-light); color: #b4372f; }
+  [data-bs-theme="dark"] .mu-act.danger { color: #f08a82; }
+
+  /* ---------- Panel ---------- */
+  .mu-panel { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 1.25rem; }
+
+  /* ---------- Toolbar ---------- */
+  .mu-toolbar { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; padding: 0.9rem 1.2rem; border-bottom: 1px solid var(--border-color); }
+  .mu-search { position: relative; flex: 1 1 260px; max-width: 380px; }
+  .mu-search i { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); font-size: 0.8rem; color: var(--text-muted); pointer-events: none; }
+  .mu-search input { width: 100%; padding-left: 2.1rem; }
+
+  .mu-chips { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+  .mu-chip {
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 99px;
+    padding: 0.28rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 550;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: border-color .15s, color .15s, background-color .15s;
+  }
+  .mu-chip:hover { border-color: var(--text-muted); color: var(--text-primary); }
+  .mu-chip.active { background: var(--primary-light); border-color: transparent; color: var(--primary-color); }
+  .mu-chip em { font-style: normal; font-size: 0.74rem; margin-left: 0.3rem; opacity: .75; }
+  .mu-spacer { flex: 1; }
+
+  /* ---------- Bulk bar ---------- */
+  .mu-bulk { padding: 0.8rem 1.2rem; background: var(--primary-light); border-bottom: 1px solid var(--border-color); }
+  .mu-bulk[hidden] { display: none; }
+  .mu-bulk-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+  .mu-bulk-row strong { font-size: 0.86rem; font-weight: 600; color: var(--text-primary); margin-right: 0.3rem; }
+  .mu-bulk-email { display: none; max-width: 620px; margin-top: 0.7rem; }
+  .mu-bulk-email .mu-field { width: 100%; margin-bottom: 0.5rem; }
+  .mu-bulk-email small { color: var(--text-muted); font-size: 0.78rem; }
+
+  /* ---------- Table ---------- */
+  .mu-scroll { overflow-x: auto; }
+  .mu-table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+  .mu-table th {
+    text-align: left;
+    padding: 0.65rem 1rem;
+    background: var(--body-bg);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+  }
+  .mu-table th[data-sort] { cursor: pointer; user-select: none; }
+  .mu-table th[data-sort]:hover { color: var(--text-primary); }
+  .mu-table th .arrow { margin-left: 0.25rem; opacity: .6; }
+  .mu-table td { padding: 0.7rem 1rem; color: var(--text-secondary); border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+  .mu-table tbody tr:last-child td { border-bottom: none; }
+  .mu-table tbody tr:hover td { background: var(--body-bg); }
+  .mu-table input[type="checkbox"] { accent-color: var(--primary-color); }
+  .mu-table td.acts { white-space: nowrap; text-align: right; }
+
+  .mu-person { display: flex; align-items: center; gap: 0.75rem; min-width: 0; }
+  .mu-initial { width: 34px; height: 34px; border-radius: 9px; background: var(--primary-light); color: var(--primary-color); font-weight: 650; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .mu-person b { display: block; font-size: 0.88rem; font-weight: 600; color: var(--text-primary); }
+  .mu-person span { display: block; font-size: 0.78rem; color: var(--text-muted); word-break: break-all; }
+
+  .mu-tag { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 5px; font-size: 0.74rem; font-weight: 600; background: var(--body-bg); color: var(--text-secondary); border: 1px solid var(--border-color); white-space: nowrap; }
+  .mu-tag.ok { background: var(--success-light); color: #0d7a57; border-color: transparent; }
+  .mu-tag.off { background: var(--danger-light); color: #b4372f; border-color: transparent; }
+  .mu-tag.you { background: var(--primary-light); color: var(--primary-color); border-color: transparent; margin-left: 0.4rem; }
+  [data-bs-theme="dark"] .mu-tag.ok { color: #5be0b0; }
+  [data-bs-theme="dark"] .mu-tag.off { color: #f08a82; }
+
+  .mu-when { white-space: nowrap; }
+
+  .mu-empty { display: none; padding: 2.5rem 1.5rem; text-align: center; }
+  .mu-empty b { display: block; font-size: 1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.3rem; }
+  .mu-empty p { margin: 0; font-size: 0.88rem; color: var(--text-muted); }
+
+  .mu-foot { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; padding: 0.8rem 1.2rem; border-top: 1px solid var(--border-color); font-size: 0.82rem; color: var(--text-muted); }
+  .mu-foot-btns { display: flex; gap: 0.4rem; }
+
+  /* ---------- Details modal ---------- */
+  .mu-modal { display: none; position: fixed; inset: 0; z-index: 2100; background: rgba(15, 23, 42, 0.5); align-items: center; justify-content: center; padding: 1rem; }
+  .mu-modal.open { display: flex; }
+  .mu-modal-box { width: min(440px, 100%); background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; box-shadow: var(--shadow-xl); padding: 1.3rem 1.4rem; }
+  .mu-modal-box h2 { font-size: 1.05rem; font-weight: 650; color: var(--text-primary); margin-bottom: 0.9rem; }
+  .mu-modal-box dl { margin: 0 0 1.1rem; }
+  .mu-modal-box dl div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.88rem; }
+  .mu-modal-box dt { color: var(--text-muted); font-weight: 450; }
+  .mu-modal-box dd { margin: 0; color: var(--text-primary); font-weight: 550; text-align: right; word-break: break-word; }
+
+  @media (max-width: 767.98px) {
+    .mu-title { font-size: 1.3rem; }
+    .mu-search { max-width: none; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container">
-  <h2>Operations Dashboard</h2>
-  <div class="row">
-    <div class="col-md-3">
-      <div class="card p-2">
-        <strong>Total users</strong>
-        <div>{{ stats.total_users }}</div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card p-2">
-        <strong>Open maintenance</strong>
-        <div>{{ stats.maintenance_open }}</div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card p-2">
-        <strong>Open support</strong>
-        <div>{{ stats.support_open }}</div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card p-2">
-        <strong>Payment failures</strong>
-        <div>{{ stats.payment_failures }}</div>
-      </div>
-    </div>
-  </div>
+<div class="mu-wrap">
 
-  <h3 class="mt-4">Maintenance (priority)</h3>
-  <table class="table table-sm">
-    <thead><tr><th>ID</th><th>Issue</th><th>Status</th><th>SLA</th><th>Assigned</th></tr></thead>
-    <tbody>
-      {% for r in open_maintenance %}
-      <tr>
-        <td>{{ r.id }}</td>
-        <td>{{ r.issue }}</td>
-        <td>{{ r.status }}</td>
-        <td>{{ r.sla_due or '—' }}</td>
-        <td>{{ r.assigned_to or '—' }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <header class="mu-head">
+    <div>
+      <div class="mu-eyebrow"><a href="{{ url_for('admin.dashboard') }}">Admin</a> / People</div>
+      <h1 class="mu-title">Manage users</h1>
+    </div>
+    <div class="mu-tools">
+      <a href="{{ url_for('admin.email_templates') }}" class="mu-btn"><i class="fas fa-envelope"></i> Email templates</a>
+      <a href="{{ url_for('admin.dashboard') }}" class="mu-btn"><i class="fas fa-arrow-left"></i> Dashboard</a>
+    </div>
+  </header>
 
-  <h3 class="mt-4">Recent Support (unresolved)</h3>
-  <ul>
-    {% for s in unresolved_support %}
-      <li>{{ s.id }} — {{ s.subject }} ({{ s.user.name if s.user else 'anon' }})</li>
-    {% endfor %}
-  </ul>
+  <section class="mu-panel">
+
+    <!-- Filters (work instantly on the rows below) -->
+    <div class="mu-toolbar">
+      <div class="mu-search">
+        <i class="fas fa-magnifying-glass"></i>
+        <input type="search" id="mu-search" class="mu-field" placeholder="Search name, email or phone" aria-label="Search users" autocomplete="off">
+      </div>
+      <div class="mu-chips" id="mu-roles" role="group" aria-label="Filter by role">
+        <button type="button" class="mu-chip active" data-role="all">All<em data-count="all">{{ users|length }}</em></button>
+        <button type="button" class="mu-chip" data-role="tenant">Tenants<em data-count="tenant"></em></button>
+        <button type="button" class="mu-chip" data-role="landlord">Landlords<em data-count="landlord"></em></button>
+        <button type="button" class="mu-chip" data-role="service">Service<em data-count="service"></em></button>
+        <button type="button" class="mu-chip" data-role="admin">Admins<em data-count="admin"></em></button>
+      </div>
+      <div class="mu-spacer"></div>
+      <select id="mu-status" class="mu-field" aria-label="Filter by status">
+        <option value="all">Any status</option>
+        <option value="active">Active</option>
+        <option value="inactive">Suspended</option>
+      </select>
+    </div>
+
+    <form id="mu-bulk-form" action="{{ url_for('admin.bulk_action') }}" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="confirm" value="soft">
+
+      <!-- Bulk actions: appear once something is selected -->
+      <div class="mu-bulk" id="mu-bulk" hidden>
+        <div class="mu-bulk-row">
+          <strong><span id="mu-selected">0</span> selected</strong>
+          <select name="action" class="mu-field" aria-label="Bulk action">
+            <option value="suspend">Suspend</option>
+            <option value="notify">Send email</option>
+            <option value="delete_users">Delete</option>
+          </select>
+          <button type="button" id="mu-bulk-apply" class="mu-btn mu-btn-primary">Apply</button>
+          <button type="submit" name="dry_run" value="1" class="mu-btn">Preview</button>
+          <button type="button" id="mu-clear" class="mu-act">Clear selection</button>
+        </div>
+        <div class="mu-bulk-email" id="mu-bulk-email">
+          <input type="text" name="subject" class="mu-field" placeholder="Email subject">
+          <textarea name="message" class="mu-field" rows="4" placeholder="Email message"></textarea>
+          <small>Sent to every selected user.</small>
+        </div>
+      </div>
+
+      <div class="mu-scroll">
+        <table class="mu-table" id="mu-table">
+          <thead>
+            <tr>
+              <th style="width:38px;"><input type="checkbox" id="mu-all" aria-label="Select all shown"></th>
+              <th data-sort="name">User<span class="arrow"></span></th>
+              <th data-sort="role">Role<span class="arrow"></span></th>
+              <th>Contact</th>
+              <th>Status</th>
+              <th data-sort="login">Last login<span class="arrow"></span></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+            {% set is_me = (user.id == current_user.id) %}
+            {% set active = (user.is_active|default(True)) %}
+            <tr data-user-id="{{ user.id }}"
+                data-name="{{ user.name or '' }}"
+                data-email="{{ user.email or '' }}"
+                data-phone="{{ user.phone_number or '' }}"
+                data-role="{{ (user.role or '')|lower }}"
+                data-status="{{ 'active' if active else 'inactive' }}"
+                data-login="{{ user.last_login.timestamp()|int if user.last_login and user.last_login.timestamp is defined else 0 }}"
+                data-login-text="{{ user.last_login | datetimeformat if user.last_login else 'Never' }}">
+              <td><input type="checkbox" name="ids" value="{{ user.id }}" {% if is_me %}disabled title="You can't act on your own account"{% endif %} aria-label="Select {{ user.name }}"></td>
+              <td>
+                <div class="mu-person">
+                  <div class="mu-initial">{{ (user.name or user.email or '?')[:1]|upper }}</div>
+                  <div>
+                    <b>{{ user.name or '—' }}{% if is_me %}<span class="mu-tag you">You</span>{% endif %}</b>
+                    <span>{{ user.email }}</span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="mu-tag">{{ (user.role or '-')|title }}</span></td>
+              <td>{{ user.phone_number or '-' }}</td>
+              <td><span class="mu-tag {{ 'ok' if active else 'off' }}">{{ 'Active' if active else 'Suspended' }}</span></td>
+              <td class="mu-when">{{ user.last_login | datetimeformat if user.last_login else 'Never' }}</td>
+              <td class="acts">
+                <button type="button" class="mu-act" onclick="showUserDetails('{{ user.id }}')">View</button>
+                {% if not is_me %}
+                  {% if active %}
+                  <button type="submit" form="user-action-{{ user.id }}" name="action" value="deactivate" class="mu-act danger"
+                          onclick="return confirm('Suspend {{ (user.name or user.email)|replace("'", "") }}?')">Suspend</button>
+                  {% else %}
+                  <button type="submit" form="user-action-{{ user.id }}" name="action" value="activate" class="mu-act">Reactivate</button>
+                  {% endif %}
+                  {% if (user.role or '')|lower == 'admin' %}
+                  <button type="submit" form="user-action-{{ user.id }}" name="action" value="reset_password" class="mu-act">Reset link</button>
+                  {% endif %}
+                  <button type="submit" form="impersonate-{{ user.id }}" class="mu-act">Impersonate</button>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </form>
+
+    <div class="mu-empty" id="mu-empty">
+      <b id="mu-empty-title">No users found</b>
+      <p id="mu-empty-text">Nothing matches your search or filters.</p>
+    </div>
+
+    <div class="mu-foot">
+      <span id="mu-showing">Showing {{ users|length }} users</span>
+      {% if pagination and pagination.pages > 1 %}
+      <div class="mu-foot-btns">
+        <span style="align-self:center; margin-right:0.5rem;">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+        {% if pagination.has_prev %}
+        <a class="mu-btn" href="{{ url_for('admin.manage_users', page=pagination.prev_num) }}"><i class="fas fa-chevron-left"></i> Previous</a>
+        {% else %}
+        <span class="mu-btn disabled"><i class="fas fa-chevron-left"></i> Previous</span>
+        {% endif %}
+        {% if pagination.has_next %}
+        <a class="mu-btn" href="{{ url_for('admin.manage_users', page=pagination.next_num) }}">Next <i class="fas fa-chevron-right"></i></a>
+        {% else %}
+        <span class="mu-btn disabled">Next <i class="fas fa-chevron-right"></i></span>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </section>
 
 </div>
+
+<!-- Per-row action forms live outside the bulk form (HTML forms can't nest);
+     row buttons point at them with the form="" attribute. -->
+<div hidden>
+  {% for user in users %}
+  <form id="user-action-{{ user.id }}" action="{{ url_for('admin.user_action', user_id=user.id) }}" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  </form>
+  <form id="impersonate-{{ user.id }}" action="{{ url_for('admin.impersonate', user_id=user.id) }}" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  </form>
+  {% endfor %}
+</div>
+
+<!-- Details modal -->
+<div class="mu-modal" id="mu-modal" aria-hidden="true">
+  <div class="mu-modal-box" role="dialog" aria-modal="true" aria-labelledby="mu-modal-title">
+    <h2 id="mu-modal-title">User</h2>
+    <dl id="mu-modal-body"></dl>
+    <button type="button" class="mu-btn" onclick="closeUserModal()">Close</button>
+  </div>
+</div>
+
+{% include 'shared/confirm_modal.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    var tbody = document.querySelector('#mu-table tbody');
+    var rows = Array.from(tbody.querySelectorAll('tr[data-user-id]'));
+    var form = document.getElementById('mu-bulk-form');
+    var bulk = document.getElementById('mu-bulk');
+    var selectedEl = document.getElementById('mu-selected');
+    var allBox = document.getElementById('mu-all');
+    var searchEl = document.getElementById('mu-search');
+    var statusEl = document.getElementById('mu-status');
+    var emptyEl = document.getElementById('mu-empty');
+    var showingEl = document.getElementById('mu-showing');
+    var state = { q: '', role: 'all', status: 'all' };
+
+    // ---- chip counts ----
+    var counts = { all: rows.length, tenant: 0, landlord: 0, service: 0, admin: 0 };
+    rows.forEach(function (r) { if (counts[r.dataset.role] !== undefined) counts[r.dataset.role]++; });
+    document.querySelectorAll('[data-count]').forEach(function (el) { el.textContent = counts[el.dataset.count] || 0; });
+
+    // ---- filtering ----
+    function visibleRows() { return rows.filter(function (r) { return r.style.display !== 'none'; }); }
+
+    function applyFilters() {
+      var q = state.q;
+      rows.forEach(function (r) {
+        var d = r.dataset;
+        var hay = (d.name + ' ' + d.email + ' ' + d.phone).toLowerCase();
+        var ok = (!q || hay.indexOf(q) !== -1)
+              && (state.role === 'all' || d.role === state.role)
+              && (state.status === 'all' || d.status === state.status);
+        r.style.display = ok ? '' : 'none';
+        // a hidden row must never stay selected, or a bulk action would still hit it
+        if (!ok) { var cb = r.querySelector("input[name='ids']"); if (cb) cb.checked = false; }
+      });
+      var shown = visibleRows().length;
+      emptyEl.style.display = (rows.length && shown === 0) || !rows.length ? 'block' : 'none';
+      if (!rows.length) {
+        document.getElementById('mu-empty-title').textContent = 'No users yet';
+        document.getElementById('mu-empty-text').textContent = 'Accounts will appear here once people sign up.';
+      }
+      showingEl.textContent = shown === rows.length
+        ? 'Showing ' + shown + ' user' + (shown === 1 ? '' : 's')
+        : 'Showing ' + shown + ' of ' + rows.length + ' users';
+      updateSelection();
+    }
+
+    searchEl.addEventListener('input', function () { state.q = searchEl.value.trim().toLowerCase(); applyFilters(); });
+    statusEl.addEventListener('change', function () { state.status = statusEl.value; applyFilters(); });
+    document.getElementById('mu-roles').addEventListener('click', function (e) {
+      var chip = e.target.closest('.mu-chip');
+      if (!chip) return;
+      state.role = chip.dataset.role;
+      document.querySelectorAll('.mu-chip').forEach(function (c) { c.classList.toggle('active', c === chip); });
+      applyFilters();
+    });
+
+    // ---- selection ----
+    function checkboxes() { return Array.from(form.querySelectorAll("input[name='ids']")); }
+    function updateSelection() {
+      var cbs = checkboxes();
+      var n = cbs.filter(function (c) { return c.checked; }).length;
+      selectedEl.textContent = n;
+      bulk.hidden = n === 0;
+      var vis = visibleRows().map(function (r) { return r.querySelector("input[name='ids']"); }).filter(function (c) { return c && !c.disabled; });
+      var visChecked = vis.filter(function (c) { return c.checked; }).length;
+      allBox.checked = vis.length > 0 && visChecked === vis.length;
+      allBox.indeterminate = visChecked > 0 && visChecked < vis.length;
+    }
+    allBox.addEventListener('change', function () {
+      visibleRows().forEach(function (r) {
+        var cb = r.querySelector("input[name='ids']");
+        if (cb && !cb.disabled) cb.checked = allBox.checked;
+      });
+      updateSelection();
+    });
+    form.addEventListener('change', function (e) { if (e.target.name === 'ids') updateSelection(); });
+    document.getElementById('mu-clear').addEventListener('click', function () {
+      checkboxes().forEach(function (c) { c.checked = false; });
+      updateSelection();
+    });
+
+    // ---- bulk action UI ----
+    var actionSel = form.querySelector('select[name="action"]');
+    var emailBox = document.getElementById('mu-bulk-email');
+    function syncEmail() { emailBox.style.display = actionSel.value === 'notify' ? 'block' : 'none'; }
+    actionSel.addEventListener('change', syncEmail);
+    syncEmail();
+
+    document.getElementById('mu-bulk-apply').addEventListener('click', function () {
+      var n = checkboxes().filter(function (c) { return c.checked; }).length;
+      if (!n) return;
+      var a = actionSel.value;
+      var msg = a === 'notify'
+        ? 'Queue the email for ' + n + ' selected user(s)?'
+        : (a === 'delete_users'
+            ? 'Delete ' + n + ' selected user(s)? Check "Permanently delete" to remove them for good.'
+            : 'Suspend ' + n + ' selected user(s)?');
+      confirmFormSubmission('mu-bulk-form', msg);
+    });
+
+    form.querySelector('button[name="dry_run"]').addEventListener('click', function (e) {
+      e.preventDefault();
+      var n = checkboxes().filter(function (c) { return c.checked; }).length;
+      if (!n) { confirmFormSubmission('mu-bulk-form', 'No users selected for preview.', { hideHard: true }); return; }
+      var dry = form.querySelector('input[name="dry_run"]');
+      if (!dry) { dry = document.createElement('input'); dry.type = 'hidden'; dry.name = 'dry_run'; form.appendChild(dry); }
+      dry.value = '1';
+      confirmFormSubmission('mu-bulk-form', 'Preview ' + n + ' selected user(s). Proceed to preview?', { hideHard: true });
+    });
+
+    // ---- sorting ----
+    var sortKey = null, sortDir = 1;
+    document.querySelectorAll('#mu-table th[data-sort]').forEach(function (th) {
+      th.addEventListener('click', function () {
+        var key = th.dataset.sort;
+        sortDir = (sortKey === key) ? -sortDir : 1;
+        sortKey = key;
+        rows.sort(function (a, b) {
+          var x = key === 'login' ? Number(a.dataset.login) : (a.dataset[key] || '').toLowerCase();
+          var y = key === 'login' ? Number(b.dataset.login) : (b.dataset[key] || '').toLowerCase();
+          return (x > y ? 1 : x < y ? -1 : 0) * sortDir;
+        });
+        rows.forEach(function (r) { tbody.appendChild(r); });
+        document.querySelectorAll('#mu-table th .arrow').forEach(function (a) { a.textContent = ''; });
+        th.querySelector('.arrow').textContent = sortDir === 1 ? '\u2191' : '\u2193';
+      });
+    });
+
+    // ---- details modal ----
+    var modal = document.getElementById('mu-modal');
+    window.showUserDetails = function (id) {
+      var row = tbody.querySelector('tr[data-user-id="' + id + '"]');
+      if (!row) return;
+      var d = row.dataset;
+      document.getElementById('mu-modal-title').textContent = d.name || d.email;
+      var items = [
+        ['Email', d.email || '-'],
+        ['Role', d.role ? d.role.charAt(0).toUpperCase() + d.role.slice(1) : '-'],
+        ['Contact', d.phone || '-'],
+        ['Status', d.status === 'active' ? 'Active' : 'Suspended'],
+        ['Last login', d.loginText || 'Never']
+      ];
+      var dl = document.getElementById('mu-modal-body');
+      dl.innerHTML = '';
+      items.forEach(function (it) {
+        var w = document.createElement('div');
+        var dt = document.createElement('dt'); dt.textContent = it[0];
+        var dd = document.createElement('dd'); dd.textContent = it[1];
+        w.appendChild(dt); w.appendChild(dd); dl.appendChild(w);
+      });
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+    };
+    window.closeUserModal = function () {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+    };
+    modal.addEventListener('click', function (e) { if (e.target === modal) closeUserModal(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeUserModal(); });
+
+    applyFilters();
+  })();
+</script>
 {% endblock %}
