@@ -1666,7 +1666,7 @@
                                 <li><a href="{{ url_for('tenant.dashboard') }}">Dashboard</a></li>
                                 <li><a href="{{ url_for('tenant.properties') }}">Browse Properties</a></li>
                                 {% elif current_user.role.lower() == 'admin' %}
-                                <li><a href="{{ url_for('admin.manage_users') }}">Manage Users</a></li>
+                                <li><a href="{{ url_for('admin.operations') }}">Manage Users</a></li>
                                 {% endif %} 
                             {% else %}
                             <li><a href="{{ url_for('auth.signup') }}">Sign Up</a></li>
